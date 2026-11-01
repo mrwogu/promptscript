@@ -6,7 +6,7 @@
 
 # Interface: EvalImportStepsV1
 
-Defined in: [core/src/types/eval-import.ts:54](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L54)
+Defined in: [core/src/types/eval-import.ts:54](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L54)
 
 Counts of the import steps, in the order the steps run.
 
@@ -16,7 +16,7 @@ Counts of the import steps, in the order the steps run.
 
 > **filtered**: `number`
 
-Defined in: [core/src/types/eval-import.ts:62](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L62)
+Defined in: [core/src/types/eval-import.ts:62](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L62)
 
 Samples left after `--max-score` and `--label`
 
@@ -26,7 +26,7 @@ Samples left after `--max-score` and `--label`
 
 > **fitted**: `number`
 
-Defined in: [core/src/types/eval-import.ts:64](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L64)
+Defined in: [core/src/types/eval-import.ts:64](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L64)
 
 Samples whose inputs fit the prompt
 
@@ -36,7 +36,7 @@ Samples whose inputs fit the prompt
 
 > **forPrompt**: `number`
 
-Defined in: [core/src/types/eval-import.ts:60](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L60)
+Defined in: [core/src/types/eval-import.ts:60](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L60)
 
 Samples of the suite's prompt
 
@@ -46,7 +46,7 @@ Samples of the suite's prompt
 
 > **read**: `number`
 
-Defined in: [core/src/types/eval-import.ts:56](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L56)
+Defined in: [core/src/types/eval-import.ts:56](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L56)
 
 Non-blank lines read
 
@@ -56,7 +56,7 @@ Non-blank lines read
 
 > **sampled**: `number`
 
-Defined in: [core/src/types/eval-import.ts:68](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L68)
+Defined in: [core/src/types/eval-import.ts:68](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L68)
 
 Rows written, or that would be written
 
@@ -66,7 +66,7 @@ Rows written, or that would be written
 
 > **unique**: `number`
 
-Defined in: [core/src/types/eval-import.ts:66](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L66)
+Defined in: [core/src/types/eval-import.ts:66](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L66)
 
 Samples left after the duplicates are dropped
 
@@ -76,6 +76,6 @@ Samples left after the duplicates are dropped
 
 > **valid**: `number`
 
-Defined in: [core/src/types/eval-import.ts:58](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L58)
+Defined in: [core/src/types/eval-import.ts:58](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L58)
 
 Lines that passed the sample schema

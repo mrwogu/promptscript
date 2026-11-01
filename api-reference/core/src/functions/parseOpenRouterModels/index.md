@@ -8,7 +8,7 @@
 
 > **parseOpenRouterModels**(`payload`): [`OpenRouterModelEntry`](https://getpromptscript.dev/api-reference/core/src/interfaces/OpenRouterModelEntry/index.md)[]
 
-Defined in: [core/src/model-drift.ts:148](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/model-drift.ts#L148)
+Defined in: [core/src/model-drift.ts:148](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/model-drift.ts#L148)
 
 Read the tracked providers' models out of an OpenRouter /api/v1/models
 payload: mirror providers (~), request variants (like :batch), and

@@ -275,6 +275,11 @@ used across the entire PromptScript ecosystem. It includes:
 - [UseDeclaration](https://getpromptscript.dev/api-reference/core/src/interfaces/UseDeclaration/index.md)
 - [UseOperation](https://getpromptscript.dev/api-reference/core/src/interfaces/UseOperation/index.md)
 - [UserConfig](https://getpromptscript.dev/api-reference/core/src/interfaces/UserConfig/index.md)
+- [ValidateErrorV1](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateErrorV1/index.md)
+- [ValidateLocationV1](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateLocationV1/index.md)
+- [ValidateReportV1](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateReportV1/index.md)
+- [ValidateSummaryV1](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateSummaryV1/index.md)
+- [ValidateWarningV1](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateWarningV1/index.md)
 - [ValidationExclude](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidationExclude/index.md)
 - [ValueReplacement](https://getpromptscript.dev/api-reference/core/src/interfaces/ValueReplacement/index.md)
 

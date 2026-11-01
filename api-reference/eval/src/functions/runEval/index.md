@@ -8,7 +8,7 @@
 
 > **runEval**(`options`): `Promise`\<[`EvalReportV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportV1/index.md)\>
 
-Defined in: [eval/src/run.ts:990](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L990)
+Defined in: [eval/src/run.ts:998](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L998)
 
 Run suites and return the report of the whole run.
 

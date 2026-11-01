@@ -6,7 +6,7 @@
 
 # Interface: EvalReportErrorV1
 
-Defined in: [core/src/types/eval.ts:454](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L454)
+Defined in: [core/src/types/eval.ts:454](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L454)
 
 An error of a run that is not tied to one case.
 
@@ -16,7 +16,7 @@ An error of a run that is not tied to one case.
 
 > **code**: `string`
 
-Defined in: [core/src/types/eval.ts:460](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L460)
+Defined in: [core/src/types/eval.ts:460](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L460)
 
 Error code.
 
@@ -36,7 +36,7 @@ Error code.
 
 > `optional` **file?**: `string`
 
-Defined in: [core/src/types/eval.ts:464](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L464)
+Defined in: [core/src/types/eval.ts:464](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L464)
 
 File the error is about, relative to the project root
 
@@ -46,7 +46,7 @@ File the error is about, relative to the project root
 
 > `optional` **line?**: `number`
 
-Defined in: [core/src/types/eval.ts:470](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L470)
+Defined in: [core/src/types/eval.ts:470](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L470)
 
 Line in the file.
 
@@ -64,6 +64,6 @@ integer
 
 > **message**: `string`
 
-Defined in: [core/src/types/eval.ts:462](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval.ts#L462)
+Defined in: [core/src/types/eval.ts:462](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval.ts#L462)
 
 What went wrong and what to do

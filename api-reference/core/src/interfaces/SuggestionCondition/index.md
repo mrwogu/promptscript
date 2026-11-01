@@ -6,7 +6,7 @@
 
 # Interface: SuggestionCondition
 
-Defined in: [core/src/types/manifest.ts:83](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L83)
+Defined in: [core/src/types/manifest.ts:83](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L83)
 
 Condition for triggering a suggestion rule.
 
@@ -16,7 +16,7 @@ Condition for triggering a suggestion rule.
 
 > `optional` **always?**: `boolean`
 
-Defined in: [core/src/types/manifest.ts:85](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L85)
+Defined in: [core/src/types/manifest.ts:85](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L85)
 
 Always match
 
@@ -26,7 +26,7 @@ Always match
 
 > `optional` **dependencies?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:89](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L89)
+Defined in: [core/src/types/manifest.ts:89](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L89)
 
 Match if any of these dependencies are present
 
@@ -36,7 +36,7 @@ Match if any of these dependencies are present
 
 > `optional` **files?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:87](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L87)
+Defined in: [core/src/types/manifest.ts:87](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L87)
 
 Match if any of these files exist
 
@@ -46,7 +46,7 @@ Match if any of these files exist
 
 > `optional` **frameworks?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:93](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L93)
+Defined in: [core/src/types/manifest.ts:93](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L93)
 
 Match if any of these frameworks are detected
 
@@ -56,6 +56,6 @@ Match if any of these frameworks are detected
 
 > `optional` **languages?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:91](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L91)
+Defined in: [core/src/types/manifest.ts:91](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L91)
 
 Match if any of these languages are detected

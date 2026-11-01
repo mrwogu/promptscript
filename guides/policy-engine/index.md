@@ -31,7 +31,7 @@ policies:
 
 ## Policy Kinds
 
-Three kinds check skill extensions: `layer-boundary`, `property-protection` and `registry-allowlist`. Six more check prompts, see [Prompt Policies](#prompt-policies).
+Three kinds check skill extensions: `layer-boundary`, `property-protection` and `registry-allowlist`. Seven more check prompts, see [Prompt Policies](#prompt-policies).
 
 ### Layer Boundary
 
@@ -69,7 +69,7 @@ Any extension sourced from a registry not in the `allowed` list produces a viola
 
 ## Prompt Policies
 
-Six kinds read the `@prompts` entries of the resolved program: `required-metadata`, `risk-floor`, `model-allowlist`, `content-rules`, `required-approvals` and `required-evals`.
+Seven kinds read the `@prompts` entries of the resolved program: `required-metadata`, `risk-floor`, `model-allowlist`, `content-rules`, `required-approvals`, `required-evals` and `max-experiment-weight`.
 
 ### What a policy sees
 
@@ -211,6 +211,8 @@ policies:
 
 `count` is optional and only `1` is accepted: approval records are unsigned, so two records cannot prove two different approvers under one review.
 
+On an experiment arm, `required-approvals` counts a record that has `maxWeight` too, up to its ceiling. For the entry hash, the control arm, a promote, `prs release split --end --keep` and a plain rollback, only a record without `maxWeight` counts. See [Max Experiment Weight](#max-experiment-weight).
+
 ```yaml
 governance:
   roles:
@@ -225,6 +227,56 @@ policies:
     environments: [prod]
     approvals: [{ role: legal }]
 ```
+
+### Max Experiment Weight
+
+`max-experiment-weight` limits how much traffic a non-control arm of a label experiment may get, see [Experiments](https://getpromptscript.dev/guides/releases/index.md#split). The gates judge it for every arm with traffic in an environment the policy covers. The entry hash and the control arm are promotions, so the policy never judges them, and neither an arm at weight 0.
+
+| Field          | Type       | Required | Description                                                                                  |
+| -------------- | ---------- | -------- | -------------------------------------------------------------------------------------------- |
+| `match`        | object     | No       | Prompts the policy applies to                                                                |
+| `environments` | `string[]` | No       | Names from `releases.environments`. Absent means all                                         |
+| `maxWeight`    | number     | Yes      | Percent of traffic an arm gets without approvals, at most two decimals                       |
+| `approvals`    | list       | No       | `{ role }` rows. An arm above `maxWeight` needs one record of each role                      |
+| `ceiling`      | number     | No       | Percent above which no arm passes, whoever approved. Needs `approvals`, at least `maxWeight` |
+
+Percents run from 0 to 100 with at most two decimals. `ceiling` needs `approvals`, and it is at least `maxWeight`. `count` is `1`, as in `required-approvals`. Without `approvals` the cap is hard: `maxWeight` is the most an arm may get.
+
+For an arm at weight `w`:
+
+| Case                                                 | Result                                                                            |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `w` is at most `maxWeight`                           | passed, no record needed                                                          |
+| above `maxWeight`, no `approvals`                    | failed: the cap is hard                                                           |
+| above `ceiling`                                      | failed, with or without records                                                   |
+| above `maxWeight`, at most `ceiling` (or no ceiling) | passed when every role has a record for this hash and environment that covers `w` |
+
+A record covers `w` when it has no `maxWeight`, or its `maxWeight` is at least `w`. Create one with `prs approve ... --env prod --max-weight 10`, see [Release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates). Several policies stack: each one judges the arm on its own, and every policy that matches must pass. At severity `warning` a failed check only warns.
+
+```yaml
+governance:
+  roles:
+    legal: ['@acme/legal']
+releases:
+  environments: [staging, prod]
+policies:
+  - name: high-risk-exposure
+    kind: max-experiment-weight
+    severity: error
+    match: { minRisk: high }
+    environments: [prod]
+    maxWeight: 5
+    approvals: [{ role: legal }]
+    ceiling: 25
+```
+
+An arm of a high risk prompt may run up to 5 % in prod. Between 5 % and 25 % it needs a legal record that covers its weight. Above 25 % it never passes.
+
+A record without `maxWeight` counts as a full approval, so it covers any arm weight. A record with `maxWeight` never approves the entry hash, even at `10000` (100 %): a capped approval is about traffic, not about a promotion. That holds under `required-approvals` as well. Neither a promote, `prs release split --end --keep` nor a plain rollback counts it.
+
+`prs release status --base <ref>` reads the policies from `<ref>`, and the weights and the records from HEAD. A pull request can add a record with a high `maxWeight` next to the weight it asks for, so the review of `approvals/<role>/` by CODEOWNERS is what stops it.
+
+The limits are the ones of [Required Approvals](#required-approvals-and-required-evals): records are unsigned, `count` is `1`, and two people mean two roles.
 
 ### Typos and unknown kinds
 

@@ -6,7 +6,7 @@
 
 # Interface: TargetCapability
 
-Defined in: [core/src/target-capabilities.ts:49](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L49)
+Defined in: [core/src/target-capabilities.ts:49](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L49)
 
 ## Extended by
 
@@ -18,7 +18,7 @@ Defined in: [core/src/target-capabilities.ts:49](https://github.com/mrwogu/promp
 
 > `readonly` **defaultVersion**: `string`
 
-Defined in: [core/src/target-capabilities.ts:51](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L51)
+Defined in: [core/src/target-capabilities.ts:51](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L51)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [core/src/target-capabilities.ts:51](https://github.com/mrwogu/promp
 
 > `readonly` **featureSupport**: `Readonly`\<`Record`\<`string`, [`TargetFeatureStatus`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetFeatureStatus/index.md)\>\>
 
-Defined in: [core/src/target-capabilities.ts:55](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L55)
+Defined in: [core/src/target-capabilities.ts:55](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L55)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [core/src/target-capabilities.ts:55](https://github.com/mrwogu/promp
 
 > `readonly` **hooks**: [`HookCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/HookCapability/index.md)
 
-Defined in: [core/src/target-capabilities.ts:56](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L56)
+Defined in: [core/src/target-capabilities.ts:56](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L56)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [core/src/target-capabilities.ts:56](https://github.com/mrwogu/promp
 
 > `readonly` **mcpConfigFormat**: `"json"` \| `"toml"` \| `null`
 
-Defined in: [core/src/target-capabilities.ts:60](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L60)
+Defined in: [core/src/target-capabilities.ts:60](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L60)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [core/src/target-capabilities.ts:60](https://github.com/mrwogu/promp
 
 > `readonly` **mcpConfigPath**: `string` \| `null`
 
-Defined in: [core/src/target-capabilities.ts:59](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L59)
+Defined in: [core/src/target-capabilities.ts:59](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L59)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [core/src/target-capabilities.ts:59](https://github.com/mrwogu/promp
 
 > `readonly` **referencesMode**: [`TargetReferenceMode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetReferenceMode/index.md)
 
-Defined in: [core/src/target-capabilities.ts:53](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L53)
+Defined in: [core/src/target-capabilities.ts:53](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L53)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [core/src/target-capabilities.ts:53](https://github.com/mrwogu/promp
 
 > `readonly` **resources**: readonly [`TargetResourceCapability`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetResourceCapability/index.md)[]
 
-Defined in: [core/src/target-capabilities.ts:57](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L57)
+Defined in: [core/src/target-capabilities.ts:57](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L57)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [core/src/target-capabilities.ts:57](https://github.com/mrwogu/promp
 
 > `readonly` **sectionProfile**: [`SectionProfile`](https://getpromptscript.dev/api-reference/core/src/type-aliases/SectionProfile/index.md)
 
-Defined in: [core/src/target-capabilities.ts:62](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L62)
+Defined in: [core/src/target-capabilities.ts:62](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L62)
 
 Section set the target renders.
 
@@ -84,7 +84,7 @@ Section set the target renders.
 
 > `readonly` **sections**: [`TargetSectionMap`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetSectionMap/index.md)
 
-Defined in: [core/src/target-capabilities.ts:54](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L54)
+Defined in: [core/src/target-capabilities.ts:54](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L54)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [core/src/target-capabilities.ts:54](https://github.com/mrwogu/promp
 
 > `readonly` **unsupportedBlocks**: readonly `string`[]
 
-Defined in: [core/src/target-capabilities.ts:58](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L58)
+Defined in: [core/src/target-capabilities.ts:58](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L58)
 
 ***
 
@@ -100,7 +100,7 @@ Defined in: [core/src/target-capabilities.ts:58](https://github.com/mrwogu/promp
 
 > `readonly` **versionAliases**: `Readonly`\<`Record`\<`string`, `string`\>\>
 
-Defined in: [core/src/target-capabilities.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L52)
+Defined in: [core/src/target-capabilities.ts:52](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L52)
 
 ***
 
@@ -108,4 +108,4 @@ Defined in: [core/src/target-capabilities.ts:52](https://github.com/mrwogu/promp
 
 > `readonly` **versions**: [`TargetVersionMap`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetVersionMap/index.md)
 
-Defined in: [core/src/target-capabilities.ts:50](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-capabilities.ts#L50)
+Defined in: [core/src/target-capabilities.ts:50](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-capabilities.ts#L50)

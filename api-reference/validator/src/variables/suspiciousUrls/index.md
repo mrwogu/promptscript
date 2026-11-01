@@ -8,7 +8,7 @@
 
 > `const` **suspiciousUrls**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)
 
-Defined in: [validator/src/rules/suspicious-urls.ts:288](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/rules/suspicious-urls.ts#L288)
+Defined in: [validator/src/rules/suspicious-urls.ts:288](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/rules/suspicious-urls.ts#L288)
 
 PS010: Detect suspicious URLs that may indicate security risks.
 

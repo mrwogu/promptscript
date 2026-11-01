@@ -6,7 +6,7 @@
 
 # Interface: EvalSampleV1
 
-Defined in: [core/src/types/eval-import.ts:26](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L26)
+Defined in: [core/src/types/eval-import.ts:26](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L26)
 
 One production sample, version 1: a line of the JSONL file `prs eval import`
 reads. The schema is closed: there is no field for a comment, an assignment
@@ -18,7 +18,7 @@ key, a user, a session or a trace.
 
 > `optional` **contentHash?**: `string`
 
-Defined in: [core/src/types/eval-import.ts:38](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L38)
+Defined in: [core/src/types/eval-import.ts:38](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L38)
 
 Content hash of the served prompt: `sha256-` plus 64 lowercase hex characters.
 
@@ -32,7 +32,7 @@ Content hash of the served prompt: `sha256-` plus 64 lowercase hex characters.
 
 > `optional` **feedback?**: [`EvalSampleFeedbackV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalSampleFeedbackV1/index.md)
 
-Defined in: [core/src/types/eval-import.ts:50](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L50)
+Defined in: [core/src/types/eval-import.ts:50](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L50)
 
 Feedback on the response
 
@@ -42,7 +42,7 @@ Feedback on the response
 
 > **inputs**: `Record`\<`string`, [`EvalInputValue`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalInputValue/index.md)\>
 
-Defined in: [core/src/types/eval-import.ts:46](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L46)
+Defined in: [core/src/types/eval-import.ts:46](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L46)
 
 Prompt input values by input name; scalars only
 
@@ -52,7 +52,7 @@ Prompt input values by input name; scalars only
 
 > `optional` **output?**: `string`
 
-Defined in: [core/src/types/eval-import.ts:48](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L48)
+Defined in: [core/src/types/eval-import.ts:48](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L48)
 
 Model response text
 
@@ -62,7 +62,7 @@ Model response text
 
 > **prompt**: `string`
 
-Defined in: [core/src/types/eval-import.ts:33](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L33)
+Defined in: [core/src/types/eval-import.ts:33](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L33)
 
 Prompt id the sample was served from.
 
@@ -86,7 +86,7 @@ Prompt id the sample was served from.
 
 > `optional` **variant?**: `string`
 
-Defined in: [core/src/types/eval-import.ts:44](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/eval-import.ts#L44)
+Defined in: [core/src/types/eval-import.ts:44](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/eval-import.ts#L44)
 
 Arm of an online experiment, or `control`.
 

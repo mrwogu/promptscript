@@ -8,7 +8,7 @@
 
 > **getTargetDefinition**(`name`): [`TargetDefinition`](https://getpromptscript.dev/api-reference/core/src/interfaces/TargetDefinition/index.md)
 
-Defined in: [core/src/target-catalog.ts:887](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/target-catalog.ts#L887)
+Defined in: [core/src/target-catalog.ts:887](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/target-catalog.ts#L887)
 
 Get the target definition for a known target.
 

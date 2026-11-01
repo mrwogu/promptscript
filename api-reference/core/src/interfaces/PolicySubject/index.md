@@ -6,7 +6,7 @@
 
 # Interface: PolicySubject
 
-Defined in: [core/src/types/policy.ts:282](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L282)
+Defined in: [core/src/types/policy.ts:282](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L282)
 
 A prompt as prompt policies see it, built from source or from a release bundle.
 
@@ -16,7 +16,7 @@ A prompt as prompt policies see it, built from source or from a release bundle.
 
 > **governance**: [`GovernanceMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceMeta/index.md)
 
-Defined in: [core/src/types/policy.ts:286](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L286)
+Defined in: [core/src/types/policy.ts:286](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L286)
 
 Effective governance
 
@@ -26,7 +26,7 @@ Effective governance
 
 > **id**: `string`
 
-Defined in: [core/src/types/policy.ts:284](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L284)
+Defined in: [core/src/types/policy.ts:284](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L284)
 
 Prompt id, `<@meta.id>/<key>`
 
@@ -36,7 +36,7 @@ Prompt id, `<@meta.id>/<key>`
 
 > **inputs**: `Record`\<`string`, \{ `options?`: `string`[]; `type`: [`PromptScalarType`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PromptScalarType/index.md); \}\>
 
-Defined in: [core/src/types/policy.ts:290](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L290)
+Defined in: [core/src/types/policy.ts:290](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L290)
 
 Inputs by name
 
@@ -46,7 +46,7 @@ Inputs by name
 
 > `optional` **loc?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/policy.ts:294](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L294)
+Defined in: [core/src/types/policy.ts:294](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L294)
 
 The entry, or the bundle file
 
@@ -56,7 +56,7 @@ The entry, or the bundle file
 
 > `optional` **model?**: `object`
 
-Defined in: [core/src/types/policy.ts:288](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L288)
+Defined in: [core/src/types/policy.ts:288](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L288)
 
 Model reference and the catalog profile it resolved to
 
@@ -74,7 +74,7 @@ Model reference and the catalog profile it resolved to
 
 > **texts**: `object`[]
 
-Defined in: [core/src/types/policy.ts:292](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/policy.ts#L292)
+Defined in: [core/src/types/policy.ts:292](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/policy.ts#L292)
 
 Message texts the content checks scan
 

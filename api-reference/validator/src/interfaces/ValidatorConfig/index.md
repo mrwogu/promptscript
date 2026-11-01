@@ -6,7 +6,7 @@
 
 # Interface: ValidatorConfig
 
-Defined in: [validator/src/types.ts:93](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L93)
+Defined in: [validator/src/types.ts:93](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L93)
 
 Validator configuration options.
 
@@ -20,7 +20,7 @@ Validator configuration options.
 
 > `optional` **allowedPatterns?**: (`string` \| `RegExp`)[]
 
-Defined in: [validator/src/types.ts:140](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L140)
+Defined in: [validator/src/types.ts:140](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L140)
 
 Pattern sources exempt from blocked-patterns detection. A blocked pattern
 is subtracted from the active set when its source text matches an entry
@@ -32,7 +32,7 @@ exactly.
 
 > `optional` **blockedPatterns?**: (`string` \| `RegExp`)[]
 
-Defined in: [validator/src/types.ts:99](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L99)
+Defined in: [validator/src/types.ts:99](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L99)
 
 Patterns to block in content (strings are converted to RegExp)
 
@@ -42,7 +42,7 @@ Patterns to block in content (strings are converted to RegExp)
 
 > `optional` **customRules?**: [`ValidationRule`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationRule/index.md)[]
 
-Defined in: [validator/src/types.ts:103](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L103)
+Defined in: [validator/src/types.ts:103](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L103)
 
 Custom validation rules to add
 
@@ -52,7 +52,7 @@ Custom validation rules to add
 
 > `optional` **disableRules?**: `string`[]
 
-Defined in: [validator/src/types.ts:101](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L101)
+Defined in: [validator/src/types.ts:101](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L101)
 
 Array of rule names to disable
 
@@ -62,7 +62,7 @@ Array of rule names to disable
 
 > `optional` **excludes?**: [`ValidationExclude`](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidationExclude/index.md)[]
 
-Defined in: [validator/src/types.ts:134](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L134)
+Defined in: [validator/src/types.ts:134](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L134)
 
 Rule exclusions for specific imports, bound to the commit pinned in the
 lockfile. Declared by the consumer in promptscript.yaml; an imported file
@@ -74,7 +74,7 @@ can never mute its own scan.
 
 > `optional` **externalRoots?**: `string`[]
 
-Defined in: [validator/src/types.ts:122](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L122)
+Defined in: [validator/src/types.ts:122](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L122)
 
 Absolute path roots holding imported (registry cache, vendored) content.
 Heuristic content rules skip text located under these roots by default.
@@ -85,7 +85,7 @@ Heuristic content rules skip text located under these roots by default.
 
 > `optional` **governance?**: [`GovernanceConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceConfig/index.md)
 
-Defined in: [validator/src/types.ts:156](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L156)
+Defined in: [validator/src/types.ts:156](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L156)
 
 Governance settings from promptscript.yaml (`governance`). Policies check
 approval roles against it; PS047 runs only when it is set.
@@ -96,7 +96,7 @@ approval roles against it; PS047 runs only when it is set.
 
 > `optional` **ignoreHashes?**: `boolean`
 
-Defined in: [validator/src/types.ts:117](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L117)
+Defined in: [validator/src/types.ts:117](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L117)
 
 Skip reference integrity checks
 
@@ -106,7 +106,7 @@ Skip reference integrity checks
 
 > `optional` **importRoots?**: [`ImportRoot`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ImportRoot/index.md)[]
 
-Defined in: [validator/src/types.ts:146](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L146)
+Defined in: [validator/src/types.ts:146](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L146)
 
 Absolute roots holding imported content, keyed by import source and the
 commit the lockfile pins for it. Computed by the compiler from the
@@ -118,7 +118,7 @@ lockfile (registry cache, vendor directory, reference roots).
 
 > `optional` **lockfile?**: [`Lockfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/Lockfile/index.md)
 
-Defined in: [validator/src/types.ts:111](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L111)
+Defined in: [validator/src/types.ts:111](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L111)
 
 Lockfile for reference integrity checks
 
@@ -128,7 +128,7 @@ Lockfile for reference integrity checks
 
 > `optional` **logger?**: [`Logger`](https://getpromptscript.dev/api-reference/core/src/interfaces/Logger/index.md)
 
-Defined in: [validator/src/types.ts:105](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L105)
+Defined in: [validator/src/types.ts:105](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L105)
 
 Logger for verbose/debug output
 
@@ -138,7 +138,7 @@ Logger for verbose/debug output
 
 > `optional` **models?**: [`ModelsConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelsConfig/index.md)
 
-Defined in: [validator/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L151)
+Defined in: [validator/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L151)
 
 Model catalog settings from promptscript.yaml (`models`). Custom profiles
 extend the catalog; `supported` enables model set checks.
@@ -149,7 +149,7 @@ extend the catalog; `supported` enables model set checks.
 
 > `optional` **policies?**: [`PolicyDefinition`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicyDefinition/index.md)[]
 
-Defined in: [validator/src/types.ts:107](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L107)
+Defined in: [validator/src/types.ts:107](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L107)
 
 Policies for skill extensions and prompts
 
@@ -159,7 +159,7 @@ Policies for skill extensions and prompts
 
 > `optional` **registryReferencePaths?**: `Map`\<`string`, `Map`\<`string`, `string`\>\>
 
-Defined in: [validator/src/types.ts:115](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L115)
+Defined in: [validator/src/types.ts:115](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L115)
 
 Canonical lock keys keyed by source file and declared reference
 
@@ -169,7 +169,7 @@ Canonical lock keys keyed by source file and declared reference
 
 > `optional` **registryReferences?**: `Set`\<`string`\>
 
-Defined in: [validator/src/types.ts:113](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L113)
+Defined in: [validator/src/types.ts:113](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L113)
 
 Set of resolved absolute paths that came from registry cache
 
@@ -179,7 +179,7 @@ Set of resolved absolute paths that came from registry cache
 
 > `optional` **releases?**: [`ReleasesConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/ReleasesConfig/index.md)
 
-Defined in: [validator/src/types.ts:161](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L161)
+Defined in: [validator/src/types.ts:161](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L161)
 
 Release settings from promptscript.yaml (`releases`). Policies check their
 `environments` against it.
@@ -190,7 +190,7 @@ Release settings from promptscript.yaml (`releases`). Policies check their
 
 > `optional` **requiredGuards?**: `string`[]
 
-Defined in: [validator/src/types.ts:97](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L97)
+Defined in: [validator/src/types.ts:97](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L97)
 
 List of guards that must be present in
 
@@ -204,7 +204,7 @@ block
 
 > `optional` **rules?**: `Record`\<`string`, `"off"` \| [`Severity`](https://getpromptscript.dev/api-reference/validator/src/type-aliases/Severity/index.md)\>
 
-Defined in: [validator/src/types.ts:95](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L95)
+Defined in: [validator/src/types.ts:95](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L95)
 
 Override severity for specific rules (rule name -> severity or 'off')
 
@@ -214,7 +214,7 @@ Override severity for specific rules (rule name -> severity or 'off')
 
 > `optional` **scanExternalContent?**: `boolean`
 
-Defined in: [validator/src/types.ts:128](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L128)
+Defined in: [validator/src/types.ts:128](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L128)
 
 Scan imported content under externalRoots with heuristic rules anyway.
 Concrete security findings (decoded payloads, suspicious URLs) always scan.
@@ -231,6 +231,6 @@ false
 
 > `optional` **skipPolicies?**: `boolean`
 
-Defined in: [validator/src/types.ts:109](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/types.ts#L109)
+Defined in: [validator/src/types.ts:109](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/types.ts#L109)
 
 Skip policy evaluation

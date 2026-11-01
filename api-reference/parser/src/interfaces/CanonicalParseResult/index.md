@@ -6,7 +6,7 @@
 
 # Interface: CanonicalParseResult
 
-Defined in: [parser/src/parse.ts:55](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/parse.ts#L55)
+Defined in: [parser/src/parse.ts:55](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/parse.ts#L55)
 
 Result of parsing PromptScript into the immutable canonical AST.
 
@@ -16,7 +16,7 @@ Result of parsing PromptScript into the immutable canonical AST.
 
 > **ast**: [`CanonicalProgram`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalProgram/index.md) \| `null`
 
-Defined in: [parser/src/parse.ts:57](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/parse.ts#L57)
+Defined in: [parser/src/parse.ts:57](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/parse.ts#L57)
 
 The canonical AST, or null if parsing failed with tolerant=false.
 
@@ -26,7 +26,7 @@ The canonical AST, or null if parsing failed with tolerant=false.
 
 > **comments**: readonly [`Comment`](https://getpromptscript.dev/api-reference/parser/src/interfaces/Comment/index.md)[]
 
-Defined in: [parser/src/parse.ts:61](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/parse.ts#L61)
+Defined in: [parser/src/parse.ts:61](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/parse.ts#L61)
 
 Comments in source order. They are not part of the AST.
 
@@ -36,6 +36,6 @@ Comments in source order. They are not part of the AST.
 
 > **errors**: [`ParseError`](https://getpromptscript.dev/api-reference/core/src/classes/ParseError/index.md)[]
 
-Defined in: [parser/src/parse.ts:59](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/parser/src/parse.ts#L59)
+Defined in: [parser/src/parse.ts:59](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/parser/src/parse.ts#L59)
 
 List of errors encountered during parsing.

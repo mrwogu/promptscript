@@ -7,6 +7,8 @@ uses the same catalog to report deprecated and retired models, and it also
 checks the `model.ref` of `@prompts` entries. Coding agent targets skip prompt
 definitions, so none of them receives that name. The `bundle` target resolves the
 reference and writes the profile, provider, and API id next to it.
+`prs release status --check-models` checks the prompts of your release labels
+against the same catalog.
 
 This page is generated from the catalog source, so it matches what the
 compiler does. To use a model that is not listed yet, or to change a built-in

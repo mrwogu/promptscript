@@ -2020,15 +2020,18 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 - The registry is configured if using `@scope/package` syntax
 - Run `prs registry list` to verify configured registries
 
-### `PS1001: Unexpected token`
+### `PS2000: Expecting token ...`
 
-The parser encountered invalid syntax, such as an unknown directive or misplaced token. Check the
-reported location and compare it with the [Language Reference](https://getpromptscript.dev/reference/language/index.md).
+The parser found invalid syntax, such as a missing closing brace or a misplaced token, for example
+`Expecting token of type --> RBrace <-- but found --> '?' <--`. The resolver reports every parse
+error with the code `PS2000`, which you see in `prs validate --format json`. Check the reported
+location and compare it with the [Language Reference](https://getpromptscript.dev/reference/language/index.md). A parse error that
+has no position reports line and column `-1`.
 
-### `PS3001: Required field`
+### `PS001: @meta block is required`
 
-A required field is missing. The error message identifies the block and field to add. Other
-validation failures use `PS3000` or a more specific `PS300x` code.
+The file has no `@meta` block. Add one with at least an `id` and a `syntax` version, as in the
+[Language Reference](https://getpromptscript.dev/reference/language/index.md).
 
 ### Compiled output doesn't match expected format
 
@@ -6409,10 +6412,13 @@ the label that keeps the entry hash is gated the same way and fails like `--end`
 
 Approvals and evals bind to a hash, not to a weight. Without an exposure policy, moving an arm from
 1 % to 99 % passes when 1 % did. Treat a weight change as a release: put CODEOWNERS on
-`.promptscript/releases/` and review it. `max-experiment-weight` is parsed, but the release gates
-do not judge weights in this version. An arm with traffic that such a policy selects is
-`unavailable`: it fails split, rollback and `status --base` at severity `error` and warns at
-`warning`. An arm at weight 0 is not judged.
+`.promptscript/releases/` and review it. A `max-experiment-weight` policy changes that: the gates
+judge the weight of every arm with traffic in split, rollback and `status --base`, and warn in plain
+`status`. Up to `maxWeight` an arm needs nothing. If the policy defines `approvals`, a higher weight
+needs a record from each role that covers the weight, made with
+`prs approve --env <env> --max-weight <percent>`. Without `approvals`, `maxWeight` is a hard cap.
+Above `ceiling` nothing passes. An arm at weight 0, the entry hash and the control arm are not judged. See
+[Max Experiment Weight](https://getpromptscript.dev/guides/policy-engine/index.md#max-experiment-weight).
 
 A promote on an entry with a running experiment is refused with `PS5010`, so it can never drop
 arms. End the experiment first.
@@ -6444,6 +6450,40 @@ With prompt policies, status also runs the [release gates](#release-gates) on ev
 an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approvals` policy applies.
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
+
+#### Check the models of the labels
+
+```bash
+prs release status --check-models
+prs release status --check-models --retiring-within 14
+```
+
+`--check-models` reads the model of every verified bundle that a label holds and checks it against
+the [model catalog](https://getpromptscript.dev/reference/models/index.md). It looks at every entry and at every experiment arm
+besides control, an arm with weight 0 too, because a 0 arm can be ramped up without another check.
+A bundle that is missing or does not verify gives `PS5003` or `PS5004` as before and no model line.
+
+A model is retiring when the catalog marks it `retired`, or marks it `deprecated` with a
+retirement date that is not later than today plus `--retiring-within` days (0 to 3650, default
+30; today is the UTC date). A date that has already passed counts. Each one is a `PS5011` error
+at the label, with the environment, the prompt, the short hash, the arm, the
+model, the date and the replacement from the catalog, and the exit code is 1. A `deprecated`
+model with a later date, or with no date, is listed and does not fail. A model the catalog does
+not know gives a warning only.
+
+The catalog is the one of the `prs` you run, plus `models.profiles` of the checkout, the same as
+`prs release build` uses for prices. The built-in part changes with each `prs` release, so run the
+newest CLI to see current dates. A profile in `models.profiles` can change a built-in status. The
+profile that is judged is the one whose provider and API id equal the bundle's, so a floating
+alias in the source is not re-resolved to a newer model here.
+
+`PS041` checks the model of the source when you validate. This check covers what the labels run,
+so it also finds a released bundle whose source has moved on. In text output a Models section lists
+every labelled model, and control characters of label and bundle values are removed. In JSON the
+report has a `models` list with one item per labelled hash (`environment`, `prompt`,
+`contentHash`, `variant` for an arm, `ref`, `profile`, `provider`, `apiId`, `status`,
+`retirementDate`, `retiring`), with the values as they are in the files. Without `--check-models`
+the list is absent.
 
 ## One pull request per promotion
 
@@ -6489,6 +6529,7 @@ Approve the full hash, for one environment or for all of them:
 prs approve --list acme-support/refund-reply
 prs approve acme-support/refund-reply@sha256-<64 hex digits> --role legal --approver @jane --env prod
 prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --approver @bob --all-environments --comment "Checked in PR 123"
+prs approve acme-support/refund-reply@sha256-<64 hex digits> --role legal --approver @jane --env prod --max-weight 25
 ```
 
 `--list` prints the hash the checkout builds. The command checks, and fails without writing:
@@ -6499,6 +6540,9 @@ prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --a
   enough, and no id segment may end with a dot.
 - `--env` is a configured environment (`PS5002`), or `--all-environments` is given. One of the two
   is required.
+- `--max-weight <percent>` is a percent from 0.01 to 100 with at most two decimals, such as `5` or
+  `2.5`, and comes with `--env` (`PS5110`). It is refused with `--all-environments`: a capped
+  approval counts in one environment only. See [Capped approvals](#capped-approvals).
 - `--comment` has at most 2000 characters, no control characters except newlines and no invisible
   format characters such as bidi marks.
 - `--approver` is a Git host user handle like `@jane` (`PS5104`): `@`, a letter or digit, then
@@ -6529,8 +6573,8 @@ The approver part is the handle without `@`, lowercased, so `@Jane.Doe` writes
 On Windows a long prompt id plus a long handle can go over the 260 character `MAX_PATH` limit. Run
 `git config core.longpaths true` in the repository if Git can not check out or add a record.
 
-The file holds exactly these bytes, with `environment` only when `--env` was given and `comment` only
-when one was given:
+The file holds exactly these bytes, with `environment` only when `--env` was given, `comment` only
+when one was given and `maxWeight` only when `--max-weight` was given:
 
 ```json
 {
@@ -6548,8 +6592,18 @@ when one was given:
 }
 ```
 
-A record is never overwritten. When the file exists, the command fails with `PS5105` and exit code 2. To withdraw an approval, delete the file in a commit. To change its environment or comment,
-delete it in a commit and approve again.
+A record is never overwritten. When the file exists, the command fails with `PS5105` and exit code 2. To withdraw an approval, delete the file in a commit. To change its environment, comment or
+ceiling, delete it and approve again in the same change: the file has to go away in that commit,
+else `PS5105` refuses the new record. The gate suggests `--max-weight` for an arm even when the
+approver already has a lower capped record, and that is the case this covers.
+
+`maxWeight` is a whole number of basis points from 1 to 10000, so `--max-weight 25` writes
+`"maxWeight": 2500`. See [Capped approvals](#capped-approvals) for what it changes. A record with
+`maxWeight` always names its `environment`: a capped approval counts in one environment only, and a
+file with `maxWeight` and no `environment` is no valid record. An older `prs` reads a record with
+`maxWeight` as invalid and never counts it: `prs approve --list` warns with `PS5109` and
+`prs audit log` shows `state=invalid`. Upgrade CI and the people who audit together before anyone
+writes a capped record.
 
 A record counts only with these exact bytes. The first `prs approve` writes
 `.promptscript/approvals/.gitattributes` with `* -text`, so a checkout with `core.autocrlf` never
@@ -6577,7 +6631,7 @@ prs approve --list acme-support/refund-reply --format json
 
 `--list` compiles the source in memory, reads every record, asks Git with `git ls-files -s` which
 paths it tracks and which blob each holds, and prints, per prompt, the hash the checkout builds and
-each record with its role, approver, scope (`prod` or `all environments`) and state. When there are
+each record with its role, approver, scope (`prod`, `all environments`, or `prod up to 25 %` for a capped record) and state. When there are
 record files, it needs Git and a repository, else `PS5108`.
 
 | State            | Meaning                                                          |
@@ -6600,6 +6654,20 @@ to 10 MiB; a longer one fails with `PS5108`.
 
 With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/approval-report/v1.json`.
+
+### Capped approvals
+
+A record with `maxWeight` approves traffic, not a promotion. It counts only for an experiment arm
+whose weight is at or under the ceiling. It never approves the entry hash, the control arm, a
+promote, `prs release split --end --keep` or a plain rollback, also not at `--max-weight 100`. A
+record without `maxWeight` is a full approval and counts everywhere, for an arm at any weight. Use
+`--max-weight` for a `max-experiment-weight` policy, see
+[Max Experiment Weight](https://getpromptscript.dev/guides/policy-engine/index.md#max-experiment-weight): a legal reviewer can sign off a
+canary at 5 % without signing off the prompt for everyone.
+
+The gate lists a capped record that did not count as `capped` next to the approvers found. To raise
+a ceiling, delete the old record file and run `prs approve` again with a higher `--max-weight` in the
+same change. `prs approve` stops with `PS5105` while the old file exists.
 
 ### What an approval proves
 
@@ -6655,8 +6723,11 @@ Without a prompt policy the gates pass and nothing else runs. With one:
   the source falls under.
 - `required-metadata`, `risk-floor`, `model-allowlist` and `content-rules` judge the bundle that
   ships: its governance, model, inputs and messages.
-- `required-approvals` counts approval records for that prompt, hash and environment. `required-evals`
-  is `unavailable`, see [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md#required-approvals-and-required-evals).
+- `required-approvals` counts approval records for that prompt, hash and environment.
+  `required-evals` is `unavailable`, see
+  [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md#required-approvals-and-required-evals).
+- `max-experiment-weight` judges the weight of an experiment arm with traffic, with the records that
+  cover that weight, see [Policy Engine](https://getpromptscript.dev/guides/policy-engine/index.md#max-experiment-weight).
 
 A check of severity `error` that fails, or is `unavailable`, fails the command with a `PS030` error
 that names the policy and what to do. A check of severity `warning` is a warning. The skill policy
@@ -6683,7 +6754,10 @@ A record counts for one approver when:
 - its committed path is the one its fields give, `.promptscript/approvals/<role>/<prompt id>/...`.
   CODEOWNERS protects records by that path, so a record anywhere else had the wrong reviewers;
 - the role is still in `governance.roles`;
-- the bytes are a valid v1 record.
+- the bytes are a valid v1 record;
+- it has no `maxWeight`, or the item is an arm whose weight is at or under `maxWeight`. A record
+  with `maxWeight` never approves the entry hash. A record without it counts as a ceiling of
+  100 %, so existing records keep working.
 
 An approver counts once per role, compared lowercased. A record of the same prompt and role for
 another hash shows as stale. Two committed paths under `.promptscript/approvals/` that differ only
@@ -6701,12 +6775,13 @@ records committed at `HEAD`.
 Gates for acme-support/refund-reply@sha256-3f9a1c2b4d5e to prod (policy risk: high)
   passed       high-risk-models  model-allowlist
   failed       high-risk-signoff  legal 0 of 1 (stale: @bob for sha256-91bc0d2e1a2b)
+  failed       high-risk-exposure  legal 0 of 1 (capped: @bob up to 10 %)
   unavailable  prod-evals  acme-support/refund-reply needs passing evals for prod, but release gates do not read eval results in this version of prs
 Promotion refused. Label prod is unchanged.
 ```
 
 With `--format json`, the report holds every result under `gates`, with the status, message and,
-for approvals, the approvers found and the stale records per role.
+for approvals, the approvers found, the stale records and the capped records per role.
 
 ## In CI
 
@@ -6720,7 +6795,8 @@ prs release status --base refs/remotes/origin/main
 Build writes whatever the committed release files miss, so the `test -z` check fails when a pull
 request changes prompts without the build. It also catches new bundle files, which
 `git diff --exit-code` would not see because they are untracked. `status` fails when a label points
-at a bundle that is missing or does not verify. All five commands accept
+at a bundle that is missing or does not verify. `prs release status --check-models` can run as an
+extra step to fail on labels that run a retired or retiring model. All five commands accept
 `--format json`, which prints one document on stdout that matches
 `https://getpromptscript.dev/schema/release-report/v1.json`, and prints the human text on stderr.
 
@@ -6825,7 +6901,8 @@ What `--base` does not do:
 against a fresh compile of the source. Each bundle is verified against its hash first, so the run
 uses what the environment serves even when the source has moved on. For an experiment it runs the
 entry hash, and `--variant <name>` runs one arm. Every result carries the hash that ran, in
-`prompt.contentHash`. See [prs eval run](https://getpromptscript.dev/reference/cli/index.md#prs-eval-run).
+`prompt.contentHash`. Judge rubrics of `llm-judge` assertions are the exception: they are compiled
+from the working tree, and `judges` in the report holds their hash. See [prs eval run](https://getpromptscript.dev/reference/cli/index.md#prs-eval-run).
 
 ```bash
 prs eval run --label prod
@@ -6879,8 +6956,8 @@ content hash before use, as described in [Application Prompts](https://getprompt
 ## Audit log
 
 `prs audit log` reads the governance history of the project from Git: who changed a prompt file,
-who approved which hash, who promoted, rolled back or removed a label entry, and who changed the
-config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
+who approved which hash, who promoted, rolled back or removed a label entry, who started, changed
+or ended an experiment, and who changed the config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
 the history on the branch.
 
 ```bash
@@ -6907,17 +6984,20 @@ them), `path` (relative to the repository top level) and `mainline`. `mainline` 
 commit on the first-parent chain of `HEAD`. An event with `mainline: false` is history of a branch:
 its change may never have reached `HEAD`, or reached it only through a merge.
 
-| Type               | When                                                                   | Extra fields                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `changed`          | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                            |
-| `approved`         | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `state` |
-| `approval-removed` | an approval record was deleted, read from the parent commit            | the same                                                                                                            |
-| `promoted`         | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                       |
-| `rolled-back`      | a label entry was set to a hash it held before in that label           | the same                                                                                                            |
-| `label-removed`    | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                      |
-| `merge-dropped`    | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`          |
-| `config-changed`   | a config file name of the project, the config or its `extends` changed | `change`                                                                                                            |
-| `generated`        | the CODEOWNERS section under this project's marker changed             | none                                                                                                                |
+| Type                 | When                                                                   | Extra fields                                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `changed`            | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                                         |
+| `approved`           | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `maxWeight`, `state` |
+| `approval-removed`   | an approval record was deleted, read from the parent commit            | the same                                                                                                                         |
+| `promoted`           | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                                    |
+| `rolled-back`        | a label entry was set to a hash it held before in that label           | the same                                                                                                                         |
+| `label-removed`      | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                                   |
+| `merge-dropped`      | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`                       |
+| `config-changed`     | a config file name of the project, the config or its `extends` changed | `change`                                                                                                                         |
+| `experiment-started` | a label entry got an experiment                                        | `environment`, `prompt`, `experiment`, `arms`, `contentHash`                                                                     |
+| `experiment-changed` | the arms, their weights or their order changed, same name              | the same, and `previousArms`                                                                                                     |
+| `experiment-ended`   | a label entry lost its experiment, or the entry or label is gone       | `environment`, `prompt`, `experiment`, `arms` (the last ones), `contentHash`, `keptVariant`                                      |
+| `generated`          | the CODEOWNERS section under this project's marker changed             | none                                                                                                                             |
 
 A record file changed in place shows as `approval-removed` with the old content and `approved`
 with the new. `state` comes from the record bytes and the path alone: `well-formed` at the path
@@ -6926,7 +7006,24 @@ form `prs approve` writes, is a link or a submodule, or is larger than 1 MiB (an
 has no record fields). Well-formed does not mean a gate accepts the record: the gate also needs
 the role in `governance.roles` and the scope, and the review by the role team lives in the review
 log of the Git host. A misplaced or invalid record never counts in a gate. `approverSource` is
-always `asserted`.
+always `asserted`. `maxWeight` is the ceiling of a capped record in basis points and is absent for a
+full approval; the text format prints it as `env=prod up to 5 %`.
+
+Experiments are read per label entry. Every arm is `variant`, `contentHash` and `weight` in basis
+points, the control first; JSON keeps basis points, text and CEF print percent. A new experiment
+on an entry is `experiment-started`, and a label that goes from v1 to v2 by `prs release split`
+starts one without a `promoted`, because the entry hash did not change. A change of a weight, an
+arm added, removed or paused at 0, or the arms in another order is `experiment-changed`, with
+`previousArms` for the comparison. The order matters because it decides which bucket a key lands
+in. `prs release split --end` gives `experiment-ended` with `keptVariant: "control"`. With
+`--keep <variant>` it gives `experiment-ended` with that variant and the hash it serves, and then
+the usual `promoted` (or `rolled-back`) for the entry. A rename, only possible by a hand edit or a
+rollback, is `experiment-ended` and then `experiment-started` in the same commit. When the entry
+or the label file goes while an experiment runs, `experiment-ended` has no `contentHash` and no
+`keptVariant`, and `label-removed` follows. Inside one label file the order is: ended
+experiments, `label-removed`, `promoted` or `rolled-back`, then started and changed experiments.
+`keptVariant` is also absent when a hand edit sets the entry to a hash that is no arm. Arm hashes
+do not count as hashes the label held, so `rolled-back` still means the entry hash held before.
 
 Commits of merged side branches are read too, each with its own events. A merge commit is read
 against its first parent: its events are what it brought to the branch it was merged into, and
@@ -6949,7 +7046,7 @@ what the parent did (`A`, `M` or `D`) and the record fields come from the parent
 from the merge's when the parent deleted it.
 
 After reading the history, the command replays the `mainline` events and compares the result with
-the approval records and label entries at `HEAD`. Any difference fails with `PS5108`: the history
+the approval records, label entries and experiments at `HEAD`. Any difference fails with `PS5108`: the history
 has a change the log cannot explain, and the log is not printed as if it were complete. Labels
 that did not parse at some commit are left out of this check.
 
@@ -6962,14 +7059,14 @@ carry `configured: false`, so a look-alike file such as `prodd.json` stands apar
 
 ### Filters
 
-| Option            | Keeps                                                                                                                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                  |
-| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                               |
-| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash) starts with these hex digits (`sha256-` optional, at least 4 digits) |
-| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                     |
-| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                  |
-| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                  |
+| Option            | Keeps                                                                                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                                                                        |
+| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                                                                                     |
+| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash; for experiment events, any arm hash, before or after) starts with these hex digits (`sha256-` optional, at least 4 digits) |
+| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                                                                           |
+| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                                                                        |
+| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                                                                        |
 
 An event without the filtered field does not match: with `--hash`, only approval and release
 events remain. `--prompt` finds the files of a prompt by resolving the checkout, so a prompt file
@@ -6993,27 +7090,33 @@ zero-width characters in strings are written as `\uXXXX` escapes.
 CEF:0|PromptScript|prs|<cli version>|prs-approved|Prompt approved|5|rt=1792591331000 act=approved suser=jane@acme.example duser=@jane filePath=... cs1=acme-support/refund-reply cs1Label=prompt cs2=sha256-... cs2Label=contentHash cs3=legal cs3Label=role cs4=prod cs4Label=environment cs5=9ffb3347... cs5Label=commit outcome=well-formed msg=Refund wording checked flexString1=4452d509... flexString1Label=head flexString2=asserted flexString2Label=approverSource
 ```
 
-| Key            | Value                                                                                                 |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| `rt`           | commit time in milliseconds                                                                           |
-| `act`          | event type                                                                                            |
-| `suser`        | author email                                                                                          |
-| `duser`        | approver                                                                                              |
-| `filePath`     | path                                                                                                  |
-| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`) |
-| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                    |
-| `msg`          | record comment                                                                                        |
-| `flexString1`  | `head`, the commit the log was read from                                                              |
-| `flexString2`  | `approverSource`, always `asserted`, on approval events                                               |
-| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                     |
-| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                 |
-| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                   |
-| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                 |
+| Key            | Value                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `rt`           | commit time in milliseconds                                                                                                          |
+| `act`          | event type                                                                                                                           |
+| `suser`        | author email                                                                                                                         |
+| `duser`        | approver                                                                                                                             |
+| `filePath`     | path                                                                                                                                 |
+| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`)                                |
+| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                                                   |
+| `msg`          | record comment; on experiment events the arms, `; previous <arms>` or `; kept <variant>`                                             |
+| `flexString1`  | `head`, the commit the log was read from                                                                                             |
+| `flexString2`  | `approverSource`, always `asserted`, on approval events; the experiment name with `flexString2Label=experiment` on experiment events |
+| `flexNumber1`  | `maxWeight` in basis points, with `flexNumber1Label=maxWeight`, on capped approval events                                            |
+| `flexNumber2`  | sum of the variant weights in basis points, with `flexNumber2Label=variantWeight`, on `experiment-started` and `experiment-changed`  |
+| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                                                    |
+| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                                                |
+| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                                                  |
+| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                                                |
+
+`flexString2` means the approver source on approval events and the experiment name on experiment
+events, so a SIEM rule should check `flexString2Label` first.
 
 Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
-`config-changed` 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
+`config-changed` and the three experiment events 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
 and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
-drop control, bidi and zero-width characters from Git and record fields.
+drop control, bidi and zero-width characters from Git and record fields. JSON keeps them as
+escapes, so take exact prompt ids and other values from the JSON export.
 
 ### Limits
 
@@ -7036,8 +7139,17 @@ drop control, bidi and zero-width characters from Git and record fields.
 - Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
   cannot change what the log shows.
 - The output holds email addresses. Treat exports like other personal data.
-- Experiment arms and weights are not listed in the log yet, and an experiment change that keeps
-  the entry hash shows no event. Read the label history with `git log -p` on the label.
+- A merge that drops an experiment change of a side branch shows no `merge-dropped`, because that
+  check compares hashes only. The change shows on the side commit.
+- A label that does not parse is read as no change. The next readable version of it shows its
+  experiments as `experiment-started`, like its entries as `promoted`, and the label stays out of
+  the check against `HEAD`. A change made while the label did not parse shows no
+  `experiment-ended`, `experiment-changed` or `label-removed`: an experiment that ended or changed,
+  or an entry that was removed, leaves no event, because the next readable version is compared
+  against nothing. A changed experiment then shows as `experiment-started` without `previousArms`.
+- The experiment events are new in the JSON document, and the schema URL and `version` stay 1. A
+  consumer that switches on `type` sees types it does not know, and one that validates against a
+  copy of the schema from before them rejects the document. Update the copy.
 
 ## Error codes
 
@@ -7053,6 +7165,7 @@ drop control, bidi and zero-width characters from Git and record fields.
 | PS5008 | A compile output lies inside `.promptscript/releases/`                               |
 | PS5009 | A split breaks the experiment rules, or targets the first environment                |
 | PS5010 | A promote on an entry with a running experiment                                      |
+| PS5011 | A labelled prompt runs a retired model, or one that retires within the window        |
 
 `prs approve` uses these codes:
 
@@ -7065,6 +7178,7 @@ drop control, bidi and zero-width characters from Git and record fields.
 | PS5105 | The record exists (exit code 2)                                                                |
 | PS5108 | `--list` cannot run Git, or the project is not in a repository                                 |
 | PS5109 | A record is invalid, modified, misplaced or has an unknown role, or the record path has a link |
+| PS5110 | `--max-weight` is not a percent from 0.01 to 100, or it comes without `--env`                  |
 
 `prs audit log` uses `PS5102` for a `--prompt` or `--hash` value of the wrong shape and `PS5108`
 when Git cannot give the history: no repository, no commit, a shallow clone, a timeout, a
@@ -13685,7 +13799,7 @@ policies:
 
 ## Policy Kinds
 
-Three kinds check skill extensions: `layer-boundary`, `property-protection` and `registry-allowlist`. Six more check prompts, see [Prompt Policies](#prompt-policies).
+Three kinds check skill extensions: `layer-boundary`, `property-protection` and `registry-allowlist`. Seven more check prompts, see [Prompt Policies](#prompt-policies).
 
 ### Layer Boundary
 
@@ -13723,7 +13837,7 @@ Any extension sourced from a registry not in the `allowed` list produces a viola
 
 ## Prompt Policies
 
-Six kinds read the `@prompts` entries of the resolved program: `required-metadata`, `risk-floor`, `model-allowlist`, `content-rules`, `required-approvals` and `required-evals`.
+Seven kinds read the `@prompts` entries of the resolved program: `required-metadata`, `risk-floor`, `model-allowlist`, `content-rules`, `required-approvals`, `required-evals` and `max-experiment-weight`.
 
 ### What a policy sees
 
@@ -13865,6 +13979,8 @@ policies:
 
 `count` is optional and only `1` is accepted: approval records are unsigned, so two records cannot prove two different approvers under one review.
 
+On an experiment arm, `required-approvals` counts a record that has `maxWeight` too, up to its ceiling. For the entry hash, the control arm, a promote, `prs release split --end --keep` and a plain rollback, only a record without `maxWeight` counts. See [Max Experiment Weight](#max-experiment-weight).
+
 ```yaml
 governance:
   roles:
@@ -13879,6 +13995,56 @@ policies:
     environments: [prod]
     approvals: [{ role: legal }]
 ```
+
+### Max Experiment Weight
+
+`max-experiment-weight` limits how much traffic a non-control arm of a label experiment may get, see [Experiments](https://getpromptscript.dev/guides/releases/index.md#split). The gates judge it for every arm with traffic in an environment the policy covers. The entry hash and the control arm are promotions, so the policy never judges them, and neither an arm at weight 0.
+
+| Field          | Type       | Required | Description                                                                                  |
+| -------------- | ---------- | -------- | -------------------------------------------------------------------------------------------- |
+| `match`        | object     | No       | Prompts the policy applies to                                                                |
+| `environments` | `string[]` | No       | Names from `releases.environments`. Absent means all                                         |
+| `maxWeight`    | number     | Yes      | Percent of traffic an arm gets without approvals, at most two decimals                       |
+| `approvals`    | list       | No       | `{ role }` rows. An arm above `maxWeight` needs one record of each role                      |
+| `ceiling`      | number     | No       | Percent above which no arm passes, whoever approved. Needs `approvals`, at least `maxWeight` |
+
+Percents run from 0 to 100 with at most two decimals. `ceiling` needs `approvals`, and it is at least `maxWeight`. `count` is `1`, as in `required-approvals`. Without `approvals` the cap is hard: `maxWeight` is the most an arm may get.
+
+For an arm at weight `w`:
+
+| Case                                                 | Result                                                                            |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `w` is at most `maxWeight`                           | passed, no record needed                                                          |
+| above `maxWeight`, no `approvals`                    | failed: the cap is hard                                                           |
+| above `ceiling`                                      | failed, with or without records                                                   |
+| above `maxWeight`, at most `ceiling` (or no ceiling) | passed when every role has a record for this hash and environment that covers `w` |
+
+A record covers `w` when it has no `maxWeight`, or its `maxWeight` is at least `w`. Create one with `prs approve ... --env prod --max-weight 10`, see [Release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates). Several policies stack: each one judges the arm on its own, and every policy that matches must pass. At severity `warning` a failed check only warns.
+
+```yaml
+governance:
+  roles:
+    legal: ['@acme/legal']
+releases:
+  environments: [staging, prod]
+policies:
+  - name: high-risk-exposure
+    kind: max-experiment-weight
+    severity: error
+    match: { minRisk: high }
+    environments: [prod]
+    maxWeight: 5
+    approvals: [{ role: legal }]
+    ceiling: 25
+```
+
+An arm of a high risk prompt may run up to 5 % in prod. Between 5 % and 25 % it needs a legal record that covers its weight. Above 25 % it never passes.
+
+A record without `maxWeight` counts as a full approval, so it covers any arm weight. A record with `maxWeight` never approves the entry hash, even at `10000` (100 %): a capped approval is about traffic, not about a promotion. That holds under `required-approvals` as well. Neither a promote, `prs release split --end --keep` nor a plain rollback counts it.
+
+`prs release status --base <ref>` reads the policies from `<ref>`, and the weights and the records from HEAD. A pull request can add a record with a high `maxWeight` next to the weight it asks for, so the review of `approvals/<role>/` by CODEOWNERS is what stops it.
+
+The limits are the ones of [Required Approvals](#required-approvals-and-required-evals): records are unsigned, `count` is `1`, and two people mean two roles.
 
 ### Typos and unknown kinds
 
@@ -15284,16 +15450,16 @@ flowchart LR
 
 ## Key Commands for CI
 
-| Command                      | Purpose                       | Exit Code                                    |
-| ---------------------------- | ----------------------------- | -------------------------------------------- |
-| `prs validate`               | Validate syntax and structure | 0=pass, 1=error, 2=warning (with `--strict`) |
-| `prs validate --strict`      | Treat warnings as errors      | 0=pass, 1=error, 2=warning                   |
-| `prs validate --format json` | JSON output for parsing       | Same as above                                |
-| `prs compile`                | Compile to all targets        | 0=success, 1=error                           |
-| `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error                           |
-| `prs check`                  | Check config and dependencies | 0=healthy, 1=issues                          |
-| `prs diff --all`             | Show uncommitted changes      | Always 0                                     |
-| `prs diff --format json`     | Machine-readable diff report  | 0=report produced, 1=error                   |
+| Command                      | Purpose                       | Exit Code                  |
+| ---------------------------- | ----------------------------- | -------------------------- |
+| `prs validate`               | Validate syntax and structure | 0=pass, 1=error            |
+| `prs validate --strict`      | Treat warnings as errors      | 0=pass, 1=error or warning |
+| `prs validate --format json` | JSON report for parsing       | Same as above              |
+| `prs compile`                | Compile to all targets        | 0=success, 1=error         |
+| `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error         |
+| `prs check`                  | Check config and dependencies | 0=healthy, 1=issues        |
+| `prs diff --all`             | Show uncommitted changes      | 0=shown, 1=error           |
+| `prs diff --format json`     | Machine-readable diff report  | 0=report produced, 1=error |
 
 ## GitHub Actions
 
@@ -25456,6 +25622,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5008     | Compile output inside the release directory                                                     | Point the target output elsewhere                                      |
 | PS5009     | Invalid split, or a split in the first environment                                              | Fix the arms, or split in a later environment                          |
 | PS5010     | Promote on an entry with a running experiment                                                   | End it with `prs release split --end`                                  |
+| PS5011     | Labelled prompt runs a retired or retiring model                                                | Move it to a current model, build and promote                          |
 | PS5101     | `governance` missing or invalid, or no role                                                     | Fix the section or add the role                                        |
 | PS5102     | Approval reference, prompt id or hash filter malformed                                          | Use `<id>@sha256-<64 hex>`, a hash filter takes 4+ hex digits          |
 | PS5103     | Approved hash is not built or released                                                          | Approve the hash `prs approve --list` shows                            |
@@ -25465,6 +25632,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5107     | CODEOWNERS owner or path refused                                                                | Use Git host identities and plain paths                                |
 | PS5108     | Git missing, no repository, shallow history, Git failed or history that does not explain `HEAD` | Run it in a full Git checkout with git on PATH, see the releases guide |
 | PS5109     | Approval record invalid or misplaced                                                            | Fix, move or delete it in a commit                                     |
+| PS5110     | Invalid `--max-weight`, or `--max-weight` without `--env` or with `--all-environments`          | Give a percent like 5 or 2.5 with `--env` and no `--all-environments`  |
 
 PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are
 not the ones Git has) or one with a role that is not in `governance.roles`. It is an error, with
@@ -25791,6 +25959,8 @@ Use `prs validate --strict` to include shape warnings in CI.
 Complete reference for the PromptScript command-line interface.
 
 ## Commands at a Glance
+
+The JSON output of `prs diff`, `prs release`, `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable. See [JSON Output](https://getpromptscript.dev/reference/json-output/index.md) for the rules.
 
 | Task                          | Command                                                                                                        |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -26330,11 +26500,21 @@ prs validate --format json
 
 **Exit Codes:**
 
-| Code | Meaning                                   |
-| ---- | ----------------------------------------- |
-| 0    | Validation passed                         |
-| 1    | Validation errors found                   |
-| 2    | Validation warnings found (with --strict) |
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| 0    | Validation passed                                    |
+| 1    | Validation errors found, or warnings with `--strict` |
+
+With `--format json`, stdout holds one document that matches
+[`validate-report/v1.json`](https://getpromptscript.dev/reference/json-output/index.md). It has `success`, `errors`, `warnings` and a `summary`
+with the counts. With `--strict`, a warning sets `success` to `false`, and it stays in `warnings`.
+An error has a `code` when it is a PromptScript error (`PS` and three or four digits). The code is
+absent when the run stops before the compile with another error, such as a missing entry file or a
+registry clone failure. A parse error carries the resolve code `PS2000`. A location has `file`,
+`line`, `column` and, on some warnings, `offset`. A parse error without a position reports `-1` for
+`line` and `column`. Paths are as the compiler reports them, usually absolute. With several files,
+`errors` and `warnings` hold the results of all of them in file order.
+`--fix` cannot be combined with `--format json`: the command prints an error to stderr and exits 1.
 
 ---
 
@@ -26970,7 +27150,7 @@ With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
 code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
 
-Errors use the codes `PS5001` to `PS5010`, listed in the
+Errors use the codes `PS5001` to `PS5011`, listed in the
 [releases guide](https://getpromptscript.dev/guides/releases/index.md#error-codes).
 
 #### prs release build
@@ -27085,10 +27265,12 @@ List the released prompts of every environment and verify their bundles.
 prs release status [options]
 ```
 
-| Option          | Description                                                             |
-| --------------- | ----------------------------------------------------------------------- |
-| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000)      |
-| `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
+| Option                     | Description                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--history <n>`            | Show commit, date and subject of the last n label commits (1-1000)                                    |
+| `--base <ref>`             | Check every label entry changed since `<ref>` with the rules of `<ref>`                               |
+| `--check-models`           | Check the models of every labelled prompt against the model catalog                                   |
+| `--retiring-within <days>` | With `--check-models`, days ahead in which a deprecated model counts as retiring (0-3650, default 30) |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
 verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
@@ -27112,8 +27294,15 @@ code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such
 `refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
 [Check label changes with `--base`](https://getpromptscript.dev/guides/releases/index.md#check-label-changes-with---base).
 
+With `--check-models`, the model of every verified label entry and experiment arm is checked
+against the model catalog of the running `prs` plus `models.profiles`. A retired model, or a
+deprecated one whose retirement date is within `--retiring-within` days, fails with `PS5011`; a
+model the catalog does not know gives a warning. See
+[Check the models of the labels](https://getpromptscript.dev/guides/releases/index.md#check-the-models-of-the-labels).
+
 ```bash
 prs release status --history 5
+prs release status --check-models --retiring-within 14
 prs release status --base refs/remotes/origin/main
 ```
 
@@ -27126,21 +27315,22 @@ record it checks the whole [`governance`](https://getpromptscript.dev/reference/
 [Approvals](https://getpromptscript.dev/guides/releases/index.md#approvals) in the releases guide.
 
 ```bash
-prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [options]
+prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [--max-weight <percent>] [options]
 prs approve --list [<id>] [options]
 ```
 
-| Option                | Description                                                                  | Default |
-| --------------------- | ---------------------------------------------------------------------------- | ------- |
-| `--role <role>`       | Approval role from `governance.roles` (required to approve)                  | -       |
-| `--approver <handle>` | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
-| `--env <env>`         | The one environment the approval counts for                                  | -       |
-| `--all-environments`  | Let the approval count for every environment                                 | -       |
-| `--comment <text>`    | Note in the record, at most 2000 characters                                  | -       |
-| `--list`              | List records with their scope and state                                      | -       |
-| `--format <format>`   | `text` or `json`                                                             | `text`  |
-| `-c, --config <path>` | Path to a custom config file                                                 | -       |
-| `--cwd <dir>`         | Working directory (project root)                                             | -       |
+| Option                   | Description                                                                  | Default |
+| ------------------------ | ---------------------------------------------------------------------------- | ------- |
+| `--role <role>`          | Approval role from `governance.roles` (required to approve)                  | -       |
+| `--approver <handle>`    | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
+| `--env <env>`            | The one environment the approval counts for                                  | -       |
+| `--all-environments`     | Let the approval count for every environment                                 | -       |
+| `--max-weight <percent>` | Highest arm weight in percent the approval counts for; needs `--env`         | -       |
+| `--comment <text>`       | Note in the record, at most 2000 characters                                  | -       |
+| `--list`                 | List records with their scope and state                                      | -       |
+| `--format <format>`      | `text` or `json`                                                             | `text`  |
+| `-c, --config <path>`    | Path to a custom config file                                                 | -       |
+| `--cwd <dir>`            | Working directory (project root)                                             | -       |
 
 `<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
 that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command
@@ -27149,6 +27339,13 @@ stderr, with invisible characters shown as `<U+XXXX>`. It writes
 `.promptscript/approvals/<role>/<id>/<hash>.<approver>.json` and, the first time,
 `.promptscript/approvals/.gitattributes`. An existing record is never replaced: the command fails
 with `PS5105` and exit code 2. Other errors exit with code 1.
+
+`--max-weight` caps the approval at an experiment arm weight, a percent from 0.01 to 100 with at
+most two decimals. It needs `--env` and is refused with `--all-environments`, and a bad value is
+`PS5110`. The record gets `maxWeight` in basis points. It counts only for an arm at or under that
+weight, never for the entry hash, a promote, `--end --keep` or a plain rollback, see
+[Capped approvals](https://getpromptscript.dev/guides/releases/index.md#capped-approvals). `--list` shows such a record as
+`prod up to 25 %` and does not take the option.
 
 `--list` prints per prompt the hash the checkout builds and every record as `current`,
 `labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
@@ -27160,6 +27357,7 @@ With `--format json`, stdout holds one document that matches
 ```bash
 prs approve --list acme-support/refund-reply
 prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod
+prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod --max-weight 25
 ```
 
 ---
@@ -27257,7 +27455,7 @@ Markdown print it as a count and a percentage.
 | `PS6604` | Warning: labels name rows the run did not read                                  |
 
 **Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
-matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
+matches `https://getpromptscript.dev/schema/eval-report/v1.json`, starts with `$schema` and `version`, and holds no timestamp, so two replay
 runs give the same bytes. Progress, warnings and `sending` lines go to stderr. In JSON mode errors are
 inside the document, under `errors`. Control and bidi characters are removed from every string that
 comes from a model, a provider or a dataset, in all formats. Reports hold no responses, but a
@@ -27287,7 +27485,15 @@ runs that arm instead, only for prompts that have it. One run covers one arm, be
 each suite once. A suite whose prompt is not in the label, or has no such arm, is skipped with a
 warning `PS6311`, which counts for `--strict`. A suite you name on the command line is an error
 instead, and so is a run where every suite is skipped. The report records the hash of every suite
-under `prompt.contentHash`, and `--report-dir` names files after that hash. The cache is keyed by
+under `prompt.contentHash`, and `--report-dir` names files after that hash. Only the prompt under
+test comes from the label. The suite, its dataset and the rubric prompts of `llm-judge` assertions
+come from the working tree, so a run with a judge compiles the project (`PS6310` when it does not
+compile, `PS6203` when the rubric is not in it), and a run without judges does not. The rubrics are
+compiled with the validator settings of a release build, so `validation.excludes` cannot switch off
+the forced security rules for them. A rubric always comes from the working tree, also when the label
+serves the same prompt id; `judges` in the report holds the hash of the rubric that judged, and
+stderr gets one line `label <env>: suite <name> judged by <rubric> at <short hash> (working tree)`
+per judged suite, next to the `runs` line. The cache is keyed by
 the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
 source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
 environment serves. Release gates do not read eval reports, so a report of a label run is not gate
@@ -27334,8 +27540,8 @@ baseline and does not pass in the candidate. A drop of the pass rate above the t
 regression too. Only cases both reports have are compared. When the dataset hash differs, that is
 noted, and a suite or model that only one report has is listed with its cases and is not a
 regression, but it is shown as a warning: on stderr for `json`, inside the document for `text` and
-`markdown`. With `--format json`, stdout holds one document that matches
-`https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
+`markdown`. With `--format json`, stdout holds one document that starts with `$schema` and `version`
+and matches `https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
 so an unreadable report or a bad option goes to stderr in every format, with exit code 1.
 
 ```bash
@@ -27508,11 +27714,10 @@ Read the governance history of the project from Git.
 
 #### prs audit log
 
-List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
-and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
-included, plus the changes a merge dropped from a parent. See [Audit log](https://getpromptscript.dev/guides/releases/index.md#audit-log)
-in the releases guide. Experiment arms and weights are not listed yet: read the label history with
-`git log -p`.
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, experiments
+started, changed or ended, config changes and changes of the generated CODEOWNERS section, newest
+commit first, merges and side branches included, plus the changes a merge dropped from a parent.
+See [Audit log](https://getpromptscript.dev/guides/releases/index.md#audit-log) in the releases guide.
 
 ```bash
 prs audit log [options]
@@ -27995,6 +28200,108 @@ PROMPTSCRIPT_DEBUG=1 prs compile
 - Cache hits and stores
 - Individual validation rules being executed
 - Formatter conventions used
+
+---
+
+# JSON Output
+
+Some `prs` commands print a JSON document with `--format json`. This page says which of them you
+can build on, and what the rules are.
+
+## Stable commands
+
+The output of these commands is a contract. Each one has a JSON Schema in the
+[`schema/`](https://github.com/mrwogu/promptscript/tree/main/schema) directory, and a test runs every
+command and checks stdout against its schema.
+
+| Command                                                                                  | Schema `$id`                                                 |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [`prs diff`](https://getpromptscript.dev/reference/cli/index.md#prs-diff)                                                            | `https://getpromptscript.dev/schema/diff/v1.json`            |
+| [`prs release`](https://getpromptscript.dev/reference/cli/index.md#prs-release) `build`, `promote`, `rollback`, `split` and `status` | `https://getpromptscript.dev/schema/release-report/v1.json`  |
+| [`prs approve`](https://getpromptscript.dev/reference/cli/index.md#prs-approve)                                                      | `https://getpromptscript.dev/schema/approval-report/v1.json` |
+| [`prs audit log`](https://getpromptscript.dev/reference/cli/index.md#prs-audit-log)                                                  | `https://getpromptscript.dev/schema/audit-log/v1.json`       |
+| [`prs eval run`](https://getpromptscript.dev/reference/cli/index.md#prs-eval-run)                                                    | `https://getpromptscript.dev/schema/eval-report/v1.json`     |
+| [`prs eval compare`](https://getpromptscript.dev/reference/cli/index.md#prs-eval-compare)                                            | `https://getpromptscript.dev/schema/eval-comparison/v1.json` |
+| [`prs validate`](https://getpromptscript.dev/reference/cli/index.md#prs-validate)                                                    | `https://getpromptscript.dev/schema/validate-report/v1.json` |
+
+## Experimental
+
+`--format json` of every other command is experimental, and its output may change in any minor
+release. This covers `prs inspect`, `prs explain`, `prs resolve`,
+`prs registry validate`, `prs registry list` and `prs governance codeowners`. `prs eval import` has
+a schema (`eval-import-summary/v1.json`), but it is not declared stable either.
+
+## stdout and stderr
+
+For the stable commands, with `--format json`, stdout holds exactly one JSON document and nothing else. Spinners, progress,
+warnings, verbose and debug lines, the update notice and the human text go to stderr. That holds with
+`--verbose`, `--debug` and `PROMPTSCRIPT_VERBOSE=1` too, so this works:
+
+```bash
+prs release status --format json --verbose 2> status.log | jq .success
+```
+
+Warnings and errors that belong to the report, like the `warnings` and `errors` arrays of a release
+report, are only in the JSON document. In JSON mode they are not printed to stderr as well, so read
+them from the document.
+
+When a stable command fails, the document is still printed. It has `success: false`, or for
+`prs eval run` an `outcome` other than `passed`. Do not read the shape of the document from the exit
+code alone: `prs eval compare --fail-on-regression` exits 1 with `regression: true` in a normal
+comparison, and `prs eval run --strict` exits 2 with `outcome: "passed"` when there are warnings. There are four cases with nothing on stdout, only a
+message on stderr and exit code 1:
+
+- any error of `prs eval compare`, also a bad `--tolerance` value, because a comparison has no place for errors,
+- `prs validate --fix` together with `--format json`, which is refused before anything runs,
+- a usage error of Commander, like an unknown option,
+- a `--format` value the command does not know.
+
+## Version marker
+
+A document starts with `$schema` and `version`. The schema URL carries the major version, and
+`version` repeats it as a number.
+
+```json
+{
+  "$schema": "https://getpromptscript.dev/schema/release-report/v1.json",
+  "version": 1
+}
+```
+
+Eval reports and comparisons written by older CLI versions have only `$schema`. Read a missing
+`version` as 1. A comparison inside an eval report has neither field.
+
+## Exit codes
+
+| Command                                                       | 0                                           | 1                                                                                              | Other                                                   |
+| ------------------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `prs diff`                                                    | Report written, also when it has changes    | `success: false`: a compile or report error                                                    | -                                                       |
+| `prs release build`, `promote`, `rollback`, `split`, `status` | `success: true`, also a no-op or a dry run  | `success: false`, also a failed gate of `status --base`                                        | -                                                       |
+| `prs approve`                                                 | Record written or listed                    | Any other error                                                                                | 2: the record exists already (`PS5105`)                 |
+| `prs audit log`                                               | Log read                                    | Error                                                                                          | -                                                       |
+| `prs eval run`                                                | `passed`                                    | `failed`, `regression`, `budget-exceeded` or `error` (a bad option is `PS6309`, still as JSON) | 2: `passed` with warnings under `--strict`. 130: Ctrl+C |
+| `prs eval compare`                                            | Compared, also when something regressed     | A regression with `--fail-on-regression`, or any error (no JSON)                               | -                                                       |
+| `prs validate`                                                | No errors, and no warnings under `--strict` | `success: false`: errors, warnings under `--strict`, or any error before the compile           | -                                                       |
+
+## Schema versioning
+
+- The file name and the `$id` carry the major version.
+- A v1 schema only gains optional properties.
+- A change that breaks readers goes into a new `-v2` file with a new `$id`, and the old file stays.
+  This is the convention, like `prompt-release-label-v1` and `-v2`.
+- `pnpm api:breaking` runs on every pull request and compares the schemas of these commands with the
+  base branch. It fails on a removed property, a property that is no longer required, a narrowed
+  type, a removed enum value, a changed `const`, a new enum on a free value, or `additionalProperties`
+  that becomes stricter. It does not fail on a new required property or a widened type. A pull
+  request marked as breaking (`!` in the commit subject that lands on `main`, or a
+  `BREAKING CHANGE:` line in a commit message) passes. The check does not
+  look for a `-v2` file.
+- Schemas are closed (`additionalProperties: false`). Validate a document with the schema of the CLI
+  version that wrote it, or a newer one, and let your reader ignore properties it does not know.
+
+## Text output
+
+The default text output is for people. It can change in any release, so do not parse it.
 
 ---
 
@@ -29814,6 +30121,8 @@ uses the same catalog to report deprecated and retired models, and it also
 checks the `model.ref` of `@prompts` entries. Coding agent targets skip prompt
 definitions, so none of them receives that name. The `bundle` target resolves the
 reference and writes the profile, provider, and API id next to it.
+`prs release status --check-models` checks the prompts of your release labels
+against the same catalog.
 
 This page is generated from the catalog source, so it matches what the
 compiler does. To use a model that is not listed yet, or to change a built-in

@@ -6,7 +6,7 @@
 
 # Interface: RegistryMeta
 
-Defined in: [core/src/types/manifest.ts:121](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L121)
+Defined in: [core/src/types/manifest.ts:121](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L121)
 
 Registry metadata.
 
@@ -16,7 +16,7 @@ Registry metadata.
 
 > **description**: `string`
 
-Defined in: [core/src/types/manifest.ts:125](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L125)
+Defined in: [core/src/types/manifest.ts:125](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L125)
 
 Registry description
 
@@ -26,7 +26,7 @@ Registry description
 
 > **lastUpdated**: `string`
 
-Defined in: [core/src/types/manifest.ts:127](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L127)
+Defined in: [core/src/types/manifest.ts:127](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L127)
 
 Last update timestamp (ISO 8601)
 
@@ -36,7 +36,7 @@ Last update timestamp (ISO 8601)
 
 > `optional` **maintainer?**: `string`
 
-Defined in: [core/src/types/manifest.ts:131](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L131)
+Defined in: [core/src/types/manifest.ts:131](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L131)
 
 Maintainer information
 
@@ -46,7 +46,7 @@ Maintainer information
 
 > **name**: `string`
 
-Defined in: [core/src/types/manifest.ts:123](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L123)
+Defined in: [core/src/types/manifest.ts:123](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L123)
 
 Registry name
 
@@ -56,6 +56,6 @@ Registry name
 
 > `optional` **version?**: `string`
 
-Defined in: [core/src/types/manifest.ts:129](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/manifest.ts#L129)
+Defined in: [core/src/types/manifest.ts:129](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/manifest.ts#L129)
 
 Registry version

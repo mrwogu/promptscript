@@ -6,7 +6,7 @@
 
 # Interface: RegistriesValidationResult
 
-Defined in: [resolver/src/alias-resolver.ts:34](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/alias-resolver.ts#L34)
+Defined in: [resolver/src/alias-resolver.ts:36](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/alias-resolver.ts#L36)
 
 Result of validating the registries config.
 
@@ -16,7 +16,7 @@ Result of validating the registries config.
 
 > **errors**: `string`[]
 
-Defined in: [resolver/src/alias-resolver.ts:38](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/alias-resolver.ts#L38)
+Defined in: [resolver/src/alias-resolver.ts:40](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/alias-resolver.ts#L40)
 
 Validation error messages (empty when valid)
 
@@ -26,6 +26,6 @@ Validation error messages (empty when valid)
 
 > **valid**: `boolean`
 
-Defined in: [resolver/src/alias-resolver.ts:36](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/alias-resolver.ts#L36)
+Defined in: [resolver/src/alias-resolver.ts:38](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/alias-resolver.ts#L38)
 
 Whether the config is valid

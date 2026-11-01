@@ -6,7 +6,7 @@
 
 # Interface: EvalPlanSuite
 
-Defined in: [eval/src/run.ts:1024](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L1024)
+Defined in: [eval/src/run.ts:1032](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L1032)
 
 One suite in a [EvalPlan](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalPlan/index.md).
 
@@ -16,7 +16,7 @@ One suite in a [EvalPlan](https://getpromptscript.dev/api-reference/eval/src/int
 
 > **models**: [`EvalPlanModel`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalPlanModel/index.md)[]
 
-Defined in: [eval/src/run.ts:1028](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L1028)
+Defined in: [eval/src/run.ts:1036](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L1036)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [eval/src/run.ts:1028](https://github.com/mrwogu/promptscript/blob/1
 
 > **name**: `string`
 
-Defined in: [eval/src/run.ts:1025](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L1025)
+Defined in: [eval/src/run.ts:1033](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L1033)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [eval/src/run.ts:1025](https://github.com/mrwogu/promptscript/blob/1
 
 > **prompt**: `string`
 
-Defined in: [eval/src/run.ts:1026](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L1026)
+Defined in: [eval/src/run.ts:1034](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L1034)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [eval/src/run.ts:1026](https://github.com/mrwogu/promptscript/blob/1
 
 > **rows**: `number`
 
-Defined in: [eval/src/run.ts:1027](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L1027)
+Defined in: [eval/src/run.ts:1035](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L1035)

@@ -6,7 +6,7 @@
 
 # Interface: AgentProvenance
 
-Defined in: [core/src/types/ast.ts:131](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L131)
+Defined in: [core/src/types/ast.ts:131](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L131)
 
 Provenance retained for a resolved agent definition.
 
@@ -16,7 +16,7 @@ Provenance retained for a resolved agent definition.
 
 > **action**: `"local"` \| `"imported"` \| `"qualified"` \| `"native"`
 
-Defined in: [core/src/types/ast.ts:141](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L141)
+Defined in: [core/src/types/ast.ts:141](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L141)
 
 How the definition entered the resolved program
 
@@ -26,7 +26,7 @@ How the definition entered the resolved program
 
 > `optional` **importPath?**: `string`
 
-Defined in: [core/src/types/ast.ts:137](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L137)
+Defined in: [core/src/types/ast.ts:137](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L137)
 
 Import path used to bring the definition into the current program
 
@@ -36,7 +36,7 @@ Import path used to bring the definition into the current program
 
 > `optional` **loc?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:143](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L143)
+Defined in: [core/src/types/ast.ts:143](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L143)
 
 Source location of the definition or import
 
@@ -46,7 +46,7 @@ Source location of the definition or import
 
 > **name**: `string`
 
-Defined in: [core/src/types/ast.ts:133](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L133)
+Defined in: [core/src/types/ast.ts:133](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L133)
 
 Resolved agent name
 
@@ -56,7 +56,7 @@ Resolved agent name
 
 > `optional` **namespace?**: `string`
 
-Defined in: [core/src/types/ast.ts:139](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L139)
+Defined in: [core/src/types/ast.ts:139](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L139)
 
 Namespace added by an aliased import
 
@@ -66,6 +66,6 @@ Namespace added by an aliased import
 
 > **source**: `string`
 
-Defined in: [core/src/types/ast.ts:135](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/ast.ts#L135)
+Defined in: [core/src/types/ast.ts:135](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/ast.ts#L135)
 
 Source file that defined the agent

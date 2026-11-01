@@ -8,7 +8,7 @@
 
 > `const` **SECURITY\_STRICT\_MULTILINGUAL**: [`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md)
 
-Defined in: [validator/src/presets.ts:311](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/presets.ts#L311)
+Defined in: [validator/src/presets.ts:311](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/presets.ts#L311)
 
 Strict security preset with ALL language patterns.
 

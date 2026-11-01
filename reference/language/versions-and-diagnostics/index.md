@@ -105,6 +105,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5008     | Compile output inside the release directory                                                     | Point the target output elsewhere                                      |
 | PS5009     | Invalid split, or a split in the first environment                                              | Fix the arms, or split in a later environment                          |
 | PS5010     | Promote on an entry with a running experiment                                                   | End it with `prs release split --end`                                  |
+| PS5011     | Labelled prompt runs a retired or retiring model                                                | Move it to a current model, build and promote                          |
 | PS5101     | `governance` missing or invalid, or no role                                                     | Fix the section or add the role                                        |
 | PS5102     | Approval reference, prompt id or hash filter malformed                                          | Use `<id>@sha256-<64 hex>`, a hash filter takes 4+ hex digits          |
 | PS5103     | Approved hash is not built or released                                                          | Approve the hash `prs approve --list` shows                            |
@@ -114,6 +115,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS5107     | CODEOWNERS owner or path refused                                                                | Use Git host identities and plain paths                                |
 | PS5108     | Git missing, no repository, shallow history, Git failed or history that does not explain `HEAD` | Run it in a full Git checkout with git on PATH, see the releases guide |
 | PS5109     | Approval record invalid or misplaced                                                            | Fix, move or delete it in a commit                                     |
+| PS5110     | Invalid `--max-weight`, or `--max-weight` without `--env` or with `--all-environments`          | Give a percent like 5 or 2.5 with `--env` and no `--all-environments`  |
 
 PS5109 is a warning when `prs approve --list` reads such a record, or a modified one (its bytes are
 not the ones Git has) or one with a role that is not in `governance.roles`. It is an error, with

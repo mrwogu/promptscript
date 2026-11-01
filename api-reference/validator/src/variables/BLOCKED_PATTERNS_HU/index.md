@@ -8,6 +8,6 @@
 
 > `const` **BLOCKED\_PATTERNS\_HU**: `RegExp`[]
 
-Defined in: [validator/src/rules/blocked-patterns.ts:328](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/rules/blocked-patterns.ts#L328)
+Defined in: [validator/src/rules/blocked-patterns.ts:328](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/rules/blocked-patterns.ts#L328)
 
 Hungarian (Magyar) prompt injection patterns.

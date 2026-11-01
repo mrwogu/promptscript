@@ -44,32 +44,21 @@ if (result.success) {
 
 ## Classes
 
-- [BrowserCompiler](https://getpromptscript.dev/api-reference/browser-compiler/src/classes/BrowserCompiler/index.md)
-- [BrowserResolver](https://getpromptscript.dev/api-reference/browser-compiler/src/classes/BrowserResolver/index.md)
 - [VirtualFileSystem](https://getpromptscript.dev/api-reference/browser-compiler/src/classes/VirtualFileSystem/index.md)
 
 ## Interfaces
 
 - [BrowserCompilerOptions](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/BrowserCompilerOptions/index.md)
-- [BrowserResolverOptions](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/BrowserResolverOptions/index.md)
 - [CompileError](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileError/index.md)
 - [CompileOptions](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileOptions/index.md)
 - [CompileResult](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileResult/index.md)
 - [CompileStats](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileStats/index.md)
-- [ResolvedAST](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/ResolvedAST/index.md)
 - [TargetConfig](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/TargetConfig/index.md)
 
 ## Type Aliases
 
 - [CompileWarning](https://getpromptscript.dev/api-reference/browser-compiler/src/type-aliases/CompileWarning/index.md)
 - [~~FormatterName~~](https://getpromptscript.dev/api-reference/browser-compiler/src/type-aliases/FormatterName/index.md)
-
-## Variables
-
-- [BUNDLED\_REGISTRY](https://getpromptscript.dev/api-reference/browser-compiler/src/variables/BUNDLED_REGISTRY/index.md)
-- [CORE\_BASE](https://getpromptscript.dev/api-reference/browser-compiler/src/variables/CORE_BASE/index.md)
-- [CORE\_QUALITY](https://getpromptscript.dev/api-reference/browser-compiler/src/variables/CORE_QUALITY/index.md)
-- [CORE\_SECURITY](https://getpromptscript.dev/api-reference/browser-compiler/src/variables/CORE_SECURITY/index.md)
 
 ## Functions
 

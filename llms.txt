@@ -133,6 +133,7 @@ Every page below is plain Markdown. The whole documentation in one file: https:/
 - [Versions and Diagnostics](https://getpromptscript.dev/reference/language/versions-and-diagnostics/index.md): PromptScript syntax versions, upgrade commands, and release validation
 - [Block Shapes](https://getpromptscript.dev/reference/block-shapes/index.md): Canonical content shapes, compatibility forms, merge rules, and formatter behavior for every built-in PromptScript block
 - [CLI Reference](https://getpromptscript.dev/reference/cli/index.md): Reference for every prs CLI command: init, compile, validate, diff, import, skills, registry, hooks, and their options.
+- [JSON Output](https://getpromptscript.dev/reference/json-output/index.md): Which prs commands have a stable JSON output, what goes to stdout and stderr, the version marker, exit codes and how the schemas change.
 - [prs hooks](https://getpromptscript.dev/reference/cli/hooks/index.md): CLI reference for the prs hooks command (install and uninstall)
 - [prs hook](https://getpromptscript.dev/reference/cli/hook/index.md): CLI reference for the prs hook command (pre-edit and post-edit actions)
 - [Configuration](https://getpromptscript.dev/reference/config/index.md): Reference for promptscript.yaml: targets, output versions, registries, inputs, validation, formatting, and other project settings.

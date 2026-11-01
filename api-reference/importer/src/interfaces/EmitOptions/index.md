@@ -6,7 +6,7 @@
 
 # Interface: EmitOptions
 
-Defined in: [importer/src/emitter.ts:4](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/importer/src/emitter.ts#L4)
+Defined in: [importer/src/emitter.ts:4](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/importer/src/emitter.ts#L4)
 
 ## Properties
 
@@ -14,4 +14,4 @@ Defined in: [importer/src/emitter.ts:4](https://github.com/mrwogu/promptscript/b
 
 > **projectName**: `string`
 
-Defined in: [importer/src/emitter.ts:5](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/importer/src/emitter.ts#L5)
+Defined in: [importer/src/emitter.ts:5](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/importer/src/emitter.ts#L5)

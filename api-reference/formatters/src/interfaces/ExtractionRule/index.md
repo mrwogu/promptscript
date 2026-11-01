@@ -6,7 +6,7 @@
 
 # Interface: ExtractionRule
 
-Defined in: [formatters/src/parity-matrix.ts:61](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/parity-matrix.ts#L61)
+Defined in: [formatters/src/parity-matrix.ts:61](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/parity-matrix.ts#L61)
 
 Content extraction rule for a specific block.
 
@@ -16,7 +16,7 @@ Content extraction rule for a specific block.
 
 > **block**: `string`
 
-Defined in: [formatters/src/parity-matrix.ts:63](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/parity-matrix.ts#L63)
+Defined in: [formatters/src/parity-matrix.ts:63](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/parity-matrix.ts#L63)
 
 Block name to extract from
 
@@ -26,7 +26,7 @@ Block name to extract from
 
 > `optional` **contentMatcher?**: `RegExp`
 
-Defined in: [formatters/src/parity-matrix.ts:69](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/parity-matrix.ts#L69)
+Defined in: [formatters/src/parity-matrix.ts:69](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/parity-matrix.ts#L69)
 
 Content validation pattern
 
@@ -36,7 +36,7 @@ Content validation pattern
 
 > **producesSections**: `string`[]
 
-Defined in: [formatters/src/parity-matrix.ts:67](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/parity-matrix.ts#L67)
+Defined in: [formatters/src/parity-matrix.ts:67](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/parity-matrix.ts#L67)
 
 Expected output sections from this extraction
 
@@ -46,6 +46,6 @@ Expected output sections from this extraction
 
 > `optional` **propertyPath?**: `string`
 
-Defined in: [formatters/src/parity-matrix.ts:65](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/parity-matrix.ts#L65)
+Defined in: [formatters/src/parity-matrix.ts:65](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/parity-matrix.ts#L65)
 
 Property path within block (dot notation)

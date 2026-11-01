@@ -12,6 +12,11 @@
         "https://getpromptscript.dev/schema/eval-comparison/v1.json"
       ]
     },
+    "version": {
+      "type": "number",
+      "const": 1,
+      "description": "Format version, 1 in standalone comparisons this CLI writes. Absent inside a report and in comparisons from older versions; read a missing value as 1."
+    },
     "tolerance": {
       "type": "number",
       "description": "Pass-rate drop that counts as a regression.",

@@ -8,6 +8,6 @@
 
 > `const` **FEEDBACK\_LABEL\_PATTERN**: `RegExp`
 
-Defined in: [eval/src/import/sample.ts:29](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/import/sample.ts#L29)
+Defined in: [eval/src/import/sample.ts:29](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/import/sample.ts#L29)
 
 Pattern of a feedback label.

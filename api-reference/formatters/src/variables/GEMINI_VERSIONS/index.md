@@ -8,7 +8,7 @@
 
 > `const` **GEMINI\_VERSIONS**: `object`
 
-Defined in: [formatters/src/formatters/gemini.ts:22](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/formatters/src/formatters/gemini.ts#L22)
+Defined in: [formatters/src/formatters/gemini.ts:22](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/formatters/src/formatters/gemini.ts#L22)
 
 Gemini formatter version information.
 

@@ -6,7 +6,7 @@
 
 # Interface: PromptDefinition
 
-Defined in: [core/src/types/prompts.ts:95](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L95)
+Defined in: [core/src/types/prompts.ts:95](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L95)
 
 Typed view of one
 
@@ -20,7 +20,7 @@ entry. Extraction type, not an AST node.
 
 > **compose**: [`ComposableBlock`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ComposableBlock/index.md)[]
 
-Defined in: [core/src/types/prompts.ts:105](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L105)
+Defined in: [core/src/types/prompts.ts:105](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L105)
 
 Blocks composed into the system message
 
@@ -30,7 +30,7 @@ Blocks composed into the system message
 
 > **description**: `string`
 
-Defined in: [core/src/types/prompts.ts:99](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L99)
+Defined in: [core/src/types/prompts.ts:99](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L99)
 
 What the prompt does
 
@@ -40,7 +40,7 @@ What the prompt does
 
 > **governance**: [`GovernanceMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceMeta/index.md)
 
-Defined in: [core/src/types/prompts.ts:113](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L113)
+Defined in: [core/src/types/prompts.ts:113](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L113)
 
 Governance authored on the entry, before
 
@@ -54,7 +54,7 @@ defaults
 
 > **inputs**: `Record`\<`string`, [`PromptInput`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PromptInput/index.md)\>
 
-Defined in: [core/src/types/prompts.ts:107](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L107)
+Defined in: [core/src/types/prompts.ts:107](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L107)
 
 Runtime inputs by name
 
@@ -64,7 +64,7 @@ Runtime inputs by name
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/prompts.ts:115](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L115)
+Defined in: [core/src/types/prompts.ts:115](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L115)
 
 Location of the entry
 
@@ -74,7 +74,7 @@ Location of the entry
 
 > `optional` **model?**: [`ModelInvocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelInvocation/index.md)
 
-Defined in: [core/src/types/prompts.ts:111](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L111)
+Defined in: [core/src/types/prompts.ts:111](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L111)
 
 Model reference and parameters
 
@@ -84,7 +84,7 @@ Model reference and parameters
 
 > **name**: `string`
 
-Defined in: [core/src/types/prompts.ts:97](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L97)
+Defined in: [core/src/types/prompts.ts:97](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L97)
 
 Entry key
 
@@ -94,7 +94,7 @@ Entry key
 
 > `optional` **output?**: [`PromptOutputSchema`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptOutputSchema/index.md)
 
-Defined in: [core/src/types/prompts.ts:109](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L109)
+Defined in: [core/src/types/prompts.ts:109](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L109)
 
 Output contract
 
@@ -104,7 +104,7 @@ Output contract
 
 > `optional` **system?**: `string`
 
-Defined in: [core/src/types/prompts.ts:101](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L101)
+Defined in: [core/src/types/prompts.ts:101](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L101)
 
 System message text
 
@@ -114,6 +114,6 @@ System message text
 
 > `optional` **user?**: `string`
 
-Defined in: [core/src/types/prompts.ts:103](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/prompts.ts#L103)
+Defined in: [core/src/types/prompts.ts:103](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/prompts.ts#L103)
 
 User message text

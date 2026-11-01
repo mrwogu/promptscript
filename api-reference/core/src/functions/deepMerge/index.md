@@ -8,7 +8,7 @@
 
 > **deepMerge**\<`T`\>(`parent`, `child`, `options?`): `T`
 
-Defined in: [core/src/utils/merge.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/utils/merge.ts#L52)
+Defined in: [core/src/utils/merge.ts:52](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/utils/merge.ts#L52)
 
 Deep merge two objects following PromptScript inheritance rules.
 

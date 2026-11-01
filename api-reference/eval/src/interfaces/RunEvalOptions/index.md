@@ -6,7 +6,7 @@
 
 # Interface: RunEvalOptions
 
-Defined in: [eval/src/run.ts:58](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L58)
+Defined in: [eval/src/run.ts:58](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L58)
 
 Options of [runEval](https://getpromptscript.dev/api-reference/eval/src/functions/runEval/index.md).
 
@@ -16,7 +16,7 @@ Options of [runEval](https://getpromptscript.dev/api-reference/eval/src/function
 
 > `optional` **allowedPatterns?**: readonly `string`[]
 
-Defined in: [eval/src/run.ts:82](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L82)
+Defined in: [eval/src/run.ts:87](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L87)
 
 `validation.allowedPatterns` of the project, for the dataset scan
 
@@ -26,7 +26,7 @@ Defined in: [eval/src/run.ts:82](https://github.com/mrwogu/promptscript/blob/19e
 
 > `optional` **budget?**: `object`
 
-Defined in: [eval/src/run.ts:72](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L72)
+Defined in: [eval/src/run.ts:77](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L77)
 
 Spending limit in USD; required by every mode that calls a provider
 
@@ -40,7 +40,7 @@ Spending limit in USD; required by every mode that calls a provider
 
 > **bundles**: readonly [`PromptBundleV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleV1/index.md)[]
 
-Defined in: [eval/src/run.ts:64](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L64)
+Defined in: [eval/src/run.ts:64](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L64)
 
 Prompt bundles the project compiles; each is verified again before use
 
@@ -50,7 +50,7 @@ Prompt bundles the project compiles; each is verified again before use
 
 > **cache**: `object`
 
-Defined in: [eval/src/run.ts:70](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L70)
+Defined in: [eval/src/run.ts:75](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L75)
 
 Cache mode and directory, relative to the project root
 
@@ -68,7 +68,7 @@ Cache mode and directory, relative to the project root
 
 > **catalog**: [`ModelCatalog`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelCatalog/index.md)
 
-Defined in: [eval/src/run.ts:66](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L66)
+Defined in: [eval/src/run.ts:71](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L71)
 
 Model catalog with the project's profiles
 
@@ -78,7 +78,7 @@ Model catalog with the project's profiles
 
 > `optional` **concurrency?**: `number`
 
-Defined in: [eval/src/run.ts:76](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L76)
+Defined in: [eval/src/run.ts:81](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L81)
 
 Calls in flight at once; default 4, at most 16
 
@@ -88,7 +88,7 @@ Calls in flight at once; default 4, at most 16
 
 > `optional` **maxCases?**: `number`
 
-Defined in: [eval/src/run.ts:74](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L74)
+Defined in: [eval/src/run.ts:79](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L79)
 
 Row limit of a dataset; default 1000
 
@@ -98,7 +98,7 @@ Row limit of a dataset; default 1000
 
 > `optional` **maxOutputTokens?**: `number`
 
-Defined in: [eval/src/run.ts:78](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L78)
+Defined in: [eval/src/run.ts:83](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L83)
 
 Output token cap when a prompt sets no `maxTokens`; default 1024
 
@@ -108,7 +108,7 @@ Output token cap when a prompt sets no `maxTokens`; default 1024
 
 > `optional` **modelOverride?**: `string`
 
-Defined in: [eval/src/run.ts:80](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L80)
+Defined in: [eval/src/run.ts:85](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L85)
 
 Run every suite on this model only
 
@@ -118,7 +118,7 @@ Run every suite on this model only
 
 > `optional` **onProgress?**: (`event`) => `void`
 
-Defined in: [eval/src/run.ts:86](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L86)
+Defined in: [eval/src/run.ts:91](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L91)
 
 Receives warnings and finished cases; after it throws once it gets no more
 
@@ -138,7 +138,7 @@ Receives warnings and finished cases; after it throws once it gets no more
 
 > **projectRoot**: `string`
 
-Defined in: [eval/src/run.ts:60](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L60)
+Defined in: [eval/src/run.ts:60](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L60)
 
 Project root directory
 
@@ -148,7 +148,7 @@ Project root directory
 
 > **providers**: [`EvalProviderLookup`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalProviderLookup/index.md)
 
-Defined in: [eval/src/run.ts:68](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L68)
+Defined in: [eval/src/run.ts:73](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L73)
 
 Provider of a name; called only for calls the cache cannot answer
 
@@ -158,9 +158,20 @@ Provider of a name; called only for calls the cache cannot answer
 
 > `optional` **retryBaseMs?**: `number`
 
-Defined in: [eval/src/run.ts:88](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L88)
+Defined in: [eval/src/run.ts:93](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L93)
 
 First retry delay in milliseconds when a provider gives none; default 500
+
+***
+
+### rubrics?
+
+> `optional` **rubrics?**: readonly [`PromptBundleV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleV1/index.md)[]
+
+Defined in: [eval/src/run.ts:69](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L69)
+
+Bundles judge rubrics are looked up in; defaults to `bundles`. A rubric is not the
+prompt under test, so it may come from another source than the tested prompt.
 
 ***
 
@@ -168,7 +179,7 @@ First retry delay in milliseconds when a provider gives none; default 500
 
 > `optional` **signal?**: `AbortSignal`
 
-Defined in: [eval/src/run.ts:84](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L84)
+Defined in: [eval/src/run.ts:89](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L89)
 
 Stops new calls; finished cases stay in the report
 
@@ -178,6 +189,6 @@ Stops new calls; finished cases stay in the report
 
 > **suites**: readonly [`LoadedSuite`](https://getpromptscript.dev/api-reference/eval/src/interfaces/LoadedSuite/index.md)[]
 
-Defined in: [eval/src/run.ts:62](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/run.ts#L62)
+Defined in: [eval/src/run.ts:62](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/run.ts#L62)
 
 Suites from `loadSuites`

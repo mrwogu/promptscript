@@ -6,7 +6,7 @@
 
 # Interface: PromptPolicyScope
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:227](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/policy/prompt-evaluator.ts#L227)
+Defined in: [validator/src/policy/prompt-evaluator.ts:227](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/policy/prompt-evaluator.ts#L227)
 
 Policy risk and selection that replace the subject's own, for a caller that judges one
 prompt by more than its own fields, such as a release gate that also reads the source.
@@ -17,7 +17,7 @@ prompt by more than its own fields, such as a release gate that also reads the s
 
 > **risk**: [`RiskLevel`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RiskLevel/index.md)
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:229](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/policy/prompt-evaluator.ts#L229)
+Defined in: [validator/src/policy/prompt-evaluator.ts:229](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/policy/prompt-evaluator.ts#L229)
 
 Policy risk the checks and their messages use
 
@@ -27,7 +27,7 @@ Policy risk the checks and their messages use
 
 > **selects**: (`match`) => `boolean`
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:231](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/validator/src/policy/prompt-evaluator.ts#L231)
+Defined in: [validator/src/policy/prompt-evaluator.ts:231](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/validator/src/policy/prompt-evaluator.ts#L231)
 
 Whether a policy's `match` selects the prompt
 

@@ -32,13 +32,8 @@ steps to transform PromptScript into usable artifacts.
 
 ## Type Aliases
 
-- [FormatterConstructor](https://getpromptscript.dev/api-reference/compiler/src/type-aliases/FormatterConstructor/index.md)
 - [LegacyFormatter](https://getpromptscript.dev/api-reference/compiler/src/type-aliases/LegacyFormatter/index.md)
 - [WatchCallback](https://getpromptscript.dev/api-reference/compiler/src/type-aliases/WatchCallback/index.md)
-
-## Variables
-
-- [MAX\_ENTRY\_RESOLVERS](https://getpromptscript.dev/api-reference/compiler/src/variables/MAX_ENTRY_RESOLVERS/index.md)
 
 ## Functions
 

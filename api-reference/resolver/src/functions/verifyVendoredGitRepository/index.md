@@ -8,7 +8,7 @@
 
 > **verifyVendoredGitRepository**(`directory`, `expectedCommit`): `Promise`\<`void`\>
 
-Defined in: [resolver/src/vendor-manifest.ts:540](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/resolver/src/vendor-manifest.ts#L540)
+Defined in: [resolver/src/vendor-manifest.ts:540](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/resolver/src/vendor-manifest.ts#L540)
 
 ## Parameters
 

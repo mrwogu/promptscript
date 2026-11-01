@@ -6,7 +6,7 @@
 
 # Class: GitAuthError
 
-Defined in: [core/src/errors/resolve.ts:133](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/resolve.ts#L133)
+Defined in: [core/src/errors/resolve.ts:133](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/resolve.ts#L133)
 
 Git authentication failed.
 
@@ -20,7 +20,7 @@ Git authentication failed.
 
 > **new GitAuthError**(`message`, `url`, `location?`): `GitAuthError`
 
-Defined in: [core/src/errors/resolve.ts:137](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/resolve.ts#L137)
+Defined in: [core/src/errors/resolve.ts:137](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/resolve.ts#L137)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [core/src/errors/resolve.ts:137](https://github.com/mrwogu/promptscr
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -64,7 +64,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -78,7 +78,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -92,7 +92,7 @@ Source location where error occurred
 
 > `readonly` **url**: `string`
 
-Defined in: [core/src/errors/resolve.ts:135](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/resolve.ts#L135)
+Defined in: [core/src/errors/resolve.ts:135](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/resolve.ts#L135)
 
 Git repository URL
 
@@ -102,7 +102,7 @@ Git repository URL
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -120,7 +120,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

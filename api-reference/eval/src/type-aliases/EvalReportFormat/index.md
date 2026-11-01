@@ -8,6 +8,6 @@
 
 > **EvalReportFormat** = `"text"` \| `"json"` \| `"markdown"` \| `"junit"`
 
-Defined in: [eval/src/format.ts:15](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/format.ts#L15)
+Defined in: [eval/src/format.ts:15](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/format.ts#L15)
 
 Output formats of a run report.

@@ -6,7 +6,7 @@
 
 # Interface: ModelPricing
 
-Defined in: [core/src/types/models.ts:14](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/models.ts#L14)
+Defined in: [core/src/types/models.ts:14](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/models.ts#L14)
 
 List price of a model, in USD per million tokens. Cache, batch and
 long-context tiers are ignored, so a cost computed from it is an estimate.
@@ -17,7 +17,7 @@ long-context tiers are ignored, so a cost computed from it is an estimate.
 
 > **checkedOn**: `string`
 
-Defined in: [core/src/types/models.ts:29](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/models.ts#L29)
+Defined in: [core/src/types/models.ts:29](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/models.ts#L29)
 
 Date the price was checked against the provider, YYYY-MM-DD.
 
@@ -31,7 +31,7 @@ Date the price was checked against the provider, YYYY-MM-DD.
 
 > **inputUsdPerMillion**: `number`
 
-Defined in: [core/src/types/models.ts:19](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/models.ts#L19)
+Defined in: [core/src/types/models.ts:19](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/models.ts#L19)
 
 Price of one million input tokens in USD.
 
@@ -45,7 +45,7 @@ Price of one million input tokens in USD.
 
 > **outputUsdPerMillion**: `number`
 
-Defined in: [core/src/types/models.ts:24](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/types/models.ts#L24)
+Defined in: [core/src/types/models.ts:24](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/types/models.ts#L24)
 
 Price of one million output tokens in USD.
 

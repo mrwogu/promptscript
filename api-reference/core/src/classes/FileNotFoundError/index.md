@@ -6,7 +6,7 @@
 
 # Class: FileNotFoundError
 
-Defined in: [core/src/errors/resolve.ts:23](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/resolve.ts#L23)
+Defined in: [core/src/errors/resolve.ts:23](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/resolve.ts#L23)
 
 File not found during resolution.
 
@@ -20,7 +20,7 @@ File not found during resolution.
 
 > **new FileNotFoundError**(`path`, `location?`): `FileNotFoundError`
 
-Defined in: [core/src/errors/resolve.ts:27](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/resolve.ts#L27)
+Defined in: [core/src/errors/resolve.ts:27](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/resolve.ts#L27)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [core/src/errors/resolve.ts:27](https://github.com/mrwogu/promptscri
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -60,7 +60,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -74,7 +74,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -88,7 +88,7 @@ Source location where error occurred
 
 > `readonly` **path**: `string`
 
-Defined in: [core/src/errors/resolve.ts:25](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/resolve.ts#L25)
+Defined in: [core/src/errors/resolve.ts:25](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/resolve.ts#L25)
 
 Path that was not found
 
@@ -98,7 +98,7 @@ Path that was not found
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -116,7 +116,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

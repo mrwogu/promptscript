@@ -6,7 +6,7 @@
 
 # Interface: FlushResult
 
-Defined in: [telemetry/src/types.ts:79](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/types.ts#L79)
+Defined in: [telemetry/src/types.ts:79](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L79)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/types.ts:79](https://github.com/mrwogu/promptscript/b
 
 > **attempted**: `boolean`
 
-Defined in: [telemetry/src/types.ts:80](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/types.ts#L80)
+Defined in: [telemetry/src/types.ts:80](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L80)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [telemetry/src/types.ts:80](https://github.com/mrwogu/promptscript/b
 
 > **deliveredRecords**: `number`
 
-Defined in: [telemetry/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/types.ts#L81)
+Defined in: [telemetry/src/types.ts:81](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L81)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [telemetry/src/types.ts:81](https://github.com/mrwogu/promptscript/b
 
 > **rejectedRecords**: `number`
 
-Defined in: [telemetry/src/types.ts:82](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/types.ts#L82)
+Defined in: [telemetry/src/types.ts:82](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L82)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [telemetry/src/types.ts:82](https://github.com/mrwogu/promptscript/b
 
 > **remainingRecords**: `number`
 
-Defined in: [telemetry/src/types.ts:83](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/telemetry/src/types.ts#L83)
+Defined in: [telemetry/src/types.ts:83](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/telemetry/src/types.ts#L83)

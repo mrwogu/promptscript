@@ -8,7 +8,7 @@
 
 > **missingFromCandidate**(`baseline`, `candidate`): `string`[]
 
-Defined in: [eval/src/compare.ts:252](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/compare.ts#L252)
+Defined in: [eval/src/compare.ts:255](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/compare.ts#L255)
 
 Suites and models the baseline has and the candidate lacks: `suite` for a
 whole suite, `suite/model` for a model entry of a suite both have. A

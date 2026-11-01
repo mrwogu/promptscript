@@ -6,7 +6,7 @@
 
 # Interface: FormatOptions
 
-Defined in: [eval/src/format.ts:21](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/format.ts#L21)
+Defined in: [eval/src/format.ts:21](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/format.ts#L21)
 
 Options of [formatReport](https://getpromptscript.dev/api-reference/eval/src/functions/formatReport/index.md) and [formatComparison](https://getpromptscript.dev/api-reference/eval/src/functions/formatComparison/index.md).
 
@@ -16,7 +16,7 @@ Options of [formatReport](https://getpromptscript.dev/api-reference/eval/src/fun
 
 > `optional` **color?**: `boolean`
 
-Defined in: [eval/src/format.ts:23](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/format.ts#L23)
+Defined in: [eval/src/format.ts:23](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/format.ts#L23)
 
 Color the text format; set it only for a terminal
 
@@ -26,6 +26,6 @@ Color the text format; set it only for a terminal
 
 > `optional` **missing?**: readonly `string`[]
 
-Defined in: [eval/src/format.ts:25](https://github.com/mrwogu/promptscript/blob/19e211df8dd4e69090320a0a92074a3dde05e929/packages/eval/src/format.ts#L25)
+Defined in: [eval/src/format.ts:25](https://github.com/mrwogu/promptscript/blob/97d04fa1f87d4f5dda79f91be5de292033c6d45a/packages/eval/src/format.ts#L25)
 
 Suites or `suite/model` entries the baseline has and the candidate lacks, shown as a visible note
