@@ -451,7 +451,8 @@ as text, JSON or CEF for a SIEM. See [Audit log](https://getpromptscript.dev/gui
 
 `prs eval run` runs a prompt over a dataset and checks every answer with assertions and, if you
 want, an LLM judge. The default cache mode replays recorded answers, so a pull request check needs
-no key and no network. `prs eval compare` fails when a later report is worse than an earlier one.
+no key and no network. `prs eval compare --fail-on-regression` fails when a later report is
+worse than an earlier one. Without the flag it only prints the regression.
 See the [evals guide](https://getpromptscript.dev/guides/evals/).
 
 The `@promptscript/runtime` package in this repository loads, verifies and renders the released

@@ -322,7 +322,8 @@ with the rules of the base branch. See the
 
 `prs eval run` runs a prompt over a dataset and checks every answer with assertions and, if you
 want, an LLM judge. The default cache mode replays recorded answers, so a pull request check needs
-no key and no network. `prs eval compare` fails when a later report is worse than an earlier one.
+no key and no network. `prs eval compare --fail-on-regression` fails when a later report is
+worse than an earlier one. Without the flag it only prints the regression.
 See the [evals guide](https://getpromptscript.dev/guides/evals/).
 
 `prs approve` records that a person approved one exact bundle hash in a role from

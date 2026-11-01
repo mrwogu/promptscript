@@ -109,7 +109,7 @@ pnpm prs eval run --cwd packages/cli/src/__tests__/__fixtures__/application-prom
 The answers were recorded with a live model once. The report of that run is
 [`reports/baseline.json`](https://github.com/mrwogu/promptscript/blob/main/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/reports/baseline.json). The second report,
 [`reports/regressed.json`](https://github.com/mrwogu/promptscript/blob/main/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/reports/regressed.json), is the same run with one answer changed in
-the cache, with only the `decision` field of `late-return` flipped to `approve`, so the run approves a refund it should deny. `prs eval compare` fails on the pair,
+the cache, with only the `decision` field of `late-return` flipped to `approve`, so the run approves a refund it should deny. `prs eval compare --fail-on-regression` fails on the pair,
 and the CI of this repository checks that it does.
 
 ## Suites
