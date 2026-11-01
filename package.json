@@ -32,6 +32,7 @@
     "package:check": "node --import @swc-node/register/esm-register scripts/package-check.mts",
     "api:check": "node --import @swc-node/register/esm-register scripts/api-report.mts",
     "api:update": "node --import @swc-node/register/esm-register scripts/api-report.mts --update",
+    "api:breaking": "node --import @swc-node/register/esm-register scripts/api-breaking.mts",
     "grammar:check": "node --import @swc-node/register/esm-register scripts/check-grammar.mts",
     "deno:check": "node --import @swc-node/register/esm-register scripts/check-deno-bundle.mts",
     "deno:suite": "node --import @swc-node/register/esm-register scripts/test-deno-cli.mts",
