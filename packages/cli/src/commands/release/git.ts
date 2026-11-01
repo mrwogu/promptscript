@@ -384,14 +384,28 @@ export function errorMessage(error: unknown): string {
 }
 
 /**
- * Characters that move, recolor or hide terminal text: C0, DEL, C1, the bidi controls and
- * marks, zero-width characters, line and paragraph separators, word joiner and BOM.
+ * Characters that move, recolor or hide terminal text: C0, DEL, C1, soft hyphen, combining grapheme
+ * joiner, the bidi controls and marks, zero-width characters, invisible math operators, line and
+ * paragraph separators, word joiner, variation selectors (also Mongolian and supplementary), BOM, Unicode tag characters and lone
+ * surrogates.
  */
 const TERMINAL_CONTROL_RE =
-  // eslint-disable-next-line no-control-regex
-  /[\u0000-\u001f\u007f-\u009f\u061c\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g;
+  // Combining characters are listed on purpose: they are matched one by one.
+  // eslint-disable-next-line no-control-regex, no-misleading-character-class
+  /[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u180b-\u180f\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufe00-\ufe0f\ufeff\u{e0000}-\u{e007f}\u{e0100}-\u{e01ef}\p{Cs}]/gu;
 
 /** Remove the characters that could rewrite terminal output, from text Git or a file supplies. */
 export function stripControlCharacters(text: string): string {
   return text.replaceAll(TERMINAL_CONTROL_RE, '');
+}
+
+/**
+ * Write the characters of `stripControlCharacters` as visible `\u` plus 4 to 6 uppercase hex
+ * digits, one escape for each character or lone surrogate.
+ */
+export function escapeControlCharacters(text: string): string {
+  return text.replaceAll(TERMINAL_CONTROL_RE, (char) => {
+    const hex = (char.codePointAt(0) ?? 0).toString(16).toUpperCase().padStart(4, '0');
+    return String.raw`\u${hex}`;
+  });
 }

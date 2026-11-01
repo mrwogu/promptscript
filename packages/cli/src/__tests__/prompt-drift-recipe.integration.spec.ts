@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import {
   chmodSync,
@@ -19,6 +19,7 @@ import { parse } from 'yaml';
 import { compareCodeUnits } from '@promptscript/core';
 import { createMockProvider, type MockAnswer } from '@promptscript/eval';
 import { defaultFileSystem, defaultPrompts } from '../services.js';
+import { useOfflineEval } from './offline-eval-hooks.js';
 import { evalRunCommand, type EvalCommandServices } from '../commands/eval/run.js';
 
 const REPO = fileURLToPath(new URL('../../../../', import.meta.url));
@@ -129,9 +130,7 @@ function guideBlock(): string {
 
 const roots: string[] = [];
 
-const noNetwork = vi.fn(() => {
-  throw new Error('no network in the drift example check');
-});
+useOfflineEval(roots, 'drift example');
 
 function services(patch: Partial<EvalCommandServices>): EvalCommandServices {
   return { fs: defaultFileSystem, prompts: defaultPrompts, cwd: process.cwd(), env: {}, ...patch };
@@ -181,20 +180,6 @@ function replaceCommitted(copy: string): void {
     cpSync(join(copy, dir), join(EXAMPLE, dir), { recursive: true });
   }
 }
-
-beforeEach(() => {
-  vi.stubGlobal('fetch', noNetwork);
-  noNetwork.mockClear();
-  vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-  vi.spyOn(console, 'error').mockImplementation(() => undefined);
-});
-
-afterEach(async () => {
-  vi.restoreAllMocks();
-  vi.unstubAllGlobals();
-  process.exitCode = undefined;
-  await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
-});
 
 describe('the drift example cache', () => {
   it('is what the CLI records from the scripted answers, with no network', async () => {

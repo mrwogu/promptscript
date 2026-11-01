@@ -20,6 +20,7 @@ delivery:
 - [Target Platforms](../features/target-platforms.md)
 - [Application Prompts](application-prompts.md)
 - [Releasing Application Prompts](releases.md)
+- [Evaluating Prompts](evals.md)
 
 <div class="ref-list">
 
