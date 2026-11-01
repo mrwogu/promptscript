@@ -48,7 +48,7 @@
     "@microsoft/api-extractor": "7.60.0",
     "@nx/esbuild": "23.2.1",
     "@nx/eslint": "23.2.1",
-    "@nx/eslint-plugin": "23.2.1",
+    "@nx/eslint-plugin": "24.0.3",
     "@nx/js": "23.2.1",
     "@nx/vite": "23.2.1",
     "@nx/vitest": "23.2.1",
