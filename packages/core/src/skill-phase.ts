@@ -10,15 +10,49 @@ export interface SkillPhaseContent {
   skillContent?: string;
 }
 
+function toSlashes(path: string): string {
+  return path.replaceAll('\\', '/');
+}
+
 /**
- * Render a composed skill phase with a filename-only source marker.
- * Callers derive the filename with their platform's path implementation.
- * Full source paths remain in the resolver's provenance metadata.
+ * Build the portable label used in a `composed-from` marker.
+ *
+ * The label is the source path relative to the project root, with `/`
+ * separators. When the source is outside the root, or no root is given,
+ * only the file name is returned. Absolute paths and `..` segments are never
+ * returned.
  */
-export function buildSkillPhaseSection(phase: SkillPhaseContent, sourceFilename: string): string {
+export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): string {
+  const normalizedSource = toSlashes(source);
+  const fileName =
+    normalizedSource
+      .split('/')
+      .filter((part) => part.length > 0)
+      .pop() ?? source;
+  if (!projectRoot) {
+    return fileName;
+  }
+  const root = toSlashes(projectRoot).replace(/\/+$/, '');
+  if (!normalizedSource.startsWith(`${root}/`)) {
+    return fileName;
+  }
+  const parts = normalizedSource
+    .slice(root.length + 1)
+    .split('/')
+    .filter((part) => part.length > 0 && part !== '.');
+  return parts.length === 0 || parts.includes('..') ? fileName : parts.join('/');
+}
+
+/**
+ * Render a composed skill phase with a portable source marker.
+ * Callers build the label with `getSkillPhaseSourceLabel`, so the marker never
+ * holds an absolute path. Full source paths remain in the resolver's
+ * provenance metadata.
+ */
+export function buildSkillPhaseSection(phase: SkillPhaseContent, sourceLabel: string): string {
   const lines = [
     `## Phase ${phase.phaseNumber}: ${phase.name}`,
-    `<!-- composed-from: ${sourceFilename} -->`,
+    `<!-- composed-from: ${sourceLabel} -->`,
   ];
   for (const context of phase.contextBlocks) {
     const heading = context.blockType.charAt(0).toUpperCase() + context.blockType.slice(1);
