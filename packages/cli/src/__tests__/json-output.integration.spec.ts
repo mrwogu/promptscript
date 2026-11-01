@@ -51,9 +51,33 @@ const SOURCE = `@meta {
 }
 `;
 
+const EMPTY_BLOCK = `@meta {
+  id: "empty"
+  syntax: "1.0.0"
+}
+
+@identity {
+  """
+  You answer refund requests.
+  """
+}
+
+@standards {}
+`;
+
+// Fails to parse: the identity block is never closed.
+const BROKEN = `@meta {
+  id: "broken"
+  syntax: "1.0.0"
+}
+
+@identity {
+`;
+
 const diffSchema = compileSchema('diff-v1.json');
 const evalReportSchema = compileSchema('eval-report-v1.json');
 const evalComparisonSchema = compileSchema('eval-comparison-v1.json');
+const validateReportSchema = compileSchema('validate-report-v1.json');
 
 interface JsonRun {
   document: Record<string, unknown>;
@@ -136,8 +160,11 @@ beforeAll(async () => {
   vi.stubEnv('PROMPTSCRIPT_NO_UPDATE_CHECK', '');
   await mkdir(join(root, '.promptscript'), { recursive: true });
   await mkdir(join(root, 'reports'), { recursive: true });
+  await mkdir(join(root, 'fixtures'), { recursive: true });
   await writeFile(join(root, 'promptscript.yaml'), CONFIG);
   await writeFile(join(root, '.promptscript', 'project.prs'), SOURCE);
+  await writeFile(join(root, 'fixtures', 'empty.prs'), EMPTY_BLOCK);
+  await writeFile(join(root, 'fixtures', 'broken.prs'), BROKEN);
   const empty = JSON.stringify(errorReport('replay', []));
   await writeFile(join(root, 'reports', 'a.json'), empty);
   await writeFile(join(root, 'reports', 'b.json'), empty);
@@ -233,6 +260,12 @@ const rows: Row[] = [
     exitCode: 1,
   },
   {
+    name: 'validate',
+    args: ['validate', '--format', 'json'],
+    validate: validateReportSchema,
+    exitCode: 0,
+  },
+  {
     name: 'eval compare',
     args: ['eval', 'compare', 'reports/a.json', 'reports/b.json', '--format', 'json'],
     validate: evalComparisonSchema,
@@ -267,6 +300,64 @@ describe('stable commands under --format json', () => {
 
     expectStable(result, validateApprovalReport, 0);
     expect(result.document).toMatchObject({ command: 'approve', success: true });
+  });
+});
+
+describe('validate under --format json', () => {
+  const REPORT_URL = 'https://getpromptscript.dev/schema/validate-report/v1.json';
+
+  it('prints a warning and exits 0 without --strict', async () => {
+    const result = await runJson(['validate', '--format', 'json', 'fixtures/empty.prs']);
+
+    expectStable(result, validateReportSchema, 0);
+    expect(result.document).toMatchObject({ $schema: REPORT_URL, success: true });
+    expect(result.document['warnings']).toHaveLength(1);
+  });
+
+  it('fails on a warning with --strict', async () => {
+    const result = await runJson([
+      'validate',
+      '--strict',
+      '--format',
+      'json',
+      'fixtures/empty.prs',
+    ]);
+
+    expectStable(result, validateReportSchema, 1);
+    const warnings = result.document['warnings'] as {
+      ruleId: string;
+      location: { offset: number };
+    }[];
+    expect(result.document['success']).toBe(false);
+    expect(warnings[0]?.ruleId).toBe('PS008');
+    expect(typeof warnings[0]?.location.offset).toBe('number');
+  });
+
+  it('reports a missing file as one error without code or location', async () => {
+    const result = await runJson(['validate', '--format', 'json', 'missing.prs']);
+
+    expectStable(result, validateReportSchema, 1);
+    const errors = result.document['errors'] as Record<string, unknown>[];
+    expect(errors).toHaveLength(1);
+    expect(errors[0]?.['message']).toContain('File not found');
+    expect(errors[0]).not.toHaveProperty('code');
+    expect(errors[0]).not.toHaveProperty('location');
+  });
+
+  it('merges several files in file order', async () => {
+    const result = await runJson([
+      'validate',
+      '--format',
+      'json',
+      'fixtures/empty.prs',
+      'fixtures/broken.prs',
+    ]);
+
+    expectStable(result, validateReportSchema, 1);
+    const errors = result.document['errors'] as { code: string; location: { file: string } }[];
+    expect(result.document['summary']).toEqual({ errorCount: 1, warningCount: 1 });
+    expect(typeof errors[0]?.code).toBe('string');
+    expect(errors[0]?.location.file).toContain('broken.prs');
   });
 });
 

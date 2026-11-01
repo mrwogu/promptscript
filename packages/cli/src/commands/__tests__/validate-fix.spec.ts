@@ -223,9 +223,29 @@ describe('validateCommand --fix', () => {
   });
 
   it('should reject --fix with --format json', async () => {
-    await expect(validateCommand({ fix: true, format: 'json' })).rejects.toThrow(
-      '--fix is incompatible with --format json'
-    );
+    const logSpy = vi.spyOn(console, 'log');
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    process.exitCode = undefined;
+
+    await validateCommand({ fix: true, format: 'json' });
+
+    expect(logSpy).not.toHaveBeenCalled();
+    expect(errorSpy.mock.calls.join(' ')).toContain('--fix cannot be combined with --format json');
+    expect(process.exitCode).toBe(1);
+    process.exitCode = undefined;
+  });
+
+  it('should reject an unknown --format before anything runs', async () => {
+    const logSpy = vi.spyOn(console, 'log');
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    process.exitCode = undefined;
+
+    await validateCommand({ format: 'xml' });
+
+    expect(logSpy).not.toHaveBeenCalled();
+    expect(errorSpy.mock.calls.join(' ')).toContain('Invalid output format: xml');
+    expect(process.exitCode).toBe(1);
+    process.exitCode = undefined;
   });
 
   it('should fix syntax version when blocks require higher version', async () => {
