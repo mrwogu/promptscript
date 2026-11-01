@@ -53,6 +53,7 @@ schema/eval-comparison-v1.json
 schema/approval-record-v1.json
 schema/eval-sample-v1.json
 schema/eval-import-summary-v1.json
+schema/validate-report-v1.json
 
 # Lock files - machine generated
 pnpm-lock.yaml

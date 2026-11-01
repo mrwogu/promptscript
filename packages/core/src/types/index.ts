@@ -16,3 +16,4 @@ export * from './prompt-pricing.js';
 export * from './eval.js';
 export * from './eval-import.js';
 export * from './approval.js';
+export * from './validate-report.js';

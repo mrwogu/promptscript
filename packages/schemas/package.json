@@ -33,6 +33,7 @@
     "./prompt-release-label-v2.json": "./prompt-release-label-v2.json",
     "./prompt-release-pricing-v1.json": "./prompt-release-pricing-v1.json",
     "./release-report-v1.json": "./release-report-v1.json",
+    "./validate-report-v1.json": "./validate-report-v1.json",
     "./package.json": "./package.json"
   },
   "files": [
