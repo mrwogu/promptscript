@@ -358,6 +358,9 @@ export interface BuildProfileConfig {
 }
 
 // @public
+export function buildSkillPhaseSection(phase: SkillPhaseContent, sourceFilename: string): string;
+
+// @public
 export const BUILT_IN_CONVENTIONS: Record<BuiltInConventionName, OutputConvention>;
 
 // @public
@@ -4388,6 +4391,17 @@ export interface SkillPathConfig {
     basePath: string | null;
     // (undocumented)
     fileName: string | null;
+}
+
+// @public
+export interface SkillPhaseContent {
+    contextBlocks: {
+        blockType: string;
+        text: string;
+    }[];
+    name: string;
+    phaseNumber: number;
+    skillContent?: string;
 }
 
 // @public

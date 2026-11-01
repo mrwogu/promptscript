@@ -28,12 +28,25 @@ describe('compile', () => {
         { formatters: [{ name: 'claude', config: { version: 'full' } }] }
       );
 
-      expect(result.errors).toEqual([]);
-      expect(result.success).toBe(true);
+      expect(result).toMatchObject({ errors: [], success: true });
       const content = result.outputs.get('.claude/skills/deploy/SKILL.md')?.content;
-      expect(content).toBeDefined();
-      expect(content).toContain('<!-- composed-from: check.prs -->');
-      expect(content).toContain('Check the deployment.');
+      expect(content).toMatchInlineSnapshot(`
+        "---
+        name: 'deploy'
+        description: 'Deploy'
+        ---
+
+        Start deployment.
+
+        ## Phase 1: check
+
+        <!-- composed-from: check.prs -->
+
+        ### Instructions
+
+        Check the deployment.
+        "
+      `);
       expect(content).not.toContain(root);
       outputs.push(content!);
     }

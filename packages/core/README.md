@@ -206,6 +206,12 @@ previews, and diffs must consume the same final plan after all output
 transformations, including headers, formatting, migrations, and injected
 resources. Consumers must not recompute paths from raw formatter outputs.
 
+### Composed skill phases
+
+`buildSkillPhaseSection(phase, sourceFilename)` renders the phase heading, source marker,
+context blocks and optional instructions. Both compilers use this renderer. Callers pass
+the source basename; full source paths stay in resolver provenance.
+
 ## Usage (internal)
 
 ```typescript

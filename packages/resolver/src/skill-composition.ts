@@ -14,6 +14,7 @@ import type {
 } from '@promptscript/core';
 import {
   blockContentToBody,
+  buildSkillPhaseSection,
   deepClone,
   getSyntaxFeatureUsages,
   isTextContent,
@@ -536,7 +537,7 @@ function composeIntoSkill(
 
   for (const phase of phases) {
     // Build phase section
-    const section = buildPhaseSection(phase);
+    const section = buildSkillPhaseSection(phase, basename(phase.source));
     phaseSections.push(section);
 
     // Union allowedTools
@@ -624,33 +625,6 @@ function composeIntoSkill(
   return result;
 }
 
-/**
- * Build a phase section with a source filename, independent of the checkout path.
- */
-function buildPhaseSection(phase: ResolvedPhase): string {
-  const lines: string[] = [];
-
-  lines.push(`## Phase ${phase.phaseNumber}: ${phase.name}`);
-  lines.push(`<!-- composed-from: ${basename(phase.source)} -->`);
-
-  // Context blocks
-  for (const ctx of phase.contextBlocks) {
-    const heading = capitalize(ctx.blockType);
-    lines.push('');
-    lines.push(`### ${heading}`);
-    lines.push(ctx.text);
-  }
-
-  // Instructions
-  if (phase.skillContent) {
-    lines.push('');
-    lines.push('### Instructions');
-    lines.push(phase.skillContent);
-  }
-
-  return lines.join('\n');
-}
-
 // ── Utility helpers ────────────────────────────────────────────────
 
 /**
@@ -697,11 +671,4 @@ function convertToContractFields(raw: Record<string, Value>): Record<string, Ski
   }
 
   return result;
-}
-
-/**
- * Capitalize first letter.
- */
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

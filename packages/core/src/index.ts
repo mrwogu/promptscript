@@ -70,3 +70,6 @@ export * from './output-plan.js';
 
 // Output resource classification
 export * from './output-resources.js';
+
+// Composed skill rendering
+export * from './skill-phase.js';
