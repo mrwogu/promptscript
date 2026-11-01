@@ -6,11 +6,12 @@
       <p class="home-hero__lead">
         PromptScript is an open-source compiler for AI coding agent rules. Write instructions,
         skills, agents, and MCP servers once, inherit them like code, and get native files for 50
-        tools.
+        tools. Ship your application prompts the same way: versioned, approved, and released in Git.
       </p>
       <div class="home-hero__actions">
         <a href="getting-started/" class="home-button home-button--primary">Get started</a>
         <a href="/playground/" class="home-button home-button--secondary">Try it in the browser</a>
+        <a href="#prompt-releases" class="home-text-link">PromptOps <span>→</span></a>
       </div>
       <div class="home-install" aria-label="Install PromptScript CLI">
         <code>npm install -g @promptscript/cli</code>
@@ -211,10 +212,13 @@
           keep them in place.
         </p>
       </a>
-      <a href="features/target-platforms/" class="home-capability">
-        <span class="home-capability__token">portability</span>
-        <h3>No lock-in to one AI tool</h3>
-        <p>Add, drop, or mix agents by changing the target list. Your source stays the same.</p>
+      <a href="#prompt-releases" class="home-capability">
+        <span class="home-capability__token">promptops</span>
+        <h3>Prompts in production, run like code</h3>
+        <p>
+          Content-hashed versions, environment labels, sign-offs, evals, and an audit log, all in
+          Git.
+        </p>
       </a>
       <a href="guides/skill-composition/" class="home-capability">
         <span class="home-capability__token">reuse</span>
@@ -229,6 +233,69 @@
         <h3>Start from the files you have</h3>
         <p>
           <code>prs import</code> converts existing CLAUDE.md, Copilot, Cursor, and AGENTS.md files.
+        </p>
+      </a>
+    </div>
+  </section>
+  <section class="home-section" id="prompt-releases">
+    <div class="home-section__intro">
+      <div class="home-eyebrow">PromptOps</div>
+      <h2>Prompts in production, run like code</h2>
+      <p>
+        Git-native: every prompt version has a content hash, environments are labels, and a release
+        is a pull request you review. Compile <code>@prompts</code> to bundles, test them, promote
+        them, and keep a record of who did what.
+      </p>
+    </div>
+    <div class="home-capability-grid">
+      <a href="guides/releases/" class="home-capability">
+        <span class="home-capability__token">release</span>
+        <h3>Environments are labels</h3>
+        <p>
+          <code>prs release promote</code> moves one label per environment, and
+          <code>prs release split</code> puts a weighted experiment in a later environment. Rollback
+          is a Git change, and the history is the release log.
+        </p>
+      </a>
+      <a href="guides/releases/#approvals" class="home-capability">
+        <span class="home-capability__token">approval</span>
+        <h3>Sign-off for one exact version</h3>
+        <p>
+          <code>prs approve</code> records that legal or security approved one hash. Release gates
+          refuse a version without the approvals your policy asks for.
+        </p>
+      </a>
+      <a href="guides/codeowners/" class="home-capability">
+        <span class="home-capability__token">ownership</span>
+        <h3>CODEOWNERS from governance</h3>
+        <p>
+          <code>prs governance codeowners</code> routes prompt files, approval records, and release
+          labels to the right team. Turn on required code-owner review in branch protection.
+        </p>
+      </a>
+      <a href="guides/releases/#eval-what-an-environment-serves" class="home-capability">
+        <span class="home-capability__token">evals</span>
+        <h3>Test what an environment serves</h3>
+        <p>
+          <code>prs eval run --label prod</code> runs datasets and assertions, with an LLM judge, a
+          replay cache, and a cost limit. Compare with a baseline report to catch regressions.
+        </p>
+      </a>
+      <a href="guides/releases/#audit-log" class="home-capability">
+        <span class="home-capability__token">audit</span>
+        <h3>An audit log from Git history</h3>
+        <p>
+          <code>prs audit log</code> shows who changed, approved, promoted, or rolled back a prompt.
+          Read it as text or JSON, or export CEF for your SIEM.
+        </p>
+      </a>
+      <a href="guides/releases/#in-ci" class="home-capability">
+        <span class="home-capability__token">ci</span>
+        <h3>Checks in every pull request</h3>
+        <p>
+          <code>prs release status --base</code> checks label changes, and
+          <code>--check-models</code> flags labels that run a retiring model. The JSON output is
+          stable, so your pipeline can build on it.
         </p>
       </a>
     </div>
@@ -761,42 +828,6 @@
       <div class="home-scale__outputs">
         <span>Policies</span><span>Skills</span><span>Agents</span><span>Native files</span>
       </div>
-    </div>
-  </section>
-  <section class="home-section" id="prompt-releases">
-    <div class="home-section__intro">
-      <div class="home-eyebrow">Prompts for applications</div>
-      <h2>Release application prompts like code</h2>
-      <p>
-        Compile <code>@prompts</code> to content-hashed bundles, promote them from staging to prod
-        in reviewed pull requests, and require sign-off where your policy asks for it.
-      </p>
-    </div>
-    <div class="home-capability-grid">
-      <a href="guides/releases/" class="home-capability">
-        <span class="home-capability__token">release</span>
-        <h3>Promote by content hash</h3>
-        <p>
-          <code>prs release promote</code> moves one label per environment. Rollback is a Git
-          change, and the history is the release log.
-        </p>
-      </a>
-      <a href="guides/releases/#approvals" class="home-capability">
-        <span class="home-capability__token">approval</span>
-        <h3>Sign-off for one exact version</h3>
-        <p>
-          <code>prs approve</code> records that legal or security approved one hash. Release gates
-          refuse a version without the approvals your policy asks for.
-        </p>
-      </a>
-      <a href="guides/codeowners/" class="home-capability">
-        <span class="home-capability__token">ownership</span>
-        <h3>CODEOWNERS from governance</h3>
-        <p>
-          <code>prs governance codeowners</code> routes prompt files, approval records, and release
-          labels to the right team. Turn on required code-owner review in branch protection.
-        </p>
-      </a>
     </div>
   </section>
   <section class="home-section" id="ai-skill">
