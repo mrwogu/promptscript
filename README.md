@@ -449,6 +449,12 @@ release files to the admins. See [CODEOWNERS from Governance](https://getprompts
 `prs audit log` reads who changed, approved, promoted, rolled back or split a prompt from the Git history,
 as text, JSON or CEF for a SIEM. See [Audit log](https://getpromptscript.dev/guides/releases/#audit-log).
 
+`prs eval run` runs a prompt over a dataset and checks every answer with assertions and, if you
+want, an LLM judge. The default cache mode replays recorded answers, so a pull request check needs
+no key and no network. `prs eval compare --fail-on-regression` fails when a later report is
+worse than an earlier one. Without the flag it only prints the regression.
+See the [evals guide](https://getpromptscript.dev/guides/evals/).
+
 The `@promptscript/runtime` package in this repository loads, verifies and renders the released
 bundles in an application, with no dependencies. It is not published to npm yet and its API can
 still change. See the [releases guide](https://getpromptscript.dev/guides/releases/#read-a-release-in-your-application).
@@ -532,6 +538,7 @@ with `includePromptScriptSkill: false`.
 | [JSON Output](https://getpromptscript.dev/reference/json-output/)             | Stable JSON of prs commands, stdout rules, exit codes       |
 | [Configuration Reference](https://getpromptscript.dev/reference/config/)      | Targets, registries, builds, policies, and formatting       |
 | [Security Guide](https://getpromptscript.dev/guides/security/)                | Validation rules, injection detection, and safe registries  |
+| [Evaluating Prompts](https://getpromptscript.dev/guides/evals/)               | Eval suites, the LLM judge, the replay cache, and reports   |
 | [Model Catalog](https://getpromptscript.dev/reference/models/)                | Model aliases and per-target model names                    |
 | [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/) | Collected fields, delivery, and opt-out controls            |
 | [Glossary](https://getpromptscript.dev/glossary/)                             | Every PromptScript term in one place                        |

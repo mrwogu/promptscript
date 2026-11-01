@@ -212,6 +212,34 @@ jobs:
             exit 1
           fi
 
+      - name: Eval example replays with the network blocked
+        if: matrix.node-version == '25.x'
+        env:
+          PROMPTSCRIPT_NO_UPDATE_CHECK: '1'
+          DO_NOT_TRACK: '1'
+        run: |
+          example=packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply
+          # fetch throws in this process, so a replay that reached for the network fails its cases
+          node --import 'data:text/javascript,globalThis.fetch=()=>{throw new Error("network blocked")}' \
+            --import @swc-node/register/esm-register packages/cli/src/cli.ts \
+            eval run --cwd "$example" --cache replay --strict --format json --out "$RUNNER_TEMP/eval.json" > /dev/null
+          jq -e '.outcome == "passed" and .cache.mode == "replay" and .cache.live == 0' "$RUNNER_TEMP/eval.json"
+          if ! pnpm exec vitest run --config packages/cli/vitest.config.mts eval-example; then
+            echo "::error::The evals guide or the example reports are out of sync. If only prices or report bytes changed, refresh offline with: UPDATE_EVAL_EXAMPLE=true pnpm exec vitest run --config packages/cli/vitest.config.mts eval-example. Only a changed prompt, rubric, dataset, model or params needs pnpm eval:example:record (ANTHROPIC_API_KEY, a few cents)."
+            exit 1
+          fi
+
+      - name: Eval compare fails on the changed answer
+        if: matrix.node-version == '25.x'
+        run: |
+          reports=packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/reports
+          code=0
+          pnpm --silent prs eval compare "$reports/baseline.json" "$reports/regressed.json" \
+            --fail-on-regression --format json > "$RUNNER_TEMP/compare.json" || code=$?
+          test "$code" -eq 1
+          # an unreadable report exits 1 too, so check that the regression is the expected one
+          jq -e '.regression and .entries[0].regressions == ["late-return"]' "$RUNNER_TEMP/compare.json"
+
       - name: Analyze CLI bundle
         if: matrix.node-version == '25.x'
         run: pnpm nx run cli:analyze-bundle

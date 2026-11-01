@@ -1418,7 +1418,8 @@ Run eval suites against the prompts of the project, compare two reports and impo
 samples into a dataset. A suite is a file
 `<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
 dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
-`bundle` target. The settings are in [`eval`](config.md#eval).
+`bundle` target. The settings are in [`eval`](config.md#eval). For a worked example, see
+[Evaluating Prompts](../guides/evals.md).
 
 #### prs eval run
 

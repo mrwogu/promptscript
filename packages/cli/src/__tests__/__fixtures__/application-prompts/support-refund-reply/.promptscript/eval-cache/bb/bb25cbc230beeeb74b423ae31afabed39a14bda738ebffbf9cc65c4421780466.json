@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "bb25cbc230beeeb74b423ae31afabed39a14bda738ebffbf9cc65c4421780466",
+  "request": {
+    "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+    "inputsHash": "sha256-d8a4ef4089bc1db68550df2564e41be69180be32b7a131071ab4eef71e016e24",
+    "modelRef": "claude-sonnet-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-sonnet-5-5",
+    "params": {
+      "maxTokens": 600
+    },
+    "sample": 0
+  },
+  "response": {
+    "text": "{\"decision\":\"approve\",\"reply\":\"I'm sorry your kettle arrived broken. Your order was delivered 12 days ago, which is within our 30-day refund window, so I have approved a refund of 42.50 EUR. It will go back to your original payment method. You do not need to send us any card details. Please let us know if you have any other questions.\"}",
+    "usage": {
+      "inputTokens": 466,
+      "outputTokens": 111
+    },
+    "latencyMs": 3669,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}
