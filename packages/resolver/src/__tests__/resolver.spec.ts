@@ -406,6 +406,35 @@ describe('Resolver', () => {
       expect(result.errors.length).toBeGreaterThan(0);
     });
 
+    it('should keep the parser code as cause of the PS2000 error', async () => {
+      const result = await resolver.resolve('./invalid-syntax.prs');
+
+      const error = result.errors[0];
+      expect(error?.code).toBe('PS2000');
+      expect(error?.cause).toBeInstanceOf(ParseError);
+      expect((error?.cause as ParseError).code).toMatch(/^PS1\d{3}$/);
+    });
+
+    it('should keep the parser code for .md files with PRS content', async () => {
+      const directory = mkdtempSync(join(tmpdir(), 'promptscript-resolver-md-cause-'));
+      try {
+        const entry = join(directory, 'entry.md');
+        writeFileSync(entry, '@identity {\n  "unclosed\n');
+        const mdResolver = new Resolver({
+          registryPath: directory,
+          localPath: directory,
+          cache: false,
+        });
+
+        const result = await mdResolver.resolve(entry);
+
+        expect(result.errors[0]?.code).toBe('PS2000');
+        expect(result.errors[0]?.cause).toBeInstanceOf(ParseError);
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
+      }
+    });
+
     it('should handle missing parent file in inheritance', async () => {
       const result = await resolver.resolve('./inherits-missing.prs');
 

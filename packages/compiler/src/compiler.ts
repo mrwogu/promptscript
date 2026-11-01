@@ -1390,11 +1390,13 @@ export class Compiler {
   private toCompileError(err: Error | PSError): CompileError {
     const psError = err as PSError;
     const agentConflict = err instanceof AgentConflictError ? err : undefined;
+    const causeCode = this.isPSErrorLike(psError.cause) ? psError.cause.code : undefined;
 
     return {
       name: err.name,
       code: psError.code ?? 'PS0000',
       message: err.message,
+      ...(causeCode ? { causeCode } : {}),
       location: psError.location
         ? {
             file: psError.location.file,
