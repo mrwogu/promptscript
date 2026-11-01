@@ -23,7 +23,12 @@
         "main": "packages/cli/src/index.ts",
         "additionalEntryPoints": ["packages/cli/src/managed-output-worker.ts"],
         "tsConfig": "packages/cli/tsconfig.lib.json",
-        "assets": ["packages/cli/*.md", "packages/cli/bin/**/*", "packages/cli/skills/**/*"],
+        "assets": [
+          "packages/cli/*.md",
+          "packages/cli/bin/**/*",
+          "packages/cli/skills/**/*",
+          { "input": ".", "glob": "LICENSE", "output": "." }
+        ],
         "bundle": true,
         "platform": "node",
         "format": ["esm"],
