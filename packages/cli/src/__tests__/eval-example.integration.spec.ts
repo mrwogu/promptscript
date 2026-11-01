@@ -138,6 +138,12 @@ describe('the no-guarantee assertion', () => {
 });
 
 describe('the refund example cache and reports', () => {
+  it('runs with fetch blocked, so a replay can not reach a provider', () => {
+    expect(() => fetch('https://api.openai.com/v1/responses')).toThrow(
+      'no network in the eval example check'
+    );
+  });
+
   it('replays with no network and writes the baseline report', async (ctx) => {
     if (!existsSync(join(FIXTURE, CACHE))) ctx.skip(NO_CACHE);
     const root = await freshCopy();
