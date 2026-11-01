@@ -17,6 +17,7 @@
         "tsConfig": "packages/runtime/tsconfig.lib.json",
         "assets": ["packages/runtime/*.md"]
       }
-    }
+    },
+    "typecheck": {}
   }
 }
