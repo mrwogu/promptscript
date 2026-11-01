@@ -40,7 +40,7 @@ describe('compile', () => {
 
         ## Phase 1: check
 
-        <!-- composed-from: check.prs -->
+        <!-- composed-from: phases/check.prs -->
 
         ### Instructions
 
@@ -51,6 +51,31 @@ describe('compile', () => {
       outputs.push(content!);
     }
     expect(outputs[0]).toBe(outputs[1]);
+  });
+
+  it('keeps phases with the same file name apart in the marker', async () => {
+    const phase = (name: string): string => `@meta { id: "${name}" syntax: "1.2.0" }
+@skills { ${name}: { description: "${name}" content: "Run ${name}." } }`;
+    const result = await compile(
+      {
+        'app/project.prs': `@meta { id: "portable" syntax: "1.2.0" }
+@skills {
+  deploy: { description: "Deploy" content: "Start deployment." }
+  @use ./a/check
+  @use ./b/check
+}`,
+        'app/a/check.prs': phase('first'),
+        'app/b/check.prs': phase('second'),
+      },
+      'app/project.prs',
+      { formatters: [{ name: 'claude', config: { version: 'full' } }] }
+    );
+
+    expect(result).toMatchObject({ errors: [], success: true });
+    const content = result.outputs.get('.claude/skills/deploy/SKILL.md')?.content;
+    expect(content).toContain('<!-- composed-from: a/check.prs -->');
+    expect(content).toContain('<!-- composed-from: b/check.prs -->');
+    expect(content).not.toContain('app/');
   });
 
   it('should compile a simple file', async () => {

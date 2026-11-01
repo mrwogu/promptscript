@@ -22,18 +22,25 @@ describe('composed skill portability', () => {
       const root = mkdtempSync(join(tmpdir(), prefix));
       directories.push(root);
       mkdirSync(join(root, 'phases'));
+      mkdirSync(join(root, 'other'));
       writeFileSync(
         join(root, 'project.prs'),
         `@meta { id: "portable" syntax: "1.2.0" }
 @skills {
   deploy: { description: "Deploy" content: "Start deployment." }
   @use ./phases/check
+  @use ./other/check
 }`
       );
       writeFileSync(
         join(root, 'phases/check.prs'),
         `@meta { id: "check" syntax: "1.2.0" }
 @skills { check: { description: "Check" content: "Check the deployment." } }`
+      );
+      writeFileSync(
+        join(root, 'other/check.prs'),
+        `@meta { id: "other-check" syntax: "1.2.0" }
+@skills { other-check: { description: "Other" content: "Check twice." } }`
       );
       const compiler = new Compiler({
         resolver: { registryPath: root, projectRoot: root, localPath: root },
@@ -47,7 +54,8 @@ describe('composed skill portability', () => {
       expect(result.success).toBe(true);
       const content = result.outputs.get('.claude/skills/deploy/SKILL.md')?.content;
       expect(content).toBeDefined();
-      expect(content).toContain('<!-- composed-from: check.prs -->');
+      expect(content).toContain('<!-- composed-from: phases/check.prs -->');
+      expect(content).toContain('<!-- composed-from: other/check.prs -->');
       expect(content).toContain('Check the deployment.');
       expect(content).not.toContain(root);
       outputs.push(content!);

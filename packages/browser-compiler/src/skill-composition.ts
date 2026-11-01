@@ -21,6 +21,7 @@ import type {
 import {
   buildSkillPhaseSection,
   deepClone,
+  getSkillPhaseSourceLabel,
   getSyntaxFeatureUsages,
   isTextContent,
   ResolveError,
@@ -52,6 +53,8 @@ export interface CompositionOptions {
   resolvePath: (ref: string, fromFile: string) => string;
   /** Absolute path of the file being resolved (for cycle detection). */
   currentFile: string;
+  /** Virtual project root used to build portable `composed-from` markers. */
+  projectRoot?: string;
   /** Accumulated resolution stack for cycle detection. */
   resolutionStack?: Set<string>;
   /** Current nesting depth (0-based). */
@@ -191,7 +194,8 @@ async function resolveSkillsBlockComposition(
       updatedProperties[skillName] = composeIntoSkill(
         skillValue as Record<string, Value>,
         phases,
-        options.currentFile
+        options.currentFile,
+        options.projectRoot
       );
     } else {
       updatedProperties[skillName] = skillValue;
@@ -488,7 +492,8 @@ function extractBlockText(block: Block): string | null {
 function composeIntoSkill(
   skill: Record<string, Value>,
   phases: ResolvedPhase[],
-  currentFile: string
+  currentFile: string,
+  projectRoot?: string
 ): Record<string, Value> {
   const result = deepClone(skill) as Record<string, Value>;
 
@@ -507,7 +512,10 @@ function composeIntoSkill(
 
   for (const phase of phases) {
     // Build phase section
-    const section = buildSkillPhaseSection(phase, basename(phase.source));
+    const section = buildSkillPhaseSection(
+      phase,
+      getSkillPhaseSourceLabel(phase.source, projectRoot)
+    );
     phaseSections.push(section);
 
     // Union allowedTools

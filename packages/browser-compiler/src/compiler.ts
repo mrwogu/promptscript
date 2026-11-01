@@ -183,6 +183,7 @@ export class BrowserCompiler {
       cache: options.cache,
       logger: this.logger,
       envVars: options.envVars,
+      projectRoot: options.projectRoot,
     });
 
     this.validator = new Validator({ ...options.validator, logger: this.logger });

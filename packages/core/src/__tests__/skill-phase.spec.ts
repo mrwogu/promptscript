@@ -77,6 +77,12 @@ describe('getSkillPhaseSourceLabel', () => {
     );
   });
 
+  it('handles virtual paths without a leading slash', () => {
+    expect(getSkillPhaseSourceLabel('app/phases/check.prs', 'app')).toBe('phases/check.prs');
+    expect(getSkillPhaseSourceLabel('phases/check.prs', '')).toBe('phases/check.prs');
+    expect(getSkillPhaseSourceLabel('other/check.prs', 'app')).toBe('check.prs');
+  });
+
   it('uses the file name when no root is given', () => {
     expect(getSkillPhaseSourceLabel('/work/app/phases/check.prs')).toBe('check.prs');
     expect(getSkillPhaseSourceLabel('C:\\work\\check.prs')).toBe('check.prs');

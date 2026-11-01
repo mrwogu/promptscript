@@ -283,7 +283,7 @@ Build organization, team, and project layers with deterministic merge rules:
 - Typed parameters turn shared stacks into reusable templates.
 - Sealed properties, reference negation, and overlay drift warnings keep extension layers safe.
 - `prs inspect <skill>` shows property and layer provenance.
-- Composed skill comments identify source filenames without including local directory paths.
+- Composed skill comments name each source by its path relative to the project root (file name only outside the root), never an absolute path.
 - `prs explain <path>` shows source locations and composition history for any resolved path.
   Text and JSON paths are project-relative by default; use `--absolute-paths` to opt in to
   absolute paths. JSON includes `version`, `path`, `entries`, and `diagnostics`. The command exits

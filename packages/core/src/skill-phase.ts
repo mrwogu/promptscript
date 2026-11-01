@@ -19,8 +19,8 @@ function toSlashes(path: string): string {
  *
  * The label is the source path relative to the project root, with `/`
  * separators. When the source is outside the root, or no root is given,
- * only the file name is returned. Absolute paths and `..` segments are never
- * returned.
+ * only the file name is returned. An empty root means the virtual root.
+ * Absolute paths and `..` segments are never returned.
  */
 export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): string {
   const normalizedSource = toSlashes(source);
@@ -29,15 +29,21 @@ export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): 
       .split('/')
       .filter((part) => part.length > 0)
       .pop() ?? source;
-  if (!projectRoot) {
+  if (projectRoot === undefined) {
     return fileName;
   }
-  const root = toSlashes(projectRoot).replace(/\/+$/, '');
-  if (!normalizedSource.startsWith(`${root}/`)) {
+  // Virtual file systems have no leading slash, so compare without it.
+  const relativeSource = normalizedSource.replace(/^\/+/, '');
+  const root = toSlashes(projectRoot)
+    .split('/')
+    .filter((part) => part !== '' && part !== '.')
+    .join('/');
+  const prefix = root === '' ? '' : `${root}/`;
+  if (!relativeSource.startsWith(prefix)) {
     return fileName;
   }
-  const parts = normalizedSource
-    .slice(root.length + 1)
+  const parts = relativeSource
+    .slice(prefix.length)
     .split('/')
     .filter((part) => part.length > 0 && part !== '.');
   return parts.length === 0 || parts.includes('..') ? fileName : parts.join('/');
