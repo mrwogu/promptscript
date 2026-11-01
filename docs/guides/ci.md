@@ -415,7 +415,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: >-
           "$PRS" eval run --label prod --cache off --max-cost 0.50 --max-cases 50
-          --baseline .promptscript/eval-baselines/prod.json --fail-on-regression
+          --baseline .promptscript/eval-baselines/prod.json --fail-on-regression --strict
           --format json --out "$RUNNER_TEMP/prompt-drift.json" > /dev/null
 
       - name: Write the job summary
@@ -481,6 +481,10 @@ What the guards do:
   provider call in the eval step.
 - The eval step has its own `timeout-minutes`, shorter than the one of the job. A step timeout is a
   failure, so the issue opens. A job timeout is a cancel and `failure()` is false for it.
+- `--strict` makes a pass with warnings exit 2. Without it, a prompt that `prod` no longer serves
+  is skipped with a warning, and a suite that is only in the baseline is reported as "only in the
+  baseline, not run". Both exit 0, and the check would quietly cover less every week. With
+  `--strict` the job fails and the issue opens.
 - The eval step runs even when the models check failed. A retiring model should not hide this
   week's drift data. If the install fails, everything stops and the issue opens.
 
@@ -493,6 +497,7 @@ Results:
 - `prs eval run` exits 1 on a failed case, a regression, a budget stop or an error.
   `prs release status --check-models` exits 1 on `PS5011` and on any other release error, for example
   a missing or corrupt bundle.
+- With `--strict`, `prs eval run` exits 2 on a pass with warnings, for example a skipped suite.
 - The job summary has the comparison with the baseline: the pass rate change and the regressed and
   fixed case ids per suite and model.
 - The JSON report is kept as an artifact for 90 days. A reason in it can quote up to 60 characters

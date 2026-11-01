@@ -310,6 +310,7 @@ describe('the prompt drift recipe', () => {
     expect(run).toContain('--max-cases ');
     expect(run).toContain('--baseline .promptscript/eval-baselines/prod.json');
     expect(run).toContain('--fail-on-regression');
+    expect(run).toContain('--strict');
     expect(run).toContain('--format json');
   });
 
@@ -479,6 +480,29 @@ describe.skipIf(process.platform === 'win32')(
       const text = readFileSync(summary, 'utf8');
       expect(text).toContain('Eval comparison: **regression**');
       expect(text).toMatch(/\| `?refund-reply`? \|.*\| `?late-return`? \|/);
+    });
+
+    it('exits 2 and names the suite when the baseline has one that was not run', () => {
+      const widened = join(home, 'widened');
+      cpSync(EXAMPLE, widened, { recursive: true });
+      symlinkSync(join(REPO, 'node_modules'), join(widened, 'node_modules'));
+      const file = join(widened, BASELINE);
+      const baseline = JSON.parse(readFileSync(file, 'utf8')) as {
+        suites: { name: string; prompt: { id: string } }[];
+      };
+      const [first] = baseline.suites;
+      if (first === undefined) throw new Error('the example baseline has no suite');
+      const extra = { ...structuredClone(first), name: 'retired-suite' };
+      extra.prompt.id = 'acme-support/retired-suite';
+      baseline.suites.push(extra);
+      writeFileSync(file, `${JSON.stringify(baseline, null, 2)}\n`);
+
+      const result = runStep(replayRun(), {}, widened);
+
+      expect(result.status, result.output).toBe(2);
+      expect(result.output).toContain('only in the baseline, not run');
+      expect(result.output).toContain('retired-suite');
+      expect(report().outcome).toBe('passed');
     });
 
     it('fails on a blocked network, so the replay above is not a pass by luck', () => {
