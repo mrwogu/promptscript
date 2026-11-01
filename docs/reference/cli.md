@@ -9,6 +9,8 @@ Complete reference for the PromptScript command-line interface.
 
 ## Commands at a Glance
 
+The JSON output of `prs diff`, `prs release`, `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable. See [JSON Output](json-output.md) for the rules.
+
 | Task                          | Command                                                                                                        |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Start a project               | [`prs init`](#prs-init)                                                                                        |
@@ -547,11 +549,10 @@ prs validate --format json
 
 **Exit Codes:**
 
-| Code | Meaning                                   |
-| ---- | ----------------------------------------- |
-| 0    | Validation passed                         |
-| 1    | Validation errors found                   |
-| 2    | Validation warnings found (with --strict) |
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| 0    | Validation passed                                    |
+| 1    | Validation errors found, or warnings with `--strict` |
 
 ---
 
@@ -1492,7 +1493,7 @@ Markdown print it as a count and a percentage.
 | `PS6604` | Warning: labels name rows the run did not read                                  |
 
 **Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
-matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
+matches `https://getpromptscript.dev/schema/eval-report/v1.json`, starts with `$schema` and `version`, and holds no timestamp, so two replay
 runs give the same bytes. Progress, warnings and `sending` lines go to stderr. In JSON mode errors are
 inside the document, under `errors`. Control and bidi characters are removed from every string that
 comes from a model, a provider or a dataset, in all formats. Reports hold no responses, but a
@@ -1577,8 +1578,8 @@ baseline and does not pass in the candidate. A drop of the pass rate above the t
 regression too. Only cases both reports have are compared. When the dataset hash differs, that is
 noted, and a suite or model that only one report has is listed with its cases and is not a
 regression, but it is shown as a warning: on stderr for `json`, inside the document for `text` and
-`markdown`. With `--format json`, stdout holds one document that matches
-`https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
+`markdown`. With `--format json`, stdout holds one document that starts with `$schema` and `version`
+and matches `https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
 so an unreadable report or a bad option goes to stderr in every format, with exit code 1.
 
 ```bash
