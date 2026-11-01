@@ -625,13 +625,13 @@ function composeIntoSkill(
 }
 
 /**
- * Build a phase section string for a resolved phase.
+ * Build a phase section with a source filename, independent of the checkout path.
  */
 function buildPhaseSection(phase: ResolvedPhase): string {
   const lines: string[] = [];
 
   lines.push(`## Phase ${phase.phaseNumber}: ${phase.name}`);
-  lines.push(`<!-- composed-from: ${phase.source} -->`);
+  lines.push(`<!-- composed-from: ${basename(phase.source)} -->`);
 
   // Context blocks
   for (const ctx of phase.contextBlocks) {

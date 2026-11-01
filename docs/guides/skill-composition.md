@@ -188,6 +188,10 @@ The resolver produces a single skill by concatenating:
 
 Phase names come from the alias (if `@use ... as alias`) or the skill name from the sub-skill file.
 
+Each phase includes a `<!-- composed-from: filename.prs -->` comment. The comment uses only the
+source filename, so local directory paths do not enter the skill text. Full source paths remain
+in the internal `composedFrom` metadata for diagnostics and provenance.
+
 ### Property Merging
 
 | Property       | Strategy    | Details                                           |

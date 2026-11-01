@@ -11,6 +11,35 @@ import type { Formatter } from '@promptscript/formatters';
 import type { CanonicalProgram, OutputConvention } from '@promptscript/core';
 
 describe('compile', () => {
+  it('compiles identical composed skill text from different virtual roots', async () => {
+    const outputs: string[] = [];
+    for (const root of ['first/project', 'second/project']) {
+      const result = await compile(
+        {
+          [`${root}/project.prs`]: `@meta { id: "portable" syntax: "1.2.0" }
+@skills {
+  deploy: { description: "Deploy" content: "Start deployment." }
+  @use ./phases/check
+}`,
+          [`${root}/phases/check.prs`]: `@meta { id: "check" syntax: "1.2.0" }
+@skills { check: { description: "Check" content: "Check the deployment." } }`,
+        },
+        `${root}/project.prs`,
+        { formatters: [{ name: 'claude', config: { version: 'full' } }] }
+      );
+
+      expect(result.errors).toEqual([]);
+      expect(result.success).toBe(true);
+      const content = result.outputs.get('.claude/skills/deploy/SKILL.md')?.content;
+      expect(content).toBeDefined();
+      expect(content).toContain('<!-- composed-from: check.prs -->');
+      expect(content).toContain('Check the deployment.');
+      expect(content).not.toContain(root);
+      outputs.push(content!);
+    }
+    expect(outputs[0]).toBe(outputs[1]);
+  });
+
   it('should compile a simple file', async () => {
     const files = {
       'project.prs': `

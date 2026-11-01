@@ -296,7 +296,7 @@ describe('skill composition resolver', () => {
 
       expect(composedFrom[2]!.name).toBe('autofix');
       expect(composedFrom[2]!.alias).toBe('autofix');
-      expect(composedFrom[2]!.source).toContain('code-fix.prs');
+      expect(composedFrom[2]!.source).toBe(resolve(FIXTURES_DIR, 'phases/code-fix.prs'));
     });
   });
 
