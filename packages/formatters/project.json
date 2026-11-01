@@ -22,6 +22,7 @@
         "assets": ["packages/formatters/*.md", { "input": ".", "glob": "LICENSE", "output": "." }]
       }
     },
+    "typecheck": {},
     "nx-release-publish": {
       "options": {
         "packageRoot": "dist/{projectRoot}"
