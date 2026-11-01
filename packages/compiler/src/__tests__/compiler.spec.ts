@@ -991,6 +991,65 @@ describe('Compiler', () => {
       expect(result.errors[0]?.message).toContain('Import not found');
     });
 
+    it('should keep the code of a PS cause as causeCode', async () => {
+      mockResolve.mockResolvedValue({
+        ast: null,
+        canonicalAst: null,
+        sources: ['test.prs'],
+        errors: [
+          {
+            name: 'ResolveError',
+            code: 'PS2000',
+            message: 'Unexpected end of input',
+            cause: { name: 'ParseError', code: 'PS1000', message: 'Unexpected end of input' },
+          },
+        ],
+      });
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.errors[0]?.code).toBe('PS2000');
+      expect(result.errors[0]?.causeCode).toBe('PS1000');
+    });
+
+    it('should leave causeCode out when the cause has no string code', async () => {
+      mockResolve.mockResolvedValue({
+        ast: null,
+        canonicalAst: null,
+        sources: ['test.prs'],
+        errors: [
+          {
+            name: 'ResolveError',
+            code: 'PS2000',
+            message: 'Clone failed',
+            cause: { name: 'Error', code: 128, message: 'git exited' },
+          },
+          {
+            name: 'ResolveError',
+            code: 'PS2000',
+            message: 'Plain cause',
+            cause: new Error('no code'),
+          },
+        ],
+      });
+
+      const compiler = new Compiler({
+        resolver: { registryPath: '/registry' },
+        formatters: [],
+      });
+
+      const result = await compiler.compile('./test.prs');
+
+      expect(result.errors).toHaveLength(2);
+      expect(result.errors[0]).not.toHaveProperty('causeCode');
+      expect(result.errors[1]).not.toHaveProperty('causeCode');
+    });
+
     it('should expose agent conflict provenance in compile errors', async () => {
       const conflict = new AgentConflictError(
         [
