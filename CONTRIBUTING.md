@@ -158,7 +158,7 @@ What counts as breaking:
 
 - In an API report: a removed or changed line. `@internal` declarations and comment lines are ignored.
 - In a schema: a removed property, a new required property, a narrowed type, enum or union, a changed `const`, a type added to an untyped property, or `additionalProperties` narrowed or set to `false`.
-- For the schemas that only `prs` writes (`approval-report-v1`, `audit-log-v1`, `diff-v1`, `eval-comparison-v1`, `eval-import-summary-v1`, `eval-report-v1` and `release-report-v1`), a new required property is fine and a removed one is breaking.
+- For the schemas that only `prs` writes (`approval-report-v1`, `audit-log-v1`, `diff-v1`, `eval-comparison-v1`, `eval-import-summary-v1`, `eval-report-v1`, `release-report-v1` and `validate-report-v1`), a new required property is fine and a removed one is breaking.
 - Not checked: `if`, `not`, `pattern`, min and max bounds, `propertyNames` and `dependencies`. A new `allOf` entry and a new `then` or `else` are not checked. Also not caught: a base union branch split across two head branches and a narrowing `type` added next to a union. A missing `additionalProperties` changed to `{}` is reported, even though it changes nothing.
 
 Additions pass. Reports of private packages are listed but not enforced.
