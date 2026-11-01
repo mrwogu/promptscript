@@ -46,7 +46,7 @@
     "@promptscript/resolver": "workspace:^",
     "@promptscript/validator": "workspace:^",
     "chokidar": "^6.0.0",
-    "minimatch": "^10.2.6"
+    "minimatch": "^11.0.1"
   },
   "publishConfig": {
     "main": "./src/index.js",
