@@ -1,5 +1,12 @@
 import { GovernanceError, PS5108_GIT_UNAVAILABLE } from '../../utils/governance-error.js';
-import { runGit, stripControlCharacters, type GitResult } from '../release/git.js';
+import {
+  errorMessage,
+  readBlobs,
+  runGit,
+  stripControlCharacters,
+  type BlobBatch,
+  type GitResult,
+} from '../release/git.js';
 
 /** Largest log output read; more fails closed with PS5108. */
 const MAX_LOG_BYTES = 256 * 1024 * 1024;
@@ -239,41 +246,97 @@ export async function firstParentChain(top: string, head: string): Promise<Set<s
   return new Set(result.stdout.split('\n').filter((commit) => commit !== ''));
 }
 
-function isOutputLimit(error: unknown): boolean {
-  const cause = error instanceof Error ? error.cause : undefined;
-  return (
-    cause instanceof Error && 'code' in cause && cause.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
-  );
-}
-
-/** Reads blobs once each; `undefined` for a blob over {@link MAX_BLOB_BYTES}. */
+/** Reads blobs once each; `undefined` for a blob over {@link MAX_BLOB_BYTES} or not UTF-8 text. */
 export type BlobReader = (blob: string) => Promise<string | undefined>;
 
+/** Most raw blob bytes held at once; one batch keeps no more than what is left of it. */
+const BLOB_CACHE_BYTES = 32 * 1024 * 1024;
+/** Most blobs one `git cat-file --batch` is asked for. */
+const BLOB_BATCH_SIZE = 256;
+const MISSING_BLOB_HINT =
+  'A partial clone does not fetch it here; fetch the full history, for example with actions/checkout fetch-depth: 0 or git fetch --unshallow.';
+
 /**
- * A reader of blobs by id with `git cat-file blob`. A blob Git cannot give, such as one a
- * partial clone would fetch, is PS5108.
+ * A reader of blobs by id with `git cat-file --batch`. `planned` lists the ids in the order
+ * they are going to be read, repeats included. A read that is not cached asks Git for that
+ * blob and the planned ones after it in one process, as many as fit the cache by the size
+ * of the blobs seen so far (at most {@link BLOB_BATCH_SIZE}), so many revisions cost a few
+ * processes, not one each. An id outside the plan is read alone. Bytes are held up to
+ * {@link BLOB_CACHE_BYTES}: room is made first from blobs the reads have passed, and a
+ * dropped blob is read again if needed. Git runs without lazy fetch, so a blob a partial
+ * clone lacks is PS5108, as is any Git failure; the Git timeout covers one batch.
  */
-export function blobReader(top: string): BlobReader {
-  const cache = new Map<string, string | undefined>();
-  return async (blob) => {
-    if (cache.has(blob)) return cache.get(blob);
-    let text: string | undefined;
-    try {
-      const shown = await runGit(['cat-file', 'blob', blob], top, { maxBuffer: MAX_BLOB_BYTES });
-      if (shown.status !== 0) {
-        throw gitError(
-          `blob ${blob} is missing (${stripControlCharacters(shown.stderr.trim())}). A partial clone does not fetch it here; ${SHALLOW_FIX}`
-        );
-      }
-      text = shown.stdout;
-    } catch (error) {
-      if (error instanceof GovernanceError) throw error;
-      if (!isOutputLimit(error)) {
-        throw gitError(error instanceof Error ? error.message : String(error));
-      }
-      text = undefined;
+export function blobReader(
+  top: string,
+  planned: readonly string[] = [],
+  load: typeof readBlobs = readBlobs
+): BlobReader {
+  const occurrences = new Map<string, number[]>();
+  planned.forEach((id, index) => occurrences.set(id, [...(occurrences.get(id) ?? []), index]));
+  const cache = new Map<string, Buffer>();
+  const tooLarge = new Set<string>();
+  let cachedBytes = 0;
+  let cursor = 0;
+  let seenBytes = 0;
+  let seenBlobs = 0;
+
+  const drop = (id: string): void => {
+    cachedBytes -= cache.get(id)?.length ?? 0;
+    cache.delete(id);
+  };
+
+  const isPassed = (id: string): boolean => (occurrences.get(id)?.at(-1) ?? -1) < cursor;
+
+  /** Make room for a batch: blobs the reads have passed first, then the oldest held. */
+  const makeRoom = (): void => {
+    for (const id of [...cache.keys()].filter(isPassed)) {
+      if (cachedBytes <= BLOB_CACHE_BYTES / 2) break;
+      drop(id);
     }
-    cache.set(blob, text);
-    return text;
+    for (const id of [...cache.keys()]) {
+      if (cachedBytes <= BLOB_CACHE_BYTES - MAX_BLOB_BYTES) break;
+      drop(id);
+    }
+  };
+
+  /** Where `blob` is read next in the plan, and the cursor moves there. */
+  const locate = (blob: string): number | undefined => {
+    const all = occurrences.get(blob);
+    const at = all?.find((index) => index >= cursor) ?? all?.at(-1);
+    if (at !== undefined) cursor = Math.max(cursor, at);
+    return at;
+  };
+
+  const fetchBlobs = async (blob: string, at: number | undefined): Promise<void> => {
+    makeRoom();
+    const budget = BLOB_CACHE_BYTES - cachedBytes;
+    const average = seenBlobs === 0 ? MAX_BLOB_BYTES : seenBytes / seenBlobs;
+    const count = Math.max(1, Math.min(BLOB_BATCH_SIZE, Math.floor(budget / average)));
+    // A read behind the cursor is a second look at a blob; what follows it was read already.
+    const next = at === undefined || at < cursor ? [] : planned.slice(at + 1, at + count);
+    const ids = new Set([blob, ...next.filter((id) => !cache.has(id) && !tooLarge.has(id))]);
+    let batch: BlobBatch;
+    try {
+      batch = await load([...ids], top, { maxBytes: MAX_BLOB_BYTES, budgetBytes: budget });
+    } catch (error) {
+      throw gitError(stripControlCharacters(errorMessage(error)));
+    }
+    if (batch.missing.has(blob)) throw gitError(`blob ${blob} is missing. ${MISSING_BLOB_HINT}`);
+    for (const id of batch.tooLarge) tooLarge.add(id);
+    for (const [id, content] of batch.blobs) {
+      cache.set(id, content);
+      cachedBytes += content.length;
+      seenBytes += content.length;
+      seenBlobs++;
+    }
+  };
+
+  return async (blob) => {
+    if (tooLarge.has(blob)) return undefined;
+    const at = locate(blob);
+    if (!cache.has(blob)) await fetchBlobs(blob, at);
+    // Git output was always read as UTF-8 with bad bytes replaced; a record is still
+    // checked against its blob id where it is parsed.
+    return cache.get(blob)?.toString('utf-8');
   };
 }

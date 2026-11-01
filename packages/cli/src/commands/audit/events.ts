@@ -490,6 +490,27 @@ export interface BuiltEvents {
 }
 
 /**
+ * The blobs the events of `commits` read, oldest commit first, as `blobReader` takes them:
+ * the sides of approval records, labels and CODEOWNERS files that are regular files.
+ */
+export function plannedBlobs(commits: readonly HistoryCommit[], sources: AuditSources): string[] {
+  const approvals = approvalsDirectory(sources);
+  const ids: string[] = [];
+  for (const commit of [...commits].reverse()) {
+    for (const file of commit.changes) {
+      const read =
+        (file.path.startsWith(approvals) && file.path.endsWith('.json')) ||
+        labelEnvironment(file.path, sources) !== undefined ||
+        sources.codeownersFiles.has(file.path);
+      if (!read) continue;
+      if (!isNullBlob(file.oldBlob) && isRegularMode(file.oldMode)) ids.push(file.oldBlob);
+      if (!isNullBlob(file.newBlob) && isRegularMode(file.newMode)) ids.push(file.newBlob);
+    }
+  }
+  return ids;
+}
+
+/**
  * The events of the commits, newest commit first. Commits are read oldest first, so a label entry
  * set back to a hash it held before on the mainline commits is a `rolled-back` event.
  */

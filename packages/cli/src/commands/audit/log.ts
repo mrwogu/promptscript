@@ -22,7 +22,13 @@ import {
 import { promptSourceFiles } from '../governance/codeowners-sources.js';
 import { runGit, stripControlCharacters } from '../release/git.js';
 import { formatDiagnostic, toDiagnostic } from '../release/run.js';
-import { approvalsDirectory, buildEvents, type AuditEvent, type AuditSources } from './events.js';
+import {
+  approvalsDirectory,
+  buildEvents,
+  plannedBlobs,
+  type AuditEvent,
+  type AuditSources,
+} from './events.js';
 import { assertConsistent, headState, replayMainline, stateMismatches } from './consistency.js';
 import { cefLine, textLines } from './format.js';
 import { droppedChanges } from './merges.js';
@@ -313,7 +319,7 @@ async function readAuditLog(
   );
   const commits = await readHistory(repo.top, head, logPaths(sources.sources));
   const mainline = await firstParentChain(repo.top, head);
-  const read = blobReader(repo.top);
+  const read = blobReader(repo.top, plannedBlobs(commits, sources.sources));
   const dropped = { top: repo.top, sources: sources.sources, read, warn };
   const { events, unreadableLabels } = await buildEvents(
     commits,
