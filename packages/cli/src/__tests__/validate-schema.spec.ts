@@ -47,6 +47,21 @@ describe('validate report schema', () => {
     ).toBe(true);
   });
 
+  it('accepts a cause code and still accepts errors without one', () => {
+    const value = report();
+    value['errors'] = [
+      { code: 'PS2000', cause: 'PS1000', message: 'Unexpected end' },
+      { code: 'PS2000', message: 'No cause' },
+    ];
+    expect(validate(value), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it('rejects a cause that is not a PS code', () => {
+    const value = report();
+    value['errors'] = [{ code: 'PS2000', cause: 'parse', message: 'x' }];
+    expect(validate(value)).toBe(false);
+  });
+
   it('accepts the -1 position of a parse error', () => {
     const value = report();
     value['errors'] = [

@@ -310,6 +310,67 @@ describe('validateCommand', () => {
     ]);
   });
 
+  it('should report the PS code of a config error cause', async () => {
+    // Arrange
+    mockLoadConfig.mockRejectedValue(
+      new PSError('Bad config', 'PS2000', { cause: new PSError('Unexpected end', 'PS1000') })
+    );
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.errors).toEqual([{ code: 'PS2000', cause: 'PS1000', message: 'Bad config' }]);
+  });
+
+  it('should leave out a config error cause that is not a PS error', async () => {
+    // Arrange
+    mockLoadConfig.mockRejectedValue(
+      new PSError('Bad config', 'PS4000', { cause: new Error('YAML broken') })
+    );
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.errors).toEqual([{ code: 'PS4000', message: 'Bad config' }]);
+  });
+
+  it('should report only PS cause codes of compile errors', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({
+      targets: [],
+      validation: {},
+    });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: false,
+      errors: [
+        { name: 'ResolveError', code: 'PS2000', causeCode: 'PS1000', message: 'Unexpected end' },
+        { name: 'ResolveError', code: 'PS2000', causeCode: 'ENOENT', message: 'Missing file' },
+      ],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.errors).toEqual([
+      { code: 'PS2000', cause: 'PS1000', message: 'Unexpected end' },
+      { code: 'PS2000', message: 'Missing file' },
+    ]);
+  });
+
   it('should leave out the code of an error that is not a PS error', async () => {
     // Arrange
     mockLoadConfig.mockRejectedValue(new Error('registry clone failed'));

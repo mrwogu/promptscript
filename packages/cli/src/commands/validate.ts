@@ -173,6 +173,7 @@ function toJsonOutput(result: ValidationResult, success: boolean): ValidateRepor
     success,
     result.errors.map((e) => ({
       code: PS_CODE.test(e.code) ? e.code : undefined,
+      ...(e.causeCode && PS_CODE.test(e.causeCode) ? { cause: e.causeCode } : {}),
       message: e.message,
       location: toLocation(e.location),
     })),
@@ -420,6 +421,11 @@ export async function validateCommand(options: ValidateOptions): Promise<void> {
   }
 }
 
+function causeCodeOf(error: PSError): string | undefined {
+  const cause = error.cause;
+  return cause instanceof PSError && PS_CODE.test(cause.code) ? cause.code : undefined;
+}
+
 /**
  * Handle validation errors.
  */
@@ -429,9 +435,15 @@ function handleValidationError(
   spinner: ReturnType<typeof createSpinner>
 ): void {
   if (isJsonFormat) {
+    const cause = error instanceof PSError ? causeCodeOf(error) : undefined;
     const entry =
       error instanceof PSError && PS_CODE.test(error.code)
-        ? { code: error.code, message: error.message, location: toLocation(error.location) }
+        ? {
+            code: error.code,
+            ...(cause ? { cause } : {}),
+            message: error.message,
+            location: toLocation(error.location),
+          }
         : { message: error.message };
     outputJsonResult(createValidateReport(false, [entry]));
   } else {
