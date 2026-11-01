@@ -482,7 +482,8 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
 - **CI-ready output** - use `prs validate --strict --format json`, `prs compile --dry-run`,
   `prs diff --format json`, and `prs fmt --check` for deterministic machine-readable changes
   and formatting checks without generated-file writes. The JSON of `prs diff`, `prs release`,
-  `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable, see
+  `prs approve`, `prs audit log`, `prs eval run`, `prs eval compare` and `prs validate` is
+  versioned and stable, see
   [JSON Output](https://getpromptscript.dev/reference/json-output/).
 
 ## Adopt Without a Rewrite

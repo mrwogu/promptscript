@@ -496,7 +496,7 @@ change kind, deterministic content hashes, warnings, and unsupported capability 
 omitted by default; add `--include-content` when automation needs canonical output text. Reports
 with changes exit 0; compilation and report errors emit `success: false` and exit 1. See the
 [diff schema](https://getpromptscript.dev/schema/diff/v1.json). The JSON output of `prs diff`,
-`prs release`, `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable; the rules are on the
+`prs release`, `prs approve`, `prs audit log`, `prs eval run`, `prs eval compare` and `prs validate` is stable; the rules are on the
 [JSON Output](https://getpromptscript.dev/reference/json-output/) page. Diff uses the complete configured
 target when `--target` selects one, never writes generated files or registry cache metadata, and
 requires Git registries to already exist in vendor mode or a valid local cache.
@@ -534,6 +534,9 @@ $ prs validate --strict
 `--strict` turns warnings into errors. Run `prs validate --strict` in CI so a poisoned skill fails
 the build, not the agent. See the
 [security guide](https://getpromptscript.dev/guides/security/).
+
+`prs validate --format json` prints one versioned report, see
+[JSON Output](https://getpromptscript.dev/reference/json-output/).
 
 ## CLI Commands
 

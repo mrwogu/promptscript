@@ -39,7 +39,7 @@ flowchart LR
 | ---------------------------- | ----------------------------- | -------------------------- |
 | `prs validate`               | Validate syntax and structure | 0=pass, 1=error            |
 | `prs validate --strict`      | Treat warnings as errors      | 0=pass, 1=error or warning |
-| `prs validate --format json` | JSON output for parsing       | Same as above              |
+| `prs validate --format json` | JSON report for parsing       | Same as above              |
 | `prs compile`                | Compile to all targets        | 0=success, 1=error         |
 | `prs compile --dry-run`      | Preview without writing       | 0=success, 1=error         |
 | `prs check`                  | Check config and dependencies | 0=healthy, 1=issues        |
