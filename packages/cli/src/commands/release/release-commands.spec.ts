@@ -1621,24 +1621,88 @@ describe('prs release status', () => {
     expect(result.warnings[0]?.message).toContain('.promptscript/releases/qa[2J.json');
   });
 
+  /** Add entries with other ids to a label, holding the hash of the first entry. */
+  async function addIds(root: string, environment: string, ids: string[]): Promise<void> {
+    const file = releases(root, `${environment}.json`);
+    const label = await readJson(file);
+    const [entry] = label['prompts'] as { id: string }[];
+    const extra = ids.map((id) => ({ ...entry, id }));
+    await writeFile(file, JSON.stringify({ ...label, prompts: [entry, ...extra] }));
+  }
+
+  const idWarnings = (result: ReleaseReport): { message: string; file?: string }[] =>
+    result.warnings
+      .filter((warning) => warning.message.includes('an approval can name'))
+      .map((warning) => ({ message: warning.message, file: warning.location?.file }));
+
   it('warns about a label id that an approval could not name', async () => {
     const root = await project();
     await build(root);
     await promote(root, ID, 'staging');
-    const label = await readJson(releases(root, 'staging.json'));
-    const [entry] = label['prompts'] as { id: string }[];
-    const lookalike = { ...entry, id: 'acme-support/refund\u200b-reply' };
-    await writeFile(
-      releases(root, 'staging.json'),
-      JSON.stringify({ ...label, prompts: [entry, lookalike] })
-    );
+    await addIds(root, 'staging', ['acme-support/refund\u200b-reply']);
 
-    const result = await status(root);
+    const warnings = idWarnings(await status(root));
 
-    const warnings = result.warnings.filter((warning) => warning.message.includes('an approval'));
     expect(warnings).toHaveLength(1);
-    expect(warnings[0]?.message).toContain('"acme-support/refund\\u200B-reply" in staging');
-    expect(warnings[0]?.location?.file).toBe('.promptscript/releases/staging.json');
+    expect(warnings[0]?.message).toContain(String.raw`"acme-support/refund\u200B-reply"`);
+    expect(warnings[0]?.message).toContain('a gate that needs approvals never passes for it');
+    expect(warnings[0]?.file).toBe('.promptscript/releases/staging.json');
+  });
+
+  it.each([
+    ['a hangul filler', 'acme-support/refund\u3164reply', String.raw`refund\u3164reply`],
+    ['a cyrillic letter', 'acme-support/refund-\u0430', String.raw`refund-\u0430`],
+    ['a backslash', String.raw`acme-support/a\u200Bb`, String.raw`a\u005Cu200Bb`],
+    ['too many segments', 'a/b/c/d/e/f/g/h', 'a/b/c/d/e/f/g/h'],
+  ])('warns about %s in a label id', async (_name, id, shown) => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+    await addIds(root, 'staging', [id]);
+
+    const warnings = idWarnings(await status(root));
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]?.message).toContain(shown);
+  });
+
+  it('warns once for each environment and prints the id escaped in text output', async () => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+    await promote(root, ID, 'prod');
+    await addIds(root, 'staging', ['acme-support/refund\u200b-reply']);
+    await addIds(root, 'prod', ['acme-support/refund\u3164-reply']);
+    const lines: string[] = [];
+    const info = vi.spyOn(console, 'log').mockImplementation((line) => {
+      lines.push(String(line));
+    });
+    process.exitCode = undefined;
+
+    await releaseStatusCommand({ cwd: root });
+    info.mockRestore();
+
+    const text = lines.join('\n');
+    expect(text).toContain(String.raw`  acme-support/refund\u200B-reply  `);
+    expect(text).toContain(String.raw`  acme-support/refund\u3164-reply  `);
+    expect(text).not.toContain('\u200b');
+    expect(text).not.toContain('\u3164');
+  });
+
+  it('reports each label file once, however many environments it has', async () => {
+    const root = await project();
+    await build(root);
+    await promote(root, ID, 'staging');
+    await promote(root, ID, 'prod');
+    await addIds(root, 'staging', ['acme-support/refund\u200b-reply']);
+    await addIds(root, 'prod', ['acme-support/refund\u200b-reply']);
+
+    const warnings = idWarnings(await status(root));
+
+    expect(warnings.map((warning) => warning.file)).toEqual([
+      '.promptscript/releases/staging.json',
+      '.promptscript/releases/prod.json',
+    ]);
   });
 
   it('does not warn about a label id that an approval can name', async () => {
@@ -1772,6 +1836,28 @@ async function policyRepository(baseConfigName = 'promptscript.yaml'): Promise<s
 }
 
 describe('prs release status --base', () => {
+  it('checks the ids of a label file no environment owns', async () => {
+    const root = await baseRepository();
+    const hash = (await labelHash(root, 'staging')) ?? '';
+    await setLabel(root, 'qa', hash);
+    const file = releases(root, 'qa.json');
+    const label = await readJson(file);
+    const [entry] = label['prompts'] as object[];
+    await writeFile(
+      file,
+      JSON.stringify({ ...label, prompts: [{ ...entry, id: 'acme-support/refund\u200b-reply' }] })
+    );
+    await commit(root, 'qa label');
+
+    const result = await report(() =>
+      releaseStatusCommand({ cwd: root, format: 'json', base: 'base' })
+    );
+
+    const warning = result.warnings.find((entry) => entry.message.includes('an approval can name'));
+    expect(warning?.location?.file).toBe('.promptscript/releases/qa.json');
+    expect(warning?.message).toContain(String.raw`acme-support/refund\u200B-reply`);
+  });
+
   it('passes when only pricing.json changed since the base', async () => {
     const root = await baseRepository();
     await writeFile(

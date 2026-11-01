@@ -29,7 +29,7 @@ import {
   type SplitRequest,
 } from './experiment.js';
 import { checkPromotionGates, gateLines } from './gates.js';
-import { stripControlCharacters } from './git.js';
+import { escapeNonAscii } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_V2_SCHEMA_URL,
   labelText,
@@ -194,7 +194,7 @@ async function splitEntry(run: SplitRun): Promise<Partial<ReleaseReport>> {
   const label = await readLabel(paths, environment);
   const current = label?.prompts.find((entry) => entry.id === id);
   if (label === undefined || current === undefined) {
-    const shownId = stripControlCharacters(id);
+    const shownId = escapeNonAscii(id);
     throw new ReleaseError(
       PS5003_BUNDLE_MISSING,
       `${environment} does not hold ${shownId}, so there is nothing to split. Promote it first: prs release promote ${shownId} --to ${environment}`,

@@ -5,7 +5,7 @@ import {
   approvalRecordPath,
   compareCodeUnits,
   parseApprovalRecord,
-  PROMPT_ID_PATTERN,
+  isPromptId,
   serializeApprovalRecord,
   type ApprovalRecordV1,
 } from '@promptscript/core';
@@ -35,7 +35,7 @@ export const MAX_APPROVAL_DEPTH = 8;
 /** Is this a prompt id an approval can name: the pattern, and few enough segments to fit. */
 export function isApprovalPromptId(id: string): boolean {
   // The role takes one directory level, each id segment one more.
-  return PROMPT_ID_PATTERN.test(id) && id.split('/').length <= MAX_APPROVAL_DEPTH - 1;
+  return isPromptId(id) && id.split('/').length <= MAX_APPROVAL_DEPTH - 1;
 }
 
 /** Most files and directories one read takes. */

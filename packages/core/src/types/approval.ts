@@ -101,10 +101,20 @@ export function isApproverHandle(value: string): boolean {
   return value.length <= MAX_APPROVER_LENGTH && GIT_HOST_USER_PATTERN.test(value);
 }
 
-/** The prompt id of an approval record, as the schema JSDoc states it. */
-export const PROMPT_ID_PATTERN =
+// Private, so nobody can change it through RegExp.prototype.compile.
+const PROMPT_ID =
   /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
-// The patterns below are the same as the schema JSDoc; the schema spec checks that both agree.
+
+/**
+ * Is this the prompt id of an approval record: ASCII only, at least two segments split by a
+ * slash, no segment ending in a dot. It has no limit on the number of segments; the CLI adds
+ * its own depth limit for the record path.
+ */
+export function isPromptId(value: string): boolean {
+  return PROMPT_ID.test(value);
+}
+
+// These patterns are the same as the schema JSDoc; the schema spec checks that both agree.
 const CONTENT_HASH = /^sha256-[0-9a-f]{64}$/u;
 const ROLE = /^(?!(?:con|prn|aux|nul|com\d|lpt\d)$)[a-z][a-z0-9-]{0,31}$/u;
 const CREATED_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
@@ -159,7 +169,7 @@ export function isApprovalRecordV1(value: unknown): value is ApprovalRecordV1 {
     !Object.hasOwn(value, key) || matches(value[key], pattern);
   return (
     value['$schema'] === APPROVAL_RECORD_SCHEMA_URL &&
-    matches(value['prompt'], PROMPT_ID_PATTERN) &&
+    matches(value['prompt'], PROMPT_ID) &&
     matches(value['contentHash'], CONTENT_HASH) &&
     matches(value['role'], ROLE) &&
     isApprover(value['approver']) &&

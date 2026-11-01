@@ -2921,6 +2921,9 @@ export function isPortableHookScriptPath(value: string): boolean;
 export function isPortablePathSegment(segment: string): boolean;
 
 // @public
+export function isPromptId(value: string): boolean;
+
+// @public
 export function isPromptTarget(name: string): boolean;
 
 // @public
@@ -3661,9 +3664,6 @@ export const PROMPT_BUNDLE_SCHEMA_URL = "https://getpromptscript.dev/schema/prom
 
 // @public
 export const PROMPT_ENTRY_KEYS: readonly string[];
-
-// @public
-export const PROMPT_ID_PATTERN: RegExp;
 
 // @public
 export const PROMPT_INPUT_NAME_PATTERN: RegExp;
