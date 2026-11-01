@@ -41,8 +41,8 @@ describe('CEF escaping', () => {
     ['a|b', 'a\\|b'],
     ['back\\slash', 'back\\\\slash'],
     ['a=b', 'a=b'],
-    ['bell\u0007\u009b[2J', 'bell[2J'],
-    ['line\nbreak', 'linebreak'],
+    ['bell\u0007\u009b[2J', String.raw`bell\u0007\u009B[2J`],
+    ['line\nbreak', String.raw`line\u000Abreak`],
   ])('escapes the header value %j', (input, expected) => {
     // Arrange, Act
     const escaped = cefHeaderValue(input);
@@ -57,7 +57,7 @@ describe('CEF escaping', () => {
     ['back\\slash', 'back\\\\slash'],
     ['a|b', 'a|b'],
     ['one\ntwo\r\nthree\rfour', 'one\\ntwo\\nthree\\nfour'],
-    ['esc\u001b[31m\u202eflip\u200b', 'esc[31mflip'],
+    ['esc\u001b[31m\u202eflip\u200b', String.raw`esc\u001B[31m\u202Eflip\u200B`],
     ['\\=', '\\\\\\='],
   ])('escapes the extension value %j', (input, expected) => {
     // Arrange, Act
@@ -243,7 +243,7 @@ describe('textLines', () => {
     expect(lines.slice(1)).toEqual(['    comment: ok=fine', '      second line']);
   });
 
-  it('strips control, bidi and zero-width characters from Git and record fields', () => {
+  it('shows control, bidi and zero-width characters as escapes in Git and record fields', () => {
     // Arrange
     const event: AuditEvent = {
       ...approved,
@@ -255,10 +255,65 @@ describe('textLines', () => {
     const text = textLines(event).join('\n');
 
     // Assert
-    expect(text).toContain('by Evil[2J <e@x>');
-    expect(text).toContain('comment: hithere');
+    expect(text).toContain(String.raw`by Evil\u001B[2J\u202E <e\u200B@x\u2028>`);
+    expect(text).toContain(String.raw`comment: hi\u0007\u2029there`);
     // eslint-disable-next-line no-control-regex
     expect(text).not.toMatch(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u200b\u2028\u2029\u202e]/);
+  });
+
+  it('shows a tag character, a variation selector and a lone surrogate in text and CEF', () => {
+    // Arrange
+    const event: AuditEvent = {
+      ...approved,
+      prompt: 'a\u{e0041}b\ufe0fc\ud800d',
+      comment: 'x\r\ny',
+    };
+
+    // Act
+    const text = textLines(event);
+    const cef = cefLine(event, HEAD, '1');
+
+    // Assert
+    expect(text[0]).toContain(String.raw`a\uE0041b\uFE0Fc\uD800d`);
+    expect(cef).toContain(String.raw`cs1=a\uE0041b\uFE0Fc\uD800d `);
+    expect(text.join('\n')).not.toContain('u000D');
+  });
+
+  it('tells two prompt ids apart that differ only by a zero-width space', () => {
+    // Arrange
+    const plain: AuditEvent = { ...approved, prompt: 'acme/refund' };
+    const hidden: AuditEvent = { ...approved, prompt: 'acme/ref\u200bund' };
+
+    // Act
+    const texts = [plain, hidden].map((event) => textLines(event)[0]);
+    const cef = [plain, hidden].map((event) => cefLine(event, HEAD, '1'));
+
+    // Assert
+    expect(texts[0]).not.toBe(texts[1]);
+    expect(texts[1]).toContain(String.raw`acme/ref\u200Bund`);
+    expect(cef[0]).not.toBe(cef[1]);
+    expect(cef[1]).toContain(String.raw`acme/ref\u200Bund`);
+  });
+
+  it('shows a bidi override as an escape in text and CEF, and a backslash as two', () => {
+    // Arrange
+    const event: AuditEvent = {
+      ...approved,
+      prompt: 'acme/a\u202eb',
+      author: { name: 'Ann\u202e', email: 'ann@example.com\u202e' },
+      path: String.raw`dir\u200bx`,
+    };
+
+    // Act
+    const text = textLines(event)[0];
+    const cef = cefLine(event, HEAD, '1');
+
+    // Assert
+    expect(text).toContain(String.raw`acme/a\u202Eb`);
+    expect(text).toContain(String.raw`by Ann\u202E <`);
+    expect(text).toContain(String.raw`dir\\u200bx`);
+    expect(cef).toContain(String.raw`suser=ann@example.com\u202E `);
+    expect(cef).toContain(String.raw`dir\\u200bx`);
   });
 
   it('shows a dash for events without a hash', () => {
@@ -397,7 +452,8 @@ describe('experiment events', () => {
     // Assert
     expect(line).toContain(String.raw` filePath=a|b\=c\\d\ne `);
     expect(line).toContain(' suser=a|b@x ');
-    expect(textLines(event)[0]).toContain('by Na|me=x <a|b@x>');
+    expect(line).not.toContain('\u0007');
+    expect(textLines(event)[0]).toContain(String.raw`by Na|me=\u0007x <a|b@x>`);
     expect(line).toMatch(
       /^CEF:0\|PromptScript\|prs\|1\|prs-experiment-started\|Experiment started\|6\|rt=/
     );

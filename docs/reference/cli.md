@@ -1788,7 +1788,9 @@ The command runs in a Git checkout with the full history; a shallow clone, no re
 failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` or `--hash` is `PS5102`. Exit code 0 means the log was
 read, 1 an error. With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
-from. `--format cef` prints one CEF line per event.
+from. `--format cef` prints one CEF line per event. Text and CEF lines show invisible and
+control characters as `\uXXXX`. That is not a standard CEF escape, so a SIEM shows it literally.
+`--format json` keeps the exact values.
 
 ```bash
 prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44

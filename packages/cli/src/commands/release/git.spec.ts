@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import {
   CatFileBatchParser,
   errorMessage,
+  escapeControlCharacters,
   readBlobs,
   resolveWindowsGit,
   runGit,
@@ -25,6 +26,23 @@ afterEach(async () => {
   for (const directory of directories.splice(0)) {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+describe('escapeControlCharacters', () => {
+  it('writes each control, bidi and zero-width character as uppercase hex', () => {
+    expect(escapeControlCharacters('a\u001b\u202eb\u200bc\ufeff')).toBe(
+      String.raw`a\u001B\u202Eb\u200Bc\uFEFF`
+    );
+    expect(escapeControlCharacters('plain text')).toBe('plain text');
+  });
+
+  it('writes tag characters, variation selectors and lone surrogates', () => {
+    expect(escapeControlCharacters('a\u{e0001}b\ufe0fc\u00ad\u2063')).toBe(
+      String.raw`a\uE0001b\uFE0Fc\u00AD\u2063`
+    );
+    expect(escapeControlCharacters('x\ud800y\udc00z')).toBe(String.raw`x\uD800y\uDC00z`);
+    expect(escapeControlCharacters('ok \u{1f600} \ud83d\ude00')).toBe('ok \u{1f600} \ud83d\ude00');
+  });
 });
 
 describe('stripControlCharacters', () => {

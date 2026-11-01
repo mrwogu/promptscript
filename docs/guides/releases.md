@@ -990,9 +990,13 @@ events, so a SIEM rule should check `flexString2Label` first.
 
 Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
 `config-changed` and the three experiment events 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
-and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
-drop control, bidi and zero-width characters from Git and record fields. JSON keeps them as
-escapes, so take exact prompt ids and other values from the JSON export.
+and `=`, and line breaks become `\n`. The raw text and CEF lines show other control, bidi,
+zero-width and similar invisible characters, tag characters and lone surrogates of Git and record
+fields as `\u` and 4 to 6 hex digits, so two ids that differ only by an invisible character print
+differently, and the text output doubles a backslash. In CEF this is not a standard escape, so a
+SIEM shows it literally and a literal `\u200B` in a value looks like a real zero-width space after
+a lenient decode. `--format json` keeps the exact value, so take prompt ids and other values from
+the JSON export.
 
 ### Limits
 
