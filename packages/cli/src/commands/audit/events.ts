@@ -281,6 +281,8 @@ interface LabelContext {
   configured: boolean;
   /** Label paths that did not parse at some commit */
   unreadable: Set<string>;
+  /** Last readable parsed entries per label path, from mainline commits */
+  lastReadable: Map<string, Map<string, PromptReleaseLabelEntryV2>>;
 }
 
 function heldHashes(context: LabelContext, environment: string, prompt: string): Set<string> {
@@ -350,7 +352,7 @@ async function labelEvents(
 ): Promise<AuditEvent[]> {
   const short = commit.commit.slice(0, 12);
   const parent = commit.parents[0]?.slice(0, 12) ?? 'the parent';
-  const previous = await labelEntryMap(
+  const readPrevious = await labelEntryMap(
     read,
     file.oldBlob,
     file.oldMode,
@@ -368,9 +370,14 @@ async function labelEvents(
     short,
     warn
   );
-  if (previous === undefined || next === undefined) context.unreadable.add(file.path);
+  if (readPrevious === undefined || next === undefined) context.unreadable.add(file.path);
   // A label that does not parse changes nothing: no entry was promoted or removed by it.
   if (next === undefined) return [];
+  // On the mainline an unreadable old side is diffed against the last readable state of the
+  // path. A side commit can sit between newer mainline commits, so it never uses that state.
+  const previous =
+    readPrevious ?? (context.mainline ? context.lastReadable.get(file.path) : undefined);
+  if (context.mainline) context.lastReadable.set(file.path, next);
   const entries = entryEvents(
     commit,
     file.path,
@@ -429,6 +436,7 @@ async function commitEvents(
   sources: AuditSources,
   history: LabelHistory,
   unreadable: Set<string>,
+  lastReadable: LabelContext['lastReadable'],
   read: BlobReader,
   warn: AuditWarn
 ): Promise<AuditEvent[]> {
@@ -443,7 +451,13 @@ async function commitEvents(
     }
     if (environment !== undefined) {
       const configured = sources.environments.has(environment);
-      const context: LabelContext = { history, mainline: commit.mainline, configured, unreadable };
+      const context: LabelContext = {
+        history,
+        mainline: commit.mainline,
+        configured,
+        unreadable,
+        lastReadable,
+      };
       return labelEvents(commit, file, environment, context, read, warn);
     }
     if (sources.configFiles.has(file.path)) {
@@ -488,6 +502,7 @@ export async function buildEvents(
 ): Promise<BuiltEvents> {
   const history: LabelHistory = new Map();
   const unreadable = new Set<string>();
+  const lastReadable: LabelContext['lastReadable'] = new Map();
   const unconfigured = new Set<string>();
   for (const commit of commits) {
     for (const file of commit.changes) {
@@ -506,7 +521,15 @@ export async function buildEvents(
   oldestFirst.reverse();
   const byCommit = await inSequence(oldestFirst, async (parsed) => {
     const commit: AuditCommit = { ...parsed, mainline: options.mainline.has(parsed.commit) };
-    const events = await commitEvents(commit, sources, history, unreadable, read, warn);
+    const events = await commitEvents(
+      commit,
+      sources,
+      history,
+      unreadable,
+      lastReadable,
+      read,
+      warn
+    );
     if (commit.parents.length > 1 && options.dropped !== undefined) {
       events.push(...(await options.dropped(commit)));
     }
