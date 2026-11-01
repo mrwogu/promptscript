@@ -474,6 +474,11 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
   and `prs governance codeowners` writes CODEOWNERS lines that route prompt files, approvals and
   release labels to the right teams. Turn on required code-owner review in branch protection. See
   [enterprise setup](https://getpromptscript.dev/guides/enterprise/#governed-application-prompts).
+- **Prompt evals and checks** - `prs eval run --label prod` runs eval suites against the bundles an
+  environment serves, with datasets, assertions, an LLM judge, a replay cache, a cost limit and a
+  baseline compare. The default cache mode is replay, so record the answers once with
+  `--cache record --max-cost 0.5`. `prs release status --check-models` fails on labels that run a retired or
+  retiring model. See [the releases guide](https://getpromptscript.dev/guides/releases/#eval-what-an-environment-serves).
 - **Reproducible builds** - lockfile hashes, version pins, vendor mode, and strict validation.
 - **Safe automation** - lifecycle hook commands use arrays, while generated-file protection keeps
   agents pointed at `.prs` source.
