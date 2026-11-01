@@ -72,6 +72,7 @@ vi.mock('node:fs', () => ({
 import { validateCommand } from '../validate.js';
 import { ConsoleOutput } from '../../output/console.js';
 import { resolve } from 'node:path';
+import { PSError } from '@promptscript/core';
 
 describe('validateCommand', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>;
@@ -201,12 +202,124 @@ describe('validateCommand', () => {
     const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
     expect(jsonOutput).toEqual(
       expect.objectContaining({
+        $schema: 'https://getpromptscript.dev/schema/validate-report/v1.json',
+        version: 1,
         success: true,
         errors: [],
         warnings: [],
         summary: { errorCount: 0, warningCount: 0 },
       })
     );
+  });
+
+  it('should print the exact report shape and drop unknown location keys', async () => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({ targets: [], validation: {} });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: false,
+      errors: [
+        {
+          name: 'ParseError',
+          code: 'PS2000',
+          message: 'Bad block',
+          location: { file: '/a.prs', line: 2, column: 3, endLine: 9 },
+        },
+      ],
+      warnings: [
+        {
+          ruleId: 'PS008',
+          message: 'Empty block',
+          suggestion: 'Add content',
+          location: { file: '/a.prs', line: 4, column: 1, offset: 20, endLine: 5 },
+        },
+      ],
+      outputs: new Map(),
+    });
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput).toEqual({
+      $schema: 'https://getpromptscript.dev/schema/validate-report/v1.json',
+      version: 1,
+      success: false,
+      errors: [
+        {
+          code: 'PS2000',
+          message: 'Bad block',
+          location: { file: '/a.prs', line: 2, column: 3 },
+        },
+      ],
+      warnings: [
+        {
+          ruleId: 'PS008',
+          message: 'Empty block',
+          suggestion: 'Add content',
+          location: { file: '/a.prs', line: 4, column: 1, offset: 20 },
+        },
+      ],
+      summary: { errorCount: 1, warningCount: 1 },
+    });
+  });
+
+  it.each(['EACCES', 'EISDIR'])('should leave out the %s code of a failed read', async (code) => {
+    // Arrange
+    mockLoadConfig.mockResolvedValue({ targets: [], validation: {} });
+    mockResolveRegistryPath.mockResolvedValue({
+      path: './registry',
+      isRemote: false,
+      source: 'local',
+    });
+    mockExistsSync.mockImplementation((path) => !String(path).endsWith('promptscript.lock'));
+    mockCompile.mockResolvedValue({
+      success: false,
+      errors: [{ name: 'Error', code, message: `${code}: cannot read`, location: undefined }],
+      warnings: [],
+      outputs: new Map(),
+    });
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.errors).toEqual([{ message: `${code}: cannot read` }]);
+  });
+
+  it('should keep the code and location of a config PSError', async () => {
+    // Arrange
+    mockLoadConfig.mockRejectedValue(
+      new PSError('Bad config', 'PS4000', { location: { file: '/c.yaml', line: 2, column: 1 } })
+    );
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.errors).toEqual([
+      { code: 'PS4000', message: 'Bad config', location: { file: '/c.yaml', line: 2, column: 1 } },
+    ]);
+  });
+
+  it('should leave out the code of an error that is not a PS error', async () => {
+    // Arrange
+    mockLoadConfig.mockRejectedValue(new Error('registry clone failed'));
+
+    // Act
+    await validateCommand({ format: 'json' });
+
+    // Assert
+    const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.errors).toEqual([{ message: 'registry clone failed' }]);
   });
 
   it('should treat warnings as errors when --strict is enabled', async () => {
@@ -338,9 +451,13 @@ describe('validateCommand', () => {
     // Assert
     expect(consoleSpy).toHaveBeenCalled();
     const jsonOutput = JSON.parse(consoleSpy.mock.calls[0][0] as string);
+    expect(jsonOutput.$schema).toBe('https://getpromptscript.dev/schema/validate-report/v1.json');
+    expect(jsonOutput.version).toBe(1);
     expect(jsonOutput.success).toBe(false);
     expect(jsonOutput.errors).toHaveLength(1);
     expect(jsonOutput.errors[0].message).toContain('File not found');
+    expect(jsonOutput.errors[0]).not.toHaveProperty('code');
+    expect(jsonOutput.errors[0]).not.toHaveProperty('location');
     expect(process.exitCode).toBe(1);
   });
 
