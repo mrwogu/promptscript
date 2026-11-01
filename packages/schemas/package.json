@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/schemas",
-  "version": "0.0.1",
+  "version": "1.26.0",
   "private": true,
   "description": "JSON Schemas for PromptScript config and report files",
   "keywords": [
@@ -38,5 +38,11 @@
   },
   "files": [
     "*.json"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

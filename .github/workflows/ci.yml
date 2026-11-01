@@ -156,11 +156,31 @@ jobs:
             exit 1
           fi
 
+      - name: Script Specs
+        if: matrix.node-version == '22.x'
+        run: |
+          if ! pnpm test:scripts; then
+            echo "::error::Script specs failed, see the log above. Run 'pnpm test:scripts' locally."
+            exit 1
+          fi
+
       - name: Package Check
         if: matrix.node-version == '22.x'
         run: |
           if ! pnpm package:check; then
             echo "::error::Package check failed, see the log above. Run 'pnpm package:check' locally."
+            exit 1
+          fi
+
+      # Private libraries get no nx-release-publish target, so only the CLI runs here.
+      # package:check covers the libraries.
+      - name: Publish dry run
+        if: matrix.node-version == '22.x'
+        run: |
+          pnpm nx run-many -t build -p core,parser,resolver,validator,formatters,compiler,browser-compiler,schemas,cli
+          pnpm library:prepare-publish
+          if ! pnpm nx release publish --dry-run --tag latest; then
+            echo "::error::Publish dry run failed, see the log above. Run it locally after 'pnpm library:prepare-publish'."
             exit 1
           fi
 

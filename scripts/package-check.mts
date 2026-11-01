@@ -13,6 +13,7 @@
 
 import {
   cpSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -27,19 +28,17 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { publint } from 'publint';
 import { formatMessage } from 'publint/utils';
+import {
+  CODE_LIBRARIES,
+  LIBRARIES,
+  pinInternalDependencies,
+  wiringFailures,
+} from './library-packages.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-// Hardcoded on purpose: a package joins the list when it is ready to be packed.
-const PACKAGES = [
-  'core',
-  'parser',
-  'resolver',
-  'validator',
-  'formatters',
-  'compiler',
-  'browser-compiler',
-];
+// The libraries built from TypeScript. schemas has its own, smaller path below.
+const PACKAGES = CODE_LIBRARIES;
 const NODE_ENGINES = '>=22';
 const SCOPE = '@promptscript';
 const TEST_FILE = /((^|\/)__tests__\/)|(\.(spec|test)\.[cm]?[jt]s$)/;
@@ -112,6 +111,11 @@ function checkManifest(name: string, manifest: Manifest, dir: string): void {
   if (manifest.repository?.directory !== `packages/${name}`) {
     fail(`${label}: repository.directory must be packages/${name}`);
   }
+  for (const [dep, spec] of Object.entries(manifest.dependencies ?? {})) {
+    if (dep.startsWith(`${SCOPE}/`) && spec !== manifest.version) {
+      fail(`${label}: ${dep} must be pinned to ${manifest.version}, got ${spec}`);
+    }
+  }
   const shipped = (readdirSync(dir, { recursive: true }) as string[])
     .map((path) => path.replaceAll('\\', '/'))
     .filter((path) => !path.startsWith('node_modules/'));
@@ -144,15 +148,15 @@ function packTarballs(tmp: string, distManifests: Map<string, Manifest>): string
     const stage = join(tmp, 'stage', name);
     cpSync(join(root, 'dist/packages', name), stage, { recursive: true });
     const manifest = readManifest(join(stage, 'package.json'));
-    const dependencies = manifest.dependencies ?? {};
-    for (const [dep, spec] of Object.entries(dependencies)) {
-      if (!dep.startsWith(`${SCOPE}/`)) continue;
-      const sibling = distManifests.get(dep.slice(SCOPE.length + 1));
-      if (!sibling) {
+    try {
+      // Outside the workspace pnpm cannot resolve workspace:*, so pin the lockstep version.
+      pinInternalDependencies(manifest, manifest.version ?? '0.0.0');
+    } catch (error) {
+      fail(`${SCOPE}/${name}: ${errorText(error)}`);
+    }
+    for (const dep of Object.keys(manifest.dependencies ?? {})) {
+      if (dep.startsWith(`${SCOPE}/`) && !distManifests.has(dep.slice(SCOPE.length + 1))) {
         fail(`${SCOPE}/${name}: depends on ${dep}, which is not a checked package`);
-      } else if (spec.startsWith('workspace:')) {
-        // Outside the workspace pnpm cannot resolve workspace:, so pin the sibling version.
-        dependencies[dep] = sibling.version ?? '0.0.0';
       }
     }
     writeFileSync(join(stage, 'package.json'), `${JSON.stringify(manifest, null, 2)}\n`);
@@ -263,6 +267,67 @@ async function bundleForBrowser(smoke: string): Promise<void> {
   }
 }
 
+// schemas has no code: pack, publint, install, and import every exported JSON file.
+async function checkSchemas(tmp: string): Promise<void> {
+  const label = `${SCOPE}/schemas`;
+  const stage = join(tmp, 'stage', 'schemas');
+  const tarballDir = join(tmp, 'tarballs-schemas');
+  mkdirSync(tarballDir);
+  cpSync(join(root, 'dist/packages/schemas'), stage, { recursive: true });
+  const manifest = readManifest(join(stage, 'package.json'));
+  const packed = pnpm(['pack', '--pack-destination', tarballDir], stage, true);
+  if (!packed.ok) {
+    fail(`${label}: pnpm pack failed\n${packed.output}`);
+    return;
+  }
+  const tarball = join(tarballDir, `promptscript-schemas-${manifest.version}.tgz`);
+  const buf = readFileSync(tarball);
+  const tarballBytes = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  const { messages, pkg } = await publint({
+    pack: { tarball: tarballBytes },
+    level: 'warning',
+    strict: true,
+  });
+  for (const message of messages)
+    fail(`publint ${basename(tarball)}: ${formatMessage(message, pkg)}`);
+
+  const smoke = join(tmp, 'smoke-schemas');
+  mkdirSync(smoke);
+  writeFileSync(
+    join(smoke, 'package.json'),
+    JSON.stringify({ name: 'smoke-schemas', private: true, type: 'module' })
+  );
+  const install = spawnSync(
+    'npm', // NOSONAR - fixed arguments, PATH lookup is how the tool is found
+    ['install', '--no-audit', '--no-fund', '--ignore-scripts', tarball],
+    { cwd: smoke, encoding: 'utf8', shell: process.platform === 'win32' }
+  );
+  if (install.status !== 0) {
+    fail(`npm install of ${label} failed\n${install.stdout}${install.stderr}`);
+    return;
+  }
+  const dir = join(smoke, 'node_modules', SCOPE, 'schemas');
+  const installed = readManifest(join(dir, 'package.json'));
+  if (!existsSync(join(dir, 'LICENSE'))) fail(`${label}: the MIT LICENSE file is missing`);
+  const files = Object.keys(installed.exports ?? {}).filter(
+    (key) => key.endsWith('.json') && key !== './package.json'
+  );
+  if (files.length === 0) fail(`${label}: no JSON file is exported`);
+  writeFileSync(
+    join(smoke, 'schemas.mjs'),
+    `const files = ${JSON.stringify(files)};
+for (const file of files) {
+  const mod = await import('${label}/' + file.slice(2), { with: { type: 'json' } });
+  if (typeof mod.default.$id !== 'string' || !mod.default.$id.startsWith('https://')) {
+    throw new Error(file + ' has no $id');
+  }
+}
+`
+  );
+  const result = spawnSync(process.execPath, ['schemas.mjs'], { cwd: smoke, encoding: 'utf8' });
+  if (result.status !== 0) fail(`schemas import failed\n${result.stdout}${result.stderr}`);
+}
+
 async function run(tmp: string): Promise<void> {
   const distManifests = new Map<string, Manifest>();
   for (const name of PACKAGES) {
@@ -275,10 +340,18 @@ async function run(tmp: string): Promise<void> {
   if (!installTarballs(smoke, tarballs)) return;
   importAndCompile(smoke);
   await bundleForBrowser(smoke);
+  await checkSchemas(tmp);
+}
+
+const wiring = wiringFailures(root);
+if (wiring.length > 0) {
+  console.error('Library wiring check failed:');
+  for (const message of wiring) console.error(`  - ${message}`);
+  process.exit(1);
 }
 
 console.log('Building the library packages...');
-if (!pnpm(['nx', 'run-many', '-t', 'build', '-p', PACKAGES.join(',')], root).ok) {
+if (!pnpm(['nx', 'run-many', '-t', 'build', '-p', LIBRARIES.join(',')], root).ok) {
   console.error('Build failed, cannot pack.');
   process.exit(1);
 }
@@ -298,4 +371,4 @@ if (failures.length > 0) {
   for (const message of failures) console.error(`  - ${message}`);
   process.exit(1);
 }
-console.log(`\nPackage check passed for ${PACKAGES.length} packages.`);
+console.log(`\nPackage check passed for ${LIBRARIES.length} packages.`);
