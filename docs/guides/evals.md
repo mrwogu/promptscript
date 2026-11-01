@@ -34,8 +34,9 @@ has a suite with five cases. The files, the recorded answers and the two reports
 [the example folder](https://github.com/mrwogu/promptscript/tree/main/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply). Everything below is read from there.
 
 The suite checks four things in every answer. The output must fit the contract of the prompt, the
-`decision` must be the expected one, the `reply` must not promise or guarantee a refund, and a judge
-model must find the reply polite and within the policy.
+`decision` must be the expected one, the `reply` must not say "we guarantee", "I guarantee" or
+"guaranteed refund", and a judge model must find the reply polite and within the policy. The regex
+is a cheap tripwire for these words only, a promise in other words is left to the judge.
 
 ```yaml
 $schema: https://getpromptscript.dev/schema/eval-suite/v1.json
@@ -193,10 +194,10 @@ output must be exactly a `verdict` of `pass` or `fail`, and a `reason`. The asse
 
 The text the judge reads was written by a model, or by a customer. Treat it as data:
 
-- Put `response` and `case_inputs` in the user message, inside a fence made with `boundary`, as in
-  the example. The boundary comes from a hash of the answer, so the answer cannot close its own
-  fence. Text outside a fence is a warning, `PS6216`.
-- Keep them out of the system message. That is an error, `PS6212`.
+- Put `response` and `case_inputs`, and `expected` if the rubric declares it, in the user message,
+  inside a fence made with `boundary`, as in the example. The boundary comes from a hash of the
+  answer, so the answer cannot close its own fence. Text outside a fence is a warning, `PS6216`.
+- Keep all three out of the system message. That is an error, `PS6212`.
 - Say in the system message that the text in the tags is data.
 - Do not use the model under test as the judge, or you get a warning, `PS6215`.
 
@@ -256,6 +257,11 @@ prs eval compare main.json candidate.json --fail-on-regression
 A case regressed when it passed in the baseline and does not pass now. A drop of the pass rate
 above `--tolerance` counts too. A report is a claim about one run, not a proof, and release gates
 do not read it. Replay it at the commit you gate to check it.
+
+Only cases with the same suite, model and case id in both reports are compared. A case, model or
+suite that is in one report only is listed, but it is not a regression by itself. The pass rate of a
+model in both reports is still compared, so a smaller dataset can fail on `--tolerance`. A report
+that only lost cases can pass, even with `--fail-on-regression`.
 
 ## In CI
 
