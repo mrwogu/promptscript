@@ -1340,7 +1340,7 @@ describe('prs audit log experiments', () => {
     expect(rename[1]).toMatchObject({ experiment: 'tone-3' });
   });
 
-  it('shows a broken label as a warning, then a fixed one with an experiment as started', async () => {
+  it('shows a broken label as a warning, then a fixed one with the old experiment ended and the new one started', async () => {
     // Arrange
     const { root, step } = await experimentHistory();
     await put(root, { [PROD]: '{"not":"a label"}\n' });
@@ -1364,7 +1364,7 @@ describe('prs audit log experiments', () => {
     expect(validateAuditLog(report), JSON.stringify(validateAuditLog.errors)).toBe(true);
     expect(typesOf(report.events, step['broken'] ?? '')).toEqual([]);
     expect(typesOf(report.events, step['fixed'] ?? '')).toEqual([
-      'rolled-back',
+      'experiment-ended',
       'experiment-started',
     ]);
     const deleted = report.events.filter((event) => event.commit === step['delete']);
@@ -1375,6 +1375,115 @@ describe('prs audit log experiments', () => {
     expect(report.warnings.map((warning) => warning.message)).toEqual([
       expect.stringContaining('is not a release label'),
     ]);
+  });
+
+  it('diffs against the last readable label when the old side does not parse', async () => {
+    // Arrange
+    const root = await project();
+    const other = 'acme-support/other';
+    const running = experimentOf('tone', arm('control', H1, 9000), arm('warm', H2, 1000));
+    const prompts: Parameters<typeof labelText>[0]['prompts'] = [
+      { id: PROMPT, contentHash: H1, experiment: running },
+      { id: other, contentHash: H1 },
+    ];
+    const withTwo = labelText({
+      $schema: PROMPT_RELEASE_LABEL_SCHEMA_URL,
+      environment: 'prod',
+      prompts,
+    });
+    await put(root, { [PROD]: withTwo });
+    commit(root, 'two entries');
+    await put(root, { [PROD]: '{ not json' });
+    commit(root, 'broken');
+    await put(root, { [PROD]: label('prod', H1) });
+    const fixed = commit(root, 'fixed');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(typesOf(report.events, fixed)).toEqual(['experiment-ended', 'label-removed']);
+    expect(report.warnings.map((warning) => warning.message)).toEqual([
+      expect.stringContaining('is not a release label'),
+    ]);
+  });
+
+  it('does not diff a side commit against newer mainline state of a broken label', async () => {
+    // Arrange
+    const root = await project();
+    const main = branch(root);
+    const other = 'acme-support/other';
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1, [other]: H1 }) });
+    commit(root, 'promote both');
+    git(root, 'checkout', '-q', '-b', 'side');
+    await put(root, { [PROD]: '{ not json' });
+    commit(root, 'side breaks');
+    git(root, 'checkout', '-q', main);
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H2 }) });
+    commit(root, 'main drops other');
+    git(root, 'checkout', '-q', 'side');
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1, [other]: H1 }) });
+    const sideFixed = commit(root, 'side fixes');
+    git(root, 'checkout', '-q', main);
+    dated(root, 'merge', '--no-ff', '--no-edit', 'side');
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H2 }) });
+    commit(root, 'merge side');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    const fixed = report.events.filter((event) => event.commit === sideFixed);
+    expect(fixed.map((event) => event.type)).not.toContain('label-removed');
+    expect(fixed.map((event) => event.type)).not.toContain('experiment-ended');
+    expect(fixed.every((event) => event.previousContentHash === undefined)).toBe(true);
+  });
+
+  it('reads a label that was deleted, recreated unreadable and then fixed', async () => {
+    // Arrange
+    const root = await project();
+    const other = 'acme-support/other';
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1, [other]: H1 }) });
+    commit(root, 'promote both');
+    git(root, 'rm', '-q', PROD);
+    const deleted = commit(root, 'delete');
+    await put(root, { [PROD]: '{ not json' });
+    const broken = commit(root, 'recreate broken');
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1 }) });
+    const fixed = commit(root, 'fix');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(typesOf(report.events, deleted)).toEqual(['label-removed', 'label-removed']);
+    expect(typesOf(report.events, broken)).toEqual([]);
+    expect(typesOf(report.events, fixed)).toEqual(['rolled-back']);
+  });
+
+  it('diffs a merge that fixes the label of its broken first parent against the last readable one', async () => {
+    // Arrange
+    const root = await project();
+    const main = branch(root);
+    const other = 'acme-support/other';
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1, [other]: H1 }) });
+    commit(root, 'promote both');
+    git(root, 'checkout', '-q', '-b', 'side');
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1, [other]: H1 }), 'note.txt': 'x\n' });
+    commit(root, 'side note');
+    git(root, 'checkout', '-q', main);
+    await put(root, { [PROD]: '{ not json' });
+    commit(root, 'main breaks');
+    dated(root, 'merge', '--no-ff', '--no-edit', 'side');
+    await put(root, { [PROD]: labelOf('prod', { [PROMPT]: H1 }) });
+    const merge = commit(root, 'merge side');
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    const events = report.events.filter((event) => event.commit === merge);
+    expect(events.map((event) => [event.type, event.prompt])).toEqual([['label-removed', other]]);
   });
 
   it('shows an experiment that the first commit of the repository already has', async () => {

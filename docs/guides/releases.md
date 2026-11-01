@@ -1017,12 +1017,13 @@ escapes, so take exact prompt ids and other values from the JSON export.
 - The output holds email addresses. Treat exports like other personal data.
 - A merge that drops an experiment change of a side branch shows no `merge-dropped`, because that
   check compares hashes only. The change shows on the side commit.
-- A label that does not parse is read as no change. The next readable version of it shows its
-  experiments as `experiment-started`, like its entries as `promoted`, and the label stays out of
-  the check against `HEAD`. A change made while the label did not parse shows no
-  `experiment-ended`, `experiment-changed` or `label-removed`: an experiment that ended or changed,
-  or an entry that was removed, leaves no event, because the next readable version is compared
-  against nothing. A changed experiment then shows as `experiment-started` without `previousArms`.
+- A label that does not parse is read as no change, and it stays out of the check against `HEAD`.
+  The next readable version of it on the mainline is compared against the last readable version
+  before it, so an entry or experiment removed or changed meanwhile shows as `label-removed`,
+  `experiment-ended` or `experiment-changed` on that commit. A label with no readable version
+  before it on the mainline, and a commit of a side branch, are compared against nothing: its
+  experiments show as `experiment-started` and its entries as `promoted`, or as `rolled-back` when
+  the hash was held before. The warning about an unreadable label is printed once.
 - The experiment events are new in the JSON document, and the schema URL and `version` stay 1. A
   consumer that switches on `type` sees types it does not know, and one that validates against a
   copy of the schema from before them rejects the document. Update the copy.
