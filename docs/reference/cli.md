@@ -1347,7 +1347,8 @@ With `--check-models`, the model of every verified label entry and experiment ar
 against the model catalog of the running `prs` plus `models.profiles`. A retired model, or a
 deprecated one whose retirement date is within `--retiring-within` days, fails with `PS5011`; a
 model the catalog does not know gives a warning. See
-[Check the models of the labels](../guides/releases.md#check-the-models-of-the-labels).
+[Check the models of the labels](../guides/releases.md#check-the-models-of-the-labels). For a weekly check in GitHub Actions, see
+[Scheduled drift check](../guides/ci.md#scheduled-drift-check).
 
 ```bash
 prs release status --history 5
@@ -1545,7 +1546,8 @@ stderr gets one line `label <env>: suite <name> judged by <rubric> at <short has
 per judged suite, next to the `runs` line. The cache is keyed by
 the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
 source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
-environment serves. Release gates do not read eval reports, so a report of a label run is not gate
+environment serves. For a weekly check in GitHub Actions, see
+[Scheduled drift check](../guides/ci.md#scheduled-drift-check). Release gates do not read eval reports, so a report of a label run is not gate
 evidence.
 
 | Exit code | Outcome (`outcome` in JSON)                                                                   |
