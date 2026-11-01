@@ -466,6 +466,8 @@ importers:
         specifier: '>=1.9.0 <2'
         version: 1.10.0
 
+  packages/schemas: {}
+
   packages/server:
     dependencies:
       '@fastify/cors':
