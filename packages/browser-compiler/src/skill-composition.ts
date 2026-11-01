@@ -62,10 +62,11 @@ export interface CompositionOptions {
 
 /**
  * Browser-compatible basename: returns the last segment of a path.
+ * Splits on both `/` and `\` so Windows-style paths work too.
  * Replaces Node's `path.basename` which is not available in the browser.
  */
 function basename(path: string): string {
-  const parts = path.split('/').filter((s) => s.length > 0);
+  const parts = path.split(/[\\/]/).filter((s) => s.length > 0);
   return parts[parts.length - 1] ?? path;
 }
 
