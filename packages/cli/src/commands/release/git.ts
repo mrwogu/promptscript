@@ -406,6 +406,6 @@ export function stripControlCharacters(text: string): string {
 export function escapeControlCharacters(text: string): string {
   return text.replaceAll(TERMINAL_CONTROL_RE, (char) => {
     const hex = (char.codePointAt(0) ?? 0).toString(16).toUpperCase().padStart(4, '0');
-    return `\\u${hex}`;
+    return String.raw`\u${hex}`;
   });
 }
