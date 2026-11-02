@@ -30,7 +30,6 @@
   },
   "type": "module",
   "main": "./index.js",
-  "types": "./src/index.d.ts",
   "bin": {
     "prs": "./bin/prs.js",
     "promptscript": "./bin/prs.js"

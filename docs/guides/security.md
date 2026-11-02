@@ -205,6 +205,8 @@ Findings on synthesized skill nodes point at the file the content was inlined fr
 
 ### Using Security Presets
 
+`@promptscript/validator` is not published to npm, so the code examples in this section work inside the PromptScript repository only. In your own project, configure the `validation` section in `promptscript.yaml` and run `prs validate`.
+
 ```typescript
 import { createValidator, SECURITY_STRICT } from '@promptscript/validator';
 

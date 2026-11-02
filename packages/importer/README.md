@@ -48,6 +48,8 @@ prs import CLAUDE.md --validate
 
 ### Programmatic
 
+`@promptscript/importer` is not published to npm, so this example works inside the PromptScript repository only. Outside of it, use `prs import`.
+
 ```typescript
 import { importFile, validateRoundtrip } from '@promptscript/importer';
 
