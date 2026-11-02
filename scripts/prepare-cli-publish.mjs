@@ -43,7 +43,6 @@ const publishPkg = {
   publishConfig: pkg.publishConfig,
   type: pkg.type,
   main: pkg.main,
-  types: pkg.types,
   bin: pkg.bin,
   engines: {
     node: '>=22.22',
