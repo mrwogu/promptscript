@@ -6,7 +6,7 @@
 
 # Interface: ValidateWarningV1
 
-Defined in: [core/src/types/validate-report.ts:40](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L40)
+Defined in: [core/src/types/validate-report.ts:46](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L46)
 
 One warning of `prs validate`. With `--strict` a warning fails the run.
 
@@ -16,7 +16,7 @@ One warning of `prs validate`. With `--strict` a warning fails the run.
 
 > `optional` **location?**: [`ValidateLocationV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateLocationV1/index.md)
 
-Defined in: [core/src/types/validate-report.ts:51](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L51)
+Defined in: [core/src/types/validate-report.ts:57](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L57)
 
 Where the warning is
 
@@ -26,7 +26,7 @@ Where the warning is
 
 > **message**: `string`
 
-Defined in: [core/src/types/validate-report.ts:47](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L47)
+Defined in: [core/src/types/validate-report.ts:53](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L53)
 
 Warning message
 
@@ -36,7 +36,7 @@ Warning message
 
 > **ruleId**: `string`
 
-Defined in: [core/src/types/validate-report.ts:45](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L45)
+Defined in: [core/src/types/validate-report.ts:51](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L51)
 
 Validator rule id
 
@@ -52,6 +52,6 @@ Validator rule id
 
 > `optional` **suggestion?**: `string`
 
-Defined in: [core/src/types/validate-report.ts:49](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L49)
+Defined in: [core/src/types/validate-report.ts:55](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L55)
 
 Suggested fix

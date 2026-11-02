@@ -6,7 +6,7 @@
 
 # Interface: FileReport
 
-Defined in: [importer/src/multi-importer.ts:8](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/multi-importer.ts#L8)
+Defined in: [importer/src/multi-importer.ts:8](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L8)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/multi-importer.ts:8](https://github.com/mrwogu/prompts
 
 > **confidence**: `number`
 
-Defined in: [importer/src/multi-importer.ts:11](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/multi-importer.ts#L11)
+Defined in: [importer/src/multi-importer.ts:11](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L11)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/multi-importer.ts:11](https://github.com/mrwogu/prompt
 
 > **file**: `string`
 
-Defined in: [importer/src/multi-importer.ts:9](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/multi-importer.ts#L9)
+Defined in: [importer/src/multi-importer.ts:9](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L9)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [importer/src/multi-importer.ts:9](https://github.com/mrwogu/prompts
 
 > **sectionCount**: `number`
 
-Defined in: [importer/src/multi-importer.ts:10](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/importer/src/multi-importer.ts#L10)
+Defined in: [importer/src/multi-importer.ts:10](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L10)

@@ -8,7 +8,7 @@
 
 > **PolicyContext** = `Pick`\<[`ValidatorConfig`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidatorConfig/index.md), `"governance"` \| `"releases"` \| `"models"` \| `"blockedPatterns"` \| `"allowedPatterns"`\>
 
-Defined in: [validator/src/policy/types.ts:19](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/policy/types.ts#L19)
+Defined in: [validator/src/policy/types.ts:19](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/validator/src/policy/types.ts#L19)
 
 Project settings that policies are parsed and evaluated against: approval
 roles, release environments, the model catalog and the blocked-pattern setup

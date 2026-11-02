@@ -8,6 +8,6 @@
 
 > `const` **INHERIT\_MODEL**: `"inherit"` = `'inherit'`
 
-Defined in: [core/src/model-catalog.ts:35](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/model-catalog.ts#L35)
+Defined in: [core/src/model-catalog.ts:35](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/model-catalog.ts#L35)
 
 Model value that keeps the model already selected in the tool.

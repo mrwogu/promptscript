@@ -8,7 +8,7 @@
 
 > **isPromptTarget**(`name`): `boolean`
 
-Defined in: [core/src/target-catalog.ts:909](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/target-catalog.ts#L909)
+Defined in: [core/src/target-catalog.ts:913](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/target-catalog.ts#L913)
 
 Whether a target name is a built-in prompt target (`bundle`, `prompt-text`).
 Prompt targets are opt-in: no "all formatters" default includes them.

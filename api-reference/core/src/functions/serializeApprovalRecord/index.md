@@ -8,7 +8,7 @@
 
 > **serializeApprovalRecord**(`record`): `string`
 
-Defined in: [core/src/types/approval.ts:180](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/approval.ts#L180)
+Defined in: [core/src/types/approval.ts:191](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/approval.ts#L191)
 
 The exact bytes of an approval record file: fixed key order, two-space indent,
 one trailing newline.

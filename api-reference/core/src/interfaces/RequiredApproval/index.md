@@ -6,7 +6,7 @@
 
 # Interface: RequiredApproval
 
-Defined in: [core/src/types/policy.ts:156](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L156)
+Defined in: [core/src/types/policy.ts:160](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L160)
 
 Approvals one role must give.
 
@@ -16,7 +16,7 @@ Approvals one role must give.
 
 > `optional` **count?**: `number`
 
-Defined in: [core/src/types/policy.ts:167](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L167)
+Defined in: [core/src/types/policy.ts:171](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L171)
 
 Distinct approvers needed. Only 1 is accepted while approval records are
 unsigned, since unsigned records cannot tell two approvers apart under one review.
@@ -45,6 +45,6 @@ integer
 
 > **role**: [`GovernanceRoleName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/GovernanceRoleName/index.md)
 
-Defined in: [core/src/types/policy.ts:158](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L158)
+Defined in: [core/src/types/policy.ts:162](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L162)
 
 Role from `governance.roles`

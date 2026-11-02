@@ -6,7 +6,7 @@
 
 # Interface: EvalCaseErrorV1
 
-Defined in: [core/src/types/eval.ts:508](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L508)
+Defined in: [core/src/types/eval.ts:528](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L528)
 
 Error that stopped one case.
 
@@ -16,7 +16,7 @@ Error that stopped one case.
 
 > **code**: `string`
 
-Defined in: [core/src/types/eval.ts:513](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L513)
+Defined in: [core/src/types/eval.ts:533](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L533)
 
 Error code.
 
@@ -30,6 +30,6 @@ Error code.
 
 > **message**: `string`
 
-Defined in: [core/src/types/eval.ts:515](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L515)
+Defined in: [core/src/types/eval.ts:535](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L535)
 
 What went wrong and what to do

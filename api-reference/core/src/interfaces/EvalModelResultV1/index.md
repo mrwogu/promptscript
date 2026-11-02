@@ -6,7 +6,7 @@
 
 # Interface: EvalModelResultV1
 
-Defined in: [core/src/types/eval.ts:584](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L584)
+Defined in: [core/src/types/eval.ts:604](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L604)
 
 Result of one model entry of a suite.
 
@@ -16,7 +16,7 @@ Result of one model entry of a suite.
 
 > **apiId**: `string`
 
-Defined in: [core/src/types/eval.ts:590](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L590)
+Defined in: [core/src/types/eval.ts:610](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L610)
 
 Provider API model identifier
 
@@ -26,7 +26,7 @@ Provider API model identifier
 
 > **cases**: [`EvalCaseResultV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalCaseResultV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:609](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L609)
+Defined in: [core/src/types/eval.ts:629](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L629)
 
 Case results sorted by id
 
@@ -36,7 +36,7 @@ Case results sorted by id
 
 > `optional` **costUsd?**: `number`
 
-Defined in: [core/src/types/eval.ts:603](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L603)
+Defined in: [core/src/types/eval.ts:623](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L623)
 
 Cost of the entry in USD.
 
@@ -50,7 +50,7 @@ Cost of the entry in USD.
 
 > `optional` **judgeAgreement?**: [`EvalJudgeAgreementV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalJudgeAgreementV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:607](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L607)
+Defined in: [core/src/types/eval.ts:627](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L627)
 
 Agreement with human labels per judge assertion, in assertion order
 
@@ -60,7 +60,7 @@ Agreement with human labels per judge assertion, in assertion order
 
 > **latencyMs**: [`EvalLatencyV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalLatencyV1/index.md)
 
-Defined in: [core/src/types/eval.ts:605](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L605)
+Defined in: [core/src/types/eval.ts:625](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L625)
 
 Latency percentiles of the entry
 
@@ -70,7 +70,7 @@ Latency percentiles of the entry
 
 > **passRate**: `number`
 
-Defined in: [core/src/types/eval.ts:596](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L596)
+Defined in: [core/src/types/eval.ts:616](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L616)
 
 Passed cases over all cases.
 
@@ -88,7 +88,7 @@ Passed cases over all cases.
 
 > **provider**: `string`
 
-Defined in: [core/src/types/eval.ts:588](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L588)
+Defined in: [core/src/types/eval.ts:608](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L608)
 
 Provider name
 
@@ -98,7 +98,7 @@ Provider name
 
 > **ref**: `string`
 
-Defined in: [core/src/types/eval.ts:586](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L586)
+Defined in: [core/src/types/eval.ts:606](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L606)
 
 Model reference as written
 
@@ -108,6 +108,6 @@ Model reference as written
 
 > **usage**: [`EvalUsageV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalUsageV1/index.md)
 
-Defined in: [core/src/types/eval.ts:598](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L598)
+Defined in: [core/src/types/eval.ts:618](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L618)
 
 Calls and tokens of the entry

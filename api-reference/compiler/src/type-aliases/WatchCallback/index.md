@@ -8,7 +8,7 @@
 
 > **WatchCallback** = (`result`, `changedFiles`) => `void`
 
-Defined in: [compiler/src/types.ts:261](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/compiler/src/types.ts#L261)
+Defined in: [compiler/src/types.ts:263](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/compiler/src/types.ts#L263)
 
 Callback invoked when watch mode detects changes and recompiles.
 

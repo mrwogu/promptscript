@@ -81,7 +81,8 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
 ## Schema versioning
 
 - The file name and the `$id` carry the major version.
-- A v1 schema only gains optional properties.
+- A v1 schema only gains optional properties. For example, an error of `prs validate` can carry an
+  optional `cause` with the code of the error it wraps.
 - A change that breaks readers goes into a new `-v2` file with a new `$id`, and the old file stays.
   This is the convention, like `prompt-release-label-v1` and `-v2`.
 - `pnpm api:breaking` runs on every pull request and compares the schemas of these commands with the
@@ -93,6 +94,31 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
   look for a `-v2` file.
 - Schemas are closed (`additionalProperties: false`). Validate a document with the schema of the CLI
   version that wrote it, or a newer one, and let your reader ignore properties it does not know.
+
+### Enums
+
+The `description` of every enum field in the output of these schemas starts or ends with one of two
+marks. Enums used only inside `if` conditions, to pick which fields are required, have no mark.
+
+- `Closed enum: a new value needs a new schema version.` The values are fixed for the whole v1.
+  A new value goes into a new `-v2` file, so a switch over all values is safe.
+- `Open enum: new values can be added in this version, so handle unknown values.` A later CLI
+  version can write a value your reader has not seen.
+
+How to read an open enum:
+
+- Do not fail on an unknown value. Fall back to a safe default.
+- Skip an unknown audit event `type`.
+- Do not count an approval record with an unknown `state`.
+- Treat an unknown model `status` like `unknown`.
+
+A document with a new open-enum value can fail validation against an older v1 schema, because the
+older schema lists only the values it knew. Validate with the schema of the CLI version that wrote
+the document, or a newer one.
+
+Error codes and rule ids are not enums, so they are always open. They still have a format (an
+error code is `PS` and three or four digits), but new codes and rules come in any version. Do not match
+them against a fixed list.
 
 ## Text output
 

@@ -8,7 +8,7 @@
 
 > **loadVendorManifest**(`vendorDir`): `Promise`\<[`VendorManifest`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/VendorManifest/index.md) \| `null`\>
 
-Defined in: [resolver/src/vendor-manifest.ts:547](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/vendor-manifest.ts#L547)
+Defined in: [resolver/src/vendor-manifest.ts:547](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L547)
 
 ## Parameters
 

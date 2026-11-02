@@ -6,7 +6,7 @@
 
 # Interface: EvalPromptRefV1
 
-Defined in: [core/src/types/eval.ts:672](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L672)
+Defined in: [core/src/types/eval.ts:700](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L700)
 
 Prompt under test as the run saw it.
 
@@ -16,7 +16,7 @@ Prompt under test as the run saw it.
 
 > **contentHash**: `string`
 
-Defined in: [core/src/types/eval.ts:679](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L679)
+Defined in: [core/src/types/eval.ts:707](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L707)
 
 Content hash of the bundle.
 
@@ -30,6 +30,6 @@ Content hash of the bundle.
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:674](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L674)
+Defined in: [core/src/types/eval.ts:702](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L702)
 
 Prompt id

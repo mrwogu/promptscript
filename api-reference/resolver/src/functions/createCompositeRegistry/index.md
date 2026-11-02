@@ -8,7 +8,7 @@
 
 > **createCompositeRegistry**(`registries`): [`CompositeRegistry`](https://getpromptscript.dev/api-reference/resolver/src/classes/CompositeRegistry/index.md)
 
-Defined in: [resolver/src/registry.ts:453](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/registry.ts#L453)
+Defined in: [resolver/src/registry.ts:453](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/registry.ts#L453)
 
 Create a composite registry from multiple sources.
 

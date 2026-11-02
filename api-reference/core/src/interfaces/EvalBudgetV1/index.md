@@ -6,7 +6,7 @@
 
 # Interface: EvalBudgetV1
 
-Defined in: [core/src/types/eval.ts:440](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L440)
+Defined in: [core/src/types/eval.ts:460](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L460)
 
 Budget of a run.
 
@@ -16,7 +16,7 @@ Budget of a run.
 
 > **maxUsd**: `number`
 
-Defined in: [core/src/types/eval.ts:445](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L445)
+Defined in: [core/src/types/eval.ts:465](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L465)
 
 Spending limit in USD.
 
@@ -30,7 +30,7 @@ Spending limit in USD.
 
 > **spentUsd**: `number`
 
-Defined in: [core/src/types/eval.ts:450](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L450)
+Defined in: [core/src/types/eval.ts:470](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L470)
 
 Amount spent in USD.
 

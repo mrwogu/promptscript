@@ -6,7 +6,7 @@
 
 # Interface: ReleaseHistoryCommit
 
-Defined in: [cli/src/utils/release-report.ts:83](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/release-report.ts#L83)
+Defined in: [cli/src/utils/release-report.ts:92](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/release-report.ts#L92)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:83](https://github.com/mrwogu/promp
 
 > **commit**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:84](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/release-report.ts#L84)
+Defined in: [cli/src/utils/release-report.ts:93](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/release-report.ts#L93)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:84](https://github.com/mrwogu/promp
 
 > **date**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:86](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/release-report.ts#L86)
+Defined in: [cli/src/utils/release-report.ts:95](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/release-report.ts#L95)
 
 Author date, ISO 8601
 
@@ -32,4 +32,4 @@ Author date, ISO 8601
 
 > **subject**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:87](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/release-report.ts#L87)
+Defined in: [cli/src/utils/release-report.ts:96](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/release-report.ts#L96)

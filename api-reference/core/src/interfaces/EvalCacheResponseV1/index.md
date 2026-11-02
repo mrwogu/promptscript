@@ -6,7 +6,7 @@
 
 # Interface: EvalCacheResponseV1
 
-Defined in: [core/src/types/eval.ts:349](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L349)
+Defined in: [core/src/types/eval.ts:357](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L357)
 
 The recorded response of a cache entry.
 
@@ -16,7 +16,7 @@ The recorded response of a cache entry.
 
 > **latencyMs**: `number`
 
-Defined in: [core/src/types/eval.ts:359](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L359)
+Defined in: [core/src/types/eval.ts:367](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L367)
 
 Call latency in milliseconds.
 
@@ -34,7 +34,7 @@ integer
 
 > **status**: `number`
 
-Defined in: [core/src/types/eval.ts:366](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L366)
+Defined in: [core/src/types/eval.ts:374](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L374)
 
 HTTP status of the call.
 
@@ -56,7 +56,7 @@ integer
 
 > `optional` **stopReason?**: `string`
 
-Defined in: [core/src/types/eval.ts:368](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L368)
+Defined in: [core/src/types/eval.ts:376](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L376)
 
 Provider stop reason, when reported
 
@@ -66,7 +66,7 @@ Provider stop reason, when reported
 
 > **text**: `string`
 
-Defined in: [core/src/types/eval.ts:351](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L351)
+Defined in: [core/src/types/eval.ts:359](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L359)
 
 Response text
 
@@ -76,6 +76,6 @@ Response text
 
 > **usage**: [`EvalTokenUsageV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalTokenUsageV1/index.md)
 
-Defined in: [core/src/types/eval.ts:353](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L353)
+Defined in: [core/src/types/eval.ts:361](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L361)
 
 Token usage the provider reported

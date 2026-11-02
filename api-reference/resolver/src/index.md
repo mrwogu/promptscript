@@ -115,30 +115,6 @@ to produce a fully resolved AST.
 
 ## References
 
-### bindParams
-
-Re-exports [bindParams](https://getpromptscript.dev/api-reference/core/src/functions/bindParams/index.md)
-
-***
-
-### IMPORT\_MARKER\_PREFIX
-
-Re-exports [IMPORT_MARKER_PREFIX](https://getpromptscript.dev/api-reference/core/src/variables/IMPORT_MARKER_PREFIX/index.md)
-
-***
-
-### interpolateAST
-
-Re-exports [interpolateAST](https://getpromptscript.dev/api-reference/core/src/functions/interpolateAST/index.md)
-
-***
-
-### interpolateContent
-
-Re-exports [interpolateContent](https://getpromptscript.dev/api-reference/core/src/functions/interpolateContent/index.md)
-
-***
-
 ### interpolateText
 
 Re-exports [interpolateText](https://getpromptscript.dev/api-reference/core/src/functions/interpolateText/index.md)
@@ -148,12 +124,6 @@ Re-exports [interpolateText](https://getpromptscript.dev/api-reference/core/src/
 ### isTemplateExpression
 
 Re-exports [isTemplateExpression](https://getpromptscript.dev/api-reference/core/src/functions/isTemplateExpression/index.md)
-
-***
-
-### normalizeBlockAliases
-
-Re-exports [normalizeBlockAliases](https://getpromptscript.dev/api-reference/core/src/functions/normalizeBlockAliases/index.md)
 
 ***
 

@@ -8,7 +8,7 @@
 
 > **parsePolicies**(`input`, `context?`): [`ParsedPolicies`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ParsedPolicies/index.md)
 
-Defined in: [validator/src/policy/parser.ts:674](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/policy/parser.ts#L674)
+Defined in: [validator/src/policy/parser.ts:674](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/validator/src/policy/parser.ts#L674)
 
 Parse and validate policy definitions from config.
 

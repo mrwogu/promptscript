@@ -6,7 +6,7 @@
 
 # Interface: ValidateReportV1
 
-Defined in: [core/src/types/validate-report.ts:71](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L71)
+Defined in: [core/src/types/validate-report.ts:77](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L77)
 
 Report of `prs validate --format json`, version 1.
 
@@ -16,7 +16,7 @@ Report of `prs validate --format json`, version 1.
 
 > **$schema**: `"https://getpromptscript.dev/schema/validate-report/v1.json"`
 
-Defined in: [core/src/types/validate-report.ts:73](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L73)
+Defined in: [core/src/types/validate-report.ts:79](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L79)
 
 Schema URL, the version tag of the report
 
@@ -26,7 +26,7 @@ Schema URL, the version tag of the report
 
 > **errors**: [`ValidateErrorV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateErrorV1/index.md)[]
 
-Defined in: [core/src/types/validate-report.ts:79](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L79)
+Defined in: [core/src/types/validate-report.ts:85](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L85)
 
 Errors of all validated files, in file order
 
@@ -36,7 +36,7 @@ Errors of all validated files, in file order
 
 > **success**: `boolean`
 
-Defined in: [core/src/types/validate-report.ts:77](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L77)
+Defined in: [core/src/types/validate-report.ts:83](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L83)
 
 False when there are errors, or warnings under `--strict`
 
@@ -46,7 +46,7 @@ False when there are errors, or warnings under `--strict`
 
 > **summary**: [`ValidateSummaryV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateSummaryV1/index.md)
 
-Defined in: [core/src/types/validate-report.ts:83](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L83)
+Defined in: [core/src/types/validate-report.ts:89](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L89)
 
 Counts of errors and warnings
 
@@ -56,7 +56,7 @@ Counts of errors and warnings
 
 > **version**: `1`
 
-Defined in: [core/src/types/validate-report.ts:75](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L75)
+Defined in: [core/src/types/validate-report.ts:81](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L81)
 
 Major version of the report format, always 1
 
@@ -66,6 +66,6 @@ Major version of the report format, always 1
 
 > **warnings**: [`ValidateWarningV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/ValidateWarningV1/index.md)[]
 
-Defined in: [core/src/types/validate-report.ts:81](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/validate-report.ts#L81)
+Defined in: [core/src/types/validate-report.ts:87](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/validate-report.ts#L87)
 
 Warnings of all validated files, in file order

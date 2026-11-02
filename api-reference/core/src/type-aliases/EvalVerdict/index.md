@@ -8,6 +8,8 @@
 
 > **EvalVerdict** = `"pass"` \| `"fail"`
 
-Defined in: [core/src/types/eval.ts:266](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L266)
+Defined in: [core/src/types/eval.ts:274](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L274)
 
 Verdict of a judge run or a human label.
+
+Closed enum: a new value needs a new schema version.

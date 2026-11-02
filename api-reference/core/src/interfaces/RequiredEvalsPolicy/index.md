@@ -6,7 +6,7 @@
 
 # Interface: RequiredEvalsPolicy
 
-Defined in: [core/src/types/policy.ts:192](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L192)
+Defined in: [core/src/types/policy.ts:196](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L196)
 
 Required-evals policy: matched prompts need passing evals before promotion.
 
@@ -20,7 +20,7 @@ Required-evals policy: matched prompts need passing evals before promotion.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L32)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L36)
 
 Human-readable description
 
@@ -34,7 +34,7 @@ Human-readable description
 
 > `optional` **environments?**: [`ReleaseEnvironmentName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ReleaseEnvironmentName/index.md)[]
 
-Defined in: [core/src/types/policy.ts:200](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L200)
+Defined in: [core/src/types/policy.ts:204](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L204)
 
 Environments from `releases.environments` the policy applies to. Absent means all.
 
@@ -48,7 +48,7 @@ Environments from `releases.environments` the policy applies to. Absent means al
 
 > **kind**: `"required-evals"`
 
-Defined in: [core/src/types/policy.ts:193](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L193)
+Defined in: [core/src/types/policy.ts:197](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L197)
 
 Policy kind discriminator
 
@@ -62,7 +62,7 @@ Policy kind discriminator
 
 > `optional` **match?**: [`PromptPolicyMatch`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptPolicyMatch/index.md)
 
-Defined in: [core/src/types/policy.ts:195](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L195)
+Defined in: [core/src/types/policy.ts:199](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L199)
 
 Prompts the policy applies to
 
@@ -72,7 +72,7 @@ Prompts the policy applies to
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L30)
+Defined in: [core/src/types/policy.ts:34](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L34)
 
 Unique policy name within the config
 
@@ -86,7 +86,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:40](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L40)
 
 Violation severity
 

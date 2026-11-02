@@ -6,7 +6,7 @@
 
 # Interface: EvalComparisonEntryV1
 
-Defined in: [core/src/types/eval.ts:736](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L736)
+Defined in: [core/src/types/eval.ts:764](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L764)
 
 Comparison of one suite and model entry between two reports.
 
@@ -16,7 +16,7 @@ Comparison of one suite and model entry between two reports.
 
 > `optional` **costUsdDelta?**: `number`
 
-Defined in: [core/src/types/eval.ts:744](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L744)
+Defined in: [core/src/types/eval.ts:772](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L772)
 
 Candidate cost minus baseline cost in USD, when both reports carry a cost
 
@@ -26,7 +26,7 @@ Candidate cost minus baseline cost in USD, when both reports carry a cost
 
 > **datasetChanged**: `boolean`
 
-Defined in: [core/src/types/eval.ts:756](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L756)
+Defined in: [core/src/types/eval.ts:784](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L784)
 
 Whether the dataset hashes differ
 
@@ -36,7 +36,7 @@ Whether the dataset hashes differ
 
 > **fixes**: `string`[]
 
-Defined in: [core/src/types/eval.ts:750](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L750)
+Defined in: [core/src/types/eval.ts:778](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L778)
 
 Cases that passed in the candidate and not in the baseline
 
@@ -46,7 +46,7 @@ Cases that passed in the candidate and not in the baseline
 
 > **latencyP95MsDelta**: `number`
 
-Defined in: [core/src/types/eval.ts:746](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L746)
+Defined in: [core/src/types/eval.ts:774](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L774)
 
 Candidate p95 latency minus baseline p95 latency in milliseconds
 
@@ -56,7 +56,7 @@ Candidate p95 latency minus baseline p95 latency in milliseconds
 
 > **model**: `string`
 
-Defined in: [core/src/types/eval.ts:740](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L740)
+Defined in: [core/src/types/eval.ts:768](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L768)
 
 Model reference
 
@@ -66,7 +66,7 @@ Model reference
 
 > **onlyInBaseline**: `string`[]
 
-Defined in: [core/src/types/eval.ts:752](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L752)
+Defined in: [core/src/types/eval.ts:780](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L780)
 
 Case ids only the baseline has
 
@@ -76,7 +76,7 @@ Case ids only the baseline has
 
 > **onlyInCandidate**: `string`[]
 
-Defined in: [core/src/types/eval.ts:754](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L754)
+Defined in: [core/src/types/eval.ts:782](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L782)
 
 Case ids only the candidate has
 
@@ -86,7 +86,7 @@ Case ids only the candidate has
 
 > **passRateDelta**: `number`
 
-Defined in: [core/src/types/eval.ts:742](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L742)
+Defined in: [core/src/types/eval.ts:770](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L770)
 
 Candidate pass rate minus baseline pass rate
 
@@ -96,7 +96,7 @@ Candidate pass rate minus baseline pass rate
 
 > **regressions**: `string`[]
 
-Defined in: [core/src/types/eval.ts:748](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L748)
+Defined in: [core/src/types/eval.ts:776](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L776)
 
 Cases that passed in the baseline and not in the candidate
 
@@ -106,6 +106,6 @@ Cases that passed in the baseline and not in the candidate
 
 > **suite**: `string`
 
-Defined in: [core/src/types/eval.ts:738](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L738)
+Defined in: [core/src/types/eval.ts:766](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L766)
 
 Suite name

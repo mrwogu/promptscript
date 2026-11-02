@@ -8,6 +8,6 @@
 
 > **ConventionName** = [`BuiltInConventionName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BuiltInConventionName/index.md) \| `string`
 
-Defined in: [core/src/types/convention.ts:18](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/convention.ts#L18)
+Defined in: [core/src/types/convention.ts:18](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/convention.ts#L18)
 
 Convention name (built-in or custom).

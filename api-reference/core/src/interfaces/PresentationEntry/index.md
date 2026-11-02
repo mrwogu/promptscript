@@ -6,7 +6,7 @@
 
 # Interface: PresentationEntry
 
-Defined in: [core/src/types/ast.ts:614](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L614)
+Defined in: [core/src/types/ast.ts:616](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L616)
 
 Canonical presentation metadata for a generated section title.
 
@@ -20,7 +20,7 @@ Canonical presentation metadata for a generated section title.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` `optional` **sectionId?**: `string`
 
-Defined in: [core/src/types/ast.ts:617](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L617)
+Defined in: [core/src/types/ast.ts:619](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L619)
 
 Canonical section ID. Omitted for the block's primary section.
 
@@ -66,7 +66,7 @@ Canonical section ID. Omitted for the block's primary section.
 
 > `readonly` `optional` **sectionLoc?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:620](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L620)
+Defined in: [core/src/types/ast.ts:622](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L622)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [core/src/types/ast.ts:620](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **source**: `"explicit"` \| `"legacy"`
 
-Defined in: [core/src/types/ast.ts:619](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L619)
+Defined in: [core/src/types/ast.ts:621](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L621)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [core/src/types/ast.ts:619](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **title**: `string`
 
-Defined in: [core/src/types/ast.ts:618](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L618)
+Defined in: [core/src/types/ast.ts:620](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L620)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [core/src/types/ast.ts:618](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **titleLoc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:621](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L621)
+Defined in: [core/src/types/ast.ts:623](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L623)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: [core/src/types/ast.ts:621](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"PresentationEntry"`
 
-Defined in: [core/src/types/ast.ts:615](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L615)
+Defined in: [core/src/types/ast.ts:617](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L617)
 
 #### Overrides
 

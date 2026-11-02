@@ -8,7 +8,7 @@
 
 > **isKnownTarget**(`name`): `name is KnownTarget`
 
-Defined in: [core/src/types/config.ts:873](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/config.ts#L873)
+Defined in: [core/src/types/config.ts:873](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/config.ts#L873)
 
 Type guard to check if a target name is a known built-in target.
 Useful for narrowing `TargetName` to `KnownTarget` in switch statements

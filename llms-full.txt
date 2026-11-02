@@ -757,7 +757,7 @@ By the end of this tutorial, you'll have:
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22.22+
 - PromptScript CLI installed (`npm install -g @promptscript/cli`)
 - A project that completed [Getting Started](https://getpromptscript.dev/getting-started/index.md)
 - A successful `prs validate --strict` and `prs compile`
@@ -1089,7 +1089,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -1563,7 +1563,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npm install -g @promptscript/cli@1.19.0
       - run: prs validate --strict
       - run: prs compile
@@ -2024,7 +2024,8 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 
 The parser found invalid syntax, such as a missing closing brace or a misplaced token, for example
 `Expecting token of type --> RBrace <-- but found --> '?' <--`. The resolver reports every parse
-error with the code `PS2000`, which you see in `prs validate --format json`. Check the reported
+error with the code `PS2000`, which you see in `prs validate --format json`. The parser code, for
+example `PS1000`, stays in the optional `cause` field of that error. Check the reported
 location and compare it with the [Language Reference](https://getpromptscript.dev/reference/language/index.md). A parse error that
 has no position reports line and column `-1`.
 
@@ -6441,6 +6442,15 @@ Status lists every environment with the prompt id, the hash (12 hex digits), whe
 the latest build (equals the manifest) and whether the bundle verifies. A missing label means an
 empty environment. A label file for an environment that is not configured gives a warning.
 
+A label accepts more prompt ids than an approval does: it only refuses control and bidi characters,
+while an approval needs the id pattern (ASCII letters, digits, `_`, `-` and `.`, in 2 to 7
+segments split by `/`). An entry with an id outside that pattern, a zero-width space inside a
+look-alike id for example, gives a warning. The warning writes the id with every character outside
+the printable ASCII range, and the backslash, as `\uXXXX` (`\u{XXXXX}` above U+FFFF), so a
+look-alike id never prints like the real one. No approval can name that id, so a gate that needs
+approvals never passes for it. The label is still read and status does not fail on it. With
+`--base` the changed entries of label files that no configured environment owns are checked too.
+
 Under an entry with an experiment status lists every arm with its weight. Every referenced bundle,
 arms included, is verified, and a failure exits with code 1, so CI can run it.
 `--history <n>` (1 to 1000) adds the commit, date and subject of the last n commits of each label.
@@ -6450,6 +6460,37 @@ With prompt policies, status also runs the [release gates](#release-gates) on ev
 an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approvals` policy applies.
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
+
+When an approval policy (`required-approvals`, or `max-experiment-weight` with `approvals`) applies
+to an environment that has a label entry, status also checks the CODEOWNERS file that
+`prs governance codeowners` generates (see [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md)). It reads the
+configured output file from the `HEAD` commit by exact path, so a file that is only on disk does
+not count, and it must equal what `prs governance codeowners` generates from the checkout config.
+With `--base <ref>` it also checks the file at that commit, since the host applies the CODEOWNERS
+of the base branch to a pull request. There the roles come from the approval policies of the
+config at `<ref>` (the same rules the `--base` gates use) and the file is the configured output of
+that config. It must not be shadowed by an earlier location, and after the marker line of the
+project it must hold the exact owner line of each role directory, rendered from the governance at
+`<ref>`, and no other line for that path. Other lines of the file at `<ref>` are not compared. It
+gives one warning, with the file as its location, if the file is missing at a commit
+(`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
+(`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs
+cannot manage the file at `HEAD` (no marker line), or if the lines cannot be generated (for
+example `governance.admins` is missing). The warning lists the roles and tells you to run
+`prs governance codeowners` and commit the result. The policy `match` is not evaluated, so a role
+is named when some prompt could need it. Nothing is written. Without such a policy there is no
+warning. `--strict` makes this warning, and only it, exit with code 1.
+
+A clean result does not prove that the branch requires code owner review, nor that the owners have
+write access; check both on the Git host. For any location other than `.gitlab/CODEOWNERS` the
+lines are written for GitHub.
+
+When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
+and no email), status also warns about an approval that counts for a gate whose approver is not
+one of them, compared lowercased. With `--base` the roster comes from the governance of `<ref>`,
+the one the gates use. `prs approve --list` gives the same warning for a record in the state `current` or `labelled`, the ones a gate could count.
+A role with any team owner is not checked, since a team cannot be resolved offline. The record
+still counts and the exit code does not change.
 
 #### Check the models of the labels
 
@@ -6634,15 +6675,15 @@ paths it tracks and which blob each holds, and prints, per prompt, the hash the 
 each record with its role, approver, scope (`prod`, `all environments`, or `prod up to 25 %` for a capped record) and state. When there are
 record files, it needs Git and a repository, else `PS5108`.
 
-| State            | Meaning                                                          |
-| ---------------- | ---------------------------------------------------------------- |
-| `current`        | The record approves the hash the checkout builds                 |
-| `labelled:<env>` | Not the current hash, but the label of that environment holds it |
-| `stale`          | Neither: the prompt changed since                                |
-| `untracked`      | Not added to Git yet. A staged record already counts as tracked  |
-| `modified`       | The bytes on disk are not the ones Git has for the path          |
-| `misplaced`      | Git tracks the file at another path than its fields give         |
-| `unknown-role`   | The role is not in `governance.roles`                            |
+| State            | Meaning                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `current`        | The record approves the hash the checkout builds                                                                         |
+| `labelled:<env>` | Not the current hash, but the label of that environment holds it, as the entry hash or as an experiment arm with traffic |
+| `stale`          | Neither: the prompt changed since                                                                                        |
+| `untracked`      | Not added to Git yet. A staged record already counts as tracked                                                          |
+| `modified`       | The bytes on disk are not the ones Git has for the path                                                                  |
+| `misplaced`      | Git tracks the file at another path than its fields give                                                                 |
+| `unknown-role`   | The role is not in `governance.roles`                                                                                    |
 
 Only `current` and `labelled` records can count. A file that is no valid record, for example one
 with CRLF line endings, gets a `PS5109` warning, and so do modified, misplaced and unknown-role
@@ -6700,6 +6741,12 @@ the pull request of that commit. A `well-formed` record there only has the right
 right path. It does not mean a gate accepts it, and the review by the role team lives in the
 review log of the Git host, not in Git.
 
+`prs release status` warns when an approval policy applies and the CODEOWNERS file committed at
+`HEAD` (and at the `--base` commit) is missing or does not match what `prs governance codeowners`
+generates, and `--strict` turns that warning into exit code 1. It also
+warns, in `status` and `approve --list`, about a record whose approver is not in a role that lists
+user handles only. Neither warning changes what the gates count.
+
 ## Release gates
 
 The gates are the prompt policies, run on the prompt version a label is about to hold. They run
@@ -6745,7 +6792,8 @@ tell who wrote them. A record binds only through review: each `.promptscript/app
 needs that role's team as code owners, with required code owner review on the branch (see
 [What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
 lines, see [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/index.md). Without it, any author can add a record in
-another person's name and pass the gate.
+another person's name and pass the gate. `prs release status` warns when a gate needs approvals
+and these lines are missing or stale in the commit, see [Status](#status).
 
 A record counts for one approver when:
 
@@ -7139,7 +7187,9 @@ value, so take prompt ids and other values from the JSON export.
   reads from `git log`, which fails with `PS5108`.
 - A shallow clone, a missing `git`, a timeout or a blob a partial clone would fetch fails with
   `PS5108`. In CI check out the full history, for example `actions/checkout` with
-  `fetch-depth: 0`.
+  `fetch-depth: 0`. `PROMPTSCRIPT_GIT_TIMEOUT` applies to each Git call, and the log reads files
+  with a few calls that each take up to 256 files, so a very slow disk or network mount may need
+  a higher value.
 - Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
   cannot change what the log shows.
 - The output holds email addresses. Treat exports like other personal data.
@@ -8756,6 +8806,12 @@ The resolver produces a single skill by concatenating:
 ```
 
 Phase names come from the alias (if `@use ... as alias`) or the skill name from the sub-skill file.
+
+Each phase includes a `<!-- composed-from: path/to/file.prs -->` comment. The path is relative to
+the project root and uses `/` separators, so two phases named `check.prs` in different folders get
+different comments. A source outside the project root is shown by file name only. Absolute paths
+never enter the skill text. Full source paths remain in the internal `composedFrom` metadata for
+diagnostics and provenance.
 
 ### Property Merging
 
@@ -12813,7 +12869,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
       - run: npm install -g @promptscript/cli
       - run: prs registry validate --strict
 ```
@@ -13699,7 +13755,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -13739,7 +13795,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -14926,7 +14982,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
 
       - name: Install the CLI version the lockfile pins
@@ -14965,6 +15021,7 @@ A file in `.github/workflows` can change what CI checks. The `protect` line give
 - GitHub matches CODEOWNERS paths byte for byte and case-sensitively. The role lines cover exactly `.promptscript/approvals/<role>`, in lowercase. A file at `.promptscript/approvals/Legal/...` or under a look-alike Unicode name is not matched by the `legal` line, even on a disk that ignores case. The same holds for the releases, the vendor directory and the config names.
 - Any one listed owner can approve a line. A line does not ask for two teams. So adding an owner is the dangerous direction: every owner you add to a prompt, a role or the admins can approve alone.
 - GitLab sections with approval counts and optional sections are not generated.
+- `prs release status` runs the same comparison without writing: when an approval policy applies it warns if the file committed at `HEAD` (and at the `--base` commit) is missing, shadowed or out of date, and (with `--base`) whether the file at that commit has the owner line of each needed role directory, and `prs release status --strict` exits with 1 on that warning, see [Status](https://getpromptscript.dev/guides/releases/index.md#status).
 - The lines decide who must review an approval record. The [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates) then count the committed records, so a `required-approvals` policy only binds when the role directories have their owners and code owner review is required.
 
 ## Options
@@ -15788,7 +15845,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -15825,7 +15882,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -15893,7 +15950,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -15950,7 +16007,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -16009,7 +16066,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript CLI
         run: npm install -g @promptscript/cli
@@ -16309,7 +16366,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   before_script:
     - apk add --no-cache git
     - npm install -g @promptscript/cli
@@ -16336,7 +16393,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   variables:
     GITHUB_TOKEN: $REGISTRY_TOKEN
   before_script:
@@ -16363,7 +16420,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   variables:
     HOME: ${CI_PROJECT_DIR}/.promptscript-home
   cache:
@@ -16393,7 +16450,7 @@ stages:
 
 promptscript:
   stage: validate
-  image: node:20-alpine
+  image: node:22-alpine
   before_script:
     - apk add --no-cache git
     - npm install -g @promptscript/cli
@@ -16595,7 +16652,7 @@ Create `Jenkinsfile`:
 pipeline {
     agent {
         docker {
-            image 'node:20-alpine'
+            image 'node:22-alpine'
         }
     }
 
@@ -16652,7 +16709,7 @@ pipeline {
 pipeline {
     agent {
         docker {
-            image 'node:20-alpine'
+            image 'node:22-alpine'
         }
     }
 
@@ -16700,7 +16757,7 @@ pipeline {
 pipeline {
     agent {
         docker {
-            image 'node:20-alpine'
+            image 'node:22-alpine'
         }
     }
 
@@ -16748,7 +16805,7 @@ version: 2.1
 jobs:
   promptscript:
     docker:
-      - image: cimg/node:20.0
+      - image: cimg/node:22.22
     steps:
       - checkout
       - run:
@@ -16813,7 +16870,7 @@ parameters:
 jobs:
   validate-promptscript:
     docker:
-      - image: cimg/node:20.0
+      - image: cimg/node:22.22
     steps:
       - checkout
       - run: npm install -g @promptscript/cli
@@ -17054,7 +17111,7 @@ Run `prs compile` locally and commit the generated files.
 Error: Unsupported Node.js version
 ```
 
-PromptScript requires Node.js 20+. Update your CI configuration to use `node:20` or higher.
+PromptScript requires Node.js 22.22 or newer. Update your CI configuration to use `node:22` or higher.
 
 ### Debug Mode
 
@@ -26627,7 +26684,7 @@ Notes:
   `deno run` the worker gets read and write access scoped to the output
   directory, and a compiled binary re-executes itself.
 - Telemetry reports `runtime: deno`; `DO_NOT_TRACK=1` keeps it disabled.
-- Node.js 20+ remains fully supported with unchanged behavior.
+- Node.js 22.22+ remains fully supported with unchanged behavior.
 
 ## Global Options
 
@@ -27079,10 +27136,12 @@ With `--format json`, stdout holds one document that matches
 with the counts. With `--strict`, a warning sets `success` to `false`, and it stays in `warnings`.
 An error has a `code` when it is a PromptScript error (`PS` and three or four digits). The code is
 absent when the run stops before the compile with another error, such as a missing entry file or a
-registry clone failure. A parse error carries the resolve code `PS2000`. A location has `file`,
-`line`, `column` and, on some warnings, `offset`. A parse error without a position reports `-1` for
-`line` and `column`. Paths are as the compiler reports them, usually absolute. With several files,
-`errors` and `warnings` hold the results of all of them in file order.
+registry clone failure. A parse error carries the resolve code `PS2000`, and the parser code, such
+as `PS1000`, is in the optional `cause` field of the error. `cause` is absent on errors that do not
+wrap another PromptScript error. A location has `file`, `line`, `column` and, on some warnings,
+`offset`. A parse error without a position reports `-1` for `line` and `column`. Paths are as the
+compiler reports them, usually absolute. With several files, `errors` and `warnings` hold the
+results of all of them in file order.
 `--fix` cannot be combined with `--format json`: the command prints an error to stderr and exits 1.
 
 ---
@@ -27840,12 +27899,40 @@ prs release status [options]
 | `--base <ref>`             | Check every label entry changed since `<ref>` with the rules of `<ref>`                               |
 | `--check-models`           | Check the models of every labelled prompt against the model catalog                                   |
 | `--retiring-within <days>` | With `--check-models`, days ahead in which a deprecated model counts as retiring (0-3650, default 30) |
+| `--strict`                 | Exit with code 1 when CODEOWNERS does not bind the approval directories the gates need                |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
 verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
 arm bundle. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
 policies it also runs the [release gates](https://getpromptscript.dev/guides/releases/index.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
+
+When an approval policy applies to an environment that has a label entry, status reads the
+configured CODEOWNERS output from the `HEAD` commit by exact path and compares it with what
+`prs governance codeowners` generates. With `--base <ref>` it also reads the file at that commit
+and checks only that, after the marker line, it has the exact owner line of each role directory the
+approval policies of the config at `<ref>` need, rendered from the governance at `<ref>`; other
+lines there are not compared. It gives one warning, with the file as its `location`, if the file is
+missing at a commit (`is missing at <ref>`), out of date at `HEAD`, does not bind roles at `<ref>`
+(`does not bind <roles> at <ref>`), shadowed there by a file at an earlier location, not
+manageable by prs at `HEAD`, or cannot be generated from `governance`:
+`<file> <reason>, so the approval directories of <roles> are not bound to their owners. Without it any committer can add a record in another person's name. Run
+prs governance codeowners and commit the result.` `--strict` makes this warning, and no other,
+exit with code 1. A clean result does not prove that the branch requires code owner review, nor
+that the owners have write access. For any location other than `.gitlab/CODEOWNERS` the lines are
+written for GitHub. When every owner of a role is a user handle like `@jane`, status also warns about
+an approval (with `--base`, in the governance at `<ref>`) that counts for a gate whose approver is not one of them (`<prompt>@<hash> in <env>:
+<approver> approved as <role>, but is not in governance.roles.<role> (<owners>). It still counts,
+since the approver is only asserted; ...`). A role with any team owner is not checked, the record
+still counts and the exit code stays.
+
+A label entry whose prompt id does not match the id pattern of an approval (for example one with a
+zero-width space), or has more than seven slash-separated segments, gives a warning, and a gate that needs approvals never passes for it. The id in
+the warning, in the id column and in the `--base` and gate output is written with every character
+outside printable ASCII, and the backslash, as `\u200B` (`\u{1D173}` above U+FFFF). The label is
+still valid and the exit code stays; it has no error code. The warning is in `warnings` of the JSON
+report with the label file as its `location`. With `--base`, new or changed entries in label files
+that no configured environment owns are checked for it too.
 
 With `--base <ref>`, every label file in the checkout and at `<ref>` is compared, configured or
 not, and every entry that is new or changed must pass the promotion rules of `<ref>`: the
@@ -27920,7 +28007,9 @@ weight, never for the entry hash, a promote, `--end --keep` or a plain rollback,
 `--list` prints per prompt the hash the checkout builds and every record as `current`,
 `labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
 path and the bytes Git has for each record, so with record files it needs Git and a repository
-(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning.
+(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning. A record
+whose approver is not one of the owners of a role that lists user handles only, like `@jane`, gets a
+warning too if the record is `current` or `labelled`; a role with a team owner is not checked, and the record keeps its state.
 With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/approval-report/v1.json`.
 
@@ -28862,7 +28951,8 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
 ## Schema versioning
 
 - The file name and the `$id` carry the major version.
-- A v1 schema only gains optional properties.
+- A v1 schema only gains optional properties. For example, an error of `prs validate` can carry an
+  optional `cause` with the code of the error it wraps.
 - A change that breaks readers goes into a new `-v2` file with a new `$id`, and the old file stays.
   This is the convention, like `prompt-release-label-v1` and `-v2`.
 - `pnpm api:breaking` runs on every pull request and compares the schemas of these commands with the
@@ -28874,6 +28964,31 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
   look for a `-v2` file.
 - Schemas are closed (`additionalProperties: false`). Validate a document with the schema of the CLI
   version that wrote it, or a newer one, and let your reader ignore properties it does not know.
+
+### Enums
+
+The `description` of every enum field in the output of these schemas starts or ends with one of two
+marks. Enums used only inside `if` conditions, to pick which fields are required, have no mark.
+
+- `Closed enum: a new value needs a new schema version.` The values are fixed for the whole v1.
+  A new value goes into a new `-v2` file, so a switch over all values is safe.
+- `Open enum: new values can be added in this version, so handle unknown values.` A later CLI
+  version can write a value your reader has not seen.
+
+How to read an open enum:
+
+- Do not fail on an unknown value. Fall back to a safe default.
+- Skip an unknown audit event `type`.
+- Do not count an approval record with an unknown `state`.
+- Treat an unknown model `status` like `unknown`.
+
+A document with a new open-enum value can fail validation against an older v1 schema, because the
+older schema lists only the values it knew. Validate with the schema of the CLI version that wrote
+the document, or a newer one.
+
+Error codes and rule ids are not enums, so they are always open. They still have a format (an
+error code is `PS` and three or four digits), but new codes and rules come in any version. Do not match
+them against a fixed list.
 
 ## Text output
 
@@ -32368,7 +32483,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npm install -g @promptscript/cli@1.19.1
       - run: prs validate .promptscript/team.prs .promptscript/${{ matrix.build }}.prs --strict
       - run: prs compile --build ${{ matrix.build }} --dry-run
@@ -33636,7 +33751,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -34386,7 +34501,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -34449,7 +34564,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -35214,7 +35329,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -35240,7 +35355,7 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 promptscript:
-  image: node:20
+  image: node:22
   script:
     - npm install -g @promptscript/cli
     - prs pull
@@ -35557,7 +35672,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli
@@ -35584,7 +35699,7 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 promptscript:
-  image: node:20
+  image: node:22
   script:
     - npm install -g @promptscript/cli
     - prs vendor check

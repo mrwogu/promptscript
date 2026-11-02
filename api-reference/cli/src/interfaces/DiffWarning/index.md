@@ -6,7 +6,7 @@
 
 # Interface: DiffWarning
 
-Defined in: [cli/src/utils/diff-report.ts:31](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/diff-report.ts#L31)
+Defined in: [cli/src/utils/diff-report.ts:41](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/diff-report.ts#L41)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/diff-report.ts:31](https://github.com/mrwogu/promptsc
 
 > **code**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/diff-report.ts#L32)
+Defined in: [cli/src/utils/diff-report.ts:42](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/diff-report.ts#L42)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/diff-report.ts:32](https://github.com/mrwogu/promptsc
 
 > `optional` **location?**: [`DiffLocation`](https://getpromptscript.dev/api-reference/cli/src/interfaces/DiffLocation/index.md)
 
-Defined in: [cli/src/utils/diff-report.ts:35](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/diff-report.ts#L35)
+Defined in: [cli/src/utils/diff-report.ts:45](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/diff-report.ts#L45)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [cli/src/utils/diff-report.ts:35](https://github.com/mrwogu/promptsc
 
 > **message**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:33](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/diff-report.ts#L33)
+Defined in: [cli/src/utils/diff-report.ts:43](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/diff-report.ts#L43)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [cli/src/utils/diff-report.ts:33](https://github.com/mrwogu/promptsc
 
 > `optional` **suggestion?**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:34](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/cli/src/utils/diff-report.ts#L34)
+Defined in: [cli/src/utils/diff-report.ts:44](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/diff-report.ts#L44)

@@ -8,7 +8,7 @@
 
 > **EvalCacheKey** = `string`
 
-Defined in: [core/src/types/eval.ts:330](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/eval.ts#L330)
+Defined in: [core/src/types/eval.ts:338](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L338)
 
 Cache key: the SHA-256 of the canonical JSON of a cache request, 64
 lowercase hex characters.

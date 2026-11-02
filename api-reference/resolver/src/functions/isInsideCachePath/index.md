@@ -8,7 +8,7 @@
 
 > **isInsideCachePath**(`filePath`, `cachePath`): `boolean`
 
-Defined in: [resolver/src/reference-hasher.ts:29](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/reference-hasher.ts#L29)
+Defined in: [resolver/src/reference-hasher.ts:29](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/reference-hasher.ts#L29)
 
 Verify that a resolved file path is contained within the cache directory.
 Prevents path traversal attacks via symlinks or `../` in reference paths.

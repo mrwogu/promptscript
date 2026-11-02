@@ -8,7 +8,11 @@
 
 > **toLegacyBlock**(`block`, `options?`): [`Block`](https://getpromptscript.dev/api-reference/core/src/interfaces/Block/index.md)
 
-Defined in: [core/src/canonical-ast.ts:1542](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/canonical-ast.ts#L1542)
+Defined in: [core/src/canonical-ast.ts:1571](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/canonical-ast.ts#L1571)
+
+Project a canonical block to the legacy `Block` shape.
+
+Compatibility projection. It may be removed in a later major version.
 
 ## Parameters
 

@@ -6,7 +6,7 @@
 
 # Interface: RiskFloorRow
 
-Defined in: [core/src/types/policy.ts:108](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L108)
+Defined in: [core/src/types/policy.ts:112](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L112)
 
 One row of a risk floor. The row matches when any of its conditions matches.
 
@@ -20,7 +20,7 @@ One row of a risk floor. The row matches when any of its conditions matches.
 
 > `optional` **dataClasses?**: `string`[]
 
-Defined in: [core/src/types/policy.ts:113](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L113)
+Defined in: [core/src/types/policy.ts:117](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L117)
 
 Any effective data class is one of these
 
@@ -34,7 +34,7 @@ Any effective data class is one of these
 
 > `optional` **domains?**: `string`[]
 
-Defined in: [core/src/types/policy.ts:118](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L118)
+Defined in: [core/src/types/policy.ts:122](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L122)
 
 Effective domain is one of these
 
@@ -48,7 +48,7 @@ Effective domain is one of these
 
 > `optional` **inputTypes?**: (`"string"` \| `"number"` \| `"boolean"` \| `"enum"`)[]
 
-Defined in: [core/src/types/policy.ts:123](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L123)
+Defined in: [core/src/types/policy.ts:127](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L127)
 
 Any input has one of these types
 
@@ -62,6 +62,6 @@ Any input has one of these types
 
 > **minimum**: [`RiskLevel`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RiskLevel/index.md)
 
-Defined in: [core/src/types/policy.ts:125](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L125)
+Defined in: [core/src/types/policy.ts:129](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L129)
 
 Lowest policy risk of a matching prompt

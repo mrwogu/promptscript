@@ -8,7 +8,7 @@
 
 > **getTargetFeatures**(`name`): [`DefaultFeatureProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/DefaultFeatureProfile/index.md)
 
-Defined in: [core/src/target-catalog.ts:949](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/target-catalog.ts#L949)
+Defined in: [core/src/target-catalog.ts:953](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/target-catalog.ts#L953)
 
 Get the default feature profile for a known target.
 

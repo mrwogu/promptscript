@@ -15,7 +15,7 @@ By the end of this tutorial, you'll have:
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22.22+
 - PromptScript CLI installed (`npm install -g @promptscript/cli`)
 - A project that completed [Getting Started](https://getpromptscript.dev/getting-started/index.md)
 - A successful `prs validate --strict` and `prs compile`
@@ -347,7 +347,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install PromptScript
         run: npm install -g @promptscript/cli

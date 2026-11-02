@@ -6,7 +6,7 @@
 
 # Interface: RequiredApprovalsPolicy
 
-Defined in: [core/src/types/policy.ts:173](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L173)
+Defined in: [core/src/types/policy.ts:177](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L177)
 
 Required-approvals policy: matched prompts need approvals before promotion.
 
@@ -20,7 +20,7 @@ Required-approvals policy: matched prompts need approvals before promotion.
 
 > **approvals**: [`RequiredApproval`](https://getpromptscript.dev/api-reference/core/src/interfaces/RequiredApproval/index.md)[]
 
-Defined in: [core/src/types/policy.ts:186](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L186)
+Defined in: [core/src/types/policy.ts:190](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L190)
 
 Approvals per role
 
@@ -34,7 +34,7 @@ Approvals per role
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:32](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L32)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L36)
 
 Human-readable description
 
@@ -48,7 +48,7 @@ Human-readable description
 
 > `optional` **environments?**: [`ReleaseEnvironmentName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ReleaseEnvironmentName/index.md)[]
 
-Defined in: [core/src/types/policy.ts:181](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L181)
+Defined in: [core/src/types/policy.ts:185](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L185)
 
 Environments from `releases.environments` the policy applies to. Absent means all.
 
@@ -62,7 +62,7 @@ Environments from `releases.environments` the policy applies to. Absent means al
 
 > **kind**: `"required-approvals"`
 
-Defined in: [core/src/types/policy.ts:174](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L174)
+Defined in: [core/src/types/policy.ts:178](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L178)
 
 Policy kind discriminator
 
@@ -76,7 +76,7 @@ Policy kind discriminator
 
 > `optional` **match?**: [`PromptPolicyMatch`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptPolicyMatch/index.md)
 
-Defined in: [core/src/types/policy.ts:176](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L176)
+Defined in: [core/src/types/policy.ts:180](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L180)
 
 Prompts the policy applies to
 
@@ -86,7 +86,7 @@ Prompts the policy applies to
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:30](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L30)
+Defined in: [core/src/types/policy.ts:34](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L34)
 
 Unique policy name within the config
 
@@ -100,7 +100,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:40](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/policy.ts#L40)
 
 Violation severity
 

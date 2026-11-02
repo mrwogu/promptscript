@@ -8,7 +8,7 @@
 
 > **createValidator**(`config?`): [`Validator`](https://getpromptscript.dev/api-reference/validator/src/classes/Validator/index.md)
 
-Defined in: [validator/src/validator.ts:198](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/validator/src/validator.ts#L198)
+Defined in: [validator/src/validator.ts:198](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/validator/src/validator.ts#L198)
 
 Create a validator with default configuration.
 

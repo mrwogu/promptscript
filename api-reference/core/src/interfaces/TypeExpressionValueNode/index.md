@@ -6,7 +6,7 @@
 
 # Interface: TypeExpressionValueNode
 
-Defined in: [core/src/types/ast.ts:527](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L527)
+Defined in: [core/src/types/ast.ts:529](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L529)
 
 Canonical type expression value.
 
@@ -20,7 +20,7 @@ Canonical type expression value.
 
 > `readonly` **expression**: `object`
 
-Defined in: [core/src/types/ast.ts:529](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L529)
+Defined in: [core/src/types/ast.ts:531](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L531)
 
 #### constraints?
 
@@ -94,7 +94,7 @@ Node type discriminator
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:497](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L497)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -130,7 +130,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"TypeExpressionValueNode"`
 
-Defined in: [core/src/types/ast.ts:528](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/core/src/types/ast.ts#L528)
+Defined in: [core/src/types/ast.ts:530](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L530)
 
 #### Overrides
 

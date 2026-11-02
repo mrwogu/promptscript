@@ -8,7 +8,7 @@
 
 > **getFormatter**(`name`): [`Formatter`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/Formatter/index.md)
 
-Defined in: [formatters/src/standalone.ts:99](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/formatters/src/standalone.ts#L99)
+Defined in: [formatters/src/standalone.ts:99](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/standalone.ts#L99)
 
 Get a formatter instance by name.
 

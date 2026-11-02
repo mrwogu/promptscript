@@ -8,7 +8,7 @@
 
 > **createResolver**(`options`): [`Resolver`](https://getpromptscript.dev/api-reference/resolver/src/classes/Resolver/index.md)
 
-Defined in: [resolver/src/resolver.ts:2436](https://github.com/mrwogu/promptscript/blob/bf736d7e84ce7d2e4bbf3950f9e04db454797a51/packages/resolver/src/resolver.ts#L2436)
+Defined in: [resolver/src/resolver.ts:2444](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/resolver.ts#L2444)
 
 Create a resolver with the given options.
 
