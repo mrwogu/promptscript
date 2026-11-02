@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/compiler",
-  "version": "0.0.1",
+  "version": "1.26.0",
   "description": "Compilation pipeline orchestration for PromptScript",
   "keywords": [
     "cli",
@@ -41,14 +41,15 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@swc/helpers": "~0.5.23",
-    "@promptscript/core": "workspace:^",
-    "@promptscript/formatters": "workspace:^",
-    "@promptscript/resolver": "workspace:^",
-    "@promptscript/validator": "workspace:^",
+    "@promptscript/core": "workspace:*",
+    "@promptscript/formatters": "workspace:*",
+    "@promptscript/resolver": "workspace:*",
+    "@promptscript/validator": "workspace:*",
     "chokidar": "^6.0.0",
     "minimatch": "^11.0.3"
   },
   "publishConfig": {
+    "access": "public",
     "main": "./src/index.js",
     "exports": {
       ".": {
