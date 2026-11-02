@@ -228,7 +228,7 @@ describe('blobReader', () => {
     await read(ids[2] ?? '');
 
     // Assert
-    expect(load.mock.calls.length).toBe(before + 1);
+    expect(load.mock.calls).toHaveLength(before + 1);
     expect(load.mock.calls.at(-1)?.[0]).toEqual([ids[2]]);
   });
 
@@ -244,7 +244,7 @@ describe('blobReader', () => {
     await read(ids[1] ?? '');
 
     // Assert
-    expect(load.mock.calls.length).toBe(2);
+    expect(load.mock.calls).toHaveLength(2);
     expect(load.mock.calls[1]?.[0]).toEqual([idOf(500)]);
     expect(load.mock.calls[1]?.[2]?.budgetBytes).toBeGreaterThanOrEqual(MAX_BLOB_BYTES);
   });

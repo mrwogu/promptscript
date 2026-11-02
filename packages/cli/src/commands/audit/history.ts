@@ -293,7 +293,7 @@ export function blobReader(
       if (cachedBytes <= BLOB_CACHE_BYTES / 2) break;
       drop(id);
     }
-    for (const id of [...cache.keys()]) {
+    for (const id of cache.keys()) {
       if (cachedBytes <= BLOB_CACHE_BYTES - MAX_BLOB_BYTES) break;
       drop(id);
     }
