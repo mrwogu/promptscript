@@ -413,7 +413,7 @@ export function escapeNonAscii(text: string): string {
       continue;
     }
     const hex = code.toString(16).toUpperCase().padStart(4, '0');
-    out += code > 0xffff ? `\\u{${hex}}` : `\\u${hex}`;
+    out += code > 0xffff ? String.raw`\u{${hex}}` : String.raw`\u${hex}`;
   }
   return out;
 }
