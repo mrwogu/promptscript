@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -296,7 +296,7 @@ describe('skill composition resolver', () => {
 
       expect(composedFrom[2]!.name).toBe('autofix');
       expect(composedFrom[2]!.alias).toBe('autofix');
-      expect(composedFrom[2]!.source).toContain('code-fix.prs');
+      expect(composedFrom[2]!.source).toBe(resolve(FIXTURES_DIR, 'phases/code-fix.prs'));
     });
   });
 
@@ -1465,5 +1465,45 @@ describe('resolveSkillComposition — edge cases', () => {
         })
       ).rejects.toThrow('string error');
     });
+  });
+});
+
+describe('composed-from markers', () => {
+  const SUB_SKILL = (name: string): string => `@meta { id: "${name}" syntax: "1.2.0" }
+@skills { ${name}: { description: "${name}" content: "Run ${name}." } }`;
+  let dir: string;
+
+  beforeEach(async () => {
+    dir = await mkdtemp(resolve(tmpdir(), 'prs-marker-'));
+    await mkdir(resolve(dir, 'a'));
+    await mkdir(resolve(dir, 'b'));
+    await writeFile(resolve(dir, 'a/check.prs'), SUB_SKILL('first'));
+    await writeFile(resolve(dir, 'b/check.prs'), SUB_SKILL('second'));
+    await writeFile(
+      resolve(dir, 'project.prs'),
+      `@meta { id: "marker" syntax: "1.2.0" }
+@skills {
+  deploy: { description: "Deploy" content: "Start." }
+  @use ./a/check
+  @use ./b/check
+}`
+    );
+  });
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it('tells apart phases that share a file name', async () => {
+    const compiler = new Resolver({ registryPath: dir, localPath: dir, cache: false });
+
+    const result = await compiler.resolve(resolve(dir, 'project.prs'));
+
+    const skills = result.ast!.blocks.find((b) => b.name === 'skills')!.content as ObjectContent;
+    const deploy = skills.properties['deploy'] as Record<string, unknown>;
+    const text = (deploy['content'] as TextContent).value;
+    expect(text).toContain('<!-- composed-from: a/check.prs -->');
+    expect(text).toContain('<!-- composed-from: b/check.prs -->');
+    expect(text).not.toContain(dir);
   });
 });
