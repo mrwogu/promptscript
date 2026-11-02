@@ -272,7 +272,13 @@ export function blobReader(
   load: typeof readBlobs = readBlobs
 ): BlobReader {
   const occurrences = new Map<string, number[]>();
-  planned.forEach((id, index) => occurrences.set(id, [...(occurrences.get(id) ?? []), index]));
+  planned.forEach((id, index) => {
+    const list = occurrences.get(id);
+    if (list) list.push(index);
+    else occurrences.set(id, [index]);
+  });
+  // Position of the next occurrence per id. The cursor never goes back, so these only move forward.
+  const nextOccurrence = new Map<string, number>();
   const cache = new Map<string, Buffer>();
   const tooLarge = new Set<string>();
   let cachedBytes = 0;
@@ -302,7 +308,11 @@ export function blobReader(
   /** Where `blob` is read next in the plan, and the cursor moves there. */
   const locate = (blob: string): number | undefined => {
     const all = occurrences.get(blob);
-    const at = all?.find((index) => index >= cursor) ?? all?.at(-1);
+    if (!all) return undefined;
+    let next = nextOccurrence.get(blob) ?? 0;
+    while (next < all.length && (all[next] ?? 0) < cursor) next += 1;
+    nextOccurrence.set(blob, next);
+    const at = all[next] ?? all.at(-1);
     if (at !== undefined) cursor = Math.max(cursor, at);
     return at;
   };

@@ -185,6 +185,27 @@ describe('blobReader', () => {
     expect(texts).toEqual(ids.map((id) => `text ${id}`));
   });
 
+  it('reads a plan where one blob repeats many times', async () => {
+    // Arrange
+    const shared = idOf(1);
+    const ids = Array.from({ length: 40_000 }, (_, index) =>
+      index % 2 === 0 ? shared : idOf((index % 100) + 2)
+    );
+    const load = vi.fn<Loader>(async (asked) =>
+      batchOf({ blobs: new Map(asked.map((id) => [id, Buffer.from(`text ${id}`)])) })
+    );
+    const read = blobReader('/repo', ids, load);
+
+    // Act
+    let matched = 0;
+    for (const id of ids) if ((await read(id)) === `text ${id}`) matched += 1;
+
+    // Assert
+    expect(matched).toBe(ids.length);
+    const asked = load.mock.calls.flatMap((call) => call[0]);
+    expect(asked).toHaveLength(new Set(ids).size);
+  });
+
   it('asks for at most 256 small blobs at a time', async () => {
     // Arrange
     const ids = Array.from({ length: 600 }, (_, index) => idOf(index + 1));
