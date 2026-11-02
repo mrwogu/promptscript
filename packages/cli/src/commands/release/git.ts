@@ -400,6 +400,25 @@ export function stripControlCharacters(text: string): string {
 }
 
 /**
+ * Write a prompt id so that nothing in it can look like something else: every code point
+ * outside U+0021 to U+007E, and the backslash, becomes `\uXXXX` (or `\u{XXXXX}` above U+FFFF).
+ * A valid id is plain ASCII and stays as it is.
+ */
+export function escapeNonAscii(text: string): string {
+  let out = '';
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code >= 0x21 && code <= 0x7e && char !== '\\') {
+      out += char;
+      continue;
+    }
+    const hex = code.toString(16).toUpperCase().padStart(4, '0');
+    out += code > 0xffff ? `\\u{${hex}}` : `\\u${hex}`;
+  }
+  return out;
+}
+
+/**
  * Write the characters of `stripControlCharacters` as visible `\u` plus 4 to 6 uppercase hex
  * digits, one escape for each character or lone surrogate.
  */

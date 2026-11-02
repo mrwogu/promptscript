@@ -15,7 +15,7 @@ export const finite = (value: unknown): value is number =>
 export const count = (value: unknown): value is number =>
   typeof value === 'number' && Number.isSafeInteger(value) && value >= 0;
 
-// The prompt id pattern of the approval record in core: every segment is a plain name
+// The pattern of isPromptId in core. Runtime does not depend on core, so a spec keeps both in step.
 const PROMPT_ID = /^(?!.*\.\.)(?:@?[A-Za-z\d][\w.-]{0,63}(?<!\.)\/)+[A-Za-z\d][\w-]{0,63}$/;
 
 /** A prompt id with plain name segments, at most 512 characters. */

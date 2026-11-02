@@ -17,6 +17,7 @@ import {
   findApprovalRecords,
   gitBlobId,
   gitPathsOf,
+  isApprovalPromptId,
   MAX_APPROVAL_DEPTH,
   MAX_APPROVAL_ENTRIES,
   trackedApprovals,
@@ -388,4 +389,42 @@ describe('committedRecords', () => {
       }
     }
   );
+});
+
+// The same table is in the runtime spec of the otel id check, which keeps its own copy.
+const ID_TABLE: [string, boolean][] = [
+  ['acme/refund-reply', true],
+  ['@acme/support/reply', true],
+  ['a.b/c_d-e', true],
+  ['refund-reply', false],
+  ['acme/../x', false],
+  ['acme./x', false],
+  ['acme/x.', false],
+  ['acme/refund\u200b-reply', false],
+  ['acme/\u0430bc', false],
+  ['acme/x y', false],
+];
+
+describe('isApprovalPromptId', () => {
+  it.each(ID_TABLE)('judges %j as %s', (id, expected) => {
+    expect(isApprovalPromptId(id)).toBe(expected);
+  });
+
+  it.each(['acme-support/refund-reply', '@acme/support/reply'])('accepts %s', (id) => {
+    expect(isApprovalPromptId(id)).toBe(true);
+  });
+
+  it.each(['acme/refund\u200b-reply', 'refund-reply', 'acme/../x', 'acme./x', ''])(
+    'refuses %j',
+    (id) => {
+      expect(isApprovalPromptId(id)).toBe(false);
+    }
+  );
+
+  it('refuses an id with more segments than a record path holds', () => {
+    const segments = Array.from({ length: MAX_APPROVAL_DEPTH }, () => 'a');
+
+    expect(isApprovalPromptId(segments.slice(1).join('/'))).toBe(true);
+    expect(isApprovalPromptId(segments.join('/'))).toBe(false);
+  });
 });

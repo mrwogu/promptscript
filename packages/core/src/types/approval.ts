@@ -101,9 +101,20 @@ export function isApproverHandle(value: string): boolean {
   return value.length <= MAX_APPROVER_LENGTH && GIT_HOST_USER_PATTERN.test(value);
 }
 
-// Same patterns as the schema JSDoc; the schema spec checks that both agree.
+// Private, so nobody can change it through RegExp.prototype.compile.
 const PROMPT_ID =
   /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
+
+/**
+ * Is this the prompt id of an approval record: ASCII only, at least two segments split by a
+ * slash, no segment ending in a dot. It has no limit on the number of segments; the CLI adds
+ * its own depth limit for the record path.
+ */
+export function isPromptId(value: string): boolean {
+  return PROMPT_ID.test(value);
+}
+
+// These patterns are the same as the schema JSDoc; the schema spec checks that both agree.
 const CONTENT_HASH = /^sha256-[0-9a-f]{64}$/u;
 const ROLE = /^(?!(?:con|prn|aux|nul|com\d|lpt\d)$)[a-z][a-z0-9-]{0,31}$/u;
 const CREATED_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
