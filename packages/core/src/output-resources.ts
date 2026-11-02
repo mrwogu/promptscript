@@ -33,6 +33,7 @@ export const OUTPUT_RESOURCE_KINDS: readonly OutputResourceKind[] = [
   'main',
 ];
 
+/** @internal Used by the CLI for output resources. */
 export function isOutputResourceKind(value: string): value is OutputResourceKind {
   return (OUTPUT_RESOURCE_KINDS as readonly string[]).includes(value);
 }
@@ -121,6 +122,8 @@ function matchCatalogResource(
  * resource-only run never keeps files the selection did not name. A
  * configured `skillBaseDir` relocates skill outputs off the catalog default
  * path, so it classifies unmatched paths under it as `skills`.
+ *
+ * @internal Used by the CLI for output resources.
  */
 export function classifyOutputResource(
   target: string,

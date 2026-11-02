@@ -12,6 +12,7 @@ interface NativeRealpathSync {
  *
  * @param path - Absolute or relative path to resolve
  * @returns The fully resolved canonical path
+ * @internal Used by the CLI, compiler and eval for file access.
  */
 export function portableRealpathSync(path: string): string {
   const native = (realpathSync as unknown as NativeRealpathSync).native;

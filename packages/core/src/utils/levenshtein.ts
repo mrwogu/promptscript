@@ -1,5 +1,7 @@
 /**
  * Calculate the Levenshtein distance between two strings.
+ *
+ * @internal Used for did-you-mean suggestions.
  */
 export function levenshteinDistance(a: string, b: string): number {
   if (a.length === 0) return b.length;
@@ -35,6 +37,7 @@ export function levenshteinDistance(a: string, b: string): number {
  * @param candidates - List of candidate strings
  * @param maxDistance - Maximum Levenshtein distance (default: 2)
  * @returns The closest match and its distance, or undefined if none within threshold
+ * @internal Used for did-you-mean suggestions.
  */
 export function findClosestMatch(
   input: string,

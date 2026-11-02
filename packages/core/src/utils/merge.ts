@@ -48,6 +48,7 @@ export const DEFAULT_MERGE_OPTIONS: MergeOptions = {
  * @returns Merged object
  * @throws PSError (`INVALID_VALUE`) when either side has a `__proto__`, `constructor` or
  * `prototype` key in an object that is merged, at the top or at a path both sides share
+ * @internal Shared helper, not part of the API.
  */
 export function deepMerge<T extends Record<string, unknown>>(
   parent: T,
@@ -209,6 +210,8 @@ export function isTextContent(val: unknown): val is TextContent {
 
 /**
  * Type guard for plain objects.
+ *
+ * @internal Shared helper, not part of the API.
  */
 export function isPlainObject(val: unknown): val is Record<string, unknown> {
   return (
@@ -221,6 +224,8 @@ export function isPlainObject(val: unknown): val is Record<string, unknown> {
 
 /**
  * Deep clone a value.
+ *
+ * @internal Shared helper, not part of the API.
  */
 export function deepClone<T>(value: T): T {
   if (value === null || typeof value !== 'object') {

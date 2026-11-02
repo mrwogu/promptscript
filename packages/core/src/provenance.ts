@@ -353,6 +353,7 @@ function valueNodeToValue(node: ValueNode): unknown {
   }
 }
 
+/** @internal Used by the resolver for provenance trace building. */
 export interface ProvenanceEventOptions {
   /** Final content used to map incoming values to final canonical positions. */
   readonly finalContent?: BlockContent;
@@ -416,6 +417,8 @@ function getComposedPhaseMetadata(value: unknown): ComposedPhaseMetadata | undef
  *
  * Events are separate from AST nodes so internal tracing never reaches
  * formatters unless a formatter explicitly consumes the public trace.
+ *
+ * @internal Used by the resolver for provenance trace building.
  */
 export function collectProvenanceEvents(
   body: BlockBody | undefined,
@@ -504,6 +507,8 @@ export function collectProvenanceEvents(
  *
  * Composition metadata is matched to inline uses by resolved source path.
  * Positional fallback would attribute malformed metadata to the wrong use.
+ *
+ * @internal Used by the resolver for provenance trace building.
  */
 export function collectCompositionProvenanceEvents(
   phases: readonly unknown[],
@@ -585,6 +590,8 @@ export function collectCompositionProvenanceEvents(
 /**
  * Create provenance events for a value replacement, including nested fields
  * and list entries.
+ *
+ * @internal Used by the resolver for provenance trace building.
  */
 export function collectProvenanceValueEvents(
   node: ValueNode,
@@ -679,6 +686,8 @@ export function collectProvenance(
 
 /**
  * Prefix every history step with an import or inheritance link.
+ *
+ * @internal Used by the resolver for provenance trace building.
  */
 export function prefixProvenance(trace: ProvenanceTrace, link: ProvenanceLink): ProvenanceTrace {
   return {
@@ -707,6 +716,8 @@ export function prefixProvenance(trace: ProvenanceTrace, link: ProvenanceLink): 
 
 /**
  * Return an empty trace for resolver failures that have no AST.
+ *
+ * @internal Used by the resolver for provenance trace building.
  */
 export function emptyProvenance(entry = '<unknown>'): ProvenanceTrace {
   return { version: 1, entry, entries: [] };

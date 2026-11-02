@@ -132,6 +132,8 @@ function validateParamType(
  * @throws MissingParamError if a required parameter is not provided
  * @throws UnknownParamError if an unknown parameter is provided
  * @throws ParamTypeMismatchError if a parameter value has the wrong type
+ *
+ * @internal Used by the resolver and the browser compiler.
  */
 export function bindParams(
   args: ParamArgument[] | undefined,
@@ -293,6 +295,8 @@ function interpolateValue(value: Value, ctx: TemplateContext): Value {
 
 /**
  * Interpolate block content.
+ *
+ * @internal Used by the resolver.
  */
 export function interpolateContent(content: BlockContent, ctx: TemplateContext): BlockContent {
   switch (content.type) {
@@ -443,6 +447,8 @@ function interpolateOverride(override: OverrideBlock, ctx: TemplateContext): Ove
  * @param ast - The AST to interpolate
  * @param ctx - Template context with bound parameters
  * @returns A new AST with all template variables interpolated
+ *
+ * @internal Used by the resolver and the browser compiler.
  */
 export function interpolateAST(ast: Program, ctx: TemplateContext): Program {
   // Skip if no params to interpolate

@@ -271,6 +271,8 @@ export function getMinimumVersionForFeature(feature: SyntaxFeature): string | un
 
 /**
  * Select declaration-ordered resolution for syntax 1.5.0+ or ordered features.
+ *
+ * @internal Used by the resolver for sequential operations.
  */
 export function usesSequentialOperations(ast: Program): boolean {
   return getSyntaxFeatureUsages(ast).some(

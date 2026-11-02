@@ -112,6 +112,8 @@ const xai = (
 
 /**
  * Built-in model profiles, grouped by provider and family, oldest first.
+ *
+ * @internal Raw profile data, read through getModelCatalog.
  */
 export const MODEL_PROFILES: readonly ModelProfile[] = [
   // Anthropic

@@ -21,21 +21,25 @@ import {
 } from './canonical-ast.js';
 import { selectPresentationEntries } from './presentation.js';
 
+/** @internal Used by the resolver for block merging. */
 export interface BlockMergePolicy {
   readonly valuePrecedence: 'base' | 'incoming';
   readonly typeMismatchPrecedence: 'base' | 'incoming';
 }
 
+/** @internal Used by the resolver for block merging. */
 export interface BlockCollectionMergePolicy {
   readonly content: BlockMergePolicy;
   readonly outputOrder: 'base' | 'incoming';
 }
 
+/** @internal Used by the resolver for block merging. */
 export const INHERITANCE_MERGE_POLICY: BlockMergePolicy = {
   valuePrecedence: 'incoming',
   typeMismatchPrecedence: 'incoming',
 };
 
+/** @internal Used by the resolver for block merging. */
 export const IMPORT_MERGE_POLICY: BlockMergePolicy = {
   valuePrecedence: 'base',
   typeMismatchPrecedence: 'incoming',
@@ -206,6 +210,8 @@ function mergeMixedContent(
 
 /**
  * Merge legacy content through one browser-safe policy engine.
+ *
+ * @internal Used by the resolver for block merging.
  */
 export function mergeBlockContent(
   base: BlockContent,
@@ -569,6 +575,8 @@ function mergeCanonicalBodies(
 
 /**
  * Compose one matching block across source layers while preserving same-layer duplicates.
+ *
+ * @internal Used by the resolver for block merging.
  */
 export function mergeBlockCollections(
   base: readonly Block[],

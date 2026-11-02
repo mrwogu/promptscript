@@ -52,10 +52,10 @@ export interface AgentProvenance {
     source: string;
 }
 
-// @public
+// @internal
 export function applyOverride(ast: Program, override: OverrideBlock, options?: ApplyOverrideOptions): Program;
 
-// @public (undocumented)
+// @internal
 export interface ApplyOverrideOptions {
     // (undocumented)
     readonly importMarkerPrefix?: string;
@@ -111,10 +111,10 @@ export interface ArrayValueNode extends CanonicalNode {
     readonly type: 'ArrayValueNode';
 }
 
-// @public
+// @internal
 export function assertTargetDefinitionConsistency(definitions?: Readonly<Record<KnownTarget, TargetDefinition>>): void;
 
-// @public
+// @internal
 export function assertValidTargetCapabilities(capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>): void;
 
 // @public
@@ -131,7 +131,7 @@ export interface BasePolicyDefinition {
     severity: PolicySeverity;
 }
 
-// @public
+// @internal
 export function bindParams(args: ParamArgument[] | undefined, defs: ParamDefinition[] | undefined, templatePath: string, callLocation?: SourceLocation): Map<string, Value>;
 
 // @public
@@ -284,7 +284,7 @@ export interface BlockBodyOptions {
 // @public (undocumented)
 export function blockBodyToContent(body: BlockBody): BlockContent;
 
-// @public (undocumented)
+// @internal
 export interface BlockCollectionMergePolicy {
     // (undocumented)
     readonly content: BlockMergePolicy;
@@ -304,7 +304,7 @@ export type BlockEntry = TextEntry | FieldEntry | ListEntry | InlineUseEntry | P
 // @public
 export type BlockInput = Block | CanonicalBlock;
 
-// @public (undocumented)
+// @internal
 export interface BlockMergePolicy {
     // (undocumented)
     readonly typeMismatchPrecedence: 'base' | 'incoming';
@@ -398,7 +398,7 @@ export interface CanonicalExtendBlock extends CanonicalNode {
     readonly type: 'CanonicalExtendBlock';
 }
 
-// @public
+// @internal
 export function canonicalizeJson(value: unknown): string;
 
 // @public
@@ -487,7 +487,7 @@ export class CircularGuardRequiresError extends ResolveError {
     readonly chain: string[];
 }
 
-// @public
+// @internal
 export function classifyOutputResource(target: string, path: string, skillBaseDir?: string): OutputResourceKind;
 
 // @public
@@ -496,7 +496,7 @@ export type ClaudeVersion = 'simple' | 'multifile' | 'full';
 // @public
 export const CODING_TARGETS: readonly KnownTarget[];
 
-// @public
+// @internal
 export function collectCompositionProvenanceEvents(phases: readonly unknown[], inlineUses: readonly {
     readonly declaration: InlineUseDeclaration;
 }[], resolveSource: (declaration: InlineUseDeclaration) => string, skillName: string, finalProperties?: readonly string[]): ProvenanceEvent[];
@@ -508,27 +508,25 @@ export function collectProvenance(input: ProgramInput, options?: {
     readonly events?: readonly ProvenanceEvent[];
 }): ProvenanceTrace;
 
-// @public
+// @internal
 export function collectProvenanceEvents(body: BlockBody | undefined, targetPath: string, operation: Extract<ProvenanceEvent['operation'], 'extend' | 'override'>, source: SourceLocation, action: Extract<ProvenanceEvent['action'], 'merged' | 'replaced'>, strategy?: string, options?: ProvenanceEventOptions): ProvenanceEvent[];
 
-// @public
+// @internal
 export function collectProvenanceValueEvents(node: ValueNode, targetPath: string, source: SourceLocation): ProvenanceEvent[];
 
-// @public
+// @internal
 export function compareCodeUnits(a: string, b: string): number;
 
-// @public
+// @internal
 export function compareModelReleases(a: ModelProfile, b: ModelProfile): number;
 
-// @public (undocumented)
+// @internal
 export function compareModelVersions(a: string, b: string): number;
 
 // @internal
 export type CompareResult = -1 | 0 | 1;
 
-// Warning: (ae-incompatible-release-tags) The symbol "compareVersions" is marked as @public, but its signature references "CompareResult" which is marked as @internal
-//
-// @public
+// @internal
 export function compareVersions(a: string, b: string): CompareResult;
 
 // @public
@@ -537,7 +535,7 @@ export const COMPOSABLE_BLOCKS: readonly ComposableBlock[];
 // @public
 export type ComposableBlock = 'identity' | 'context' | 'knowledge' | 'standards' | 'restrictions' | 'examples';
 
-// @public (undocumented)
+// @internal
 export function composeBlockBodies(baseBody: BlockBody | undefined, incomingBody: BlockBody | undefined, baseContent: BlockContent, incomingContent: BlockContent, mergedContent: BlockContent, blockName?: string): BlockBody;
 
 // @public
@@ -553,7 +551,7 @@ export interface ComposedPhase {
     source: string;
 }
 
-// @public
+// @internal
 export function consumeInlineUses(ast: Program): Program;
 
 // @public
@@ -593,7 +591,7 @@ export function createCanonicalOverrideBlock(targetPath: string, replacement: Ov
 // @public (undocumented)
 export function createCanonicalProgram(options: CanonicalProgramOptions): CanonicalProgram;
 
-// @public
+// @internal
 export function createLocation(file: string, line: number, column: number, offset?: number): SourceLocation;
 
 // @public
@@ -606,16 +604,16 @@ export function createLogger(options: {
 // @public
 export function createModelCatalog(config?: ModelsConfig, builtIns?: readonly ModelProfile[]): ModelCatalog;
 
-// @public
+// @internal
 export function createNativeAgentNameMap(names: readonly string[]): ReadonlyMap<string, string>;
 
 // @public
 export function createOutputPlan(candidates: readonly OutputPlanCandidate[]): OutputPlan;
 
-// @public
+// @internal
 export function createPathReference(path: string, loc: SourceLocation): PathReference;
 
-// @public (undocumented)
+// @internal
 export function createTargetCapability(target: KnownTarget, seed: TargetCapabilitySeed): TargetCapability;
 
 // @public (undocumented)
@@ -629,12 +627,10 @@ export type CustomTarget = string & {
 // @public
 export function customTarget(name: string): CustomTarget;
 
-// @public
+// @internal
 export function deepClone<T>(value: T): T;
 
-// Warning: (ae-incompatible-release-tags) The symbol "deepMerge" is marked as @public, but its signature references "MergeOptions" which is marked as @internal
-//
-// @public
+// @internal
 export function deepMerge<T extends Record<string, unknown>>(parent: T, child: Partial<T>, options?: Partial<MergeOptions>): T;
 
 // @public
@@ -645,7 +641,7 @@ export type DeepReadonly<T> = T extends PrimitiveValue ? T : T extends readonly 
 // @internal
 export const DEFAULT_MERGE_OPTIONS: MergeOptions;
 
-// @public (undocumented)
+// @internal
 export const DEFAULT_OUTPUT_PATHS: DefaultOutputPathMap;
 
 // @public
@@ -672,10 +668,10 @@ export interface DetectionHints {
     languages?: string[];
 }
 
-// @public
+// @internal
 export function detectModelDrift(entries: readonly OpenRouterModelEntry[], profiles: readonly ModelProfile[]): ModelDriftReport;
 
-// @public
+// @internal
 export interface Diagnostic {
     code?: string;
     location?: SourceLocation;
@@ -684,25 +680,25 @@ export interface Diagnostic {
     source?: string;
 }
 
-// @public
+// @internal
 export type DiagnosticSeverity = 'error' | 'warning' | 'info' | 'hint';
 
-// @public
+// @internal
 export function displacedProfile(candidate: ModelDriftCandidate, profiles: readonly ModelProfile[]): ModelProfile | undefined;
 
 // @public
 export function effectiveGovernance(entry: GovernanceMeta, defaults: GovernanceMeta): GovernanceMeta;
 
-// @public
+// @internal
 export function emptyProvenance(entry?: string): ProvenanceTrace;
 
-// @public
+// @internal
 export function ensureAgentProvenance(program: Program, source: string, action?: AgentProvenance['action']): Program;
 
 // @public (undocumented)
 export type EnvironmentVariableProvider = (name: string) => string | undefined;
 
-// @internal
+// @public
 export enum ErrorCode {
     // (undocumented)
     AGENT_NAME_CONFLICT = "PS2014",
@@ -1282,10 +1278,10 @@ export class FileNotFoundError extends ResolveError {
     readonly path: string;
 }
 
-// @public
+// @internal
 export function findAgentConflicts(target: Program, source: Program, sourceImportPath: string, importLocation?: SourceLocation): AgentConflict[];
 
-// @public
+// @internal
 export function findClosestMatch(input: string, candidates: readonly string[], maxDistance?: number): {
     match: string;
     distance: number;
@@ -1297,25 +1293,23 @@ export function findRuntimeSlots(text: string): RuntimeSlotMatch[];
 // @public
 export const FLOATING_MODEL_ALIASES: Readonly<Record<string, string>>;
 
-// @public
+// @internal
 export function formatDiagnostic(diagnostic: Diagnostic, options?: FormatDiagnosticOptions): string;
 
-// @public
+// @internal
 export interface FormatDiagnosticOptions {
     color?: boolean;
     context?: boolean;
     contextLines?: number;
 }
 
-// @public
+// @internal
 export function formatDiagnostics(diagnostics: Diagnostic[], options?: FormatDiagnosticOptions): string;
 
-// Warning: (ae-incompatible-release-tags) The symbol "formatPath" is marked as @public, but its signature references "ParsedPath" which is marked as @internal
-//
-// @public
+// @internal
 export function formatPath(ref: PathReference | ParsedPath): string;
 
-// @public
+// @internal
 export function formatProfileEntry(candidate: ModelDriftCandidate, pricesCheckedOn: string): string;
 
 // @public
@@ -1326,9 +1320,7 @@ export interface FormattingConfig {
     tabWidth?: PrettierMarkdownOptions['tabWidth'];
 }
 
-// Warning: (ae-incompatible-release-tags) The symbol "formatVersion" is marked as @public, but its signature references "SemVer" which is marked as @internal
-//
-// @public
+// @internal
 export function formatVersion(version: SemVer): string;
 
 // @public
@@ -1346,10 +1338,10 @@ export function getAgentProvenance(program: Program, name: string): AgentProvena
 // @public
 export function getAgentProvenanceEntries(program: Program, name: string): AgentProvenance[];
 
-// @public (undocumented)
+// @internal
 export function getBlockItems(block: BlockInput): Value[];
 
-// @public (undocumented)
+// @internal
 export function getBlockProperties(block: BlockInput): Record<string, Value>;
 
 // @public
@@ -1358,7 +1350,7 @@ export function getBlocksForVersion(version: string): readonly string[] | undefi
 // @public
 export function getBlockShapeContract(name: string): BlockShapeContract | undefined;
 
-// @public (undocumented)
+// @internal
 export function getBlockText(block: BlockInput): string | undefined;
 
 // @public
@@ -1367,7 +1359,7 @@ export function getBuiltInConvention(name: BuiltInConventionName): OutputConvent
 // @public
 export function getCanonicalBlockName(name: string): string;
 
-// @public (undocumented)
+// @internal
 export function getCanonicalBlocks(input: ProgramInput): readonly CanonicalBlock[];
 
 // @public
@@ -1376,13 +1368,13 @@ export function getDefaultOutputPath(name: KnownTarget): string;
 // @public
 export function getFeaturesForVersion(version: string): readonly SyntaxFeature[] | undefined;
 
-// @public
+// @internal
 export function getFileName(path: string): string;
 
 // @public
 export function getHighestKnownSyntaxVersion(): string;
 
-// @public (undocumented)
+// @internal
 export function getInlineUses(block: BlockInput): InlineUseDeclaration[];
 
 // @public
@@ -1403,12 +1395,10 @@ export function getModelTargetScheme(target: string): ModelTargetScheme | undefi
 // @public
 export function getObservedBlockShape(block: BlockInput): BlockShape;
 
-// Warning: (ae-incompatible-release-tags) The symbol "getPackageInfo" is marked as @public, but its signature references "PackageInfo" which is marked as @internal
-//
-// @public
+// @internal
 export function getPackageInfo(baseDir: string, relativePath?: string): PackageInfo;
 
-// @public
+// @internal
 export function getPackageVersion(baseDir: string, relativePath?: string): string;
 
 // @public (undocumented)
@@ -2811,19 +2801,19 @@ export type HookTerminalGuarantee = 'guaranteed' | 'best-effort' | 'not-guarante
 // @public (undocumented)
 export type HookTimeoutUnit = 'milliseconds' | 'seconds' | 'none';
 
-// @public (undocumented)
+// @internal
 export const IMPORT_MARKER_PREFIX = "__import__";
 
-// @public (undocumented)
+// @internal
 export const IMPORT_MERGE_POLICY: BlockMergePolicy;
 
-// @public
+// @internal
 export function incrementVersion(version: string, type: 'major' | 'minor' | 'patch'): string;
 
 // @public
 export const INHERIT_MODEL = "inherit";
 
-// @public (undocumented)
+// @internal
 export const INHERITANCE_MERGE_POLICY: BlockMergePolicy;
 
 // @public
@@ -2863,19 +2853,19 @@ export interface InlineUseEntry extends CanonicalNode {
     readonly type: 'InlineUseEntry';
 }
 
-// @public
+// @internal
 export function interpolateAST(ast: Program, ctx: TemplateContext): Program;
 
-// @public
+// @internal
 export function interpolateContent(content: BlockContent, ctx: TemplateContext): BlockContent;
 
-// @public
+// @internal
 export function interpolateEnvVars(text: string, environmentProvider: EnvironmentVariableProvider): string;
 
 // @public
 export function interpolateText(text: string, ctx: TemplateContext): string;
 
-// @public
+// @internal
 export function isAbsolutePath(path: string): boolean;
 
 // @public
@@ -2896,10 +2886,10 @@ export function isCanonicalBlock(block: BlockInput): block is CanonicalBlock;
 // @public (undocumented)
 export function isCanonicalProgram(program: ProgramInput): program is CanonicalProgram;
 
-// @public
+// @internal
 export function isGeneratedByPromptScript(content: string): boolean;
 
-// @public
+// @internal
 export function isGitTimeoutError(error: Error): boolean;
 
 // @public
@@ -2911,19 +2901,19 @@ export function isKnownSyntaxVersion(version: string): boolean;
 // @public
 export function isKnownTarget(name: string): name is KnownTarget;
 
-// @public (undocumented)
+// @internal
 export function isOutputResourceKind(value: string): value is OutputResourceKind;
 
-// @public
+// @internal
 export function isPlainObject(val: unknown): val is Record<string, unknown>;
 
-// @public (undocumented)
+// @internal
 export function isPortableHookInterpreter(value: string): value is PortableHookInterpreter;
 
-// @public (undocumented)
+// @internal
 export function isPortableHookScriptPath(value: string): boolean;
 
-// @public (undocumented)
+// @internal
 export function isPortablePathSegment(segment: string): boolean;
 
 // @public
@@ -2932,7 +2922,7 @@ export function isPromptId(value: string): boolean;
 // @public
 export function isPromptTarget(name: string): boolean;
 
-// @public
+// @internal
 export function isRelativePath(path: string): boolean;
 
 // @public
@@ -2947,7 +2937,7 @@ export function isTextContent(val: unknown): val is TextContent;
 // @public
 export function isValidLockfile(data: unknown): data is Lockfile;
 
-// @public
+// @internal
 export function isValidVersion(version: string): boolean;
 
 // @public
@@ -2967,19 +2957,19 @@ export interface LayerBoundaryPolicy extends BasePolicyDefinition {
     maxDistance?: number;
 }
 
-// @public (undocumented)
+// @public
 export type LegacyContentType = BlockContent['type'];
 
 // @public
 export type LegacyProgram = Program;
 
-// @public (undocumented)
+// @public
 export interface LegacyProjectionOptions {
     // (undocumented)
     readonly preserveCanonicalBody?: boolean;
 }
 
-// @public
+// @internal
 export function levenshteinDistance(a: string, b: string): number;
 
 // @public
@@ -3063,10 +3053,10 @@ export interface MaxExperimentWeightPolicy extends BasePolicyDefinition {
     maxWeight: number;
 }
 
-// @public
+// @internal
 export function mergeBlockCollections(base: readonly Block[], incoming: readonly Block[], policy: BlockCollectionMergePolicy): Block[];
 
-// @public
+// @internal
 export function mergeBlockContent(base: BlockContent, incoming: BlockContent, policy: BlockMergePolicy): BlockContent;
 
 // @internal
@@ -3076,7 +3066,7 @@ export interface MergeOptions {
     textStrategy: 'replace' | 'concat' | 'prepend';
 }
 
-// @public (undocumented)
+// @internal
 export function mergeValueNodeLocations(base: ValueNode | undefined, incoming: ValueNode | undefined, value: Value, precedence: 'base' | 'incoming', fallback: ValueNode): ValueNode;
 
 // @public
@@ -3106,7 +3096,7 @@ export interface MixedContent extends BaseNode {
     readonly type: 'MixedContent';
 }
 
-// @public
+// @internal
 export const MODEL_PROFILES: readonly ModelProfile[];
 
 // @public
@@ -3129,7 +3119,7 @@ export interface ModelCatalog {
     resolve(reference: string): ModelResolution | undefined;
 }
 
-// @public
+// @internal
 export interface ModelDriftCandidate {
     // (undocumented)
     readonly displayName: string;
@@ -3145,7 +3135,7 @@ export interface ModelDriftCandidate {
     readonly version: string;
 }
 
-// @public
+// @internal
 export interface ModelDriftReport {
     readonly absent: readonly string[];
     readonly candidates: readonly ModelDriftCandidate[];
@@ -3255,16 +3245,16 @@ export interface NamespaceDefinition {
 // @public
 export const noopLogger: Logger;
 
-// @public
+// @internal
 export function normalizeBlockAliases(ast: Program, options?: NormalizeBlockAliasOptions): Program;
 
-// @public (undocumented)
+// @internal
 export interface NormalizeBlockAliasOptions {
     // (undocumented)
     readonly preserveDeclarationOrder?: boolean;
 }
 
-// @public
+// @internal
 export function normalizeLegacyHeadingEntries(blockName: string, entries: readonly BlockEntry[], syntaxVersion: string | undefined): readonly BlockEntry[];
 
 // @public
@@ -3279,10 +3269,10 @@ export function normalizeOutputPath(path: string): string;
 // @public (undocumented)
 export function normalizeProgram(input: ProgramInput): CanonicalProgram;
 
-// @public
+// @internal
 export function normalizeProvenanceFiles(trace: ProvenanceTrace, projectRoot: string | undefined, options?: NormalizeProvenanceOptions): ProvenanceTrace;
 
-// @public
+// @internal
 export interface NormalizeProvenanceOptions {
     realpath?: (path: string) => string;
 }
@@ -3328,7 +3318,7 @@ export interface OmittedManagedDirectory {
     primaryFile: string;
 }
 
-// @public
+// @internal
 export interface OpenRouterModelEntry {
     readonly displayName: string;
     readonly pricing?: OpenRouterPricing;
@@ -3338,7 +3328,7 @@ export interface OpenRouterModelEntry {
     readonly slug: string;
 }
 
-// @public
+// @internal
 export type OpenRouterPricing = Pick<ModelPricing, 'inputUsdPerMillion' | 'outputUsdPerMillion'>;
 
 // @public
@@ -3513,21 +3503,16 @@ export interface ParsedPath {
 
 // @public
 export class ParseError extends PSError {
-    // Warning: (ae-incompatible-release-tags) The symbol "__constructor" is marked as @public, but its signature references "ErrorCode" which is marked as @internal
     constructor(message: string, location?: SourceLocation, code?: ErrorCode);
 }
 
-// @public
+// @internal
 export function parseOpenRouterModels(payload: unknown): OpenRouterModelEntry[];
 
-// Warning: (ae-incompatible-release-tags) The symbol "parsePath" is marked as @public, but its signature references "ParsedPath" which is marked as @internal
-//
-// @public
+// @internal
 export function parsePath(path: string): ParsedPath;
 
-// Warning: (ae-incompatible-release-tags) The symbol "parseVersion" is marked as @public, but its signature references "SemVer" which is marked as @internal
-//
-// @public
+// @internal
 export function parseVersion(version: string): SemVer;
 
 // @public
@@ -3586,13 +3571,13 @@ export const PORTABLE_HOOK_INTERPRETERS: readonly ["python3", "python", "node", 
 // @public (undocumented)
 export type PortableHookInterpreter = (typeof PORTABLE_HOOK_INTERPRETERS)[number];
 
-// @public
+// @internal
 export function portableRealpathSync(path: string): string;
 
-// @public
+// @internal
 export function prefixProvenance(trace: ProvenanceTrace, link: ProvenanceLink): ProvenanceTrace;
 
-// @public (undocumented)
+// @internal
 export function prepareBlockContentForMerge(body: BlockBody | undefined, content: BlockContent): BlockContent;
 
 // @public
@@ -3610,13 +3595,13 @@ export interface PresentationEntry extends CanonicalNode {
     readonly type: 'PresentationEntry';
 }
 
-// @public (undocumented)
+// @internal
 export function presentationEntryKey(entry: PresentationEntry, blockName?: string): string;
 
-// @public (undocumented)
+// @internal
 export type PresentationPrecedence = 'base' | 'incoming';
 
-// @public (undocumented)
+// @internal
 export interface PresentationSelection {
     // (undocumented)
     readonly base: readonly PresentationEntry[];
@@ -4024,7 +4009,7 @@ export interface ProvenanceEvent {
     readonly trace?: ProvenanceTrace;
 }
 
-// @public (undocumented)
+// @internal
 export interface ProvenanceEventOptions {
     readonly baseBody?: BlockBody;
     readonly baseContent?: BlockContent;
@@ -4081,23 +4066,21 @@ export interface ProvenanceTrace {
 
 // @public
 export class PSError extends Error {
-    // Warning: (ae-incompatible-release-tags) The symbol "__constructor" is marked as @public, but its signature references "ErrorCode" which is marked as @internal
     constructor(message: string, code: ErrorCode | string, options?: {
         location?: SourceLocation;
         cause?: Error;
     });
     readonly cause?: Error;
-    // Warning: (ae-incompatible-release-tags) The symbol "code" is marked as @public, but its signature references "ErrorCode" which is marked as @internal
     readonly code: ErrorCode | string;
     format(): string;
     readonly location?: SourceLocation;
     toJSON(): Record<string, unknown>;
 }
 
-// @public
+// @internal
 export function qualifyAgentName(namespace: string, name: string): string;
 
-// @public
+// @internal
 export function qualifyAgentProperties(content: ObjectContent | MixedContent, namespace: string, source: Program, importPath: string, importLocation: SourceLocation): {
     content: ObjectContent | MixedContent;
     provenance: AgentProvenance[];
@@ -4116,13 +4099,13 @@ export function readMetaGovernance(fields: Record<string, Value>): GovernanceMet
 // @public (undocumented)
 export function reconcileBlockBody(body: BlockBody, content: BlockContent): BlockBody;
 
-// @public (undocumented)
+// @internal
 export function reconcileBlockBodyAtPath(baseBody: BlockBody | undefined, incomingBody: BlockBody | undefined, baseContent: BlockContent, incomingContent: BlockContent, mergedContent: BlockContent, path: readonly string[]): BlockBody;
 
-// @public (undocumented)
+// @internal
 export function reconcileValueNode(node: ValueNode, value: Value): ValueNode;
 
-// @public
+// @internal
 export function refuseUrl(url: string | URL, options: UrlRuleOptions): string | undefined;
 
 // @public
@@ -4224,19 +4207,18 @@ export const RESERVED_WORDS: readonly ["meta", "inherit", "use", "extend", "iden
 // @public
 export type ReservedWord = (typeof RESERVED_WORDS)[number];
 
-// @public
+// @internal
 export function resolveAgentTargetPath(pathParts: readonly string[], agentsIndex: number, namespace: string, agentProperties: Readonly<Record<string, Value>>): string[] | undefined;
 
 // @public
 export class ResolveError extends PSError {
-    // Warning: (ae-incompatible-release-tags) The symbol "__constructor" is marked as @public, but its signature references "ErrorCode" which is marked as @internal
     constructor(message: string, location?: SourceLocation, code?: ErrorCode, cause?: Error);
 }
 
 // @public
 export function resolveModelSet(entries: readonly string[], catalog: ModelCatalog): ModelSet;
 
-// @public
+// @internal
 export function resolvePath(path: string, options: {
     registryPath: string;
     basePath?: string;
@@ -4245,7 +4227,7 @@ export function resolvePath(path: string, options: {
 // @public (undocumented)
 export function resolveTargetVersion(capability: TargetCapability, version: string | undefined): string;
 
-// @public
+// @internal
 export function resolveUseImport(target: Program, declaration: UseDeclaration, imported: Program): Program;
 
 // @public
@@ -4328,7 +4310,7 @@ export interface SectionRenderer {
     start: string;
 }
 
-// @public
+// @internal
 export function selectPresentationEntries(baseEntries: readonly BlockEntry[], incomingEntries: readonly BlockEntry[], precedence: PresentationPrecedence, blockName?: string): PresentationSelection;
 
 // @internal
@@ -4358,10 +4340,10 @@ export function serializeApprovalRecord(record: ApprovalRecordV1): string;
 // @public
 export type Severity = 'error' | 'warning' | 'info';
 
-// @public
+// @internal
 export function sha256Hex(text: string): string;
 
-// @public (undocumented)
+// @internal
 export const SKILL_REPLACE_PROPERTY_NAMES: readonly ["content", "description", "trigger", "userInvocable", "allowedTools", "disableModelInvocation", "context", "agent", "license"];
 
 // @public
@@ -4433,13 +4415,13 @@ export interface SourceRange {
     start: SourceLocation;
 }
 
-// @public
+// @internal
 export function stripFrontmatterMarkerLines(frontmatter: string): string;
 
-// @public
+// @internal
 export function stripLeadingHtmlMarker(body: string): string;
 
-// @public
+// @internal
 export function stripPromptScriptMarkers(content: string): string;
 
 // @public
@@ -4564,7 +4546,7 @@ export interface TargetCapability {
     readonly versions: TargetVersionMap;
 }
 
-// @public (undocumented)
+// @internal
 export interface TargetCapabilitySeed {
     // (undocumented)
     readonly features: {
@@ -4721,13 +4703,13 @@ export interface TextValueNode extends CanonicalNode {
     readonly value: string;
 }
 
-// @public (undocumented)
+// @public
 export function toLegacyBlock(block: CanonicalBlock, options?: LegacyProjectionOptions): Block;
 
-// @public (undocumented)
+// @public
 export function toLegacyProgram(program: CanonicalProgram, options?: LegacyProjectionOptions): Program;
 
-// @public
+// @internal
 export function toNativeAgentName(name: string): string;
 
 // @public
@@ -4784,13 +4766,13 @@ export class UnknownParamError extends PSError {
     readonly templatePath: string;
 }
 
-// @public (undocumented)
+// @internal
 export function updateCanonicalBlockBody(block: CanonicalBlock, body: BlockBody): CanonicalBlock;
 
-// @public (undocumented)
+// @internal
 export function updateCanonicalProgramOperations(program: CanonicalProgram, operations: readonly ProgramOperation[]): CanonicalProgram;
 
-// @public
+// @internal
 export interface UrlRuleOptions {
     allowPrivate: boolean;
 }
@@ -4849,10 +4831,10 @@ export interface UserConfig {
     version: '1';
 }
 
-// @public
+// @internal
 export function usesSequentialOperations(ast: Program): boolean;
 
-// @public
+// @internal
 export function validateAgentFieldMatrix(groups?: AgentFieldMatrix, nativeTargets?: readonly KnownTarget[]): string[];
 
 // @public
@@ -4874,7 +4856,7 @@ export interface ValidateLocationV1 {
     offset?: number;
 }
 
-// @public
+// @internal
 export function validateModelCatalog(profiles?: readonly ModelProfile[]): string[];
 
 // @public
@@ -4893,10 +4875,10 @@ export interface ValidateSummaryV1 {
     warningCount: number;
 }
 
-// @public
+// @internal
 export function validateTargetCapabilities(capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>): string[];
 
-// @public
+// @internal
 export function validateTargetDefinitionConsistency(definitions?: Readonly<Record<KnownTarget, TargetDefinition>>): string[];
 
 // @public

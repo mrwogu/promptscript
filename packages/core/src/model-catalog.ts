@@ -233,6 +233,7 @@ function compareVersionParts(leftPart: string, rightPart: string): number {
   return leftSuffix.localeCompare(rightSuffix);
 }
 
+/** @internal Catalog helper, not part of the API. */
 export function compareModelVersions(a: string, b: string): number {
   const left = a.split('.');
   const right = b.split('.');
@@ -245,6 +246,8 @@ export function compareModelVersions(a: string, b: string): number {
 
 /**
  * Order two releases of one family: version first, then release date.
+ *
+ * @internal Catalog helper, not part of the API.
  */
 export function compareModelReleases(a: ModelProfile, b: ModelProfile): number {
   return (
@@ -439,6 +442,8 @@ function floatingAliasIssues(profiles: readonly ModelProfile[]): string[] {
  * Every name must point at one profile, successors must exist without
  * loops, dates use YYYY-MM-DD, per-target names must belong to targets that
  * write model names, and every floating alias needs a family to back it.
+ *
+ * @internal Catalog helper, not part of the API.
  */
 export function validateModelCatalog(profiles: readonly ModelProfile[] = MODEL_PROFILES): string[] {
   const ids = new Set(profiles.map((profile) => normalizeModelName(profile.id)));

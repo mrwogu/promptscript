@@ -12,6 +12,7 @@ import {
 import type { AgentProvenance } from './types/ast.js';
 import { AgentConflictError } from './errors/resolve.js';
 
+/** @internal Used by the resolver for @use imports. */
 export const IMPORT_MARKER_PREFIX = '__import__';
 
 function withSkillOutputDirectory(source: Program, outputDir: string): Program {
@@ -189,6 +190,8 @@ function createAliasBlocks(declaration: UseDeclaration, source: Program): Block[
 
 /**
  * Merge one resolved top-level import into a program.
+ *
+ * @internal Used by the resolver for @use imports.
  */
 export function resolveUseImport(
   target: Program,

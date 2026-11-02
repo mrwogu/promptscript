@@ -29,6 +29,7 @@ function rotr(x: number, n: number): number {
  *
  * @example
  * sha256Hex('abc'); // 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'
+ * @internal Shared hashing helper.
  */
 export function sha256Hex(text: string): string {
   const data = new TextEncoder().encode(text);

@@ -1451,6 +1451,7 @@ const VERSION_CAPABILITIES: Readonly<Record<KnownTarget, TargetVersionData>> = {
   },
 };
 
+/** @internal Catalog construction and self-check helper. */
 export interface TargetCapabilitySeed {
   readonly outputPath: string;
   readonly skillPath: { readonly basePath: string | null; readonly fileName: string | null };
@@ -1505,6 +1506,7 @@ function createSections(target: KnownTarget): TargetSectionMap {
   );
 }
 
+/** @internal Catalog construction and self-check helper. */
 export function createTargetCapability(
   target: KnownTarget,
   seed: TargetCapabilitySeed
@@ -1646,6 +1648,8 @@ export function getTargetSectionCapability(
  *
  * This check is intentionally independent from formatter implementations so
  * core consumers can validate metadata without importing the formatter package.
+ *
+ * @internal Catalog construction and self-check helper.
  */
 export function validateTargetCapabilities(
   capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>
@@ -1776,6 +1780,8 @@ export function validateTargetCapabilities(
 
 /**
  * Throw when a capability registry contains missing or contradictory metadata.
+ *
+ * @internal Catalog construction and self-check helper.
  */
 export function assertValidTargetCapabilities(
   capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>

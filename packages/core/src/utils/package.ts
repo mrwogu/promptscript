@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 /**
  * Package information from package.json.
- * @internal Used by the CLI for version reporting.
+ * @internal Shared helper, not part of the API.
  */
 export interface PackageInfo {
   /** Package name */
@@ -27,6 +27,7 @@ export interface PackageInfo {
  * const pkg = getPackageInfo(__dirname);
  * console.log(pkg.version); // "1.0.0"
  * ```
+ * @internal Shared helper, not part of the API.
  */
 export function getPackageInfo(baseDir: string, relativePath = '../package.json'): PackageInfo {
   try {
@@ -60,6 +61,7 @@ export function getPackageInfo(baseDir: string, relativePath = '../package.json'
  * const version = getPackageVersion(__dirname);
  * console.log(version); // "1.0.0"
  * ```
+ * @internal Shared helper, not part of the API.
  */
 export function getPackageVersion(baseDir: string, relativePath = '../package.json'): string {
   return getPackageInfo(baseDir, relativePath).version;

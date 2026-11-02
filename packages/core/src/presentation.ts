@@ -2,13 +2,16 @@ import type { BlockEntry, PresentationEntry } from './types/index.js';
 import { getPrimarySectionForBlock } from './section-registry.js';
 import { compareVersions, isValidVersion } from './utils/version.js';
 
+/** @internal Heading merge helper, not part of the API. */
 export type PresentationPrecedence = 'base' | 'incoming';
 
+/** @internal Heading merge helper, not part of the API. */
 export interface PresentationSelection {
   readonly base: readonly PresentationEntry[];
   readonly incoming: readonly PresentationEntry[];
 }
 
+/** @internal Heading merge helper, not part of the API. */
 export function presentationEntryKey(entry: PresentationEntry, blockName?: string): string {
   return (
     entry.sectionId ?? (blockName ? getPrimarySectionForBlock(blockName)?.id : undefined) ?? ''
@@ -36,6 +39,8 @@ function parseLegacyHeading(text: string): { title: string; end: number } | unde
 
 /**
  * Select presentation metadata by source rank and operation precedence.
+ *
+ * @internal Heading merge helper, not part of the API.
  */
 export function selectPresentationEntries(
   baseEntries: readonly BlockEntry[],
@@ -81,6 +86,8 @@ export function selectPresentationEntries(
 
 /**
  * Promote an initial text heading for opted-in blocks in syntax 1.5.0+.
+ *
+ * @internal Used by the parser for heading merge.
  */
 export function normalizeLegacyHeadingEntries(
   blockName: string,

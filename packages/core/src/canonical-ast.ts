@@ -46,6 +46,10 @@ import type { SyntaxFeatureUsage } from './syntax-versions.js';
 import { deepClone } from './utils/index.js';
 import { selectPresentationEntries } from './presentation.js';
 
+/**
+ * Content type of a legacy block projection. It is part of the compatibility
+ * projection and may be removed in a later major version.
+ */
 export type LegacyContentType = BlockContent['type'];
 
 export interface BlockBodyOptions {
@@ -61,6 +65,10 @@ export interface CanonicalProgramOptions {
   readonly loc: SourceLocation;
 }
 
+/**
+ * Options for the legacy projection. It is part of the compatibility
+ * projection and may be removed in a later major version.
+ */
 export interface LegacyProjectionOptions {
   readonly preserveCanonicalBody?: boolean;
 }
@@ -430,6 +438,9 @@ export function blockBodyToContent(body: BlockBody): BlockContent {
   return content;
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function reconcileValueNode(node: ValueNode, value: Value): ValueNode {
   if (node.type === 'ArrayValueNode' && Array.isArray(value)) {
     return deepFreeze<ArrayValueNode>({
@@ -529,6 +540,7 @@ export function reconcileValueNode(node: ValueNode, value: Value): ValueNode {
   return createValueNode(value, node.loc);
 }
 
+/** @internal Used by the resolver for block composition. */
 export function mergeValueNodeLocations(
   base: ValueNode | undefined,
   incoming: ValueNode | undefined,
@@ -896,6 +908,7 @@ export function reconcileBlockBody(body: BlockBody, content: BlockContent): Bloc
   });
 }
 
+/** @internal Used by the resolver for block composition. */
 export function prepareBlockContentForMerge(
   body: BlockBody | undefined,
   content: BlockContent
@@ -924,6 +937,7 @@ export function prepareBlockContentForMerge(
   return prepared;
 }
 
+/** @internal Used by the resolver for block composition. */
 export function composeBlockBodies(
   baseBody: BlockBody | undefined,
   incomingBody: BlockBody | undefined,
@@ -1247,6 +1261,7 @@ function mergeValueNodeAtPath(
   };
 }
 
+/** @internal Used by the resolver for block composition. */
 export function reconcileBlockBodyAtPath(
   baseBody: BlockBody | undefined,
   incomingBody: BlockBody | undefined,
@@ -1322,6 +1337,9 @@ export function createCanonicalBlock(
   });
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function updateCanonicalBlockBody(block: CanonicalBlock, body: BlockBody): CanonicalBlock {
   const requestedProjection = body.legacyProjection ?? block.body.legacyProjection;
   const contentEntries = body.entries.filter((entry) => entry.type !== 'PresentationEntry');
@@ -1415,6 +1433,9 @@ export function createCanonicalProgram(options: CanonicalProgramOptions): Canoni
   });
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function updateCanonicalProgramOperations(
   program: CanonicalProgram,
   operations: readonly ProgramOperation[]
@@ -1535,10 +1556,18 @@ export function normalizeProgram(input: ProgramInput): CanonicalProgram {
   });
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function getCanonicalBlocks(input: ProgramInput): readonly CanonicalBlock[] {
   return normalizeProgram(input).blocks;
 }
 
+/**
+ * Project a canonical block to the legacy `Block` shape.
+ *
+ * Compatibility projection. It may be removed in a later major version.
+ */
 export function toLegacyBlock(block: CanonicalBlock, options: LegacyProjectionOptions = {}): Block {
   const legacy: Block = {
     type: 'Block',
@@ -1552,6 +1581,11 @@ export function toLegacyBlock(block: CanonicalBlock, options: LegacyProjectionOp
   return legacy;
 }
 
+/**
+ * Project a canonical program to the legacy `Program` shape.
+ *
+ * Compatibility projection. It may be removed in a later major version.
+ */
 export function toLegacyProgram(
   program: CanonicalProgram,
   options: LegacyProjectionOptions = {}
@@ -1602,6 +1636,9 @@ export function toLegacyProgram(
   return legacy;
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function getBlockProperties(block: BlockInput): Record<string, Value> {
   const content = isCanonicalBlock(block) ? blockBodyToContent(block.body) : block.content;
   if (content.type === 'ObjectContent' || content.type === 'MixedContent') {
@@ -1610,6 +1647,9 @@ export function getBlockProperties(block: BlockInput): Record<string, Value> {
   return {};
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function getBlockText(block: BlockInput): string | undefined {
   const content = isCanonicalBlock(block) ? blockBodyToContent(block.body) : block.content;
   if (content.type === 'TextContent') return content.value;
@@ -1617,6 +1657,9 @@ export function getBlockText(block: BlockInput): string | undefined {
   return undefined;
 }
 
+/**
+ * @internal Form editor helper, not used outside this package.
+ */
 export function getBlockItems(block: BlockInput): Value[] {
   const content = isCanonicalBlock(block) ? blockBodyToContent(block.body) : block.content;
   if (content.type === 'ArrayContent') return deepClone(content.elements);
@@ -1632,6 +1675,7 @@ export function getBlockItems(block: BlockInput): Value[] {
   return [];
 }
 
+/** @internal Used by the resolver for block composition. */
 export function getInlineUses(block: BlockInput): InlineUseDeclaration[] {
   const content = isCanonicalBlock(block) ? blockBodyToContent(block.body) : block.content;
   if (content.type !== 'ObjectContent' && content.type !== 'MixedContent') return [];

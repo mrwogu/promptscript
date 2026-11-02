@@ -15,7 +15,11 @@
 import { compareModelVersions } from './model-catalog.js';
 import type { ModelPricing, ModelProfile } from './types/models.js';
 
-/** List price OpenRouter carries for a model, in USD per million tokens. */
+/**
+ * List price OpenRouter carries for a model, in USD per million tokens.
+ *
+ * @internal Used by repository scripts for model drift checks.
+ */
 export type OpenRouterPricing = Pick<ModelPricing, 'inputUsdPerMillion' | 'outputUsdPerMillion'>;
 
 /** OpenRouter provider prefixes that map onto catalog providers. */
@@ -26,7 +30,11 @@ const PROVIDER_PREFIXES: Readonly<Record<string, string>> = {
   'x-ai': 'xai',
 };
 
-/** A model entry parsed out of OpenRouter's /api/v1/models response. */
+/**
+ * A model entry parsed out of OpenRouter's /api/v1/models response.
+ *
+ * @internal Used by repository scripts for model drift checks.
+ */
 export interface OpenRouterModelEntry {
   /** Base id without the provider prefix (e.g. 'claude-opus-5.5'). */
   readonly slug: string;
@@ -42,7 +50,11 @@ export interface OpenRouterModelEntry {
   readonly pricing?: OpenRouterPricing;
 }
 
-/** A new release of a family the catalog already tracks. */
+/**
+ * A new release of a family the catalog already tracks.
+ *
+ * @internal Used by repository scripts for model drift checks.
+ */
 export interface ModelDriftCandidate {
   readonly provider: string;
   /** The catalog family the release belongs to. */
@@ -58,7 +70,11 @@ export interface ModelDriftCandidate {
   readonly pricing?: OpenRouterPricing;
 }
 
-/** Result of comparing OpenRouter's model list with the catalog. */
+/**
+ * Result of comparing OpenRouter's model list with the catalog.
+ *
+ * @internal Used by repository scripts for model drift checks.
+ */
 export interface ModelDriftReport {
   /** New releases of known families, oldest first. */
   readonly candidates: readonly ModelDriftCandidate[];
@@ -144,6 +160,8 @@ function versionPattern(profile: ModelProfile): RegExp | undefined {
  * Read the tracked providers' models out of an OpenRouter /api/v1/models
  * payload: mirror providers (~), request variants (like :batch), and
  * providers the catalog does not track drop out.
+ *
+ * @internal Used by repository scripts for model drift checks.
  */
 export function parseOpenRouterModels(payload: unknown): OpenRouterModelEntry[] {
   if (!isRecord(payload) || !Array.isArray(payload['data'])) return [];
@@ -251,6 +269,8 @@ function draftCandidate(
  * candidate when its provider is tracked, its slug fits the id pattern of
  * a known family, and no catalog release of that family carries its
  * version.
+ *
+ * @internal Used by repository scripts for model drift checks.
  */
 export function detectModelDrift(
   entries: readonly OpenRouterModelEntry[],
@@ -292,6 +312,8 @@ export function detectModelDrift(
 /**
  * The catalog entry a candidate displaces: the current release of its
  * family that carries no successor yet.
+ *
+ * @internal Used by repository scripts for model drift checks.
  */
 export function displacedProfile(
   candidate: ModelDriftCandidate,
@@ -311,6 +333,8 @@ export function displacedProfile(
  * with the fields OpenRouter knows about. A price is dated with the day
  * of the run, `pricesCheckedOn`, for a human to verify against the
  * provider page.
+ *
+ * @internal Used by repository scripts for model drift checks.
  */
 export function formatProfileEntry(
   candidate: ModelDriftCandidate,

@@ -805,6 +805,8 @@ assertValidTargetCapabilities(TARGET_CAPABILITIES);
 
 /**
  * Return contradictions between the target catalog and its capability data.
+ *
+ * @internal Catalog self-check helper.
  */
 export function validateTargetDefinitionConsistency(
   definitions: Readonly<Record<KnownTarget, TargetDefinition>> = TARGET_DEFINITIONS
@@ -866,6 +868,8 @@ export function validateTargetDefinitionConsistency(
 
 /**
  * Throw when target definitions contradict the canonical output and feature metadata.
+ *
+ * @internal Catalog self-check helper.
  */
 export function assertTargetDefinitionConsistency(
   definitions: Readonly<Record<KnownTarget, TargetDefinition>> = TARGET_DEFINITIONS

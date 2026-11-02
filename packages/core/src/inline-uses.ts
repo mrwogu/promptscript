@@ -2,6 +2,8 @@ import type { ObjectContent, Program } from './types/index.js';
 
 /**
  * Consume pending inline uses after a composition attempt fails.
+ *
+ * @internal Used by the resolver for inline @use.
  */
 export function consumeInlineUses(ast: Program): Program {
   let changed = false;

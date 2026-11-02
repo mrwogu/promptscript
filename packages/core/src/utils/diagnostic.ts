@@ -2,11 +2,15 @@ import type { SourceLocation } from '../types/index.js';
 
 /**
  * Severity level for diagnostics.
+ *
+ * @internal Diagnostic helper, not part of the API.
  */
 export type DiagnosticSeverity = 'error' | 'warning' | 'info' | 'hint';
 
 /**
  * A diagnostic message with location information.
+ *
+ * @internal Diagnostic helper, not part of the API.
  */
 export interface Diagnostic {
   /** Diagnostic message */
@@ -23,6 +27,8 @@ export interface Diagnostic {
 
 /**
  * Options for formatting diagnostics.
+ *
+ * @internal Diagnostic helper, not part of the API.
  */
 export interface FormatDiagnosticOptions {
   /** Include color codes (ANSI) */
@@ -85,6 +91,7 @@ function getSeverityColor(severity: DiagnosticSeverity): string {
  * formatDiagnostic(diagnostic, { color: true })
  * // '\x1b[31mproject.prs:5:3 - error E001: Missing required field: id\x1b[0m'
  * ```
+ * @internal Diagnostic helper, not part of the API.
  */
 export function formatDiagnostic(
   diagnostic: Diagnostic,
@@ -137,6 +144,7 @@ export function formatDiagnostic(
  * @param diagnostics - Array of diagnostics to format
  * @param options - Formatting options
  * @returns Formatted string with newlines between diagnostics
+ * @internal Diagnostic helper, not part of the API.
  */
 export function formatDiagnostics(
   diagnostics: Diagnostic[],
@@ -162,6 +170,7 @@ export function formatDiagnostics(
  * createLocation('project.prs', 10, 5, 150)
  * // { file: 'project.prs', line: 10, column: 5, offset: 150 }
  * ```
+ * @internal Diagnostic helper, not part of the API.
  */
 export function createLocation(
   file: string,
