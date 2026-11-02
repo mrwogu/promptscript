@@ -200,16 +200,16 @@ importers:
   packages/browser-compiler:
     dependencies:
       '@promptscript/core':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../core
       '@promptscript/formatters':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../formatters
       '@promptscript/parser':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../parser
       '@promptscript/validator':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../validator
       path-browserify:
         specifier: ^1.0.1
@@ -291,16 +291,16 @@ importers:
   packages/compiler:
     dependencies:
       '@promptscript/core':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../core
       '@promptscript/formatters':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../formatters
       '@promptscript/resolver':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../resolver
       '@promptscript/validator':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../validator
       '@swc/helpers':
         specifier: ~0.5.23
@@ -342,7 +342,7 @@ importers:
   packages/formatters:
     dependencies:
       '@promptscript/core':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../core
       '@swc/helpers':
         specifier: ~0.5.23
@@ -360,7 +360,7 @@ importers:
   packages/parser:
     dependencies:
       '@promptscript/core':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../core
       '@swc/helpers':
         specifier: ~0.5.23
@@ -445,10 +445,10 @@ importers:
   packages/resolver:
     dependencies:
       '@promptscript/core':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../core
       '@promptscript/parser':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../parser
       '@swc/helpers':
         specifier: ~0.5.23
@@ -510,7 +510,7 @@ importers:
   packages/validator:
     dependencies:
       '@promptscript/core':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../core
       '@swc/helpers':
         specifier: ~0.5.23

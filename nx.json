@@ -71,7 +71,17 @@
     }
   },
   "release": {
-    "projects": ["cli"],
+    "projects": [
+      "cli",
+      "core",
+      "parser",
+      "resolver",
+      "validator",
+      "formatters",
+      "compiler",
+      "browser-compiler",
+      "schemas"
+    ],
     "version": {
       "generator": "@nx/js:release-version",
       "generatorOptions": {

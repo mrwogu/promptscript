@@ -161,6 +161,8 @@ export interface BlobBatch {
   blobs: Map<string, Buffer>;
   /** Blobs larger than `maxBytes`, whose content is not kept */
   tooLarge: Set<string>;
+  /** Blobs within `maxBytes` whose content did not fit the byte budget; read them again */
+  skipped: Set<string>;
   /** Ids Git has no blob for */
   missing: Set<string>;
 }
@@ -175,17 +177,32 @@ const BATCH_MISSING_RE = /^(\S+) (?:missing|ambiguous)$/;
  * Parser of `git cat-file --batch` output: `<id> <type> <size>\n<content>\n` per object,
  * or `<id> missing\n`. Content is framed by its size, never by lines, so a record may hold
  * any bytes. An object that is no blob counts as missing. With `asked`, an answer for any
- * other id throws.
+ * other id throws. Content is kept while the kept total stays within `budgetBytes`; a blob
+ * past it is `skipped`, so memory is bounded however many blobs are asked for.
  */
 export class CatFileBatchParser {
-  readonly result: BlobBatch = { blobs: new Map(), tooLarge: new Set(), missing: new Set() };
+  readonly result: BlobBatch = {
+    blobs: new Map(),
+    tooLarge: new Set(),
+    skipped: new Set(),
+    missing: new Set(),
+  };
+  private keptBytes = 0;
   private buffered: Buffer = Buffer.alloc(0);
   private current:
-    { id: string; blob: boolean; remaining: number; kept: Buffer[] | undefined } | undefined;
+    | {
+        id: string;
+        blob: boolean;
+        remaining: number;
+        kept: Buffer[] | undefined;
+        skipped: boolean;
+      }
+    | undefined;
 
   constructor(
     private readonly maxBytes: number,
-    private readonly asked?: ReadonlySet<string>
+    private readonly asked?: ReadonlySet<string>,
+    private readonly budgetBytes = Number.POSITIVE_INFINITY
   ) {}
 
   /** Take the next chunk of output. Output Git does not print throws. */
@@ -224,12 +241,16 @@ export class CatFileBatchParser {
     this.askedFor(id);
     const bytes = Number(size);
     const blob = type === 'blob';
+    const fits = blob && bytes <= this.maxBytes;
+    const keep = fits && this.keptBytes + bytes <= this.budgetBytes;
+    if (keep) this.keptBytes += bytes;
     // The content and the line feed after it.
     this.current = {
       id,
       blob,
       remaining: bytes + 1,
-      kept: blob && bytes <= this.maxBytes ? [] : undefined,
+      kept: keep ? [] : undefined,
+      skipped: fits && !keep,
     };
     return true;
   }
@@ -254,6 +275,8 @@ export class CatFileBatchParser {
     this.current = undefined;
     if (!current.blob) {
       this.result.missing.add(current.id);
+    } else if (current.skipped) {
+      this.result.skipped.add(current.id);
     } else if (current.kept === undefined) {
       this.result.tooLarge.add(current.id);
     } else {
@@ -266,14 +289,15 @@ export class CatFileBatchParser {
 
 /**
  * Read blobs by id with one `git cat-file --batch`, in the environment of {@link runGit} and
- * under the same timeout. Ids go to stdin, so no id is an argument. A spawn failure, a
+ * under the same timeout. With `budgetBytes`, content past that total is not kept (see
+ * {@link CatFileBatchParser}), though Git still prints it. Ids go to stdin, so no id is an argument. A spawn failure, a
  * timeout, a non-zero exit, output Git does not print or an id with no answer throws:
  * a caller never takes a blob it could not read as one that is not there.
  */
 export function readBlobs(
   ids: readonly string[],
   cwd: string,
-  { maxBytes }: { maxBytes: number }
+  { maxBytes, budgetBytes }: { maxBytes: number; budgetBytes?: number }
 ): Promise<BlobBatch> {
   const asked = [...new Set(ids)];
   const malformed = asked.find((id) => !BLOB_ID_RE.test(id));
@@ -287,10 +311,15 @@ export function readBlobs(
     );
   }
   if (asked.length === 0) {
-    return Promise.resolve({ blobs: new Map(), tooLarge: new Set(), missing: new Set() });
+    return Promise.resolve({
+      blobs: new Map(),
+      tooLarge: new Set(),
+      skipped: new Set(),
+      missing: new Set(),
+    });
   }
   return new Promise((resolvePromise, reject) => {
-    const parser = new CatFileBatchParser(maxBytes, new Set(asked));
+    const parser = new CatFileBatchParser(maxBytes, new Set(asked), budgetBytes);
     let stderr = '';
     let settled = false;
     const refuse = (error: ReleaseError): void => {
@@ -362,7 +391,11 @@ export function readBlobs(
       try {
         const result = parser.finish();
         const unanswered = asked.filter(
-          (id) => !result.blobs.has(id) && !result.tooLarge.has(id) && !result.missing.has(id)
+          (id) =>
+            !result.blobs.has(id) &&
+            !result.tooLarge.has(id) &&
+            !result.skipped.has(id) &&
+            !result.missing.has(id)
         );
         if (unanswered.length > 0) {
           const more = unanswered.length > 1 ? ` and ${unanswered.length - 1} more` : '';
