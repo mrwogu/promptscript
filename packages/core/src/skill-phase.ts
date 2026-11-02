@@ -25,7 +25,11 @@ function toSlashes(path: string): string {
  */
 export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): string {
   const normalizedSource = toSlashes(source);
-  const trimmedSource = normalizedSource.replace(/\/+$/, '');
+  let sourceEnd = normalizedSource.length;
+  while (sourceEnd > 0 && normalizedSource[sourceEnd - 1] === '/') {
+    sourceEnd -= 1;
+  }
+  const trimmedSource = normalizedSource.slice(0, sourceEnd);
   const fileName = trimmedSource.slice(trimmedSource.lastIndexOf('/') + 1) || source;
   if (projectRoot === undefined) {
     return fileName;

@@ -92,6 +92,17 @@ describe('getSkillPhaseSourceLabel', () => {
     expect(getSkillPhaseSourceLabel('/work/check.prs/')).toBe('check.prs');
   });
 
+  it('preserves labels with long separator runs', () => {
+    const separators = '/'.repeat(65536);
+    expect(getSkillPhaseSourceLabel(`app/${separators}check.prs`, 'app')).toBe('check.prs');
+    expect(getSkillPhaseSourceLabel(`/work/check.prs${separators}`)).toBe('check.prs');
+  });
+
+  it('preserves empty sources and sources made only of slashes', () => {
+    expect(getSkillPhaseSourceLabel('')).toBe('');
+    expect(getSkillPhaseSourceLabel('///')).toBe('///');
+  });
+
   it('uses the file name when no root is given', () => {
     expect(getSkillPhaseSourceLabel('/work/app/phases/check.prs')).toBe('check.prs');
     expect(getSkillPhaseSourceLabel('C:\\work\\check.prs')).toBe('check.prs');
