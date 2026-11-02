@@ -122,14 +122,11 @@ Compatibility timeline:
 3. Next major release: legacy-only entry points may be removed after formatter
    and integration migration is complete.
 
-| Export                               | Description                                                    |
-| :----------------------------------- | :------------------------------------------------------------- |
-| `createCanonicalProgram(init)`       | Creates and deeply freezes a canonical program                 |
-| `updateCanonicalProgramOperations()` | Returns a frozen program with a replacement operation sequence |
-| `updateCanonicalBlockBody()`         | Returns a frozen block with a replacement ordered body         |
-| `normalizeProgram(input)`            | Converts canonical or legacy input to a canonical program      |
-| `toLegacyProgram(program)`           | Creates a detached mutable compatibility projection            |
-| `getCanonicalBlocks(program)`        | Reads blocks from either AST representation                    |
+| Export                         | Description                                               |
+| :----------------------------- | :-------------------------------------------------------- |
+| `createCanonicalProgram(init)` | Creates and deeply freezes a canonical program            |
+| `normalizeProgram(input)`      | Converts canonical or legacy input to a canonical program |
+| `toLegacyProgram(program)`     | Creates a detached mutable compatibility projection       |
 
 ### Prompt targets
 
