@@ -4224,7 +4224,7 @@ export function resolveAgentTargetPath(pathParts: readonly string[], agentsIndex
 // @public
 export class ResolveError extends PSError {
     // Warning: (ae-incompatible-release-tags) The symbol "__constructor" is marked as @public, but its signature references "ErrorCode" which is marked as @internal
-    constructor(message: string, location?: SourceLocation, code?: ErrorCode);
+    constructor(message: string, location?: SourceLocation, code?: ErrorCode, cause?: Error);
 }
 
 // @public
@@ -4840,6 +4840,7 @@ export function validateAgentFieldMatrix(groups?: AgentFieldMatrix, nativeTarget
 
 // @public
 export interface ValidateErrorV1 {
+    cause?: string;
     code?: string;
     location?: ValidateLocationV1;
     message: string;

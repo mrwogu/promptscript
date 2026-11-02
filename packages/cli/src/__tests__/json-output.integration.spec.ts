@@ -66,6 +66,17 @@ const EMPTY_BLOCK = `@meta {
 `;
 
 // Fails to parse: the identity block is never closed.
+const UNCLOSED = `@meta {
+  id: "unclosed"
+  syntax: "1.0.0"
+}
+
+@identity {
+  """
+  Never closed
+  """
+`;
+
 const BROKEN = `@meta {
   id: "broken"
   syntax: "1.0.0"
@@ -165,6 +176,7 @@ beforeAll(async () => {
   await writeFile(join(root, '.promptscript', 'project.prs'), SOURCE);
   await writeFile(join(root, 'fixtures', 'empty.prs'), EMPTY_BLOCK);
   await writeFile(join(root, 'fixtures', 'broken.prs'), BROKEN);
+  await writeFile(join(root, 'fixtures', 'unclosed.prs'), UNCLOSED);
   const empty = JSON.stringify(errorReport('replay', []));
   await writeFile(join(root, 'reports', 'a.json'), empty);
   await writeFile(join(root, 'reports', 'b.json'), empty);
@@ -341,7 +353,17 @@ describe('validate under --format json', () => {
     expect(errors).toHaveLength(1);
     expect(errors[0]?.['message']).toContain('File not found');
     expect(errors[0]).not.toHaveProperty('code');
+    expect(errors[0]).not.toHaveProperty('cause');
     expect(errors[0]).not.toHaveProperty('location');
+  });
+
+  it('keeps the parser code as cause of a parse error', async () => {
+    const result = await runJson(['validate', '--format', 'json', 'fixtures/unclosed.prs']);
+
+    expectStable(result, validateReportSchema, 1);
+    const errors = result.document['errors'] as Record<string, unknown>[];
+    expect(errors[0]?.['code']).toBe('PS2000');
+    expect(errors[0]?.['cause']).toMatch(/^PS1\d{3}$/);
   });
 
   it('merges several files in file order', async () => {
