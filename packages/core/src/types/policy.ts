@@ -4,11 +4,15 @@ import type { SourceLocation } from './source.js';
 
 /**
  * Severity for policy violations.
+ *
+ * Closed enum: a new value needs a new schema version.
  */
 export type PolicySeverity = 'error' | 'warning';
 
 /**
  * Supported policy kinds.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
  */
 export type PolicyKind =
   | 'layer-boundary'

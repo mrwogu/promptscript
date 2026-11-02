@@ -9,9 +9,18 @@ export const RELEASE_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/release-report/v1.json';
 export const RELEASE_REPORT_VERSION = 1 as const;
 
+/**
+ * Name of the release command.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type ReleaseCommandName = 'build' | 'promote' | 'rollback' | 'split' | 'status';
 
-/** What a command did, or would do under `--dry-run`, to one file entry. */
+/**
+ * What a command did, or would do under `--dry-run`, to one file entry.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type ReleaseChangeAction = 'created' | 'updated' | 'unchanged' | 'removed';
 
 /** The experiment arm a label change describes. */
@@ -141,9 +150,15 @@ export interface ReleaseGateApprovals {
 /** One policy as a release gate judged it for one prompt. */
 export interface ReleaseGateCheck {
   policy: string;
+  /** Open enum: new values can be added in this version, so handle unknown values. */
   kind: PolicyKind;
+  /** Closed enum: a new value needs a new schema version. */
   severity: PolicySeverity;
-  /** `unavailable` never passes at error severity */
+  /**
+   * `unavailable` never passes at error severity.
+   *
+   * Closed enum: a new value needs a new schema version.
+   */
   status: 'passed' | 'failed' | 'unavailable';
   message?: string;
   suggestion?: string;
@@ -155,7 +170,11 @@ export interface ReleaseGateResult {
   prompt: string;
   contentHash: string;
   environment: string;
-  /** The highest of the bundle's and the source's risk and risk floors */
+  /**
+   * The highest of the bundle's and the source's risk and risk floors.
+   *
+   * Closed enum: a new value needs a new schema version.
+   */
   policyRisk: RiskLevel;
   /** False when a check of severity error failed or is unavailable */
   passed: boolean;
@@ -182,7 +201,11 @@ export interface ReleaseModelStatus {
   profile?: string;
   provider: string;
   apiId: string;
-  /** Catalog status of the profile that runs it, `unknown` when the catalog has none */
+  /**
+   * Catalog status of the profile that runs it, `unknown` when the catalog has none.
+   *
+   * Open enum: new values can be added in this version, so handle unknown values.
+   */
   status: ModelStatus | 'unknown';
   /** Retirement date from the catalog, YYYY-MM-DD */
   retirementDate?: string;
