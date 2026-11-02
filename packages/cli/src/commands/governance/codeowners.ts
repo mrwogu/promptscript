@@ -168,12 +168,13 @@ function protectLines(protect: unknown, admins: string[], refused: string[]): Ow
   return sortedUnique(paths).map((path) => ({ path, owners: admins, directory: true }));
 }
 
-/** The text of the lines; on GitLab a directory gets a second line with a trailing `/`. */
-function renderLines(lines: OwnerLine[], host: CodeownersHost): string[] {
+/** The text of the lines; a directory gets a second line with a trailing `/` on every host. */
+function renderLines(lines: OwnerLine[]): string[] {
   return lines.flatMap((line) => {
     const owners = line.owners.join(' ');
-    // GitLab reads a pattern without a glob or a trailing slash as one exact file.
-    return host === 'gitlab' && line.directory === true
+    // GitLab reads a pattern without a glob or a trailing slash as one exact file, and it also
+    // reads the root and docs/ files, so the extra line is written for every output location.
+    return line.directory === true
       ? [`${line.path} ${owners}`, `${line.path}/ ${owners}`]
       : [`${line.path} ${owners}`];
   });
@@ -289,11 +290,11 @@ async function buildSection(
   const header = host === 'gitlab' ? [marker, GITLAB_SECTION] : [marker];
   return {
     marker,
-    text: `${[...header, ...renderLines(lines, host)].join('\n')}\n`,
+    text: `${[...header, ...renderLines(lines)].join('\n')}\n`,
     promptPaths: prompts.map((line) => line.path),
     unowned: findings.unowned,
     protect: protect.map((line) => line.path),
-    roleLines: new Map(roleLines.map((line) => [line.role, renderLines([line], host)])),
+    roleLines: new Map(roleLines.map((line) => [line.role, renderLines([line])])),
   };
 }
 
@@ -591,7 +592,6 @@ export async function checkApprovalOwnersAtBase(
     const [first = ''] = diagnostic(error).message.split('\n');
     return { roles: all, reason: `cannot be checked ${where}: ${first}` };
   }
-  const host: CodeownersHost = output === '.gitlab/CODEOWNERS' ? 'gitlab' : 'github';
   const earlier = READ_BEFORE[output] ?? [];
   const files = await filesAtCommit(repo.top, at.commit, [output, ...earlier]);
   const text = files.get(output);
@@ -621,7 +621,7 @@ export async function checkApprovalOwnersAtBase(
   const unbound = needed.filter((role) => {
     const line = wanted.find((candidate) => candidate.role === role);
     if (line === undefined) return true;
-    const expected = renderLines([line], host);
+    const expected = renderLines([line]);
     const written = section.filter(
       (entry) => entry.split(' ')[0]?.replace(/\/$/, '') === line.path
     );

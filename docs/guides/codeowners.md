@@ -76,11 +76,17 @@ $ prs governance codeowners
 # promptscript-generated: prs governance codeowners | project: . | do not edit below
 /.promptscript/project.prs @acme/payments @acme/support
 /.github/workflows @acme/prompt-platform
+/.github/workflows/ @acme/prompt-platform
 /.promptscript/approvals @acme/prompt-platform
+/.promptscript/approvals/ @acme/prompt-platform
 /.promptscript/approvals/legal @acme/legal
+/.promptscript/approvals/legal/ @acme/legal
 /.promptscript/approvals/security @acme/appsec
+/.promptscript/approvals/security/ @acme/appsec
 /.promptscript/releases @acme/prompt-platform
+/.promptscript/releases/ @acme/prompt-platform
 /.promptscript/vendor @acme/prompt-platform
+/.promptscript/vendor/ @acme/prompt-platform
 /.promptscriptrc.yaml @acme/prompt-platform
 /.promptscriptrc.yml @acme/prompt-platform
 /promptscript.lock @acme/prompt-platform
@@ -95,6 +101,8 @@ $ prs governance codeowners
 Commit the file. A second run changes nothing.
 
 ## The lines
+
+Every directory line is written twice, as `/.promptscript/approvals/legal` and `/.promptscript/approvals/legal/`, in every output location. The directory lines are the approvals root, each role directory, the releases and vendor directories and every `protect` path. GitLab reads a pattern without a glob or a trailing slash as one exact file, and it reads the root and `docs/` files too, so the second line is what covers the records under the directory. GitHub matches the `/` form the same way, so one output works for both. A file generated before this change shows as out of date once: run the command again and commit the result.
 
 Paths start at the repository root, so a project in a subdirectory gets lines like `/services/support/.promptscript/approvals`. The lines come in this order, sorted inside each group:
 
@@ -123,7 +131,7 @@ Only the project the command runs in gets lines. Other projects in the same repo
 
 ### GitLab
 
-For `.gitlab/CODEOWNERS` the section starts with a `[PromptScript]` section header right after the marker. GitLab reads a pattern without a glob or a trailing slash as one exact file, so every directory line is written twice, as `/.promptscript/approvals/legal` and `/.promptscript/approvals/legal/`, and so is every `protect` path. GitLab applies every section, so a line you wrote above the marker that matches a prompt file applies next to the generated one: its owners are asked to review too.
+For `.gitlab/CODEOWNERS` the section starts with a `[PromptScript]` section header right after the marker. GitLab applies every section, so a line you wrote above the marker that matches a prompt file applies next to the generated one: its owners are asked to review too.
 
 ## Rules for the file
 

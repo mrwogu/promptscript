@@ -420,6 +420,34 @@ describe('prs release status CODEOWNERS preflight', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    it('warns when the base file has only the plain line for a role directory', async () => {
+      const { root, sha } = await withBaseFile((text) =>
+        text
+          .split('\n')
+          .filter((line) => !line.startsWith('/.promptscript/approvals/legal/ '))
+          .join('\n')
+      );
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)).toHaveLength(1);
+      expect(ownerWarnings(report)[0]?.message).toContain(`does not bind legal at ${sha}`);
+    });
+
+    it.each(['.github/CODEOWNERS', 'CODEOWNERS', 'docs/CODEOWNERS', '.gitlab/CODEOWNERS'])(
+      'passes at HEAD and at the base for a file generated at %s',
+      async (output) => {
+        const root = await project(`${GOVERNANCE}  codeowners:\n    output: ${output}\n`);
+        await generate(root);
+        const base = git(root, 'rev-parse', 'HEAD').trim();
+
+        const report = await status(root, true, base);
+
+        expect(ownerWarnings(report)).toEqual([]);
+        expect(process.exitCode).toBe(0);
+      }
+    );
+
     it('ignores stale lines of other paths at the base', async () => {
       const { root, sha } = await withBaseFile(
         (text) => `${text}/promptscript.yaml @someone\n/docs @someone\n`

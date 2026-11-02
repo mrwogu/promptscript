@@ -51,10 +51,15 @@ const PROJECT = prompts(
 
 const ADMIN_LINES = [
   '/.promptscript/approvals @acme/prompt-platform',
+  '/.promptscript/approvals/ @acme/prompt-platform',
   '/.promptscript/approvals/legal @acme/legal @jane',
+  '/.promptscript/approvals/legal/ @acme/legal @jane',
   '/.promptscript/approvals/security @acme/appsec',
+  '/.promptscript/approvals/security/ @acme/appsec',
   '/.promptscript/releases @acme/prompt-platform',
+  '/.promptscript/releases/ @acme/prompt-platform',
   '/.promptscript/vendor @acme/prompt-platform',
+  '/.promptscript/vendor/ @acme/prompt-platform',
   '/.promptscriptrc.yaml @acme/prompt-platform',
   '/.promptscriptrc.yml @acme/prompt-platform',
   '/promptscript.lock @acme/prompt-platform',
@@ -401,11 +406,17 @@ describe('prs governance codeowners', () => {
       codeownersMarker('services/support'),
       '/services/support/.promptscript/project.prs @acme/payments @acme/support',
       '/.github/workflows @acme/prompt-platform',
+      '/.github/workflows/ @acme/prompt-platform',
       '/tools @acme/prompt-platform',
+      '/tools/ @acme/prompt-platform',
       '/services/support/.promptscript/approvals @acme/prompt-platform',
+      '/services/support/.promptscript/approvals/ @acme/prompt-platform',
       '/services/support/.promptscript/approvals/legal @acme/legal',
+      '/services/support/.promptscript/approvals/legal/ @acme/legal',
       '/services/support/.promptscript/releases @acme/prompt-platform',
+      '/services/support/.promptscript/releases/ @acme/prompt-platform',
       '/services/support/.promptscript/vendor @acme/prompt-platform',
+      '/services/support/.promptscript/vendor/ @acme/prompt-platform',
       '/org/base.yaml @acme/prompt-platform',
       '/services/support/.promptscriptrc.yaml @acme/prompt-platform',
       '/services/support/.promptscriptrc.yml @acme/prompt-platform',
@@ -643,6 +654,29 @@ describe('prs governance codeowners', () => {
       '.promptscript/project.prs is .promptscript/Project.prs in Git'
     );
   });
+
+  it.each(['.github/CODEOWNERS', 'CODEOWNERS', 'docs/CODEOWNERS'])(
+    'writes a directory line with and without the slash in %s, a file line once',
+    async (output) => {
+      // Arrange
+      const root = await project(
+        `${CONFIG}  codeowners:\n    output: ${output}\n    protect: [tools]\n`
+      );
+
+      // Act
+      await run(root);
+
+      // Assert
+      const written = await lines(root, output);
+      expect(written).toContain('/.promptscript/approvals/legal @acme/legal @jane');
+      expect(written).toContain('/.promptscript/approvals/legal/ @acme/legal @jane');
+      expect(written).toContain('/tools @acme/prompt-platform');
+      expect(written).toContain('/tools/ @acme/prompt-platform');
+      expect(written).toContain('/promptscript.yaml @acme/prompt-platform');
+      expect(written).not.toContain('/promptscript.yaml/ @acme/prompt-platform');
+      expect(written).not.toContain('[PromptScript]');
+    }
+  );
 
   it('writes GitLab directory lines twice and warns that hand-written lines apply too', async () => {
     // Arrange
