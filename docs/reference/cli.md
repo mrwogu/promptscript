@@ -1322,12 +1322,32 @@ prs release status [options]
 | `--base <ref>`             | Check every label entry changed since `<ref>` with the rules of `<ref>`                               |
 | `--check-models`           | Check the models of every labelled prompt against the model catalog                                   |
 | `--retiring-within <days>` | With `--check-models`, days ahead in which a deprecated model counts as retiring (0-3650, default 30) |
+| `--strict`                 | Exit with code 1 when CODEOWNERS does not bind the approval directories the gates need                |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
 verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
 arm bundle. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
 policies it also runs the [release gates](../guides/releases.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
+
+When an approval policy applies to an environment that has a label entry, status reads the
+configured CODEOWNERS output from the `HEAD` commit by exact path and compares it with what
+`prs governance codeowners` generates. With `--base <ref>` it also reads the file at that commit
+and checks only that, after the marker line, it has the exact owner line of each role directory the
+approval policies of the config at `<ref>` need, rendered from the governance at `<ref>`; other
+lines there are not compared. It gives one warning, with the file as its `location`, if the file is
+missing at a commit (`is missing at <ref>`), out of date at `HEAD`, does not bind roles at `<ref>`
+(`does not bind <roles> at <ref>`), shadowed there by a file at an earlier location, not
+manageable by prs at `HEAD`, or cannot be generated from `governance`:
+`<file> <reason>, so the approval directories of <roles> are not bound to their owners. Without it any committer can add a record in another person's name. Run
+prs governance codeowners and commit the result.` `--strict` makes this warning, and no other,
+exit with code 1. A clean result does not prove that the branch requires code owner review, nor
+that the owners have write access. For any location other than `.gitlab/CODEOWNERS` the lines are
+written for GitHub. When every owner of a role is a user handle like `@jane`, status also warns about
+an approval (with `--base`, in the governance at `<ref>`) that counts for a gate whose approver is not one of them (`<prompt>@<hash> in <env>:
+<approver> approved as <role>, but is not in governance.roles.<role> (<owners>). It still counts,
+since the approver is only asserted; ...`). A role with any team owner is not checked, the record
+still counts and the exit code stays.
 
 A label entry whose prompt id does not match the id pattern of an approval (for example one with a
 zero-width space), or has more than seven slash-separated segments, gives a warning, and a gate that needs approvals never passes for it. The id in
@@ -1410,7 +1430,9 @@ weight, never for the entry hash, a promote, `--end --keep` or a plain rollback,
 `--list` prints per prompt the hash the checkout builds and every record as `current`,
 `labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
 path and the bytes Git has for each record, so with record files it needs Git and a repository
-(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning.
+(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning. A record
+whose approver is not one of the owners of a role that lists user handles only, like `@jane`, gets a
+warning too if the record is `current` or `labelled`; a role with a team owner is not checked, and the record keeps its state.
 With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/approval-report/v1.json`.
 

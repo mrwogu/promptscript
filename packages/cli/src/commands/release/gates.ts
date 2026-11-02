@@ -37,13 +37,9 @@ import {
 import { ReleaseError } from './errors.js';
 import { escapeNonAscii, stripControlCharacters } from './git.js';
 import { checkBundleFields, percentText, readVerifiedBundle, shortHash } from './layout.js';
-import {
-  ReleaseCompileError,
-  releaseValidatorConfig,
-  type CompiledRelease,
-  type ReleaseProject,
-} from './project.js';
+import { ReleaseCompileError, type CompiledRelease, type ReleaseProject } from './project.js';
 import { toDiagnostic } from './run.js';
+import { policyContext } from './approval-roles.js';
 
 /** Policy kinds a gate judges a prompt version by; the skill kinds run in the source build. */
 const PROMPT_KINDS: ReadonlySet<PolicyDefinition['kind']> = new Set([
@@ -104,18 +100,6 @@ export interface PromotionGateResult {
   warnings: ReleaseDiagnostic[];
   /** One result per prompt version a prompt policy exists for */
   gates: ReleaseGateResult[];
-}
-
-/** The settings policies are parsed and evaluated with, the same as a release build. */
-function policyContext(config: PromptScriptConfig): PolicyContext {
-  const validator = releaseValidatorConfig(config);
-  return {
-    governance: config.governance,
-    releases: config.releases,
-    models: config.models,
-    blockedPatterns: validator.blockedPatterns,
-    allowedPatterns: validator.allowedPatterns,
-  };
 }
 
 function refused(findings: ReleaseDiagnostic[]): PromotionGateResult {

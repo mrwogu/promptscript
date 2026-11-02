@@ -336,6 +336,37 @@ an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approv
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
 
+When an approval policy (`required-approvals`, or `max-experiment-weight` with `approvals`) applies
+to an environment that has a label entry, status also checks the CODEOWNERS file that
+`prs governance codeowners` generates (see [CODEOWNERS from Governance](codeowners.md)). It reads the
+configured output file from the `HEAD` commit by exact path, so a file that is only on disk does
+not count, and it must equal what `prs governance codeowners` generates from the checkout config.
+With `--base <ref>` it also checks the file at that commit, since the host applies the CODEOWNERS
+of the base branch to a pull request. There the roles come from the approval policies of the
+config at `<ref>` (the same rules the `--base` gates use) and the file is the configured output of
+that config. It must not be shadowed by an earlier location, and after the marker line of the
+project it must hold the exact owner line of each role directory, rendered from the governance at
+`<ref>`, and no other line for that path. Other lines of the file at `<ref>` are not compared. It
+gives one warning, with the file as its location, if the file is missing at a commit
+(`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
+(`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs
+cannot manage the file at `HEAD` (no marker line), or if the lines cannot be generated (for
+example `governance.admins` is missing). The warning lists the roles and tells you to run
+`prs governance codeowners` and commit the result. The policy `match` is not evaluated, so a role
+is named when some prompt could need it. Nothing is written. Without such a policy there is no
+warning. `--strict` makes this warning, and only it, exit with code 1.
+
+A clean result does not prove that the branch requires code owner review, nor that the owners have
+write access; check both on the Git host. For any location other than `.gitlab/CODEOWNERS` the
+lines are written for GitHub.
+
+When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
+and no email), status also warns about an approval that counts for a gate whose approver is not
+one of them, compared lowercased. With `--base` the roster comes from the governance of `<ref>`,
+the one the gates use. `prs approve --list` gives the same warning for a record in the state `current` or `labelled`, the ones a gate could count.
+A role with any team owner is not checked, since a team cannot be resolved offline. The record
+still counts and the exit code does not change.
+
 #### Check the models of the labels
 
 ```bash
@@ -519,15 +550,15 @@ paths it tracks and which blob each holds, and prints, per prompt, the hash the 
 each record with its role, approver, scope (`prod`, `all environments`, or `prod up to 25 %` for a capped record) and state. When there are
 record files, it needs Git and a repository, else `PS5108`.
 
-| State            | Meaning                                                          |
-| ---------------- | ---------------------------------------------------------------- |
-| `current`        | The record approves the hash the checkout builds                 |
-| `labelled:<env>` | Not the current hash, but the label of that environment holds it |
-| `stale`          | Neither: the prompt changed since                                |
-| `untracked`      | Not added to Git yet. A staged record already counts as tracked  |
-| `modified`       | The bytes on disk are not the ones Git has for the path          |
-| `misplaced`      | Git tracks the file at another path than its fields give         |
-| `unknown-role`   | The role is not in `governance.roles`                            |
+| State            | Meaning                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `current`        | The record approves the hash the checkout builds                                                                         |
+| `labelled:<env>` | Not the current hash, but the label of that environment holds it, as the entry hash or as an experiment arm with traffic |
+| `stale`          | Neither: the prompt changed since                                                                                        |
+| `untracked`      | Not added to Git yet. A staged record already counts as tracked                                                          |
+| `modified`       | The bytes on disk are not the ones Git has for the path                                                                  |
+| `misplaced`      | Git tracks the file at another path than its fields give                                                                 |
+| `unknown-role`   | The role is not in `governance.roles`                                                                                    |
 
 Only `current` and `labelled` records can count. A file that is no valid record, for example one
 with CRLF line endings, gets a `PS5109` warning, and so do modified, misplaced and unknown-role
@@ -585,6 +616,12 @@ the pull request of that commit. A `well-formed` record there only has the right
 right path. It does not mean a gate accepts it, and the review by the role team lives in the
 review log of the Git host, not in Git.
 
+`prs release status` warns when an approval policy applies and the CODEOWNERS file committed at
+`HEAD` (and at the `--base` commit) is missing or does not match what `prs governance codeowners`
+generates, and `--strict` turns that warning into exit code 1. It also
+warns, in `status` and `approve --list`, about a record whose approver is not in a role that lists
+user handles only. Neither warning changes what the gates count.
+
 ## Release gates
 
 The gates are the prompt policies, run on the prompt version a label is about to hold. They run
@@ -630,7 +667,8 @@ tell who wrote them. A record binds only through review: each `.promptscript/app
 needs that role's team as code owners, with required code owner review on the branch (see
 [What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
 lines, see [CODEOWNERS from Governance](codeowners.md). Without it, any author can add a record in
-another person's name and pass the gate.
+another person's name and pass the gate. `prs release status` warns when a gate needs approvals
+and these lines are missing or stale in the commit, see [Status](#status).
 
 A record counts for one approver when:
 

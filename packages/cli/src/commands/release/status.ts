@@ -2,6 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ConsoleOutput } from '../../output/console.js';
 import {
+  compareCodeUnits,
   getModelCatalog,
   type PromptBundleIndexV1,
   type PromptReleaseLabelEntryV2,
@@ -14,6 +15,7 @@ import type {
   ReleaseExperimentStatus,
   ReleaseGateResult,
   ReleasePromptStatus,
+  ReleaseReport,
 } from '../../utils/release-report.js';
 import { PS5003_BUNDLE_MISSING, ReleaseError } from './errors.js';
 import { escapeNonAscii, runGit, stripControlCharacters, type GitResult } from './git.js';
@@ -30,6 +32,9 @@ import {
   type ReleasePaths,
 } from './layout.js';
 import { isApprovalPromptId } from '../approve/records.js';
+import { individualRosters, outsideRosterWarning } from '../approve/roster.js';
+import { approvalRolesFor } from './approval-roles.js';
+import { checkApprovalOwners, checkApprovalOwnersAtBase } from '../governance/codeowners.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
 import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
 import { checkLabelModels, parseRetiringWithin, printModels } from './models.js';
@@ -51,6 +56,8 @@ export interface ReleaseStatusOptions extends ReleaseCommandOptions {
   checkModels?: boolean;
   /** With checkModels, days ahead in which a deprecated model counts as retiring */
   retiringWithin?: string;
+  /** Fail when CODEOWNERS does not bind the approval directories the gates need */
+  strict?: boolean;
 }
 
 function parseHistoryCount(value: string | undefined): number | undefined {
@@ -428,6 +435,81 @@ function labelIdWarnings(
   return [...warnings.values()];
 }
 
+/** Approvers that count for a gate but are not in a role that lists user handles only. */
+function rosterWarnings(
+  gates: readonly ReleaseGateResult[],
+  governance: unknown
+): ReleaseDiagnostic[] {
+  const rosters = individualRosters(governance);
+  const warnings = new Map<string, ReleaseDiagnostic>();
+  for (const gate of gates) {
+    const where = `${escapeNonAscii(gate.prompt)}@${shortHash(gate.contentHash)} in ${stripControlCharacters(gate.environment)}`;
+    for (const { role, found } of gate.checks.flatMap((check) => check.approvals ?? [])) {
+      for (const approver of found) {
+        const warning = outsideRosterWarning(rosters, role, approver, where);
+        if (warning !== undefined) warnings.set(warning.message, warning);
+      }
+    }
+  }
+  return [...warnings.values()];
+}
+
+/** What one CODEOWNERS check found, before the warning text. */
+type OwnersProblem = NonNullable<Awaited<ReturnType<typeof checkApprovalOwners>>>;
+
+/** Both checks as one problem: the roles of both and every reason. */
+function mergedProblem(problems: readonly OwnersProblem[]): OwnersProblem | undefined {
+  const [first] = problems;
+  if (first === undefined) return undefined;
+  const roles = new Set(problems.flatMap((problem) => problem.roles));
+  const file = problems.find((problem) => problem.file !== undefined)?.file;
+  return {
+    ...(file === undefined ? {} : { file }),
+    roles: [...roles].sort(compareCodeUnits),
+    reason: problems.map((problem) => problem.reason).join(' and '),
+  };
+}
+
+/**
+ * The one warning when an approval policy applies to a labelled environment and CODEOWNERS
+ * does not bind the role directories. At HEAD, with the checkout config, the committed file
+ * must equal what `prs governance codeowners` generates. With `--base`, the file at the base
+ * commit must have the owner line of each role the config of the base needs, rendered from
+ * the governance of the base.
+ */
+async function codeownersWarning(
+  project: ReleaseProject,
+  checked: readonly EnvironmentCheck[],
+  base: BaseCheck | undefined
+): Promise<ReleaseDiagnostic | undefined> {
+  const labelled = checked
+    .filter((environment) => environment.entries.length > 0)
+    .map((environment) => environment.value.name);
+  const options = { cwd: project.root, config: project.configPath };
+  const needed = approvalRolesFor(project.config, labelled);
+  const baseNeeded = base === undefined ? [] : approvalRolesFor(base.config, base.environments);
+  const problems: OwnersProblem[] = [];
+  if (needed.length > 0) {
+    const head = await checkApprovalOwners(options, needed, [{ label: 'HEAD', commit: 'HEAD' }]);
+    if (head !== undefined) problems.push(head);
+  }
+  if (base !== undefined && baseNeeded.length > 0) {
+    const atBase = await checkApprovalOwnersAtBase(options, base.config, baseNeeded, {
+      label: base.base.ref,
+      commit: base.base.commit,
+    });
+    if (atBase !== undefined) problems.push(atBase);
+  }
+  const problem = mergedProblem(problems);
+  if (problem === undefined) return undefined;
+  const roles = problem.roles.map(escapeNonAscii).join(', ');
+  const file = problem.file === undefined ? undefined : stripControlCharacters(problem.file);
+  return {
+    message: `${file ?? 'CODEOWNERS'} ${stripControlCharacters(problem.reason)}, so the approval directories of ${roles} are not bound to their owners. Without it any committer can add a record in another person's name. Run prs governance codeowners and commit the result.`,
+    ...(file === undefined ? {} : { location: { file } }),
+  };
+}
+
 /** With --base the config is found by name; say so when the caller pointed elsewhere. */
 function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic[] {
   if (options.base === undefined) return [];
@@ -467,6 +549,58 @@ function promptState(prompt: { exists: boolean; verified: boolean }): string {
   return prompt.verified ? 'ok' : 'corrupt';
 }
 
+/** The history of every label, when `--history` asked for it. */
+async function labelHistories(
+  project: ReleaseProject,
+  count: number | undefined
+): Promise<{ history: ReleaseEnvironmentHistory; warning?: ReleaseDiagnostic }[] | undefined> {
+  if (count === undefined) return undefined;
+  return Promise.all(project.environments.map((name) => labelHistory(project.paths, name, count)));
+}
+
+/** The model check, when `--check-models` asked for it. */
+async function modelsOf(
+  project: ReleaseProject,
+  environments: ReleaseEnvironmentStatus[],
+  days: number | undefined
+): Promise<({ days: number } & Awaited<ReturnType<typeof checkLabelModels>>) | undefined> {
+  if (days === undefined) return undefined;
+  const result = await checkLabelModels(
+    project.paths,
+    getModelCatalog(project.config.models),
+    environments,
+    days,
+    new Date()
+  );
+  return { days, ...result };
+}
+
+interface StatusParts {
+  environments: ReleaseEnvironmentStatus[];
+  history: ReleaseEnvironmentHistory[] | undefined;
+  baseCheck: BaseCheck | undefined;
+  gates: ReleaseGateResult[];
+  modelCheck: Awaited<ReturnType<typeof modelsOf>>;
+  warnings: ReleaseDiagnostic[];
+  errors: ReleaseDiagnostic[];
+  /** The command fails although no error was found */
+  failed: boolean;
+}
+
+function statusReport(parts: StatusParts): Partial<ReleaseReport> {
+  const { history, baseCheck, gates, modelCheck } = parts;
+  return {
+    success: parts.errors.length === 0 && !parts.failed,
+    environments: parts.environments,
+    ...(history === undefined ? {} : { history }),
+    ...(baseCheck === undefined ? {} : { base: baseCheck.base, changes: baseCheck.changes }),
+    ...(gates.length === 0 ? {} : { gates }),
+    ...(modelCheck === undefined ? {} : { models: modelCheck.models }),
+    warnings: parts.warnings,
+    errors: parts.errors,
+  };
+}
+
 /** List every environment with its prompts, their hashes and whether the bundles verify. */
 export async function releaseStatusCommand(options: ReleaseStatusOptions): Promise<void> {
   await runReleaseCommand('status', options, async (output) => {
@@ -486,14 +620,11 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       ...upstreamArmWarnings(checked),
     ];
 
-    let history: ReleaseEnvironmentHistory[] | undefined;
-    if (historyCount !== undefined) {
-      const logs = await Promise.all(
-        project.environments.map((name) => labelHistory(paths, name, historyCount))
-      );
-      history = logs.map((log) => log.history);
-      warnings.push(...logs.flatMap((log) => (log.warning === undefined ? [] : [log.warning])));
-    }
+    const logs = await labelHistories(project, historyCount);
+    const history = logs?.map((log) => log.history);
+    warnings.push(
+      ...(logs?.flatMap((log) => (log.warning === undefined ? [] : [log.warning])) ?? [])
+    );
 
     // With --base the changed entries go through the gates of the base, which decide;
     // without it every entry goes through the checkout's gates, which only report.
@@ -505,21 +636,15 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       baseCheck === undefined
         ? await labelGates(project, checked, output.json)
         : { gates: baseCheck.gates, warnings: baseCheck.warnings };
-    warnings.push(...gateRun.warnings, ...labelIdWarnings(checked, baseCheck?.changes ?? []));
+    const unbound = await codeownersWarning(project, checked, baseCheck);
+    warnings.push(
+      ...gateRun.warnings,
+      ...labelIdWarnings(checked, baseCheck?.changes ?? []),
+      ...rosterWarnings(gateRun.gates, (baseCheck?.config ?? project.config).governance),
+      ...(unbound === undefined ? [] : [unbound])
+    );
 
-    const modelCheck =
-      retiringDays === undefined
-        ? undefined
-        : {
-            days: retiringDays,
-            ...(await checkLabelModels(
-              paths,
-              getModelCatalog(project.config.models),
-              environments,
-              retiringDays,
-              new Date()
-            )),
-          };
+    const modelCheck = await modelsOf(project, environments, retiringDays);
     warnings.push(...(modelCheck?.warnings ?? []));
 
     if (!output.json) {
@@ -533,18 +658,20 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       if (modelCheck !== undefined) printModels(modelCheck.models, modelCheck.days);
       if (baseCheck !== undefined) printBaseCheck(baseCheck);
     }
-    return {
+    return statusReport({
       environments,
-      ...(history === undefined ? {} : { history }),
-      ...(baseCheck === undefined ? {} : { base: baseCheck.base, changes: baseCheck.changes }),
-      ...(gateRun.gates.length === 0 ? {} : { gates: gateRun.gates }),
-      ...(modelCheck === undefined ? {} : { models: modelCheck.models }),
+      history,
+      baseCheck,
+      gates: gateRun.gates,
+      modelCheck,
       warnings,
       errors: [
         ...checked.flatMap((entry) => entry.errors),
         ...(baseCheck?.errors ?? []),
         ...(modelCheck?.errors ?? []),
       ],
-    };
+      // --strict fails on the CODEOWNERS warning only; other warnings keep their behavior.
+      failed: options.strict === true && unbound !== undefined,
+    });
   });
 }

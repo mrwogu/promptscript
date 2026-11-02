@@ -24,14 +24,16 @@ import {
 } from '../../utils/project-config.js';
 import { writeFileAtomic } from '../../utils/write-file-atomic.js';
 import { assertSafeWritePath } from '../../utils/write-plan.js';
-import { stripControlCharacters } from '../release/git.js';
+import { runGit, stripControlCharacters } from '../release/git.js';
 import {
   codeownersMarker,
+  manageContent,
   mergedContent,
   overlapWarnings,
   readManaged,
   sameContent,
   type CodeownersHost,
+  type ManagedFile,
 } from './codeowners-file.js';
 import {
   keepPaths,
@@ -186,6 +188,39 @@ interface Section {
   unowned: string[];
   /** Root-relative `protect` paths */
   protect: string[];
+  /** The generated lines of each role directory, by role */
+  roleLines: Map<string, string[]>;
+}
+
+/** The owners of a role, or an error when the value is not a list of strings. */
+function ownersOf(value: unknown, role: string): string[] {
+  if (!Array.isArray(value) || value.some((owner) => typeof owner !== 'string')) {
+    throw new GovernanceError(
+      PS5101_GOVERNANCE_CONFIG,
+      `governance.roles.${role} is not a list of owners.`
+    );
+  }
+  // A CODEOWNERS line with no owners removes the owners of the path, so it binds nothing.
+  if (value.length === 0) {
+    throw new GovernanceError(PS5101_GOVERNANCE_CONFIG, `governance.roles.${role} has no owners.`);
+  }
+  return value as string[];
+}
+
+/** The owner line of each role directory, in the order of the role names. */
+function roleOwnerLines(
+  roles: Record<string, unknown>,
+  base: string
+): (OwnerLine & { role: string })[] {
+  return Object.keys(roles)
+    .sort(compareCodeUnits)
+    .map((role) => ({
+      role,
+      // Role names are lowercase by the config check, the exact bytes the approvals use.
+      path: `${base}/.promptscript/approvals/${role}`,
+      owners: sortedUnique(ownersOf(roles[role], role)),
+      directory: true,
+    }));
 }
 
 /**
@@ -213,14 +248,7 @@ async function buildSection(
     codeowners['prompts'] === false
       ? { prompts: [], sources: [] }
       : await sourceLines(repo, config, configPath, admins, findings);
-  const roleLines = Object.keys(roles)
-    .sort(compareCodeUnits)
-    .map((role) => ({
-      // Role names are lowercase by the config check, the exact bytes the approvals use.
-      path: `${base}/.promptscript/approvals/${role}`,
-      owners: sortedUnique(roles[role] as string[]),
-      directory: true,
-    }));
+  const roleLines = roleOwnerLines(roles, base);
 
   const protect = protectLines(codeowners['protect'], admins, refused);
   const fixed: OwnerLine[] = [
@@ -265,6 +293,7 @@ async function buildSection(
     promptPaths: prompts.map((line) => line.path),
     unowned: findings.unowned,
     protect: protect.map((line) => line.path),
+    roleLines: new Map(roleLines.map((line) => [line.role, renderLines([line], host)])),
   };
 }
 
@@ -328,10 +357,20 @@ function checkResult(
   return { file: output, status: 'outdated', problem: problems.join(' ') };
 }
 
-async function runCodeowners(
+/** The generated section for the project, before any existing file is looked at. */
+interface Built {
+  output: string;
+  host: CodeownersHost;
+  /** Repository top level */
+  top: string;
+  path: string;
+  section: Section;
+}
+
+async function buildCodeowners(
   options: CodeownersOptions,
   warn: (message: string) => void
-): Promise<CodeownersResult> {
+): Promise<Built> {
   const root = resolveProjectRoot(options);
   // Same discovery as the release commands: --config, then PROMPTSCRIPT_CONFIG, then the names.
   const configPath =
@@ -350,17 +389,41 @@ async function runCodeowners(
       output
     );
   }
-
   const section = await buildSection(repo, host, config, configPath, files, warn);
-  const path = join(repo.top, output);
+  return { output, host, top: repo.top, path: join(repo.top, output), section };
+}
+
+interface Prepared extends Built {
+  managed: ManagedFile | undefined;
+  /** CODEOWNERS files a host reads before the output */
+  earlier: string[];
+  /** The whole file as prs would write it */
+  next: string;
+}
+
+/** The generated section and the file it goes into, with the overlap warnings sent to `warn`. */
+async function prepareCodeowners(
+  options: CodeownersOptions,
+  warn: (message: string) => void
+): Promise<Prepared> {
+  const built = await buildCodeowners(options, warn);
+  const { output, host, top, path, section } = built;
   const managed = await readManaged(path, output, section.marker, host);
   for (const message of overlapWarnings(managed?.above ?? [], section.promptPaths, output, host)) {
     warn(message);
   }
-  const earlier = (READ_BEFORE[output] ?? []).filter((location) =>
-    existsSync(join(repo.top, location))
+  const earlier = (READ_BEFORE[output] ?? []).filter((location) => existsSync(join(top, location)));
+  return { ...built, managed, earlier, next: mergedContent(managed, section.text) };
+}
+
+async function runCodeowners(
+  options: CodeownersOptions,
+  warn: (message: string) => void
+): Promise<CodeownersResult> {
+  const { output, top, path, section, managed, earlier, next } = await prepareCodeowners(
+    options,
+    warn
   );
-  const next = mergedContent(managed, section.text);
   if (options.check === true) {
     return checkResult(output, managed?.current, next, earlier, section);
   }
@@ -373,11 +436,201 @@ async function runCodeowners(
   if (managed !== undefined && sameContent(managed.current, next)) {
     return { file: output, status: 'unchanged' };
   }
-  await assertSafeWritePath(path, { ...createDefaultServices(), cwd: repo.top });
+  await assertSafeWritePath(path, { ...createDefaultServices(), cwd: top });
   await mkdir(dirname(path), { recursive: true });
   // latin1 maps each character back to the byte it was read from, so the lines above stay exact.
   writeFileAtomic(path, Buffer.from(next, 'latin1'), 0o644);
   return { file: output, status: managed === undefined ? 'created' : 'updated' };
+}
+
+/** Roles whose approval directory the CODEOWNERS file does not protect, and why. */
+export interface ApprovalOwnersProblem {
+  /** CODEOWNERS path relative to the repository root, unknown when the lines cannot be built */
+  file?: string;
+  roles: string[];
+  /** A predicate that follows the file name, for example `is out of date at HEAD` */
+  reason: string;
+}
+
+/** A commit to read CODEOWNERS from: `HEAD`, or the base commit with the ref to show. */
+export interface CodeownersCommit {
+  /** What the reasons call it, for example `HEAD` or the `--base` ref */
+  label: string;
+  /** A commit Git can resolve */
+  commit: string;
+}
+
+/** The roles whose generated line is missing from the file, or not configured at all. */
+function rolesWithoutLine(needed: readonly string[], section: Section, current: string): string[] {
+  const present = new Set(current.replaceAll('\r\n', '\n').split('\n'));
+  return needed.filter((role) => {
+    const lines = section.roleLines.get(role);
+    return !lines?.every((line) => present.has(line));
+  });
+}
+
+/**
+ * The files of `locations` the commit has, by path, with the text of the regular ones
+ * (latin1, like the file is merged). A link or submodule has an empty text: a host reads
+ * something else than the lines, so it never matches. A commit Git cannot resolve has none.
+ */
+async function filesAtCommit(
+  top: string,
+  commit: string,
+  locations: readonly string[]
+): Promise<Map<string, string>> {
+  const found = new Map<string, string>();
+  const listed = await runGit(['ls-tree', commit, '--', ...locations], top);
+  if (listed.status !== 0) return found;
+  for (const line of listed.stdout.split('\n')) {
+    const [, mode, type, object, path] = /^(\d{6}) (\w+) ([0-9a-f]+)\t(.+)$/.exec(line) ?? [];
+    if (path === undefined) continue;
+    const regular = type === 'blob' && (mode === '100644' || mode === '100755');
+    const blob = regular ? await runGit(['cat-file', 'blob', object ?? ''], top) : undefined; // NOSONAR - at most four small files
+    // runGit decodes UTF-8; the bytes of a valid text come back the same through latin1.
+    found.set(path, blob?.status === 0 ? Buffer.from(blob.stdout, 'utf8').toString('latin1') : '');
+  }
+  return found;
+}
+
+/** The problem with the file as one commit has it, or undefined when it binds every role. */
+async function problemAt(
+  built: Built,
+  needed: readonly string[],
+  at: CodeownersCommit
+): Promise<ApprovalOwnersProblem | undefined> {
+  const { output, host, top, section } = built;
+  const where = `at ${stripControlCharacters(at.label)}`;
+  const all = [...needed];
+  const earlier = READ_BEFORE[output] ?? [];
+  const files = await filesAtCommit(top, at.commit, [output, ...earlier]);
+  const text = files.get(output);
+  if (text === undefined) return { file: output, roles: all, reason: `is missing ${where}` };
+  const shadow = earlier.filter((location) => files.has(location));
+  if (shadow.length > 0) {
+    return {
+      file: output,
+      roles: all,
+      reason: `is shadowed ${where} by ${shadow.join(', ')}, which a host reads first`,
+    };
+  }
+  let managed: ManagedFile;
+  try {
+    managed = manageContent(text, output, section.marker, host);
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { file: output, roles: all, reason: `cannot be managed ${where}: ${first}` };
+  }
+  const missing = rolesWithoutLine(needed, section, text);
+  if (!sameContent(text, mergedContent(managed, section.text))) {
+    return {
+      file: output,
+      roles: missing.length > 0 ? missing : all,
+      reason: `is out of date ${where}`,
+    };
+  }
+  // A role the policies name is in governance.roles (a policy naming another does not parse),
+  // so a file that is current has its line.
+  return undefined;
+}
+
+/**
+ * Whether the CODEOWNERS file of each commit has the generated owner line of every role in
+ * `needed`, and is up to date. The commits are read from Git by exact path, so a file that is
+ * only on disk, or a path a case-insensitive disk would match, does not count. Nothing is
+ * written, and a governance section that cannot produce the lines is a problem, not an
+ * exception. One problem comes back for all commits, with their reasons joined.
+ */
+export async function checkApprovalOwners(
+  options: ProjectPathOptions,
+  needed: readonly string[],
+  commits: readonly CodeownersCommit[]
+): Promise<ApprovalOwnersProblem | undefined> {
+  let built: Built;
+  try {
+    built = await buildCodeowners({ ...options, check: true }, () => undefined);
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { roles: [...needed], reason: `cannot be generated: ${first}` };
+  }
+  const problems: ApprovalOwnersProblem[] = [];
+  for (const at of commits) {
+    const problem = await problemAt(built, needed, at); // NOSONAR - one commit at a time, few of them
+    if (problem !== undefined) problems.push(problem);
+  }
+  if (problems.length === 0) return undefined;
+  const roles = new Set(problems.flatMap((problem) => problem.roles));
+  return {
+    file: built.output,
+    roles: needed.filter((role) => roles.has(role)),
+    reason: problems.map((problem) => problem.reason).join(' and '),
+  };
+}
+
+/**
+ * Whether the CODEOWNERS the host reads at the base commit binds the role directories of
+ * `needed` under the governance of the base `config`: the configured output of that config,
+ * not shadowed by an earlier location, has the marker of this project and, after it, the exact
+ * owner line of each role directory and no other line for that path. Other lines of the
+ * section do not matter here. Nothing is written.
+ */
+export async function checkApprovalOwnersAtBase(
+  options: ProjectPathOptions,
+  config: PromptScriptConfig,
+  needed: readonly string[],
+  at: CodeownersCommit
+): Promise<ApprovalOwnersProblem | undefined> {
+  const where = `at ${stripControlCharacters(at.label)}`;
+  const all = [...needed];
+  let output: string;
+  let repo: Repository;
+  try {
+    output = outputLocation({}, config);
+    repo = await readRepository(resolveProjectRoot(options));
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { roles: all, reason: `cannot be checked ${where}: ${first}` };
+  }
+  const host: CodeownersHost = output === '.gitlab/CODEOWNERS' ? 'gitlab' : 'github';
+  const earlier = READ_BEFORE[output] ?? [];
+  const files = await filesAtCommit(repo.top, at.commit, [output, ...earlier]);
+  const text = files.get(output);
+  if (text === undefined) return { file: output, roles: all, reason: `is missing ${where}` };
+  const shadow = earlier.filter((location) => files.has(location));
+  if (shadow.length > 0) {
+    return {
+      file: output,
+      roles: all,
+      reason: `is shadowed ${where} by ${shadow.join(', ')}, which a host reads first`,
+    };
+  }
+  const governance: unknown = config.governance;
+  const roles =
+    isPlainObject(governance) && isPlainObject(governance['roles']) ? governance['roles'] : {};
+  const prefix = repo.project === '' ? '' : `/${repo.project}`;
+  let wanted: ReturnType<typeof roleOwnerLines>;
+  try {
+    wanted = roleOwnerLines(roles, prefix);
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { file: output, roles: all, reason: `cannot be checked ${where}: ${first}` };
+  }
+  const lines = text.replaceAll('\r\n', '\n').split('\n');
+  const marker = lines.indexOf(codeownersMarker(repo.project === '' ? '.' : repo.project));
+  const section = marker < 0 ? [] : lines.slice(marker + 1);
+  const unbound = needed.filter((role) => {
+    const line = wanted.find((candidate) => candidate.role === role);
+    if (line === undefined) return true;
+    const expected = renderLines([line], host);
+    const written = section.filter(
+      (entry) => entry.split(' ')[0]?.replace(/\/$/, '') === line.path
+    );
+    return (
+      !expected.every((entry) => written.includes(entry)) || written.length !== expected.length
+    );
+  });
+  if (unbound.length === 0) return undefined;
+  return { file: output, roles: unbound, reason: `does not bind ${unbound.join(', ')} ${where}` };
 }
 
 function diagnostic(error: unknown): CodeownersDiagnostic {

@@ -79,4 +79,15 @@ describe('prs release status command line', () => {
       expect.objectContaining({ checkModels: true, retiringWithin: '7' })
     );
   });
+
+  it('passes --strict on', async () => {
+    const program = new Command();
+    registerReleaseCommands(program.command('release'));
+
+    await program.parseAsync(['node', 'prs', 'release', 'status', '--strict']);
+
+    expect(releaseStatusCommand).toHaveBeenLastCalledWith(
+      expect.objectContaining({ strict: true })
+    );
+  });
 });

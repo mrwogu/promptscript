@@ -25,8 +25,9 @@ import {
 import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
-import { parsePercent, shortened } from '../release/experiment.js';
+import { gateEntriesOf, parsePercent, shortened } from '../release/experiment.js';
 import { stripControlCharacters } from '../release/git.js';
+import { individualRosters, outsideRosterWarning } from './roster.js';
 import {
   CONTENT_HASH_RE,
   checkBundleFields,
@@ -482,12 +483,24 @@ function signatureWarning(listed: ListedApproval): ReleaseDiagnostic {
 }
 
 /** The warnings a listed record adds, besides its state. */
-function listedWarnings(listed: ListedApproval): ReleaseDiagnostic[] {
+function listedWarnings(listed: ListedApproval, context: ListContext): ReleaseDiagnostic[] {
   const warnings: ReleaseDiagnostic[] = [];
   if (listed.state === 'modified') warnings.push(modifiedWarning(listed));
   if (listed.state === 'misplaced') warnings.push(misplacedWarning(listed));
   if (listed.state === 'unknown-role') warnings.push(unknownRoleWarning(listed));
   const { record } = listed;
+  // Only a record the gates could count: a stale, untracked, modified or misplaced one never does.
+  const counts = listed.state === 'current' || listed.state === 'labelled';
+  const outside = counts
+    ? outsideRosterWarning(
+        context.rosters,
+        record.role,
+        record.approver.value,
+        stripControlCharacters(listed.path),
+        listed.path
+      )
+    : undefined;
+  if (outside !== undefined) warnings.push(outside);
   if (record.signature !== undefined || record.signatureType !== undefined) {
     warnings.push(signatureWarning(listed));
   }
@@ -531,6 +544,8 @@ interface ListContext {
   labels: EnvironmentLabel[];
   /** Role names in governance.roles */
   roles: Set<string>;
+  /** Owners of the roles that list user handles only */
+  rosters: ReadonlyMap<string, readonly string[]>;
   /** The path Git tracks for each record file on disk */
   gitPaths: Map<string, string | undefined>;
   /** The blob id Git has, by tracked path */
@@ -545,8 +560,11 @@ function listedApproval(
 ): ListedApproval {
   const labels = context.labels
     .filter(({ label }) =>
+      // The entry hash and every experiment arm with traffic are what a gate judges.
       label?.prompts.some(
-        (prompt) => prompt.id === record.prompt && prompt.contentHash === record.contentHash
+        (prompt) =>
+          prompt.id === record.prompt &&
+          gateEntriesOf(prompt).some((item) => item.contentHash === record.contentHash)
       )
     )
     .map(({ environment }) => environment);
@@ -592,7 +610,7 @@ function promptStatuses(
       warnings.push(invalidWarning(entry));
     } else if (id === undefined || entry.record.prompt === id) {
       const listed = listedApproval(entry.path, entry.record, context);
-      warnings.push(...listedWarnings(listed));
+      warnings.push(...listedWarnings(listed, context));
       status(entry.record.prompt).records.push(listed);
     }
   }
@@ -649,6 +667,7 @@ async function list(
     built: new Map(compiled.bundles.map((bundle) => [bundle.id, bundle.contentHash])),
     labels,
     roles: configuredRoles(project),
+    rosters: individualRosters(project.config.governance),
     gitPaths: gitPathsOf(project.root, read.found, blobs),
     blobs,
   };

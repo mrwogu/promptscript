@@ -1008,6 +1008,101 @@ describe('prs approve --list', () => {
     expect(options.report.errors[0]?.message).toContain('--list takes only an optional prompt id');
     expect(codes(id.report)).toEqual(['PS5102']);
   });
+
+  describe('approvers outside the roster', () => {
+    const PEOPLE = CONFIG.replace("legal: ['@acme/legal']", "legal: ['@jane', '@bob']");
+
+    async function rosterWarnings(config: string, approver: string): Promise<string[]> {
+      const root = await project(config);
+      const hash = await builtHash(root);
+      await record(root, { contentHash: hash, approver: as(approver) });
+      git(root, 'add', '-A');
+      const { report } = await run(undefined, { cwd: root, list: true });
+      return report.warnings
+        .map((warning) => warning.message)
+        .filter((message) => message.includes('governance.roles.legal'));
+    }
+
+    it('warns about an approver a roster of user handles does not list', async () => {
+      const warnings = await rosterWarnings(PEOPLE, '@eve');
+
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).toContain('@eve approved as legal, but is not in governance.roles.legal');
+      expect(warnings[0]).toContain('(@jane, @bob)');
+      expect(warnings[0]).toContain('It still counts');
+    });
+
+    it('does not warn about a record the gates could not count', async () => {
+      const root = await project(PEOPLE);
+      const hash = await builtHash(root);
+      await record(root, { contentHash: hash, approver: as('@eve') });
+      await record(root, { approver: as('@mallory') });
+      git(root, 'add', '-A');
+      await record(root, { contentHash: hash, approver: as('@new') });
+
+      const { report } = await run(undefined, { cwd: root, list: true });
+
+      const states = report.prompts?.flatMap((prompt) =>
+        prompt.records.map((entry) => entry.state)
+      );
+      expect(states?.sort()).toEqual(['current', 'stale', 'untracked']);
+      const messages = report.warnings.filter((warning) =>
+        warning.message.includes('governance.roles.legal')
+      );
+      expect(messages).toHaveLength(1);
+      expect(messages[0]?.message).toContain('@eve approved');
+    });
+
+    it('warns about a record for an experiment arm with traffic, which a gate counts', async () => {
+      const root = await project(PEOPLE);
+      const entry = await storedBundle(root, ID, 'Entry');
+      const arm = await storedBundle(root, ID, 'Arm');
+      await writeFile(
+        join(root, '.promptscript/releases/prod.json'),
+        `${JSON.stringify({
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v2.json',
+          environment: 'prod',
+          prompts: [
+            {
+              id: ID,
+              contentHash: entry,
+              experiment: {
+                name: 'warm',
+                arms: [
+                  { variant: 'control', contentHash: entry, weight: 9000 },
+                  { variant: 'warm', contentHash: arm, weight: 1000 },
+                ],
+              },
+            },
+          ],
+        })}\n`
+      );
+      await record(root, { contentHash: arm, approver: as('@eve'), environment: 'prod' });
+      git(root, 'add', '-A');
+
+      const { report } = await run(undefined, { cwd: root, list: true });
+
+      const states = report.prompts?.flatMap((prompt) => prompt.records.map((item) => item.state));
+      expect(states).toEqual(['labelled']);
+      expect(
+        report.warnings.filter((warning) => warning.message.includes('governance.roles.legal'))
+      ).toHaveLength(1);
+    });
+
+    it('does not warn about a listed approver, whatever the case', async () => {
+      const warnings = await rosterWarnings(PEOPLE, '@JANE');
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('does not check a role that lists a team', async () => {
+      const mixed = PEOPLE.replace("['@jane', '@bob']", "['@jane', '@acme/legal']");
+
+      const warnings = await rosterWarnings(mixed, '@eve');
+
+      expect(warnings).toEqual([]);
+    });
+  });
 });
 
 describe('prs approve definition', () => {
