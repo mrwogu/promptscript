@@ -56,6 +56,11 @@
           "description": "Error code, such as `PS2000`. Absent when the run stops before the compile with an error that has no PS code, for example a missing entry file or a registry clone failure.",
           "pattern": "^PS[0-9]{3,4}$"
         },
+        "cause": {
+          "type": "string",
+          "description": "Code of the underlying error, when the error wraps another one. A parse error reaches the report as `PS2000` with `cause` set to the parser code, such as `PS1000`.",
+          "pattern": "^PS[0-9]{3,4}$"
+        },
         "message": {
           "type": "string",
           "description": "Error message"

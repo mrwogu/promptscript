@@ -108,7 +108,8 @@ The `@inherit` or `@use` target cannot be resolved. Check:
 
 The parser found invalid syntax, such as a missing closing brace or a misplaced token, for example
 `Expecting token of type --> RBrace <-- but found --> '?' <--`. The resolver reports every parse
-error with the code `PS2000`, which you see in `prs validate --format json`. Check the reported
+error with the code `PS2000`, which you see in `prs validate --format json`. The parser code, for
+example `PS1000`, stays in the optional `cause` field of that error. Check the reported
 location and compare it with the [Language Reference](../reference/language.md). A parse error that
 has no position reports line and column `-1`.
 

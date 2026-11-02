@@ -30,6 +30,12 @@ export interface ValidateErrorV1 {
    * @pattern ^PS[0-9]{3,4}$
    */
   code?: string;
+  /**
+   * Code of the underlying error, when the error wraps another one. A parse error reaches
+   * the report as `PS2000` with `cause` set to the parser code, such as `PS1000`.
+   * @pattern ^PS[0-9]{3,4}$
+   */
+  cause?: string;
   /** Error message */
   message: string;
   /** Where the error is, when the compiler knows */

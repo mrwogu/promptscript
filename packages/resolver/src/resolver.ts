@@ -12,6 +12,7 @@ import {
   type Program,
   type Value,
   type Lockfile,
+  type ParseError,
   ResolveError,
   CircularDependencyError,
   FileNotFoundError,
@@ -88,6 +89,14 @@ import {
   resolveVendoredRepository,
   verifyGitRepositoryCheckout,
 } from './vendor-manifest.js';
+
+/**
+ * Wrap a parse error as PS2000 and keep the parser error as its cause,
+ * so the parser code (for example PS1000) is not lost.
+ */
+function fromParseError(error: ParseError): ResolveError {
+  return new ResolveError(error.message, error.location, ErrorCode.RESOLVE_ERROR, error);
+}
 
 function effectiveCompositionPath(
   blocks: readonly Program['blocks'][number][],
@@ -1206,14 +1215,12 @@ export class Resolver {
 
     if (!parseResult.ast) {
       for (const e of parseResult.errors) {
-        errors.push(new ResolveError(e.message, e.location));
+        errors.push(fromParseError(e));
       }
       return { ast: null };
     }
 
-    const parseErrors = parseResult.errors.map(
-      (err) => new ResolveError(err.message, err.location)
-    );
+    const parseErrors = parseResult.errors.map((err) => fromParseError(err));
     errors.push(...parseErrors);
     const ast = stampSkillBaseSource(parseResult.ast, absPath);
     context.parsedFiles.set(absPath, {
@@ -1247,12 +1254,12 @@ export class Resolver {
       const parseResult = parse(source, { filename: absPath });
       if (!parseResult.ast) {
         for (const e of parseResult.errors) {
-          errors.push(new ResolveError(e.message, e.location));
+          errors.push(fromParseError(e));
         }
         return { ast: null };
       }
       for (const err of parseResult.errors) {
-        errors.push(new ResolveError(err.message, err.location));
+        errors.push(fromParseError(err));
       }
       return { ast: parseResult.ast };
     }
@@ -1940,7 +1947,7 @@ export class Resolver {
           resolvedAST = stampSkillBaseSource(parseResult.ast, resolvedFullPath);
         } else {
           for (const e of parseResult.errors) {
-            errors.push(new ResolveError(e.message, e.location));
+            errors.push(fromParseError(e));
           }
         }
       } else if (isMdPath) {
