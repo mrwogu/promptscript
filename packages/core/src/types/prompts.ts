@@ -7,7 +7,11 @@ export type PromptInput = SkillContractField;
 /** Scalar value types allowed for prompt inputs and output fields. */
 export type PromptScalarType = SkillContractField['type'];
 
-/** Risk classification of a prompt. */
+/**
+ * Risk classification of a prompt.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
 /** Blocks a prompt can compose into its system message. */

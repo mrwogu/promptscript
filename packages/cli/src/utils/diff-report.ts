@@ -18,8 +18,18 @@ import { isPromptScriptOwnedOutput } from './output-ownership.js';
 export const DIFF_SCHEMA_VERSION = 1 as const;
 export const DIFF_SCHEMA_URL = 'https://getpromptscript.dev/schema/diff/v1.json';
 
+/**
+ * What happens to one output file.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type DiffChangeKind = 'added' | 'changed' | 'removed' | 'unsupported' | 'user-owned';
 
+/**
+ * Who owns the output file.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type DiffOwnership = 'promptscript' | 'user' | 'unknown';
 
 export interface DiffLocation {

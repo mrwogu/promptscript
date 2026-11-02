@@ -82,7 +82,7 @@
         "budget-exceeded",
         "error"
       ],
-      "description": "Outcome of a run."
+      "description": "Outcome of a run.\n\nClosed enum: a new value needs a new schema version."
     },
     "EvalReportCacheV1": {
       "type": "object",
@@ -124,7 +124,7 @@
         "refresh",
         "off"
       ],
-      "description": "How a run uses the cache."
+      "description": "How a run uses the cache.\n\nOpen enum: new values can be added in this version, so handle unknown values."
     },
     "EvalUsageV1": {
       "type": "object",
@@ -348,7 +348,7 @@
         "latencyMs.p50",
         "latencyMs.p95"
       ],
-      "description": "Name of a suite threshold."
+      "description": "Name of a suite threshold.\n\nOpen enum: new values can be added in this version, so handle unknown values."
     },
     "EvalFindingV1": {
       "type": "object",
@@ -414,7 +414,7 @@
         "error",
         "warning"
       ],
-      "description": "Severity of a dataset finding."
+      "description": "Severity of a dataset finding.\n\nClosed enum: a new value needs a new schema version."
     },
     "EvalModelResultV1": {
       "type": "object",
@@ -598,7 +598,7 @@
         "failed",
         "error"
       ],
-      "description": "Status of one case."
+      "description": "Status of one case.\n\nClosed enum: a new value needs a new schema version."
     },
     "EvalAssertionResultV1": {
       "type": "object",
@@ -642,7 +642,7 @@
         "json-schema",
         "llm-judge"
       ],
-      "description": "Kind of an eval assertion."
+      "description": "Kind of an eval assertion.\n\nOpen enum: new values can be added in this version, so handle unknown values."
     },
     "EvalJudgeResultV1": {
       "type": "object",
@@ -678,7 +678,7 @@
         "pass",
         "fail"
       ],
-      "description": "Verdict of a judge run or a human label."
+      "description": "Verdict of a judge run or a human label.\n\nClosed enum: a new value needs a new schema version."
     },
     "EvalCacheUseV1": {
       "type": "object",
