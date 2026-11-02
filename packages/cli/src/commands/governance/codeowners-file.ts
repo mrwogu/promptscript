@@ -35,6 +35,29 @@ function refuse(file: string, message: string): never {
   throw new GovernanceError(PS5106_CODEOWNERS_UNMANAGED, `${file} ${message}`, file);
 }
 
+/** A GitLab section header: `[Name]`, `^[Name]`, optionally with `[n]` and default owners. */
+const SECTION_HEADER_RE = /^\^?\[[^\]]+\](?:\[\d+\])?(?:\s.*)?$/;
+
+/**
+ * Refuse a file outside .gitlab/ that has a GitLab section header above the marker. GitLab would
+ * put the generated lines into that section, which changes who must approve, and GitHub flags
+ * a section header as invalid.
+ */
+export function refuseSectionsAbove(above: readonly string[], file: string): void {
+  const section = above.find((line) => SECTION_HEADER_RE.test(line.trim()));
+  if (section === undefined) return;
+  refuse(
+    file,
+    `has the GitLab section "${stripControlCharacters(section.trim())}" above the marker. GitLab would read the generated lines as part of it, so approvals could become optional or need another count. Set governance.codeowners.output to .gitlab/CODEOWNERS, which gets its own [PromptScript] section.`
+  );
+}
+
+/** Latin1 text without a leading UTF-8 byte order mark, and the mark that was there. */
+export function stripBom(current: string): { bom: string; text: string } {
+  const bom = current.startsWith(BOM) ? BOM : '';
+  return { bom, text: current.slice(bom.length) };
+}
+
 /** Split an existing file at this project's marker, or refuse it with PS5106. */
 function splitAtMarker(
   content: string,
@@ -62,6 +85,7 @@ function splitAtMarker(
     refuse(file, `${why}, so prs does not change it. Replace that line with: ${marker}`);
   }
   const above = content.split('\n').slice(0, index);
+  if (host !== 'gitlab') refuseSectionsAbove(above, file);
   if (host === 'gitlab') {
     const section = above.find((line) => PROMPTSCRIPT_SECTION_RE.test(line.trim()));
     if (section !== undefined) {
@@ -87,8 +111,8 @@ export function manageContent(
       'has a NUL byte, and GitLab reads such a file as binary and ignores it, generated lines included. prs changes nothing until the byte is removed.'
     );
   }
-  const bom = current.startsWith(BOM) ? BOM : '';
-  const above = splitAtMarker(current.slice(bom.length), marker, file, host);
+  const { bom, text } = stripBom(current);
+  const above = splitAtMarker(text, marker, file, host);
   return { current, bom, above };
 }
 

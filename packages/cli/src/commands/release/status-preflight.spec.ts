@@ -420,6 +420,57 @@ describe('prs release status CODEOWNERS preflight', () => {
       expect(process.exitCode).toBe(1);
     });
 
+    const withoutSlashLines = (text: string): string =>
+      text
+        .split('\n')
+        .filter((line) => !/^\/\.promptscript\/approvals\/(legal|security)\/ /.test(line))
+        .join('\n');
+
+    it('accepts plain role lines alone at the base for .github/CODEOWNERS', async () => {
+      const { root, sha } = await withBaseFile(withoutSlashLines);
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report).filter((w) => w.message.includes(`at ${sha}`))).toEqual([]);
+    });
+
+    it('needs both lines at the base for a root CODEOWNERS', async () => {
+      const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+      await generate(root);
+      const path = join(root, 'CODEOWNERS');
+      const text = await readFile(path, 'utf8');
+      await writeFile(path, withoutSlashLines(text));
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain('does not bind legal');
+    });
+
+    it.each([
+      { bom: '', name: 'no BOM' },
+      { bom: '\uFEFF', name: 'a BOM' },
+    ])(
+      'reports a GitLab section above the marker at HEAD and at the base, $name',
+      async ({ bom }) => {
+        const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+        await generate(root);
+        const path = join(root, 'CODEOWNERS');
+        const text = await readFile(path, 'utf8');
+        await writeFile(path, `${bom}^[Docs]\n${text}`);
+        commitAll(root);
+        const sha = git(root, 'rev-parse', 'HEAD').trim();
+
+        const report = await status(root, true, sha);
+
+        const messages = ownerWarnings(report).map((w) => w.message);
+        expect(messages.some((m) => m.includes('cannot be managed at HEAD'))).toBe(true);
+        expect(messages.some((m) => m.includes(`cannot be managed at ${sha}`))).toBe(true);
+        expect(process.exitCode).toBe(1);
+      }
+    );
+
     it('ignores stale lines of other paths at the base', async () => {
       const { root, sha } = await withBaseFile(
         (text) => `${text}/promptscript.yaml @someone\n/docs @someone\n`

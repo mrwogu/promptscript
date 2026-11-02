@@ -51,10 +51,15 @@ const PROJECT = prompts(
 
 const ADMIN_LINES = [
   '/.promptscript/approvals @acme/prompt-platform',
+  '/.promptscript/approvals/ @acme/prompt-platform',
   '/.promptscript/approvals/legal @acme/legal @jane',
+  '/.promptscript/approvals/legal/ @acme/legal @jane',
   '/.promptscript/approvals/security @acme/appsec',
+  '/.promptscript/approvals/security/ @acme/appsec',
   '/.promptscript/releases @acme/prompt-platform',
+  '/.promptscript/releases/ @acme/prompt-platform',
   '/.promptscript/vendor @acme/prompt-platform',
+  '/.promptscript/vendor/ @acme/prompt-platform',
   '/.promptscriptrc.yaml @acme/prompt-platform',
   '/.promptscriptrc.yml @acme/prompt-platform',
   '/promptscript.lock @acme/prompt-platform',
@@ -319,6 +324,46 @@ describe('prs governance codeowners', () => {
     expect(await read(root)).toBe(content);
   });
 
+  it.each([
+    ['.github/CODEOWNERS', '[Docs]'],
+    ['CODEOWNERS', '^[Docs]'],
+    ['docs/CODEOWNERS', '[Docs][2] @acme/docs'],
+  ])('refuses a GitLab section above the marker in %s', async (output, header) => {
+    // Arrange
+    const root = await project(`${CONFIG}  codeowners:\n    output: ${output}\n`);
+    await mkdir(dirname(join(root, output)), { recursive: true });
+    const content = `${header}\n*.md @docs\n${codeownersMarker('.')}\n`;
+    await writeFile(join(root, output), content);
+
+    // Act
+    const written = await run(root);
+    const checked = await run(root, { check: true });
+
+    // Assert
+    expect(codes(written.report)).toEqual(['PS5106']);
+    expect(written.report.errors[0]?.message).toContain(
+      `has the GitLab section "${header}" above the marker`
+    );
+    expect(written.report.errors[0]?.message).toContain('.gitlab/CODEOWNERS');
+    expect(written.exitCode).toBe(2);
+    expect(checked.exitCode).toBe(1);
+    expect(await read(root, output)).toBe(content);
+  });
+
+  it('does not treat a bracket line below the marker as a section above it', async () => {
+    // Arrange
+    const root = await project();
+    await mkdir(join(root, '.github'));
+    await writeFile(join(root, '.github/CODEOWNERS'), `# team\n${codeownersMarker('.')}\n[Docs]\n`);
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(report.success).toBe(true);
+    expect(await read(root)).not.toContain('[Docs]');
+  });
+
   it('names the marker line to add when the file is not managed yet', async () => {
     // Arrange
     const root = await project();
@@ -401,11 +446,17 @@ describe('prs governance codeowners', () => {
       codeownersMarker('services/support'),
       '/services/support/.promptscript/project.prs @acme/payments @acme/support',
       '/.github/workflows @acme/prompt-platform',
+      '/.github/workflows/ @acme/prompt-platform',
       '/tools @acme/prompt-platform',
+      '/tools/ @acme/prompt-platform',
       '/services/support/.promptscript/approvals @acme/prompt-platform',
+      '/services/support/.promptscript/approvals/ @acme/prompt-platform',
       '/services/support/.promptscript/approvals/legal @acme/legal',
+      '/services/support/.promptscript/approvals/legal/ @acme/legal',
       '/services/support/.promptscript/releases @acme/prompt-platform',
+      '/services/support/.promptscript/releases/ @acme/prompt-platform',
       '/services/support/.promptscript/vendor @acme/prompt-platform',
+      '/services/support/.promptscript/vendor/ @acme/prompt-platform',
       '/org/base.yaml @acme/prompt-platform',
       '/services/support/.promptscriptrc.yaml @acme/prompt-platform',
       '/services/support/.promptscriptrc.yml @acme/prompt-platform',
@@ -643,6 +694,29 @@ describe('prs governance codeowners', () => {
       '.promptscript/project.prs is .promptscript/Project.prs in Git'
     );
   });
+
+  it.each(['.github/CODEOWNERS', 'CODEOWNERS', 'docs/CODEOWNERS'])(
+    'writes a directory line with and without the slash in %s, a file line once',
+    async (output) => {
+      // Arrange
+      const root = await project(
+        `${CONFIG}  codeowners:\n    output: ${output}\n    protect: [tools]\n`
+      );
+
+      // Act
+      await run(root);
+
+      // Assert
+      const written = await lines(root, output);
+      expect(written).toContain('/.promptscript/approvals/legal @acme/legal @jane');
+      expect(written).toContain('/.promptscript/approvals/legal/ @acme/legal @jane');
+      expect(written).toContain('/tools @acme/prompt-platform');
+      expect(written).toContain('/tools/ @acme/prompt-platform');
+      expect(written).toContain('/promptscript.yaml @acme/prompt-platform');
+      expect(written).not.toContain('/promptscript.yaml/ @acme/prompt-platform');
+      expect(written).not.toContain('[PromptScript]');
+    }
+  );
 
   it('writes GitLab directory lines twice and warns that hand-written lines apply too', async () => {
     // Arrange
