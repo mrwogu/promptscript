@@ -200,6 +200,10 @@ function ownersOf(value: unknown, role: string): string[] {
       `governance.roles.${role} is not a list of owners.`
     );
   }
+  // A CODEOWNERS line with no owners removes the owners of the path, so it binds nothing.
+  if (value.length === 0) {
+    throw new GovernanceError(PS5101_GOVERNANCE_CONFIG, `governance.roles.${role} has no owners.`);
+  }
   return value as string[];
 }
 
