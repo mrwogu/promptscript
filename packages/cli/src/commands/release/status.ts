@@ -7,6 +7,7 @@ import {
   type PromptReleaseLabelEntryV2,
 } from '@promptscript/core';
 import type {
+  ReleaseChange,
   ReleaseDiagnostic,
   ReleaseEnvironmentHistory,
   ReleaseEnvironmentStatus,
@@ -15,7 +16,7 @@ import type {
   ReleasePromptStatus,
 } from '../../utils/release-report.js';
 import { PS5003_BUNDLE_MISSING, ReleaseError } from './errors.js';
-import { runGit, stripControlCharacters, type GitResult } from './git.js';
+import { escapeNonAscii, runGit, stripControlCharacters, type GitResult } from './git.js';
 import {
   MANIFEST_FILE,
   PRICING_FILE,
@@ -28,6 +29,7 @@ import {
   verifyBundleText,
   type ReleasePaths,
 } from './layout.js';
+import { isApprovalPromptId } from '../approve/records.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
 import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
 import { checkLabelModels, parseRetiringWithin, printModels } from './models.js';
@@ -314,7 +316,7 @@ function printStatus(
           ? ''
           : `  approvals: ${approvalsText(gates, environment.name, prompt.id)}`;
       ConsoleOutput.info(
-        `  ${prompt.id}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}${approvals}`
+        `  ${escapeNonAscii(prompt.id)}  ${shortHash(prompt.contentHash)}  ${promptState(prompt)}${build}${approvals}`
       );
       printExperiment(prompt.experiment);
     }
@@ -391,6 +393,41 @@ function upstreamArmWarnings(checked: readonly EnvironmentCheck[]): ReleaseDiagn
   });
 }
 
+function idWarning(id: string, file: string): ReleaseDiagnostic {
+  return {
+    message: `The prompt id "${escapeNonAscii(id)}" in ${stripControlCharacters(file)} is not an id an approval can name, so a gate that needs approvals never passes for it. Check it for hidden or look-alike characters.`,
+    location: { file },
+  };
+}
+
+/**
+ * Entries whose id an approval could not name. A label accepts more ids than an approval
+ * record does, so a zero-width character can make an id look like another prompt. With --base
+ * the changed entries of label files no environment owns are checked too.
+ */
+function labelIdWarnings(
+  checked: readonly EnvironmentCheck[],
+  changes: readonly ReleaseChange[]
+): ReleaseDiagnostic[] {
+  const found = [
+    ...checked.flatMap((environment) =>
+      environment.entries.map((entry) => ({ id: entry.id, file: environment.value.path }))
+    ),
+    ...changes.flatMap((change) =>
+      change.id === undefined || change.contentHash === undefined
+        ? []
+        : [{ id: change.id, file: change.path }]
+    ),
+  ];
+  const warnings = new Map<string, ReleaseDiagnostic>();
+  for (const { id, file } of found) {
+    if (isApprovalPromptId(id)) continue;
+    const warning = idWarning(id, file);
+    warnings.set(warning.message, warning);
+  }
+  return [...warnings.values()];
+}
+
 /** With --base the config is found by name; say so when the caller pointed elsewhere. */
 function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic[] {
   if (options.base === undefined) return [];
@@ -412,7 +449,7 @@ function printBaseCheck(check: BaseCheck): void {
   if (changes.length === 0) ConsoleOutput.info('  no label entry changed');
   for (const change of changes) {
     const path = stripControlCharacters(change.path);
-    const id = stripControlCharacters(String(change.id));
+    const id = escapeNonAscii(String(change.id));
     if (change.experiment !== undefined) {
       ConsoleOutput.info(`  ${path}  ${id} ${armChangeText(change.experiment)}`);
       continue;
@@ -468,7 +505,7 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       baseCheck === undefined
         ? await labelGates(project, checked, output.json)
         : { gates: baseCheck.gates, warnings: baseCheck.warnings };
-    warnings.push(...gateRun.warnings);
+    warnings.push(...gateRun.warnings, ...labelIdWarnings(checked, baseCheck?.changes ?? []));
 
     const modelCheck =
       retiringDays === undefined

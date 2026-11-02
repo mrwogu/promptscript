@@ -13,7 +13,7 @@ import {
   type PromptBundleV1,
 } from '@promptscript/core';
 import { checkPromotionGates, gateLines, type PromotionGateContext } from './gates.js';
-import type { ReleaseGateCheck } from '../../utils/release-report.js';
+import type { ReleaseGateCheck, ReleaseGateResult } from '../../utils/release-report.js';
 import { loadReleaseProject, ReleaseCompileError, type CompiledRelease } from './project.js';
 
 const ID = 'acme-support/refund-reply';
@@ -169,6 +169,22 @@ describe('checkPromotionGates', () => {
     const result = await gates(root, shipped, source);
 
     expect(result).toEqual({ passed: true, findings: [], warnings: [], gates: [] });
+  });
+
+  it('does not suggest an approve command for an id an approval cannot name', async () => {
+    const root = await project(config(SIGNOFF));
+    const shipped = await bundle(root, { risk: 'high' }, { id: 'acme-support/refund\u200b-reply' });
+
+    const result = await gates(root, shipped, built(shipped));
+
+    expect(result.passed).toBe(false);
+    const suggestion = result.gates[0]?.checks[0]?.suggestion ?? '';
+    expect(suggestion).toContain(String.raw`acme-support/refund\u200B-reply cannot be approved`);
+    expect(suggestion).toContain('warning about label ids');
+    expect(suggestion).not.toContain('prs approve');
+    expect(gateLines(result.gates[0] as ReleaseGateResult)[0]).toContain(
+      String.raw`Gates for acme-support/refund\u200B-reply@`
+    );
   });
 
   it('refuses a version that misses an approval and names the command that gives it', async () => {

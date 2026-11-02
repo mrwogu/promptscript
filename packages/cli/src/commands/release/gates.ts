@@ -31,10 +31,11 @@ import {
   approvalFilesOf,
   committedApprovalFiles,
   committedRecords,
+  isApprovalPromptId,
   type CommittedApproval,
 } from '../approve/records.js';
 import { ReleaseError } from './errors.js';
-import { stripControlCharacters } from './git.js';
+import { escapeNonAscii, stripControlCharacters } from './git.js';
 import { checkBundleFields, percentText, readVerifiedBundle, shortHash } from './layout.js';
 import {
   ReleaseCompileError,
@@ -283,6 +284,22 @@ function maxWeightOption(entry: GateEntry): string {
   return entry.exposure === undefined ? '' : ` --max-weight ${entry.exposure.weight / 100}`;
 }
 
+/** The way to get the missing approvals; an id an approval cannot name has none. */
+function approveSuggestion(
+  entry: GateEntry,
+  roles: readonly string[],
+  environment: string
+): string {
+  if (!isApprovalPromptId(entry.id)) {
+    return `The id ${escapeNonAscii(entry.id)} cannot be approved, because no approval can name it. See the warning about label ids in prs release status.`;
+  }
+  const commands = roles.map(
+    (role) =>
+      `prs approve ${entry.id}@${entry.contentHash} --role ${role} --approver @<you> --env ${environment}${maxWeightOption(entry)}`
+  );
+  return `Run: ${commands.join('; ')}`;
+}
+
 /** The ` (stale: ...)` and ` (capped: ...)` notes of a role, for the gate text. */
 function approvalNotes(stale: readonly string[], capped: readonly string[] | undefined): string {
   const staleText = stale.length === 0 ? '' : ` (stale: ${stale.join(', ')})`;
@@ -311,11 +328,16 @@ function approvalsCheck(
       return `${judgedName(entry)} needs ${required} ${role} approval for ${environment}, found ${found.length}${approvalNotes(stale, capped)}`;
     })
     .join('; ');
-  const commands = missing.map(
-    ({ role }) =>
-      `prs approve ${entry.id}@${entry.contentHash} --role ${role} --approver @<you> --env ${environment}${maxWeightOption(entry)}`
-  );
-  return { ...base, status: 'failed', message, suggestion: `Run: ${commands.join('; ')}` };
+  return {
+    ...base,
+    status: 'failed',
+    message,
+    suggestion: approveSuggestion(
+      entry,
+      missing.map(({ role }) => role),
+      environment
+    ),
+  };
 }
 
 function toBasisPoints(percent: number): number {
@@ -383,15 +405,15 @@ async function exposureCheck(
         `a ${role} approval up to at least ${percentText(weight)}, found ${found.length}${approvalNotes(stale, capped)}`
     )
     .join(', ');
-  const commands = missing.map(
-    ({ role }) =>
-      `prs approve ${entry.id}@${entry.contentHash} --role ${role} --approver @<you> --env ${environment}${maxWeightOption(entry)}`
-  );
   return {
     ...base,
     status: 'failed',
     message: `${runs}; ${policy.name} needs ${needs}`,
-    suggestion: `Run: ${commands.join('; ')}`,
+    suggestion: approveSuggestion(
+      entry,
+      missing.map(({ role }) => role),
+      environment
+    ),
     approvals,
   };
 }
@@ -629,7 +651,7 @@ function checkLine(check: ReleaseGateCheck): string {
 export function gateLines(gate: ReleaseGateResult): string[] {
   if (gate.checks.length === 0) return [];
   return [
-    `Gates for ${stripControlCharacters(gate.prompt)}@${shortHash(gate.contentHash)} to ${stripControlCharacters(gate.environment)} (policy risk: ${gate.policyRisk})`,
+    `Gates for ${escapeNonAscii(gate.prompt)}@${shortHash(gate.contentHash)} to ${stripControlCharacters(gate.environment)} (policy risk: ${gate.policyRisk})`,
     ...gate.checks.map(checkLine),
   ];
 }

@@ -55,6 +55,7 @@ import {
   findApprovalRecords,
   gitBlobId,
   gitPathsOf,
+  isApprovalPromptId,
   MAX_APPROVAL_DEPTH,
   trackedApprovals,
   writeApprovalRecord,
@@ -65,8 +66,6 @@ export const APPROVAL_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/approval-report/v1.json';
 
 // Same patterns as the approval record guard in core, checked here to name the failing field.
-const PROMPT_ID_RE =
-  /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
 const ROLE_RE = /^[a-z][a-z0-9-]{0,31}$/;
 // Stricter than the core guard: format characters (bidi, BOM, zero-width) are refused too.
 const COMMENT_RE = /^(?:[^\p{Cc}\p{Cs}\p{Cf}]|\n){0,2000}$/u;
@@ -221,8 +220,7 @@ export function parseApprovalReference(reference: string | undefined): {
 
 /** A prompt id as an approval names it, or PS5102. */
 export function checkPromptId(id: string): void {
-  // The role takes one directory level, each id segment one more.
-  if (!PROMPT_ID_RE.test(id) || id.split('/').length > MAX_APPROVAL_DEPTH - 1) {
+  if (!isApprovalPromptId(id)) {
     throw new GovernanceError(
       PS5102_APPROVAL_REFERENCE,
       `"${stripControlCharacters(id)}" is not a prompt id. Use <@meta.id>/<key> as the bundle names it: up to ${MAX_APPROVAL_DEPTH - 1} segments of letters, digits, "_", "-" and ".", none ending in a dot.`
