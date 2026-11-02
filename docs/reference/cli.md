@@ -1331,16 +1331,20 @@ policies it also runs the [release gates](../guides/releases.md#release-gates) o
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
 
 When an approval policy applies to an environment that has a label entry, status reads the
-configured CODEOWNERS output from the `HEAD` commit by exact path, and with `--base` at that
-commit too. It gives one warning, with the file as its `location`, if the file is missing or out
-of date at a commit (`is missing at <commit>`, `is out of date at <commit>`), shadowed there by a
-file at an earlier location, not manageable by prs, or cannot be generated from `governance`:
+configured CODEOWNERS output from the `HEAD` commit by exact path and compares it with what
+`prs governance codeowners` generates. With `--base <ref>` it also reads the file at that commit
+and checks only that, after the marker line, it has the exact owner line of each role directory the
+approval policies of the config at `<ref>` need, rendered from the governance at `<ref>`; other
+lines there are not compared. It gives one warning, with the file as its `location`, if the file is
+missing at a commit (`is missing at <ref>`), out of date at `HEAD`, does not bind roles at `<ref>`
+(`does not bind <roles> at <ref>`), shadowed there by a file at an earlier location, not
+manageable by prs at `HEAD`, or cannot be generated from `governance`:
 `<file> <reason>, so the approval directories of <roles> are not bound to their owners. Without it any committer can add a record in another person's name. Run
 prs governance codeowners and commit the result.` `--strict` makes this warning, and no other,
 exit with code 1. A clean result does not prove that the branch requires code owner review, nor
 that the owners have write access. For any location other than `.gitlab/CODEOWNERS` the lines are
 written for GitHub. When every owner of a role is a user handle like `@jane`, status also warns about
-an approval that counts for a gate whose approver is not one of them (`<prompt>@<hash> in <env>:
+an approval (with `--base`, in the governance at `<ref>`) that counts for a gate whose approver is not one of them (`<prompt>@<hash> in <env>:
 <approver> approved as <role>, but is not in governance.roles.<role> (<owners>). It still counts,
 since the approver is only asserted; ...`). A role with any team owner is not checked, the record
 still counts and the exit code stays.

@@ -386,6 +386,136 @@ describe('prs release status CODEOWNERS preflight', () => {
       );
     });
 
+    /** The base commit holds `file` text for CODEOWNERS; HEAD has the generated one. */
+    async function withBaseFile(
+      change: (text: string) => string,
+      baseRoles = ['legal', 'security']
+    ): Promise<{ root: string; sha: string }> {
+      const root = await project(GOVERNANCE, POLICY(baseRoles));
+      await generate(root);
+      const path = join(root, '.github', 'CODEOWNERS');
+      const text = await readFile(path, 'utf8');
+      await writeFile(path, change(text));
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+      await writeFile(path, text);
+      await writeFile(join(root, 'promptscript.yaml'), config(GOVERNANCE, POLICY(['legal'])));
+      commitAll(root);
+      return { root, sha };
+    }
+
+    it('names a role only the base config needs when the base file lacks its line', async () => {
+      const { root, sha } = await withBaseFile((text) =>
+        text
+          .split('\n')
+          .filter((line) => !line.startsWith('/.promptscript/approvals/security'))
+          .join('\n')
+      );
+
+      const report = await status(root, true, sha);
+
+      expect(ownerWarnings(report)).toHaveLength(1);
+      expect(ownerWarnings(report)[0]?.message).toContain(`does not bind security at ${sha}`);
+      expect(ownerWarnings(report)[0]?.message).toContain('approval directories of security are');
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('ignores stale lines of other paths at the base', async () => {
+      const { root, sha } = await withBaseFile(
+        (text) => `${text}/promptscript.yaml @someone\n/docs @someone\n`
+      );
+
+      const report = await status(root, true, sha);
+
+      expect(ownerWarnings(report)).toEqual([]);
+      expect(process.exitCode).toBe(0);
+    });
+
+    it('warns when the role line has other owners at the base', async () => {
+      const { root, sha } = await withBaseFile((text) =>
+        text.replace(
+          '/.promptscript/approvals/legal @acme/legal',
+          '/.promptscript/approvals/legal @someone'
+        )
+      );
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain(`does not bind legal at ${sha}`);
+    });
+
+    it('warns when the base file has a second line for the role path', async () => {
+      const { root, sha } = await withBaseFile(
+        (text) => `${text}/.promptscript/approvals/legal @someone\n`
+      );
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain(`does not bind legal at ${sha}`);
+    });
+
+    it('warns when the base file has no marker line', async () => {
+      const { root, sha } = await withBaseFile(() => '* @someone\n');
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain(
+        `does not bind legal, security at ${sha}`
+      );
+    });
+
+    it('warns when an earlier location shadows the file at the base only', async () => {
+      const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+      await generate(root);
+      await mkdir(join(root, '.github'), { recursive: true });
+      await writeFile(join(root, '.github', 'CODEOWNERS'), '* @someone\n');
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+      git(root, 'rm', '-q', '.github/CODEOWNERS');
+      commitAll(root);
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain(
+        `CODEOWNERS is shadowed at ${sha} by .github/CODEOWNERS, which a host reads first`
+      );
+      expect(ownerWarnings(report)[0]?.message).not.toContain('at HEAD');
+    });
+
+    it('warns when the base config names a place no host reads', async () => {
+      const root = await project(`${GOVERNANCE}  codeowners:\n    output: nowhere/CODEOWNERS\n`);
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+      await writeFile(join(root, 'promptscript.yaml'), config(GOVERNANCE));
+      await generate(root);
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain(`cannot be checked at ${sha}: `);
+    });
+
+    it('takes the roster from the governance of the base', async () => {
+      const root = await project(
+        "governance:\n  admins: ['@a/b']\n  roles:\n    legal: ['@jane']\n"
+      );
+      const label = join(root, '.promptscript', 'releases', 'prod.json');
+      const text = await readFile(label, 'utf8');
+      await rm(label);
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+      await writeFile(label, text);
+      await writeFile(join(root, 'promptscript.yaml'), config(GOVERNANCE));
+      commitAll(root);
+      gate.gates = [approvalGate(['legal'], { legal: ['@eve'] })];
+
+      const report = await status(root, false, sha);
+
+      const messages = report.warnings.map((warning) => warning.message);
+      expect(messages.some((message) => message.includes('governance.roles.legal (@jane)'))).toBe(
+        true
+      );
+    });
+
     it('does not warn when HEAD and the base both have the current file', async () => {
       const root = await project();
       await generate(root);

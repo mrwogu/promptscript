@@ -192,6 +192,22 @@ interface Section {
   roleLines: Map<string, string[]>;
 }
 
+/** The owner line of each role directory, in the order of the role names. */
+function roleOwnerLines(
+  roles: Record<string, unknown>,
+  base: string
+): (OwnerLine & { role: string })[] {
+  return Object.keys(roles)
+    .sort(compareCodeUnits)
+    .map((role) => ({
+      role,
+      // Role names are lowercase by the config check, the exact bytes the approvals use.
+      path: `${base}/.promptscript/approvals/${role}`,
+      owners: sortedUnique(roles[role] as string[]),
+      directory: true,
+    }));
+}
+
 /**
  * The generated section, from the marker line to the end of the file. CODEOWNERS uses the
  * last matching line, so the lines that pick the authority come last: prompt files, their
@@ -217,15 +233,7 @@ async function buildSection(
     codeowners['prompts'] === false
       ? { prompts: [], sources: [] }
       : await sourceLines(repo, config, configPath, admins, findings);
-  const roleLines = Object.keys(roles)
-    .sort(compareCodeUnits)
-    .map((role) => ({
-      role,
-      // Role names are lowercase by the config check, the exact bytes the approvals use.
-      path: `${base}/.promptscript/approvals/${role}`,
-      owners: sortedUnique(roles[role] as string[]),
-      directory: true,
-    }));
+  const roleLines = roleOwnerLines(roles, base);
 
   const protect = protectLines(codeowners['protect'], admins, refused);
   const fixed: OwnerLine[] = [
@@ -442,7 +450,7 @@ function rolesWithoutLine(needed: readonly string[], section: Section, current: 
   const present = new Set(current.replaceAll('\r\n', '\n').split('\n'));
   return needed.filter((role) => {
     const lines = section.roleLines.get(role);
-    return lines === undefined || !lines.every((line) => present.has(line));
+    return !lines?.every((line) => present.has(line));
   });
 }
 
@@ -542,6 +550,66 @@ export async function checkApprovalOwners(
     roles: needed.filter((role) => roles.has(role)),
     reason: problems.map((problem) => problem.reason).join(' and '),
   };
+}
+
+/**
+ * Whether the CODEOWNERS the host reads at the base commit binds the role directories of
+ * `needed` under the governance of the base `config`: the configured output of that config,
+ * not shadowed by an earlier location, has the marker of this project and, after it, the exact
+ * owner line of each role directory and no other line for that path. Other lines of the
+ * section do not matter here. Nothing is written.
+ */
+export async function checkApprovalOwnersAtBase(
+  options: ProjectPathOptions,
+  config: PromptScriptConfig,
+  needed: readonly string[],
+  at: CodeownersCommit
+): Promise<ApprovalOwnersProblem | undefined> {
+  const where = `at ${stripControlCharacters(at.label)}`;
+  const all = [...needed];
+  let output: string;
+  let repo: Repository;
+  try {
+    output = outputLocation({}, config);
+    repo = await readRepository(resolveProjectRoot(options));
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { roles: all, reason: `cannot be checked ${where}: ${first}` };
+  }
+  const host: CodeownersHost = output === '.gitlab/CODEOWNERS' ? 'gitlab' : 'github';
+  const earlier = READ_BEFORE[output] ?? [];
+  const files = await filesAtCommit(repo.top, at.commit, [output, ...earlier]);
+  const text = files.get(output);
+  if (text === undefined) return { file: output, roles: all, reason: `is missing ${where}` };
+  const shadow = earlier.filter((location) => files.has(location));
+  if (shadow.length > 0) {
+    return {
+      file: output,
+      roles: all,
+      reason: `is shadowed ${where} by ${shadow.join(', ')}, which a host reads first`,
+    };
+  }
+  const governance: unknown = config.governance;
+  const roles =
+    isPlainObject(governance) && isPlainObject(governance['roles']) ? governance['roles'] : {};
+  const prefix = repo.project === '' ? '' : `/${repo.project}`;
+  const wanted = roleOwnerLines(roles, prefix);
+  const lines = text.replaceAll('\r\n', '\n').split('\n');
+  const marker = lines.indexOf(codeownersMarker(repo.project === '' ? '.' : repo.project));
+  const section = marker < 0 ? [] : lines.slice(marker + 1);
+  const unbound = needed.filter((role) => {
+    const line = wanted.find((candidate) => candidate.role === role);
+    if (line === undefined) return true;
+    const expected = renderLines([line], host);
+    const written = section.filter(
+      (entry) => entry.split(' ')[0]?.replace(/\/$/, '') === line.path
+    );
+    return (
+      !expected.every((entry) => written.includes(entry)) || written.length !== expected.length
+    );
+  });
+  if (unbound.length === 0) return undefined;
+  return { file: output, roles: unbound, reason: `does not bind ${unbound.join(', ')} ${where}` };
 }
 
 function diagnostic(error: unknown): CodeownersDiagnostic {

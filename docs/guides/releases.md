@@ -340,11 +340,18 @@ When an approval policy (`required-approvals`, or `max-experiment-weight` with `
 to an environment that has a label entry, status also checks the CODEOWNERS file that
 `prs governance codeowners` generates (see [CODEOWNERS from Governance](codeowners.md)). It reads the
 configured output file from the `HEAD` commit by exact path, so a file that is only on disk does
-not count, and with `--base <ref>` it reads it at that commit too, since the host applies the
-CODEOWNERS of the base branch to a pull request. It gives one warning, with the file as its
-location, if the file is missing or out of date at a commit, if a file at an earlier location
-shadows it there, if prs cannot manage it (no marker line), or if the lines cannot be generated
-(for example `governance.admins` is missing). The warning lists the roles and tells you to run
+not count, and it must equal what `prs governance codeowners` generates from the checkout config.
+With `--base <ref>` it also checks the file at that commit, since the host applies the CODEOWNERS
+of the base branch to a pull request. There the roles come from the approval policies of the
+config at `<ref>` (the same rules the `--base` gates use) and the file is the configured output of
+that config. It must not be shadowed by an earlier location, and after the marker line of the
+project it must hold the exact owner line of each role directory, rendered from the governance at
+`<ref>`, and no other line for that path. Other lines of the file at `<ref>` are not compared. It
+gives one warning, with the file as its location, if the file is missing at a commit
+(`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
+(`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs
+cannot manage the file at `HEAD` (no marker line), or if the lines cannot be generated (for
+example `governance.admins` is missing). The warning lists the roles and tells you to run
 `prs governance codeowners` and commit the result. The policy `match` is not evaluated, so a role
 is named when some prompt could need it. Nothing is written. Without such a policy there is no
 warning. `--strict` makes this warning, and only it, exit with code 1.
@@ -355,7 +362,8 @@ lines are written for GitHub.
 
 When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
 and no email), status also warns about an approval that counts for a gate whose approver is not
-one of them, compared lowercased. `prs approve --list` gives the same warning for a record in the state `current` or `labelled`, the ones a gate could count.
+one of them, compared lowercased. With `--base` the roster comes from the governance of `<ref>`,
+the one the gates use. `prs approve --list` gives the same warning for a record in the state `current` or `labelled`, the ones a gate could count.
 A role with any team owner is not checked, since a team cannot be resolved offline. The record
 still counts and the exit code does not change.
 
