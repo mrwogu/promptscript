@@ -11,6 +11,9 @@ function unsupported(kind: string, path: string): PSError {
  * Compare two strings by UTF-16 code units, the order RFC 8785 requires.
  * Unlike `localeCompare` it gives the same order on every host.
  *
+ * This order decides the bytes of bundle and approval files, so changing it
+ * changes their hashes.
+ *
  * @internal Used for bundle hashing.
  */
 export function compareCodeUnits(a: string, b: string): number {

@@ -149,6 +149,8 @@ export interface AgentProvenance {
  * New pipeline stages should use {@link CanonicalProgram}. This alias makes
  * the compatibility boundary explicit without renaming the long-standing
  * `Program` API.
+ *
+ * It is a compatibility projection and may be removed in a later major version.
  */
 export type LegacyProgram = Program;
 
