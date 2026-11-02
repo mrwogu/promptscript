@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { hashPromptBundle, PROMPT_BUNDLE_SCHEMA_URL } from '@promptscript/core';
 import type { ReleaseGateResult, ReleaseReport } from '../../utils/release-report.js';
 import { governanceCodeownersCommand } from '../governance/codeowners.js';
 import { releaseStatusCommand } from './status.js';
@@ -34,7 +35,15 @@ const PRS = `@meta {
 }
 `;
 
-function config(governance: string): string {
+const POLICY = (roles: string[]): string => `policies:
+  - name: signoff
+    kind: required-approvals
+    severity: error
+    environments: [prod]
+    approvals: [${roles.map((role) => `{ role: ${role} }`).join(', ')}]
+`;
+
+function config(governance: string, policies = POLICY(['legal'])): string {
   return `version: '1'
 project:
   id: acme-support
@@ -43,7 +52,7 @@ targets:
 includePromptScript: false
 releases:
   environments: [staging, prod]
-${governance}`;
+${governance}${policies}`;
 }
 
 const GOVERNANCE = `governance:
@@ -80,34 +89,72 @@ function approvalGate(roles: string[], found: Record<string, string[]> = {}): Re
 const directories: string[] = [];
 
 function git(root: string, ...args: string[]): string {
-  return execFileSync('git', args, {
-    cwd: root,
-    encoding: 'utf-8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  return execFileSync(
+    'git',
+    ['-c', 'user.email=t@example.com', '-c', 'user.name=T', '-c', 'commit.gpgsign=false', ...args],
+    { cwd: root, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'] }
+  );
 }
 
-async function project(governance = GOVERNANCE): Promise<string> {
+const LABEL_URL = 'https://getpromptscript.dev/schema/prompt-release-label/v1.json';
+
+/** A repository with a source and a label entry in prod, not committed yet. */
+async function project(governance = GOVERNANCE, policies = POLICY(['legal'])): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'promptscript-preflight-'));
   directories.push(root);
-  await mkdir(join(root, '.promptscript'), { recursive: true });
-  await writeFile(join(root, 'promptscript.yaml'), config(governance));
+  await mkdir(join(root, '.promptscript', 'releases'), { recursive: true });
+  await writeFile(join(root, 'promptscript.yaml'), config(governance, policies));
   await writeFile(join(root, '.promptscript', 'project.prs'), PRS);
+  const body = {
+    $schema: PROMPT_BUNDLE_SCHEMA_URL,
+    id: ID,
+    description: 'Answer a refund request',
+    messages: [{ role: 'system', content: 'You answer refund requests.' }],
+    inputs: {},
+    governance: { risk: 'high' },
+    provenance: { entry: '.promptscript/project.prs', segments: [] },
+  };
+  const contentHash = hashPromptBundle(body);
+  await mkdir(join(root, '.promptscript', 'releases', 'bundles'), { recursive: true });
+  await writeFile(
+    join(root, '.promptscript', 'releases', 'bundles', `${contentHash}.json`),
+    `${JSON.stringify({ ...body, contentHash }, null, 2)}\n`
+  );
+  await writeFile(
+    join(root, '.promptscript', 'releases', 'prod.json'),
+    `${JSON.stringify({
+      $schema: LABEL_URL,
+      environment: 'prod',
+      prompts: [{ id: ID, contentHash }],
+    })}\n`
+  );
   git(root, 'init', '-q');
   git(root, 'add', '-A');
   return root;
 }
 
+function commitAll(root: string): void {
+  git(root, 'add', '-A');
+  git(root, 'commit', '-q', '--allow-empty', '-m', 'commit');
+}
+
+/** Write the CODEOWNERS file and commit everything. */
 async function generate(root: string): Promise<void> {
   const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
   await governanceCodeownersCommand({ cwd: root, format: 'json' });
   log.mockRestore();
+  commitAll(root);
 }
 
-async function status(cwd: string, strict = false): Promise<ReleaseReport> {
+async function status(cwd: string, strict = false, base?: string): Promise<ReleaseReport> {
   const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
   process.exitCode = undefined;
-  await releaseStatusCommand({ cwd, format: 'json', ...(strict ? { strict } : {}) });
+  await releaseStatusCommand({
+    cwd,
+    format: 'json',
+    ...(strict ? { strict } : {}),
+    ...(base === undefined ? {} : { base }),
+  });
   const printed = log.mock.calls.map((call) => String(call[0])).join('\n');
   log.mockRestore();
   return JSON.parse(printed) as ReleaseReport;
@@ -119,7 +166,7 @@ function ownerWarnings(report: ReleaseReport): ReleaseReport['warnings'] {
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
-  gate.gates = [approvalGate(['legal'])];
+  gate.gates = [];
 });
 
 afterEach(async () => {
@@ -130,16 +177,18 @@ afterEach(async () => {
   }
 });
 
+const TAIL =
+  "so the approval directories of legal are not bound to their owners. Without it any committer can add a record in another person's name. Run prs governance codeowners and commit the result.";
+
 describe('prs release status CODEOWNERS preflight', () => {
-  it('warns when the CODEOWNERS file does not exist', async () => {
+  it('warns when the CODEOWNERS file is not committed', async () => {
     const root = await project();
 
     const report = await status(root);
 
     expect(ownerWarnings(report)).toEqual([
       {
-        message:
-          ".github/CODEOWNERS does not exist, so the approval directories of legal are not bound to their owners. Without it any committer can add a record in another person's name. Run prs governance codeowners and commit the result.",
+        message: `.github/CODEOWNERS is missing at HEAD, ${TAIL}`,
         location: { file: '.github/CODEOWNERS' },
       },
     ]);
@@ -147,9 +196,30 @@ describe('prs release status CODEOWNERS preflight', () => {
     expect(process.exitCode).toBe(0);
   });
 
-  it('lists every role the gates need, once', async () => {
+  it('does not count a file that is only on disk', async () => {
     const root = await project();
-    gate.gates = [approvalGate(['security', 'legal']), approvalGate(['legal'])];
+    await generate(root);
+    git(root, 'rm', '-q', '--cached', '.github/CODEOWNERS');
+    git(root, 'commit', '-q', '-m', 'untrack');
+
+    const report = await status(root);
+
+    expect(ownerWarnings(report)[0]?.message).toContain('is missing at HEAD');
+  });
+
+  it('warns in a repository without a commit', async () => {
+    const root = await project();
+    await generate(root);
+    await rm(join(root, '.git'), { recursive: true });
+    git(root, 'init', '-q');
+
+    const report = await status(root);
+
+    expect(ownerWarnings(report)[0]?.message).toContain('is missing at HEAD');
+  });
+
+  it('lists every role the policies need, once', async () => {
+    const root = await project(GOVERNANCE, POLICY(['security', 'legal']));
 
     const report = await status(root);
 
@@ -157,7 +227,7 @@ describe('prs release status CODEOWNERS preflight', () => {
     expect(ownerWarnings(report)[0]?.message).toContain('approval directories of legal, security');
   });
 
-  it('does not warn when the generated file is up to date', async () => {
+  it('does not warn when the committed file is up to date', async () => {
     const root = await project();
     await generate(root);
 
@@ -166,38 +236,51 @@ describe('prs release status CODEOWNERS preflight', () => {
     expect(ownerWarnings(report)).toEqual([]);
   });
 
-  it('warns when the generated section is out of date', async () => {
-    const root = await project();
+  it('warns when the committed section is out of date', async () => {
+    const root = await project(GOVERNANCE, POLICY(['legal', 'security']));
     await generate(root);
-    gate.gates = [approvalGate(['legal', 'security'])];
     const path = join(root, '.github', 'CODEOWNERS');
     const text = await readFile(path, 'utf8');
     await writeFile(path, text.replace('@acme/legal', '@someone/else'));
+    commitAll(root);
 
     const report = await status(root);
 
     const [warning] = ownerWarnings(report);
-    expect(warning?.message).toContain('.github/CODEOWNERS is out of date');
+    expect(warning?.message).toContain('.github/CODEOWNERS is out of date at HEAD');
     expect(warning?.message).toContain('approval directories of legal are');
-    expect(warning?.message).not.toContain('security');
   });
 
   it('names every needed role when the file is out of date elsewhere', async () => {
-    const root = await project();
+    const root = await project(GOVERNANCE, POLICY(['legal', 'security']));
     await generate(root);
-    gate.gates = [approvalGate(['legal', 'security'])];
     const path = join(root, '.github', 'CODEOWNERS');
     await writeFile(path, `${await readFile(path, 'utf8')}/extra @someone\n`);
+    commitAll(root);
 
     const report = await status(root);
 
-    expect(ownerWarnings(report)[0]?.message).toContain('is out of date');
+    expect(ownerWarnings(report)[0]?.message).toContain('is out of date at HEAD');
     expect(ownerWarnings(report)[0]?.message).toContain(
       'approval directories of legal, security are'
     );
   });
 
-  it('warns when an earlier CODEOWNERS location shadows the configured one', async () => {
+  it('warns when an earlier committed location shadows the configured one', async () => {
+    const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+    await generate(root);
+    await mkdir(join(root, '.github'), { recursive: true });
+    await writeFile(join(root, '.github', 'CODEOWNERS'), '* @someone\n');
+    commitAll(root);
+
+    const report = await status(root);
+
+    expect(ownerWarnings(report)[0]?.message).toContain(
+      'CODEOWNERS is shadowed at HEAD by .github/CODEOWNERS, which a host reads first'
+    );
+  });
+
+  it('does not count an earlier location that is only on disk', async () => {
     const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
     await generate(root);
     await mkdir(join(root, '.github'), { recursive: true });
@@ -205,21 +288,18 @@ describe('prs release status CODEOWNERS preflight', () => {
 
     const report = await status(root);
 
-    expect(ownerWarnings(report)[0]?.message).toContain(
-      'CODEOWNERS is shadowed by .github/CODEOWNERS, which a host reads first'
-    );
+    expect(ownerWarnings(report)).toEqual([]);
   });
 
-  it('reports a role that governance.roles does not list', async () => {
+  it('reports a file prs cannot manage in the same warning', async () => {
     const root = await project();
-    await generate(root);
-    gate.gates = [approvalGate(['finance'])];
+    await mkdir(join(root, '.github'), { recursive: true });
+    await writeFile(join(root, '.github', 'CODEOWNERS'), '* @someone\n');
+    commitAll(root);
 
     const report = await status(root);
 
-    expect(ownerWarnings(report)[0]?.message).toContain(
-      'has no owner line for them in governance.roles'
-    );
+    expect(ownerWarnings(report)[0]?.message).toContain('cannot be managed at HEAD: ');
   });
 
   it('reports a governance section that cannot produce the lines in the same warning', async () => {
@@ -234,16 +314,29 @@ describe('prs release status CODEOWNERS preflight', () => {
     expect(warning?.location).toBeUndefined();
   });
 
-  it('does not warn when no gate needs approvals', async () => {
-    const root = await project();
-    gate.gates = [];
-    const none = await status(root);
-    gate.gates = [{ ...approvalGate(['legal']), checks: [] }];
+  it('does not warn without an approval policy for a labelled environment', async () => {
+    const none = await project(GOVERNANCE, 'policies: []\n');
+    const other = await project(GOVERNANCE, POLICY(['legal']).replace('[prod]', '[staging]'));
+    const broken = await project(GOVERNANCE, 'policies:\n  - name: x\n    kind: nope\n');
 
-    const empty = await status(root);
+    expect(ownerWarnings(await status(none))).toEqual([]);
+    expect(ownerWarnings(await status(other))).toEqual([]);
+    expect(ownerWarnings(await status(broken))).toEqual([]);
+  });
 
-    expect(ownerWarnings(none)).toEqual([]);
-    expect(ownerWarnings(empty)).toEqual([]);
+  it('counts a max-experiment-weight policy with approvals and one for every environment', async () => {
+    const policies = `policies:
+  - name: cap
+    kind: max-experiment-weight
+    severity: error
+    maxWeight: 10
+    approvals: [{ role: legal }]
+`;
+    const root = await project(GOVERNANCE, policies);
+
+    const report = await status(root);
+
+    expect(ownerWarnings(report)).toHaveLength(1);
   });
 
   it('fails with --strict for this warning only', async () => {
@@ -251,7 +344,6 @@ describe('prs release status CODEOWNERS preflight', () => {
     const open = await status(root, true);
     const failed = process.exitCode;
     await generate(root);
-    await mkdir(join(root, '.promptscript', 'releases'), { recursive: true });
     await writeFile(join(root, '.promptscript', 'releases', 'other.json'), '{}');
 
     const covered = await status(root, true);
@@ -264,6 +356,45 @@ describe('prs release status CODEOWNERS preflight', () => {
     expect(ownerWarnings(covered)).toEqual([]);
     expect(covered.success).toBe(true);
     expect(process.exitCode).toBe(0);
+  });
+
+  describe('with --base', () => {
+    it('warns when the base commit lacks the file, even with no changed entry', async () => {
+      const root = await project();
+      commitAll(root);
+      const base = git(root, 'rev-parse', 'HEAD').trim();
+      await generate(root);
+
+      const report = await status(root, true, base);
+
+      expect(report.changes).toEqual([]);
+      expect(ownerWarnings(report)[0]?.message).toContain(`is missing at ${base}`);
+      expect(ownerWarnings(report)[0]?.message).not.toContain('at HEAD');
+      expect(report.success).toBe(false);
+      expect(process.exitCode).toBe(1);
+    });
+
+    it('joins the reasons of HEAD and the base in one warning', async () => {
+      const root = await project();
+      commitAll(root);
+
+      const report = await status(root, false, 'HEAD');
+
+      expect(ownerWarnings(report)).toHaveLength(1);
+      expect(ownerWarnings(report)[0]?.message).toContain(
+        'is missing at HEAD and is missing at HEAD'
+      );
+    });
+
+    it('does not warn when HEAD and the base both have the current file', async () => {
+      const root = await project();
+      await generate(root);
+
+      const report = await status(root, true, 'HEAD');
+
+      expect(ownerWarnings(report)).toEqual([]);
+      expect(report.success).toBe(true);
+    });
   });
 });
 

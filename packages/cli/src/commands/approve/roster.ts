@@ -25,7 +25,7 @@ export function individualRosters(governance: unknown): Map<string, string[]> {
 
 /**
  * A warning for an approver that is not in the roster of the role, or undefined. `where`
- * says what is judged, already escaped. The record still counts.
+ * says what is judged; control characters are stripped. The record still counts.
  */
 export function outsideRosterWarning(
   rosters: ReadonlyMap<string, readonly string[]>,
@@ -41,7 +41,7 @@ export function outsideRosterWarning(
   )
     return undefined;
   return {
-    message: `${where}: ${escapeNonAscii(approver)} approved as ${escapeNonAscii(role)}, but is not in governance.roles.${escapeNonAscii(role)} (${roster.map(escapeNonAscii).join(', ')}). It still counts, since the approver is only asserted; check that CODEOWNERS made one of those owners review it.`,
+    message: `${stripControlCharacters(where)}: ${escapeNonAscii(approver)} approved as ${escapeNonAscii(role)}, but is not in governance.roles.${escapeNonAscii(role)} (${roster.map(escapeNonAscii).join(', ')}). It still counts, since the approver is only asserted; check that CODEOWNERS made one of those owners review it.`,
     ...(file === undefined ? {} : { location: { file: stripControlCharacters(file) } }),
   };
 }

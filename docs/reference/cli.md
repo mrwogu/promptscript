@@ -1330,13 +1330,16 @@ arm bundle. Exits with code 1 when a referenced bundle is missing or does not ve
 policies it also runs the [release gates](../guides/releases.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
 
-When a gate needs approvals by role, status reads the CODEOWNERS file a Git host would read and
-gives one warning, with the file as its `location`, if it is missing, out of date, shadowed by a
-file at an earlier location, has no generated line for a role the gates need, or cannot be
-generated from `governance`: `<file> <reason>, so the approval directories of <roles> are not
-bound to their owners. Without it any committer can add a record in another person's name. Run
+When an approval policy applies to an environment that has a label entry, status reads the
+configured CODEOWNERS output from the `HEAD` commit by exact path, and with `--base` at that
+commit too. It gives one warning, with the file as its `location`, if the file is missing or out
+of date at a commit (`is missing at <commit>`, `is out of date at <commit>`), shadowed there by a
+file at an earlier location, not manageable by prs, or cannot be generated from `governance`:
+`<file> <reason>, so the approval directories of <roles> are not bound to their owners. Without it any committer can add a record in another person's name. Run
 prs governance codeowners and commit the result.` `--strict` makes this warning, and no other,
-exit with code 1. When every owner of a role is a user handle like `@jane`, status also warns about
+exit with code 1. A clean result does not prove that the branch requires code owner review, nor
+that the owners have write access. For any location other than `.gitlab/CODEOWNERS` the lines are
+written for GitHub. When every owner of a role is a user handle like `@jane`, status also warns about
 an approval that counts for a gate whose approver is not one of them (`<prompt>@<hash> in <env>:
 <approver> approved as <role>, but is not in governance.roles.<role> (<owners>). It still counts,
 since the approver is only asserted; ...`). A role with any team owner is not checked, the record
@@ -1425,7 +1428,7 @@ weight, never for the entry hash, a promote, `--end --keep` or a plain rollback,
 path and the bytes Git has for each record, so with record files it needs Git and a repository
 (`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning. A record
 whose approver is not one of the owners of a role that lists user handles only, like `@jane`, gets a
-warning too; a role with a team owner is not checked, and the record keeps its state.
+warning too if the record is `current` or `labelled`; a role with a team owner is not checked, and the record keeps its state.
 With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/approval-report/v1.json`.
 

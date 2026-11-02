@@ -1032,6 +1032,27 @@ describe('prs approve --list', () => {
       expect(warnings[0]).toContain('It still counts');
     });
 
+    it('does not warn about a record the gates could not count', async () => {
+      const root = await project(PEOPLE);
+      const hash = await builtHash(root);
+      await record(root, { contentHash: hash, approver: as('@eve') });
+      await record(root, { approver: as('@mallory') });
+      git(root, 'add', '-A');
+      await record(root, { contentHash: hash, approver: as('@new') });
+
+      const { report } = await run(undefined, { cwd: root, list: true });
+
+      const states = report.prompts?.flatMap((prompt) =>
+        prompt.records.map((entry) => entry.state)
+      );
+      expect(states?.sort()).toEqual(['current', 'stale', 'untracked']);
+      const messages = report.warnings.filter((warning) =>
+        warning.message.includes('governance.roles.legal')
+      );
+      expect(messages).toHaveLength(1);
+      expect(messages[0]?.message).toContain('@eve approved');
+    });
+
     it('does not warn about a listed approver, whatever the case', async () => {
       const warnings = await rosterWarnings(PEOPLE, '@JANE');
 

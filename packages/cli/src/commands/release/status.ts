@@ -2,7 +2,6 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ConsoleOutput } from '../../output/console.js';
 import {
-  compareCodeUnits,
   getModelCatalog,
   type PromptBundleIndexV1,
   type PromptReleaseLabelEntryV2,
@@ -32,6 +31,7 @@ import {
 } from './layout.js';
 import { isApprovalPromptId } from '../approve/records.js';
 import { individualRosters, outsideRosterWarning } from '../approve/roster.js';
+import { approvalRolesFor } from './approval-roles.js';
 import { checkApprovalOwners } from '../governance/codeowners.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
 import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
@@ -453,31 +453,34 @@ function rosterWarnings(
 }
 
 /**
- * The one warning when a gate needs approvals by role and the CODEOWNERS a Git host reads
- * does not bind those role directories. Without a gate that needs approvals there is nothing
- * to bind.
+ * The one warning when an approval policy applies to a labelled environment and the
+ * CODEOWNERS file committed at HEAD (and at the `--base` commit) does not bind the role
+ * directories. Without such a policy there is nothing to bind.
  */
 async function codeownersWarning(
   project: ReleaseProject,
-  gates: readonly ReleaseGateResult[]
+  checked: readonly EnvironmentCheck[],
+  base: BaseCheck | undefined
 ): Promise<ReleaseDiagnostic | undefined> {
-  const needed = [
-    ...new Set(
-      gates.flatMap((gate) =>
-        gate.checks.flatMap((check) => (check.approvals ?? []).map(({ role }) => role))
-      )
-    ),
-  ].sort(compareCodeUnits);
+  const labelled = checked
+    .filter((environment) => environment.entries.length > 0)
+    .map((environment) => environment.value.name);
+  const needed = approvalRolesFor(project.config, labelled);
   if (needed.length === 0) return undefined;
   const problem = await checkApprovalOwners(
     { cwd: project.root, config: project.configPath },
-    needed
+    needed,
+    [
+      { label: 'HEAD', commit: 'HEAD' },
+      ...(base === undefined ? [] : [{ label: base.base.ref, commit: base.base.commit }]),
+    ]
   );
   if (problem === undefined) return undefined;
   const roles = problem.roles.map(escapeNonAscii).join(', ');
+  const file = problem.file === undefined ? undefined : stripControlCharacters(problem.file);
   return {
-    message: `${problem.file ?? 'CODEOWNERS'} ${problem.reason}, so the approval directories of ${roles} are not bound to their owners. Without it any committer can add a record in another person's name. Run prs governance codeowners and commit the result.`,
-    ...(problem.file === undefined ? {} : { location: { file: problem.file } }),
+    message: `${file ?? 'CODEOWNERS'} ${stripControlCharacters(problem.reason)}, so the approval directories of ${roles} are not bound to their owners. Without it any committer can add a record in another person's name. Run prs governance codeowners and commit the result.`,
+    ...(file === undefined ? {} : { location: { file } }),
   };
 }
 
@@ -560,7 +563,7 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
         : { gates: baseCheck.gates, warnings: baseCheck.warnings };
     warnings.push(...gateRun.warnings, ...labelIdWarnings(checked, baseCheck?.changes ?? []));
     warnings.push(...rosterWarnings(gateRun.gates, project.config.governance));
-    const unbound = await codeownersWarning(project, gateRun.gates);
+    const unbound = await codeownersWarning(project, checked, baseCheck);
     if (unbound !== undefined) warnings.push(unbound);
 
     const modelCheck =

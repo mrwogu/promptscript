@@ -336,17 +336,26 @@ an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approv
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
 
-When a gate needs approvals by role, status also reads the CODEOWNERS file a Git host would read
-(see [CODEOWNERS from Governance](codeowners.md)) and gives one warning, with the file as its
-location, if that file is missing, out of date, shadowed by a file at an earlier location, or has
-no generated line for a role the gates need, or if the lines cannot be generated (for example
-`governance.admins` is missing). The warning lists the roles and tells you to run
-`prs governance codeowners` and commit the result. Nothing is written. With no gate that needs
-approvals there is no warning. `--strict` makes this warning, and only it, exit with code 1.
+When an approval policy (`required-approvals`, or `max-experiment-weight` with `approvals`) applies
+to an environment that has a label entry, status also checks the CODEOWNERS file that
+`prs governance codeowners` generates (see [CODEOWNERS from Governance](codeowners.md)). It reads the
+configured output file from the `HEAD` commit by exact path, so a file that is only on disk does
+not count, and with `--base <ref>` it reads it at that commit too, since the host applies the
+CODEOWNERS of the base branch to a pull request. It gives one warning, with the file as its
+location, if the file is missing or out of date at a commit, if a file at an earlier location
+shadows it there, if prs cannot manage it (no marker line), or if the lines cannot be generated
+(for example `governance.admins` is missing). The warning lists the roles and tells you to run
+`prs governance codeowners` and commit the result. The policy `match` is not evaluated, so a role
+is named when some prompt could need it. Nothing is written. Without such a policy there is no
+warning. `--strict` makes this warning, and only it, exit with code 1.
+
+A clean result does not prove that the branch requires code owner review, nor that the owners have
+write access; check both on the Git host. For any location other than `.gitlab/CODEOWNERS` the
+lines are written for GitHub.
 
 When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
 and no email), status also warns about an approval that counts for a gate whose approver is not
-one of them, compared lowercased. `prs approve --list` gives the same warning for such a record.
+one of them, compared lowercased. `prs approve --list` gives the same warning for a record in the state `current` or `labelled`, the ones a gate could count.
 A role with any team owner is not checked, since a team cannot be resolved offline. The record
 still counts and the exit code does not change.
 
@@ -599,8 +608,9 @@ the pull request of that commit. A `well-formed` record there only has the right
 right path. It does not mean a gate accepts it, and the review by the role team lives in the
 review log of the Git host, not in Git.
 
-`prs release status` warns when a gate needs approvals and the CODEOWNERS file does not have the
-generated line of the role directory, and `--strict` turns that warning into exit code 1. It also
+`prs release status` warns when an approval policy applies and the CODEOWNERS file committed at
+`HEAD` (and at the `--base` commit) is missing or does not match what `prs governance codeowners`
+generates, and `--strict` turns that warning into exit code 1. It also
 warns, in `status` and `approve --list`, about a record whose approver is not in a role that lists
 user handles only. Neither warning changes what the gates count.
 
@@ -650,7 +660,7 @@ needs that role's team as code owners, with required code owner review on the br
 [What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
 lines, see [CODEOWNERS from Governance](codeowners.md). Without it, any author can add a record in
 another person's name and pass the gate. `prs release status` warns when a gate needs approvals
-and these lines are missing or stale, see [Status](#status).
+and these lines are missing or stale in the commit, see [Status](#status).
 
 A record counts for one approver when:
 

@@ -486,13 +486,17 @@ function listedWarnings(listed: ListedApproval, context: ListContext): ReleaseDi
   if (listed.state === 'misplaced') warnings.push(misplacedWarning(listed));
   if (listed.state === 'unknown-role') warnings.push(unknownRoleWarning(listed));
   const { record } = listed;
-  const outside = outsideRosterWarning(
-    context.rosters,
-    record.role,
-    record.approver.value,
-    stripControlCharacters(listed.path),
-    listed.path
-  );
+  // Only a record the gates could count: a stale, untracked, modified or misplaced one never does.
+  const counts = listed.state === 'current' || listed.state === 'labelled';
+  const outside = counts
+    ? outsideRosterWarning(
+        context.rosters,
+        record.role,
+        record.approver.value,
+        stripControlCharacters(listed.path),
+        listed.path
+      )
+    : undefined;
   if (outside !== undefined) warnings.push(outside);
   if (record.signature !== undefined || record.signatureType !== undefined) {
     warnings.push(signatureWarning(listed));
