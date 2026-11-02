@@ -86,7 +86,8 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
 ## Schema versioning
 
 - The file name and the `$id` carry the major version.
-- A v1 schema only gains optional properties.
+- A v1 schema only gains optional properties. For example, an error of `prs validate` can carry an
+  optional `cause` with the code of the error it wraps.
 - A change that breaks readers goes into a new `-v2` file with a new `$id`, and the old file stays.
   This is the convention, like `prompt-release-label-v1` and `-v2`.
 - `pnpm api:breaking` runs on every pull request and compares the schemas of these commands with the
