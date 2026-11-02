@@ -409,7 +409,7 @@
         "high",
         "critical"
       ],
-      "description": "Risk classification of a prompt."
+      "description": "Risk classification of a prompt.\n\nClosed enum: a new value needs a new schema version."
     },
     "PromptBundleProvenance": {
       "type": "object",

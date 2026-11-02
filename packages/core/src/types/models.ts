@@ -4,6 +4,8 @@
  * - `legacy`: still served, but superseded by a newer version
  * - `deprecated`: the provider announced a retirement date
  * - `retired`: the provider no longer serves the model
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
  */
 export type ModelStatus = 'current' | 'legacy' | 'deprecated' | 'retired';
 

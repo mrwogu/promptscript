@@ -1078,7 +1078,7 @@
         "deprecated",
         "retired"
       ],
-      "description": "Lifecycle status of a model profile.\n- `current`: recommended for new instructions\n- `legacy`: still served, but superseded by a newer version\n- `deprecated`: the provider announced a retirement date\n- `retired`: the provider no longer serves the model"
+      "description": "Lifecycle status of a model profile.\n- `current`: recommended for new instructions\n- `legacy`: still served, but superseded by a newer version\n- `deprecated`: the provider announced a retirement date\n- `retired`: the provider no longer serves the model\n\nOpen enum: new values can be added in this version, so handle unknown values."
     },
     "ModelPricing": {
       "type": "object",
@@ -1465,7 +1465,7 @@
         "error",
         "warning"
       ],
-      "description": "Severity for policy violations."
+      "description": "Severity for policy violations.\n\nClosed enum: a new value needs a new schema version."
     },
     "PropertyProtectionPolicy": {
       "type": "object",
@@ -1630,7 +1630,7 @@
         "high",
         "critical"
       ],
-      "description": "Risk classification of a prompt."
+      "description": "Risk classification of a prompt.\n\nClosed enum: a new value needs a new schema version."
     },
     "RiskFloorPolicy": {
       "type": "object",

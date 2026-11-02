@@ -100,6 +100,29 @@ Eval reports and comparisons written by older CLI versions have only `$schema`. 
 - Schemas are closed (`additionalProperties: false`). Validate a document with the schema of the CLI
   version that wrote it, or a newer one, and let your reader ignore properties it does not know.
 
+### Enums
+
+The `description` of every enum in these schemas starts or ends with one of two marks.
+
+- `Closed enum: a new value needs a new schema version.` The values are fixed for the whole v1.
+  A new value goes into a new `-v2` file, so a switch over all values is safe.
+- `Open enum: new values can be added in this version, so handle unknown values.` A later CLI
+  version can write a value your reader has not seen.
+
+How to read an open enum:
+
+- Do not fail on an unknown value. Fall back to a safe default.
+- Skip an unknown audit event `type`.
+- Do not count an approval record with an unknown `state`.
+- Treat an unknown model `status` like `unknown`.
+
+A document with a new open-enum value can fail validation against an older v1 schema, because the
+older schema lists only the values it knew. Validate with the schema of the CLI version that wrote
+the document, or a newer one.
+
+Error codes and rule ids are free strings, so they are always open. Do not match them against a
+fixed list.
+
 ## Text output
 
 The default text output is for people. It can change in any release, so do not parse it.
