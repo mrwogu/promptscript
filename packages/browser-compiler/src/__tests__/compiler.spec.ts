@@ -11,6 +11,73 @@ import type { Formatter } from '@promptscript/formatters';
 import type { CanonicalProgram, OutputConvention } from '@promptscript/core';
 
 describe('compile', () => {
+  it('compiles identical composed skill text from different virtual roots', async () => {
+    const outputs: string[] = [];
+    for (const root of ['first/project', 'second/project']) {
+      const result = await compile(
+        {
+          [`${root}/project.prs`]: `@meta { id: "portable" syntax: "1.2.0" }
+@skills {
+  deploy: { description: "Deploy" content: "Start deployment." }
+  @use ./phases/check
+}`,
+          [`${root}/phases/check.prs`]: `@meta { id: "check" syntax: "1.2.0" }
+@skills { check: { description: "Check" content: "Check the deployment." } }`,
+        },
+        `${root}/project.prs`,
+        { formatters: [{ name: 'claude', config: { version: 'full' } }] }
+      );
+
+      expect(result).toMatchObject({ errors: [], success: true });
+      const content = result.outputs.get('.claude/skills/deploy/SKILL.md')?.content;
+      expect(content).toMatchInlineSnapshot(`
+        "---
+        name: 'deploy'
+        description: 'Deploy'
+        ---
+
+        Start deployment.
+
+        ## Phase 1: check
+
+        <!-- composed-from: phases/check.prs -->
+
+        ### Instructions
+
+        Check the deployment.
+        "
+      `);
+      expect(content).not.toContain(root);
+      outputs.push(content!);
+    }
+    expect(outputs[0]).toBe(outputs[1]);
+  });
+
+  it('keeps phases with the same file name apart in the marker', async () => {
+    const phase = (name: string): string => `@meta { id: "${name}" syntax: "1.2.0" }
+@skills { ${name}: { description: "${name}" content: "Run ${name}." } }`;
+    const result = await compile(
+      {
+        'app/project.prs': `@meta { id: "portable" syntax: "1.2.0" }
+@skills {
+  deploy: { description: "Deploy" content: "Start deployment." }
+  @use ./a/check
+  @use ./b/check
+}`,
+        'app/a/check.prs': phase('first'),
+        'app/b/check.prs': phase('second'),
+      },
+      'app/project.prs',
+      { formatters: [{ name: 'claude', config: { version: 'full' } }] }
+    );
+
+    expect(result).toMatchObject({ errors: [], success: true });
+    const content = result.outputs.get('.claude/skills/deploy/SKILL.md')?.content;
+    expect(content).toContain('<!-- composed-from: a/check.prs -->');
+    expect(content).toContain('<!-- composed-from: b/check.prs -->');
+    expect(content).not.toContain('app/');
+  });
+
   it('should compile a simple file', async () => {
     const files = {
       'project.prs': `
