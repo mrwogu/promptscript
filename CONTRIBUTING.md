@@ -22,7 +22,7 @@ By participating, you are expected to uphold this code.
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22.22+
 - pnpm 8+
 - Git
 
