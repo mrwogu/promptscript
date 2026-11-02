@@ -494,6 +494,25 @@ describe('prs release status CODEOWNERS preflight', () => {
       expect(ownerWarnings(report)[0]?.message).toContain(`cannot be checked at ${sha}: `);
     });
 
+    it('reports a malformed role at the base instead of failing', async () => {
+      const root = await project(
+        "governance:\n  admins: ['@a/b']\n  roles:\n    legal: 5\n",
+        POLICY(['legal'])
+      );
+      await mkdir(join(root, '.github'), { recursive: true });
+      await writeFile(join(root, '.github', 'CODEOWNERS'), '* @someone\n');
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+      await writeFile(join(root, 'promptscript.yaml'), config(GOVERNANCE));
+      await generate(root);
+
+      const report = await status(root, false, sha);
+
+      expect(ownerWarnings(report)[0]?.message).toContain(
+        `cannot be checked at ${sha}: governance.roles.legal is not a list of owners.`
+      );
+    });
+
     it('takes the roster from the governance of the base', async () => {
       const root = await project(
         "governance:\n  admins: ['@a/b']\n  roles:\n    legal: ['@jane']\n"

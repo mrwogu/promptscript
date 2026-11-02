@@ -192,6 +192,17 @@ interface Section {
   roleLines: Map<string, string[]>;
 }
 
+/** The owners of a role, or an error when the value is not a list of strings. */
+function ownersOf(value: unknown, role: string): string[] {
+  if (!Array.isArray(value) || value.some((owner) => typeof owner !== 'string')) {
+    throw new GovernanceError(
+      PS5101_GOVERNANCE_CONFIG,
+      `governance.roles.${role} is not a list of owners.`
+    );
+  }
+  return value as string[];
+}
+
 /** The owner line of each role directory, in the order of the role names. */
 function roleOwnerLines(
   roles: Record<string, unknown>,
@@ -203,7 +214,7 @@ function roleOwnerLines(
       role,
       // Role names are lowercase by the config check, the exact bytes the approvals use.
       path: `${base}/.promptscript/approvals/${role}`,
-      owners: sortedUnique(roles[role] as string[]),
+      owners: sortedUnique(ownersOf(roles[role], role)),
       directory: true,
     }));
 }
@@ -593,7 +604,13 @@ export async function checkApprovalOwnersAtBase(
   const roles =
     isPlainObject(governance) && isPlainObject(governance['roles']) ? governance['roles'] : {};
   const prefix = repo.project === '' ? '' : `/${repo.project}`;
-  const wanted = roleOwnerLines(roles, prefix);
+  let wanted: ReturnType<typeof roleOwnerLines>;
+  try {
+    wanted = roleOwnerLines(roles, prefix);
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { file: output, roles: all, reason: `cannot be checked ${where}: ${first}` };
+  }
   const lines = text.replaceAll('\r\n', '\n').split('\n');
   const marker = lines.indexOf(codeownersMarker(repo.project === '' ? '.' : repo.project));
   const section = marker < 0 ? [] : lines.slice(marker + 1);

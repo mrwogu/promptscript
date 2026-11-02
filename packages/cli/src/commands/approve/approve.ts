@@ -25,7 +25,7 @@ import {
 import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
-import { parsePercent, shortened } from '../release/experiment.js';
+import { gateEntriesOf, parsePercent, shortened } from '../release/experiment.js';
 import { stripControlCharacters } from '../release/git.js';
 import { individualRosters, outsideRosterWarning } from './roster.js';
 import {
@@ -560,8 +560,11 @@ function listedApproval(
 ): ListedApproval {
   const labels = context.labels
     .filter(({ label }) =>
+      // The entry hash and every experiment arm with traffic are what a gate judges.
       label?.prompts.some(
-        (prompt) => prompt.id === record.prompt && prompt.contentHash === record.contentHash
+        (prompt) =>
+          prompt.id === record.prompt &&
+          gateEntriesOf(prompt).some((item) => item.contentHash === record.contentHash)
       )
     )
     .map(({ environment }) => environment);

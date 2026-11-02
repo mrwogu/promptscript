@@ -550,15 +550,15 @@ paths it tracks and which blob each holds, and prints, per prompt, the hash the 
 each record with its role, approver, scope (`prod`, `all environments`, or `prod up to 25 %` for a capped record) and state. When there are
 record files, it needs Git and a repository, else `PS5108`.
 
-| State            | Meaning                                                          |
-| ---------------- | ---------------------------------------------------------------- |
-| `current`        | The record approves the hash the checkout builds                 |
-| `labelled:<env>` | Not the current hash, but the label of that environment holds it |
-| `stale`          | Neither: the prompt changed since                                |
-| `untracked`      | Not added to Git yet. A staged record already counts as tracked  |
-| `modified`       | The bytes on disk are not the ones Git has for the path          |
-| `misplaced`      | Git tracks the file at another path than its fields give         |
-| `unknown-role`   | The role is not in `governance.roles`                            |
+| State            | Meaning                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `current`        | The record approves the hash the checkout builds                                                                         |
+| `labelled:<env>` | Not the current hash, but the label of that environment holds it, as the entry hash or as an experiment arm with traffic |
+| `stale`          | Neither: the prompt changed since                                                                                        |
+| `untracked`      | Not added to Git yet. A staged record already counts as tracked                                                          |
+| `modified`       | The bytes on disk are not the ones Git has for the path                                                                  |
+| `misplaced`      | Git tracks the file at another path than its fields give                                                                 |
+| `unknown-role`   | The role is not in `governance.roles`                                                                                    |
 
 Only `current` and `labelled` records can count. A file that is no valid record, for example one
 with CRLF line endings, gets a `PS5109` warning, and so do modified, misplaced and unknown-role

@@ -1053,6 +1053,42 @@ describe('prs approve --list', () => {
       expect(messages[0]?.message).toContain('@eve approved');
     });
 
+    it('warns about a record for an experiment arm with traffic, which a gate counts', async () => {
+      const root = await project(PEOPLE);
+      const entry = await storedBundle(root, ID, 'Entry');
+      const arm = await storedBundle(root, ID, 'Arm');
+      await writeFile(
+        join(root, '.promptscript/releases/prod.json'),
+        `${JSON.stringify({
+          $schema: 'https://getpromptscript.dev/schema/prompt-release-label/v2.json',
+          environment: 'prod',
+          prompts: [
+            {
+              id: ID,
+              contentHash: entry,
+              experiment: {
+                name: 'warm',
+                arms: [
+                  { variant: 'control', contentHash: entry, weight: 9000 },
+                  { variant: 'warm', contentHash: arm, weight: 1000 },
+                ],
+              },
+            },
+          ],
+        })}\n`
+      );
+      await record(root, { contentHash: arm, approver: as('@eve'), environment: 'prod' });
+      git(root, 'add', '-A');
+
+      const { report } = await run(undefined, { cwd: root, list: true });
+
+      const states = report.prompts?.flatMap((prompt) => prompt.records.map((item) => item.state));
+      expect(states).toEqual(['labelled']);
+      expect(
+        report.warnings.filter((warning) => warning.message.includes('governance.roles.legal'))
+      ).toHaveLength(1);
+    });
+
     it('does not warn about a listed approver, whatever the case', async () => {
       const warnings = await rosterWarnings(PEOPLE, '@JANE');
 
