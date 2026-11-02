@@ -167,6 +167,25 @@ describe('readBlobs', () => {
     expect([...read.missing].sort()).toEqual([gone, tree].sort());
   });
 
+  it('keeps content only up to the byte budget and lists the rest as skipped', async () => {
+    const directory = await repository();
+    const [one, two, three, huge] = await blobs(directory, [
+      'a'.repeat(40),
+      'b'.repeat(40),
+      'c'.repeat(40),
+      'd'.repeat(500),
+    ]);
+
+    const read = await readBlobs([one ?? '', two ?? '', huge ?? '', three ?? ''], directory, {
+      maxBytes: 100,
+      budgetBytes: 80,
+    });
+
+    expect([...read.blobs.keys()]).toEqual([one, two]);
+    expect([...read.skipped]).toEqual([three]);
+    expect([...read.tooLarge]).toEqual([huge]);
+  });
+
   it('starts no process for no ids', async () => {
     const missing = join(tmpdir(), 'promptscript-release-git-missing', 'nowhere');
 
