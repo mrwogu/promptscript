@@ -19,7 +19,9 @@ import type {
   SyntaxFeatureUsage,
 } from '@promptscript/core';
 import {
+  buildSkillPhaseSection,
   deepClone,
+  getSkillPhaseSourceLabel,
   getSyntaxFeatureUsages,
   isTextContent,
   ResolveError,
@@ -51,6 +53,8 @@ export interface CompositionOptions {
   resolvePath: (ref: string, fromFile: string) => string;
   /** Absolute path of the file being resolved (for cycle detection). */
   currentFile: string;
+  /** Virtual project root used to build portable `composed-from` markers. */
+  projectRoot?: string;
   /** Accumulated resolution stack for cycle detection. */
   resolutionStack?: Set<string>;
   /** Current nesting depth (0-based). */
@@ -61,10 +65,11 @@ export interface CompositionOptions {
 
 /**
  * Browser-compatible basename: returns the last segment of a path.
+ * Splits on both `/` and `\` so Windows-style paths work too.
  * Replaces Node's `path.basename` which is not available in the browser.
  */
 function basename(path: string): string {
-  const parts = path.split('/').filter((s) => s.length > 0);
+  const parts = path.split(/[\\/]/).filter((s) => s.length > 0);
   return parts[parts.length - 1] ?? path;
 }
 
@@ -216,6 +221,8 @@ interface ResolvedPhase {
   name: string;
   /** Absolute source path */
   source: string;
+  /** Portable label for the `composed-from` marker. */
+  label: string;
   /** Source location of the composed skill definition */
   loc: SourceLocation;
   /** Alias if specified */
@@ -332,6 +339,7 @@ async function resolveInlineUse(
     phaseNumber,
     name: phaseName,
     source: absPath,
+    label: getSkillPhaseSourceLabel(absPath, options.projectRoot),
     loc: inlineUse.loc,
     alias: inlineUse.alias,
     description: skillDef.description,
@@ -505,7 +513,7 @@ function composeIntoSkill(
 
   for (const phase of phases) {
     // Build phase section
-    const section = buildPhaseSection(phase);
+    const section = buildSkillPhaseSection(phase, phase.label);
     phaseSections.push(section);
 
     // Union allowedTools
@@ -588,33 +596,6 @@ function composeIntoSkill(
   return result;
 }
 
-/**
- * Build a phase section string for a resolved phase.
- */
-function buildPhaseSection(phase: ResolvedPhase): string {
-  const lines: string[] = [];
-
-  lines.push(`## Phase ${phase.phaseNumber}: ${phase.name}`);
-  lines.push(`<!-- composed-from: ${phase.source} -->`);
-
-  // Context blocks
-  for (const ctx of phase.contextBlocks) {
-    const heading = capitalize(ctx.blockType);
-    lines.push('');
-    lines.push(`### ${heading}`);
-    lines.push(ctx.text);
-  }
-
-  // Instructions
-  if (phase.skillContent) {
-    lines.push('');
-    lines.push('### Instructions');
-    lines.push(phase.skillContent);
-  }
-
-  return lines.join('\n');
-}
-
 // ── Utility helpers ────────────────────────────────────────────────
 
 /**
@@ -661,11 +642,4 @@ function convertToContractFields(raw: Record<string, Value>): Record<string, Ski
   }
 
   return result;
-}
-
-/**
- * Capitalize first letter.
- */
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

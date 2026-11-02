@@ -1043,3 +1043,22 @@ describe('resolveSkillComposition — extractTextValue with object content', () 
     expect(content.value).toContain('Phase 1');
   });
 });
+
+describe('resolveSkillComposition - composed-from marker', () => {
+  it('uses only the file name for a backslash path', async () => {
+    const ast = makeProgram([
+      makeSkillsBlock({ deploy: { content: 'Start.' } as unknown as Value }, [
+        makeInlineUse('./phases/check'),
+      ]),
+    ]);
+
+    const result = await resolveSkillComposition(ast, {
+      resolveFile: vi.fn().mockResolvedValue(makeSubSkillProgram('check', 'Check the deployment.')),
+      resolvePath: () => 'C:\\Users\\someone\\project\\phases\\check.prs',
+      currentFile: 'C:\\Users\\someone\\project\\project.prs',
+    });
+
+    const text = JSON.stringify(result.blocks[0]!.content);
+    expect(text).toContain('<!-- composed-from: check.prs -->');
+  });
+});

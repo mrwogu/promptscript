@@ -106,6 +106,7 @@ export interface CompositeRegistryOptions {
 export interface CompositionOptions {
     currentFile: string;
     depth?: number;
+    projectRoot?: string;
     resolutionStack?: Set<string>;
     // Warning: (ae-forgotten-export) The symbol "CompositionResolutionContext" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "ResolvedCompositionFile" needs to be exported by the entry point index.d.ts

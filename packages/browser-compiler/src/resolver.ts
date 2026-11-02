@@ -212,6 +212,8 @@ export interface BrowserResolverOptions {
    * will be replaced with values from this map.
    */
   envVars?: Record<string, string>;
+  /** Virtual project root. Defaults to the directory of the entry file. */
+  projectRoot?: string;
 }
 
 /**
@@ -349,8 +351,12 @@ export class BrowserResolver {
   private readonly cacheEnabled: boolean;
   private readonly logger: Logger;
   private readonly envVars?: Record<string, string>;
+  private readonly projectRoot?: string;
+  /** Directory of the outermost entry file, used when no project root is set. */
+  private entryDir = '';
 
   constructor(options: BrowserResolverOptions) {
+    this.projectRoot = options.projectRoot;
     this.fs = options.fs;
     this.cache = new Map();
     this.resolving = new Set();
@@ -374,12 +380,21 @@ export class BrowserResolver {
       throw new CircularDependencyError([...this.resolving, absPath]);
     }
 
+    if (this.resolving.size === 0) {
+      const entryDir = this.dirname(absPath);
+      // Composed skill markers are relative to the entry directory when no
+      // project root is set, so cached results from another entry are stale.
+      if (this.projectRoot === undefined && entryDir !== this.entryDir) {
+        this.cache.clear();
+      }
+      this.entryDir = entryDir;
+    }
+
     // Check cache
     if (this.cacheEnabled && this.cache.has(absPath)) {
       this.logger.debug(`Cache hit: ${absPath}`);
       return this.cache.get(absPath)!;
     }
-
     this.resolving.add(absPath);
     this.logger.verbose(`Parsing ${absPath}`);
 
@@ -1074,6 +1089,7 @@ export class BrowserResolver {
         );
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
+        projectRoot: this.projectRoot ?? this.entryDir,
         resolvePath: (ref: string, fromFile: string): string => {
           // Build a PathReference-like object matching the parser's shape
           const isRelative = ref.startsWith('./') || ref.startsWith('../');
