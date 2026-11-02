@@ -116,6 +116,10 @@ function checkManifest(name: string, manifest: Manifest, dir: string): void {
       fail(`${label}: ${dep} must be pinned to ${manifest.version}, got ${spec}`);
     }
   }
+  checkShippedFiles(label, dir);
+}
+
+function checkShippedFiles(label: string, dir: string): void {
   const shipped = (readdirSync(dir, { recursive: true }) as string[])
     .map((path) => path.replaceAll('\\', '/'))
     .filter((path) => !path.startsWith('node_modules/'));
