@@ -2927,6 +2927,9 @@ export function isPortableHookScriptPath(value: string): boolean;
 export function isPortablePathSegment(segment: string): boolean;
 
 // @public
+export function isPromptId(value: string): boolean;
+
+// @public
 export function isPromptTarget(name: string): boolean;
 
 // @public

@@ -5,6 +5,7 @@ import {
   GIT_HOST_USER_PATTERN,
   isApprovalRecordV1,
   isApproverHandle,
+  isPromptId,
   MAX_APPROVER_LENGTH,
   parseApprovalRecord,
   serializeApprovalRecord,
@@ -26,6 +27,22 @@ function record(overrides: Partial<ApprovalRecordV1> = {}): ApprovalRecordV1 {
 }
 
 const as = (value: string): ApprovalRecordV1['approver'] => ({ source: 'asserted', value });
+
+describe('isPromptId', () => {
+  it.each(['team/support', '@acme/support/triage', 'a/b.c/d_e-f'])('accepts %s', (value) => {
+    expect(isPromptId(value)).toBe(true);
+  });
+
+  it.each([
+    ['one segment', 'support'],
+    ['a zero-width space', 'team/sup\u200Bport'],
+    ['a segment ending in a dot', 'team./support'],
+    ['two dots', 'team/../support'],
+    ['an empty segment', 'team//support'],
+  ])('rejects %s', (_name, value) => {
+    expect(isPromptId(value)).toBe(false);
+  });
+});
 
 describe('isApproverHandle', () => {
   it.each(['@jane', '@Jane-Doe', '@jane.doe', '@name_shortcode', '@a-b-c', `@${'a'.repeat(100)}`])(

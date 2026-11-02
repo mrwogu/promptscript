@@ -7,6 +7,7 @@ import {
   CatFileBatchParser,
   errorMessage,
   escapeControlCharacters,
+  escapeNonAscii,
   readBlobs,
   resolveWindowsGit,
   runGit,
@@ -26,6 +27,29 @@ afterEach(async () => {
   for (const directory of directories.splice(0)) {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+describe('escapeNonAscii', () => {
+  it('keeps printable ASCII as it is', () => {
+    expect(escapeNonAscii('acme-support/@x.y_z~')).toBe('acme-support/@x.y_z~');
+  });
+
+  it.each([
+    ['\u200b', String.raw`\u200B`],
+    ['\u3164', String.raw`\u3164`],
+    ['\u0430', String.raw`\u0430`],
+    ['\u00a0', String.raw`\u00A0`],
+    [' ', String.raw`\u0020`],
+    ['\u{1d173}', String.raw`\u{1D173}`],
+    ['\ud800', String.raw`\uD800`],
+  ])('escapes %j', (char, escaped) => {
+    expect(escapeNonAscii(`a${char}b`)).toBe(`a${escaped}b`);
+  });
+
+  it('prints a literal backslash-u text differently from a real zero-width space', () => {
+    expect(escapeNonAscii(String.raw`a\u200Bb`)).toBe(String.raw`a\u005Cu200Bb`);
+    expect(escapeNonAscii('a\u200bb')).not.toBe(escapeNonAscii(String.raw`a\u200Bb`));
+  });
 });
 
 describe('escapeControlCharacters', () => {
@@ -165,6 +189,25 @@ describe('readBlobs', () => {
     expect([...read.blobs.keys()]).toEqual([small]);
     expect([...read.tooLarge]).toEqual([large]);
     expect([...read.missing].sort()).toEqual([gone, tree].sort());
+  });
+
+  it('keeps content only up to the byte budget and lists the rest as skipped', async () => {
+    const directory = await repository();
+    const [one, two, three, huge] = await blobs(directory, [
+      'a'.repeat(40),
+      'b'.repeat(40),
+      'c'.repeat(40),
+      'd'.repeat(500),
+    ]);
+
+    const read = await readBlobs([one ?? '', two ?? '', huge ?? '', three ?? ''], directory, {
+      maxBytes: 100,
+      budgetBytes: 80,
+    });
+
+    expect([...read.blobs.keys()]).toEqual([one, two]);
+    expect([...read.skipped]).toEqual([three]);
+    expect([...read.tooLarge]).toEqual([huge]);
   });
 
   it('starts no process for no ids', async () => {
