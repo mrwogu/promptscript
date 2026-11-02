@@ -3729,3 +3729,39 @@ describe('BrowserResolver', () => {
     });
   });
 });
+
+describe('BrowserResolver composed-from markers and the cache', () => {
+  it('recomposes a cached skill when the entry directory changes', async () => {
+    const fs = new VirtualFileSystem({
+      'root.prs': `@meta { id: "root" syntax: "1.2.0" }
+@use ./app/skill`,
+      'app/skill.prs': `@meta { id: "skill" syntax: "1.2.0" }
+@skills {
+  deploy: { description: "Deploy" content: "Start deployment." }
+  @use ./phases/check
+}`,
+      'app/phases/check.prs': `@meta { id: "check" syntax: "1.2.0" }
+@skills { check: { description: "Check" content: "Check it." } }`,
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const first = await resolver.resolve('app/skill.prs');
+    const second = await resolver.resolve('root.prs');
+
+    expect(JSON.stringify(first.ast)).toContain('composed-from: phases/check.prs');
+    expect(JSON.stringify(second.ast)).toContain('composed-from: app/phases/check.prs');
+  });
+
+  it('keeps the cache for entries in the same directory', async () => {
+    const fs = new VirtualFileSystem({
+      'a.prs': `@meta { id: "a" syntax: "1.2.0" }`,
+      'b.prs': `@meta { id: "b" syntax: "1.2.0" }`,
+    });
+    const resolver = new BrowserResolver({ fs });
+
+    const first = await resolver.resolve('a.prs');
+    await resolver.resolve('b.prs');
+
+    expect(await resolver.resolve('a.prs')).toBe(first);
+  });
+});

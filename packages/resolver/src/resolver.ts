@@ -1574,6 +1574,7 @@ export class Resolver {
         );
       ast = await resolveSkillComposition(ast, {
         currentFile: absPath,
+        projectRoot: this.loader.getProjectRoot(),
         ...(compositionContext
           ? {
               resolutionStack: compositionContext.resolutionStack,

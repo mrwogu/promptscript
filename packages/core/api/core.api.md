@@ -358,6 +358,9 @@ export interface BuildProfileConfig {
 }
 
 // @public
+export function buildSkillPhaseSection(phase: SkillPhaseContent, sourceLabel: string): string;
+
+// @public
 export const BUILT_IN_CONVENTIONS: Record<BuiltInConventionName, OutputConvention>;
 
 // @public
@@ -1416,6 +1419,9 @@ export function getSectionContract(sectionIdOrAlias: string): SectionContract | 
 
 // @public (undocumented)
 export function getSectionsForBlock(blockName: string): readonly SectionContract[];
+
+// @public
+export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): string;
 
 // @public
 export function getSyntaxFeatureUsages(ast: Program): SyntaxFeatureUsage[];
@@ -4388,6 +4394,17 @@ export interface SkillPathConfig {
     basePath: string | null;
     // (undocumented)
     fileName: string | null;
+}
+
+// @public
+export interface SkillPhaseContent {
+    contextBlocks: {
+        blockType: string;
+        text: string;
+    }[];
+    name: string;
+    phaseNumber: number;
+    skillContent?: string;
 }
 
 // @public

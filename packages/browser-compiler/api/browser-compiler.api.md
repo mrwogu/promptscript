@@ -67,6 +67,7 @@ export interface BrowserResolverOptions {
     envVars?: Record<string, string>;
     fs: VirtualFileSystem;
     logger?: Logger;
+    projectRoot?: string;
 }
 
 // @internal
