@@ -31,6 +31,8 @@
     "skill:sync": "./scripts/sync-skill.sh",
     "skill:check": "./scripts/sync-skill.sh --check",
     "package:check": "node --import @swc-node/register/esm-register scripts/package-check.mts",
+    "test:scripts": "vitest run --config vitest.scripts.config.mts",
+    "library:prepare-publish": "node --import @swc-node/register/esm-register scripts/prepare-library-publish.mts",
     "api:check": "node --import @swc-node/register/esm-register scripts/api-report.mts",
     "api:update": "node --import @swc-node/register/esm-register scripts/api-report.mts --update",
     "api:breaking": "node --import @swc-node/register/esm-register scripts/api-breaking.mts",
