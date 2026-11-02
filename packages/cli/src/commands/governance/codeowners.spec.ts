@@ -324,6 +324,46 @@ describe('prs governance codeowners', () => {
     expect(await read(root)).toBe(content);
   });
 
+  it.each([
+    ['.github/CODEOWNERS', '[Docs]'],
+    ['CODEOWNERS', '^[Docs]'],
+    ['docs/CODEOWNERS', '[Docs][2] @acme/docs'],
+  ])('refuses a GitLab section above the marker in %s', async (output, header) => {
+    // Arrange
+    const root = await project(`${CONFIG}  codeowners:\n    output: ${output}\n`);
+    await mkdir(dirname(join(root, output)), { recursive: true });
+    const content = `${header}\n*.md @docs\n${codeownersMarker('.')}\n`;
+    await writeFile(join(root, output), content);
+
+    // Act
+    const written = await run(root);
+    const checked = await run(root, { check: true });
+
+    // Assert
+    expect(codes(written.report)).toEqual(['PS5106']);
+    expect(written.report.errors[0]?.message).toContain(
+      `has the GitLab section "${header}" above the marker`
+    );
+    expect(written.report.errors[0]?.message).toContain('.gitlab/CODEOWNERS');
+    expect(written.exitCode).toBe(2);
+    expect(checked.exitCode).toBe(1);
+    expect(await read(root, output)).toBe(content);
+  });
+
+  it('does not treat a bracket line below the marker as a section above it', async () => {
+    // Arrange
+    const root = await project();
+    await mkdir(join(root, '.github'));
+    await writeFile(join(root, '.github/CODEOWNERS'), `# team\n${codeownersMarker('.')}\n[Docs]\n`);
+
+    // Act
+    const { report } = await run(root);
+
+    // Assert
+    expect(report.success).toBe(true);
+    expect(await read(root)).not.toContain('[Docs]');
+  });
+
   it('names the marker line to add when the file is not managed yet', async () => {
     // Arrange
     const root = await project();

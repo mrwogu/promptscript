@@ -347,7 +347,9 @@ config at `<ref>` (the same rules the `--base` gates use) and the file is the co
 that config. It must not be shadowed by an earlier location, and after the marker line of the
 project it must hold the exact owner line of each role directory, rendered from the governance at
 `<ref>`, and no other line for that path. A role directory has two lines, with and without the
-trailing `/`, and a file with only the plain one does not bind it. Other lines of the file at `<ref>` are not compared. It
+trailing `/`. At the base, `.github/CODEOWNERS` with only the plain line is accepted, since files
+generated before the second line existed bind the role on GitHub; every other location needs both
+lines. `HEAD` must match the lines generated now, so it still warns until you regenerate. Other lines of the file at `<ref>` are not compared. It
 gives one warning, with the file as its location, if the file is missing at a commit
 (`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
 (`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs

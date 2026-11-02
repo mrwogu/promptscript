@@ -420,33 +420,50 @@ describe('prs release status CODEOWNERS preflight', () => {
       expect(process.exitCode).toBe(1);
     });
 
-    it('warns when the base file has only the plain line for a role directory', async () => {
-      const { root, sha } = await withBaseFile((text) =>
-        text
-          .split('\n')
-          .filter((line) => !line.startsWith('/.promptscript/approvals/legal/ '))
-          .join('\n')
-      );
+    const withoutSlashLines = (text: string): string =>
+      text
+        .split('\n')
+        .filter((line) => !/^\/\.promptscript\/approvals\/(legal|security)\/ /.test(line))
+        .join('\n');
+
+    it('accepts plain role lines alone at the base for .github/CODEOWNERS', async () => {
+      const { root, sha } = await withBaseFile(withoutSlashLines);
 
       const report = await status(root, false, sha);
 
-      expect(ownerWarnings(report)).toHaveLength(1);
-      expect(ownerWarnings(report)[0]?.message).toContain(`does not bind legal at ${sha}`);
+      expect(ownerWarnings(report).filter((w) => w.message.includes(`at ${sha}`))).toEqual([]);
     });
 
-    it.each(['.github/CODEOWNERS', 'CODEOWNERS', 'docs/CODEOWNERS', '.gitlab/CODEOWNERS'])(
-      'passes at HEAD and at the base for a file generated at %s',
-      async (output) => {
-        const root = await project(`${GOVERNANCE}  codeowners:\n    output: ${output}\n`);
-        await generate(root);
-        const base = git(root, 'rev-parse', 'HEAD').trim();
+    it('needs both lines at the base for a root CODEOWNERS', async () => {
+      const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+      await generate(root);
+      const path = join(root, 'CODEOWNERS');
+      const text = await readFile(path, 'utf8');
+      await writeFile(path, withoutSlashLines(text));
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
 
-        const report = await status(root, true, base);
+      const report = await status(root, false, sha);
 
-        expect(ownerWarnings(report)).toEqual([]);
-        expect(process.exitCode).toBe(0);
-      }
-    );
+      expect(ownerWarnings(report)[0]?.message).toContain('does not bind legal');
+    });
+
+    it('reports a GitLab section above the marker at HEAD and at the base', async () => {
+      const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+      await generate(root);
+      const path = join(root, 'CODEOWNERS');
+      const text = await readFile(path, 'utf8');
+      await writeFile(path, `^[Docs]\n${text}`);
+      commitAll(root);
+      const sha = git(root, 'rev-parse', 'HEAD').trim();
+
+      const report = await status(root, true, sha);
+
+      const messages = ownerWarnings(report).map((w) => w.message);
+      expect(messages.some((m) => m.includes('cannot be managed at HEAD'))).toBe(true);
+      expect(messages.some((m) => m.includes(`cannot be managed at ${sha}`))).toBe(true);
+      expect(process.exitCode).toBe(1);
+    });
 
     it('ignores stale lines of other paths at the base', async () => {
       const { root, sha } = await withBaseFile(

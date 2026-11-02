@@ -31,6 +31,7 @@ import {
   mergedContent,
   overlapWarnings,
   readManaged,
+  refuseSectionsAbove,
   sameContent,
   type CodeownersHost,
   type ManagedFile,
@@ -618,6 +619,14 @@ export async function checkApprovalOwnersAtBase(
   const lines = text.replaceAll('\r\n', '\n').split('\n');
   const marker = lines.indexOf(codeownersMarker(repo.project === '' ? '.' : repo.project));
   const section = marker < 0 ? [] : lines.slice(marker + 1);
+  if (marker >= 0 && output !== '.gitlab/CODEOWNERS') {
+    try {
+      refuseSectionsAbove(lines.slice(0, marker), output);
+    } catch (error) {
+      const [first = ''] = diagnostic(error).message.split('\n');
+      return { file: output, roles: all, reason: `cannot be managed ${where}: ${first}` };
+    }
+  }
   const unbound = needed.filter((role) => {
     const line = wanted.find((candidate) => candidate.role === role);
     if (line === undefined) return true;
@@ -625,9 +634,12 @@ export async function checkApprovalOwnersAtBase(
     const written = section.filter(
       (entry) => entry.split(' ')[0]?.replace(/\/$/, '') === line.path
     );
-    return (
-      !expected.every((entry) => written.includes(entry)) || written.length !== expected.length
-    );
+    const matches = (lines: readonly string[]): boolean =>
+      lines.every((entry) => written.includes(entry)) && written.length === lines.length;
+    // Files generated before the `/` line existed bind a role with the plain line alone, and
+    // GitHub reads that as the directory. GitLab never reads .github/CODEOWNERS.
+    const [plain = ''] = expected;
+    return !(matches(expected) || (output === '.github/CODEOWNERS' && matches([plain])));
   });
   if (unbound.length === 0) return undefined;
   return { file: output, roles: unbound, reason: `does not bind ${unbound.join(', ')} ${where}` };
