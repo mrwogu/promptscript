@@ -33,6 +33,7 @@ import {
   readManaged,
   refuseSectionsAbove,
   sameContent,
+  stripBom,
   type CodeownersHost,
   type ManagedFile,
 } from './codeowners-file.js';
@@ -616,7 +617,7 @@ export async function checkApprovalOwnersAtBase(
     const [first = ''] = diagnostic(error).message.split('\n');
     return { file: output, roles: all, reason: `cannot be checked ${where}: ${first}` };
   }
-  const lines = text.replaceAll('\r\n', '\n').split('\n');
+  const lines = stripBom(text).text.replaceAll('\r\n', '\n').split('\n');
   const marker = lines.indexOf(codeownersMarker(repo.project === '' ? '.' : repo.project));
   const section = marker < 0 ? [] : lines.slice(marker + 1);
   if (marker >= 0 && output !== '.gitlab/CODEOWNERS') {

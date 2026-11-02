@@ -52,6 +52,12 @@ export function refuseSectionsAbove(above: readonly string[], file: string): voi
   );
 }
 
+/** Latin1 text without a leading UTF-8 byte order mark, and the mark that was there. */
+export function stripBom(current: string): { bom: string; text: string } {
+  const bom = current.startsWith(BOM) ? BOM : '';
+  return { bom, text: current.slice(bom.length) };
+}
+
 /** Split an existing file at this project's marker, or refuse it with PS5106. */
 function splitAtMarker(
   content: string,
@@ -105,8 +111,8 @@ export function manageContent(
       'has a NUL byte, and GitLab reads such a file as binary and ignores it, generated lines included. prs changes nothing until the byte is removed.'
     );
   }
-  const bom = current.startsWith(BOM) ? BOM : '';
-  const above = splitAtMarker(current.slice(bom.length), marker, file, host);
+  const { bom, text } = stripBom(current);
+  const above = splitAtMarker(text, marker, file, host);
   return { current, bom, above };
 }
 

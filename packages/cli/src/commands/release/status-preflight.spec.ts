@@ -448,22 +448,28 @@ describe('prs release status CODEOWNERS preflight', () => {
       expect(ownerWarnings(report)[0]?.message).toContain('does not bind legal');
     });
 
-    it('reports a GitLab section above the marker at HEAD and at the base', async () => {
-      const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
-      await generate(root);
-      const path = join(root, 'CODEOWNERS');
-      const text = await readFile(path, 'utf8');
-      await writeFile(path, `^[Docs]\n${text}`);
-      commitAll(root);
-      const sha = git(root, 'rev-parse', 'HEAD').trim();
+    it.each([
+      { bom: '', name: 'no BOM' },
+      { bom: '\uFEFF', name: 'a BOM' },
+    ])(
+      'reports a GitLab section above the marker at HEAD and at the base, $name',
+      async ({ bom }) => {
+        const root = await project(`${GOVERNANCE}  codeowners:\n    output: CODEOWNERS\n`);
+        await generate(root);
+        const path = join(root, 'CODEOWNERS');
+        const text = await readFile(path, 'utf8');
+        await writeFile(path, `${bom}^[Docs]\n${text}`);
+        commitAll(root);
+        const sha = git(root, 'rev-parse', 'HEAD').trim();
 
-      const report = await status(root, true, sha);
+        const report = await status(root, true, sha);
 
-      const messages = ownerWarnings(report).map((w) => w.message);
-      expect(messages.some((m) => m.includes('cannot be managed at HEAD'))).toBe(true);
-      expect(messages.some((m) => m.includes(`cannot be managed at ${sha}`))).toBe(true);
-      expect(process.exitCode).toBe(1);
-    });
+        const messages = ownerWarnings(report).map((w) => w.message);
+        expect(messages.some((m) => m.includes('cannot be managed at HEAD'))).toBe(true);
+        expect(messages.some((m) => m.includes(`cannot be managed at ${sha}`))).toBe(true);
+        expect(process.exitCode).toBe(1);
+      }
+    );
 
     it('ignores stale lines of other paths at the base', async () => {
       const { root, sha } = await withBaseFile(
