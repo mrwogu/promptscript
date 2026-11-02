@@ -75,5 +75,9 @@ export function registerReleaseCommands(release: Command): void {
         '--retiring-within <days>',
         'With --check-models, flag deprecated models that retire within this many days (default 30)'
       )
+      .option(
+        '--strict',
+        'Exit 1 when CODEOWNERS does not bind the approval directories the gates need'
+      )
   ).action((opts) => releaseStatusCommand(opts));
 }

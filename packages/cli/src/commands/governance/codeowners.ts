@@ -32,6 +32,7 @@ import {
   readManaged,
   sameContent,
   type CodeownersHost,
+  type ManagedFile,
 } from './codeowners-file.js';
 import {
   keepPaths,
@@ -186,6 +187,8 @@ interface Section {
   unowned: string[];
   /** Root-relative `protect` paths */
   protect: string[];
+  /** The generated lines of each role directory, by role */
+  roleLines: Map<string, string[]>;
 }
 
 /**
@@ -216,6 +219,7 @@ async function buildSection(
   const roleLines = Object.keys(roles)
     .sort(compareCodeUnits)
     .map((role) => ({
+      role,
       // Role names are lowercase by the config check, the exact bytes the approvals use.
       path: `${base}/.promptscript/approvals/${role}`,
       owners: sortedUnique(roles[role] as string[]),
@@ -265,6 +269,7 @@ async function buildSection(
     promptPaths: prompts.map((line) => line.path),
     unowned: findings.unowned,
     protect: protect.map((line) => line.path),
+    roleLines: new Map(roleLines.map((line) => [line.role, renderLines([line], host)])),
   };
 }
 
@@ -328,10 +333,24 @@ function checkResult(
   return { file: output, status: 'outdated', problem: problems.join(' ') };
 }
 
-async function runCodeowners(
+interface Prepared {
+  output: string;
+  /** Repository top level */
+  top: string;
+  path: string;
+  section: Section;
+  managed: ManagedFile | undefined;
+  /** CODEOWNERS files a host reads before the output */
+  earlier: string[];
+  /** The whole file as prs would write it */
+  next: string;
+}
+
+/** The generated section and the file it goes into, with the overlap warnings sent to `warn`. */
+async function prepareCodeowners(
   options: CodeownersOptions,
   warn: (message: string) => void
-): Promise<CodeownersResult> {
+): Promise<Prepared> {
   const root = resolveProjectRoot(options);
   // Same discovery as the release commands: --config, then PROMPTSCRIPT_CONFIG, then the names.
   const configPath =
@@ -360,7 +379,25 @@ async function runCodeowners(
   const earlier = (READ_BEFORE[output] ?? []).filter((location) =>
     existsSync(join(repo.top, location))
   );
-  const next = mergedContent(managed, section.text);
+  return {
+    output,
+    top: repo.top,
+    path,
+    section,
+    managed,
+    earlier,
+    next: mergedContent(managed, section.text),
+  };
+}
+
+async function runCodeowners(
+  options: CodeownersOptions,
+  warn: (message: string) => void
+): Promise<CodeownersResult> {
+  const { output, top, path, section, managed, earlier, next } = await prepareCodeowners(
+    options,
+    warn
+  );
   if (options.check === true) {
     return checkResult(output, managed?.current, next, earlier, section);
   }
@@ -373,11 +410,66 @@ async function runCodeowners(
   if (managed !== undefined && sameContent(managed.current, next)) {
     return { file: output, status: 'unchanged' };
   }
-  await assertSafeWritePath(path, { ...createDefaultServices(), cwd: repo.top });
+  await assertSafeWritePath(path, { ...createDefaultServices(), cwd: top });
   await mkdir(dirname(path), { recursive: true });
   // latin1 maps each character back to the byte it was read from, so the lines above stay exact.
   writeFileAtomic(path, Buffer.from(next, 'latin1'), 0o644);
   return { file: output, status: managed === undefined ? 'created' : 'updated' };
+}
+
+/** Roles whose approval directory the CODEOWNERS file does not protect, and why. */
+export interface ApprovalOwnersProblem {
+  /** CODEOWNERS path relative to the repository root, unknown when the lines cannot be built */
+  file?: string;
+  roles: string[];
+  /** A predicate that follows the file name, for example `is out of date` */
+  reason: string;
+}
+
+/** The roles whose generated line is missing from the file, or not configured at all. */
+function rolesWithoutLine(needed: readonly string[], section: Section, current: string): string[] {
+  const present = new Set(current.replaceAll('\r\n', '\n').split('\n'));
+  return needed.filter((role) => {
+    const lines = section.roleLines.get(role);
+    return lines === undefined || !lines.every((line) => present.has(line));
+  });
+}
+
+/**
+ * Whether the CODEOWNERS file a Git host reads has the generated owner line of each role
+ * in `needed`, and is up to date. Nothing is written, and a governance section that cannot
+ * produce the lines is a problem, not an exception.
+ */
+export async function checkApprovalOwners(
+  options: ProjectPathOptions,
+  needed: readonly string[]
+): Promise<ApprovalOwnersProblem | undefined> {
+  let prepared: Prepared;
+  try {
+    prepared = await prepareCodeowners({ ...options, check: true }, () => undefined);
+  } catch (error) {
+    const [first = ''] = diagnostic(error).message.split('\n');
+    return { roles: [...needed], reason: `cannot be generated: ${first}` };
+  }
+  const { output, section, managed, earlier, next } = prepared;
+  if (managed === undefined) return { file: output, roles: [...needed], reason: 'does not exist' };
+  if (earlier.length > 0) {
+    return {
+      file: output,
+      roles: [...needed],
+      reason: `is shadowed by ${earlier.join(', ')}, which a host reads first`,
+    };
+  }
+  const missing = rolesWithoutLine(needed, section, managed.current);
+  if (!sameContent(managed.current, next)) {
+    return {
+      file: output,
+      roles: missing.length > 0 ? missing : [...needed],
+      reason: 'is out of date',
+    };
+  }
+  if (missing.length === 0) return undefined;
+  return { file: output, roles: missing, reason: 'has no owner line for them in governance.roles' };
 }
 
 function diagnostic(error: unknown): CodeownersDiagnostic {

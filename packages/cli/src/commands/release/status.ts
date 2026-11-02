@@ -2,6 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ConsoleOutput } from '../../output/console.js';
 import {
+  compareCodeUnits,
   getModelCatalog,
   type PromptBundleIndexV1,
   type PromptReleaseLabelEntryV2,
@@ -30,6 +31,8 @@ import {
   type ReleasePaths,
 } from './layout.js';
 import { isApprovalPromptId } from '../approve/records.js';
+import { individualRosters, outsideRosterWarning } from '../approve/roster.js';
+import { checkApprovalOwners } from '../governance/codeowners.js';
 import { checkAgainstBase, type BaseCheck } from './base.js';
 import { armChangeText, armLimitWarnings, gateEntriesOf } from './experiment.js';
 import { checkLabelModels, parseRetiringWithin, printModels } from './models.js';
@@ -51,6 +54,8 @@ export interface ReleaseStatusOptions extends ReleaseCommandOptions {
   checkModels?: boolean;
   /** With checkModels, days ahead in which a deprecated model counts as retiring */
   retiringWithin?: string;
+  /** Fail when CODEOWNERS does not bind the approval directories the gates need */
+  strict?: boolean;
 }
 
 function parseHistoryCount(value: string | undefined): number | undefined {
@@ -428,6 +433,54 @@ function labelIdWarnings(
   return [...warnings.values()];
 }
 
+/** Approvers that count for a gate but are not in a role that lists user handles only. */
+function rosterWarnings(
+  gates: readonly ReleaseGateResult[],
+  governance: unknown
+): ReleaseDiagnostic[] {
+  const rosters = individualRosters(governance);
+  const warnings = new Map<string, ReleaseDiagnostic>();
+  for (const gate of gates) {
+    const where = `${escapeNonAscii(gate.prompt)}@${shortHash(gate.contentHash)} in ${stripControlCharacters(gate.environment)}`;
+    for (const { role, found } of gate.checks.flatMap((check) => check.approvals ?? [])) {
+      for (const approver of found) {
+        const warning = outsideRosterWarning(rosters, role, approver, where);
+        if (warning !== undefined) warnings.set(warning.message, warning);
+      }
+    }
+  }
+  return [...warnings.values()];
+}
+
+/**
+ * The one warning when a gate needs approvals by role and the CODEOWNERS a Git host reads
+ * does not bind those role directories. Without a gate that needs approvals there is nothing
+ * to bind.
+ */
+async function codeownersWarning(
+  project: ReleaseProject,
+  gates: readonly ReleaseGateResult[]
+): Promise<ReleaseDiagnostic | undefined> {
+  const needed = [
+    ...new Set(
+      gates.flatMap((gate) =>
+        gate.checks.flatMap((check) => (check.approvals ?? []).map(({ role }) => role))
+      )
+    ),
+  ].sort(compareCodeUnits);
+  if (needed.length === 0) return undefined;
+  const problem = await checkApprovalOwners(
+    { cwd: project.root, config: project.configPath },
+    needed
+  );
+  if (problem === undefined) return undefined;
+  const roles = problem.roles.map(escapeNonAscii).join(', ');
+  return {
+    message: `${problem.file ?? 'CODEOWNERS'} ${problem.reason}, so the approval directories of ${roles} are not bound to their owners. Without it any committer can add a record in another person's name. Run prs governance codeowners and commit the result.`,
+    ...(problem.file === undefined ? {} : { location: { file: problem.file } }),
+  };
+}
+
 /** With --base the config is found by name; say so when the caller pointed elsewhere. */
 function ignoredConfigWarnings(options: ReleaseStatusOptions): ReleaseDiagnostic[] {
   if (options.base === undefined) return [];
@@ -506,6 +559,9 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
         ? await labelGates(project, checked, output.json)
         : { gates: baseCheck.gates, warnings: baseCheck.warnings };
     warnings.push(...gateRun.warnings, ...labelIdWarnings(checked, baseCheck?.changes ?? []));
+    warnings.push(...rosterWarnings(gateRun.gates, project.config.governance));
+    const unbound = await codeownersWarning(project, gateRun.gates);
+    if (unbound !== undefined) warnings.push(unbound);
 
     const modelCheck =
       retiringDays === undefined
@@ -533,18 +589,21 @@ export async function releaseStatusCommand(options: ReleaseStatusOptions): Promi
       if (modelCheck !== undefined) printModels(modelCheck.models, modelCheck.days);
       if (baseCheck !== undefined) printBaseCheck(baseCheck);
     }
+    const errors = [
+      ...checked.flatMap((entry) => entry.errors),
+      ...(baseCheck?.errors ?? []),
+      ...(modelCheck?.errors ?? []),
+    ];
     return {
+      // --strict fails on the CODEOWNERS warning only; other warnings keep their behavior.
+      success: errors.length === 0 && !(options.strict === true && unbound !== undefined),
       environments,
       ...(history === undefined ? {} : { history }),
       ...(baseCheck === undefined ? {} : { base: baseCheck.base, changes: baseCheck.changes }),
       ...(gateRun.gates.length === 0 ? {} : { gates: gateRun.gates }),
       ...(modelCheck === undefined ? {} : { models: modelCheck.models }),
       warnings,
-      errors: [
-        ...checked.flatMap((entry) => entry.errors),
-        ...(baseCheck?.errors ?? []),
-        ...(modelCheck?.errors ?? []),
-      ],
+      errors,
     };
   });
 }

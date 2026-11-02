@@ -336,6 +336,20 @@ an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approv
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
 
+When a gate needs approvals by role, status also reads the CODEOWNERS file a Git host would read
+(see [CODEOWNERS from Governance](codeowners.md)) and gives one warning, with the file as its
+location, if that file is missing, out of date, shadowed by a file at an earlier location, or has
+no generated line for a role the gates need, or if the lines cannot be generated (for example
+`governance.admins` is missing). The warning lists the roles and tells you to run
+`prs governance codeowners` and commit the result. Nothing is written. With no gate that needs
+approvals there is no warning. `--strict` makes this warning, and only it, exit with code 1.
+
+When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
+and no email), status also warns about an approval that counts for a gate whose approver is not
+one of them, compared lowercased. `prs approve --list` gives the same warning for such a record.
+A role with any team owner is not checked, since a team cannot be resolved offline. The record
+still counts and the exit code does not change.
+
 #### Check the models of the labels
 
 ```bash
@@ -585,6 +599,11 @@ the pull request of that commit. A `well-formed` record there only has the right
 right path. It does not mean a gate accepts it, and the review by the role team lives in the
 review log of the Git host, not in Git.
 
+`prs release status` warns when a gate needs approvals and the CODEOWNERS file does not have the
+generated line of the role directory, and `--strict` turns that warning into exit code 1. It also
+warns, in `status` and `approve --list`, about a record whose approver is not in a role that lists
+user handles only. Neither warning changes what the gates count.
+
 ## Release gates
 
 The gates are the prompt policies, run on the prompt version a label is about to hold. They run
@@ -630,7 +649,8 @@ tell who wrote them. A record binds only through review: each `.promptscript/app
 needs that role's team as code owners, with required code owner review on the branch (see
 [What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
 lines, see [CODEOWNERS from Governance](codeowners.md). Without it, any author can add a record in
-another person's name and pass the gate.
+another person's name and pass the gate. `prs release status` warns when a gate needs approvals
+and these lines are missing or stale, see [Status](#status).
 
 A record counts for one approver when:
 
