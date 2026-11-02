@@ -10,6 +10,8 @@ import type { ImportRoot, ValidatorConfig } from './types.js';
  * Mirrors the normalization the compiler applies to lockfile dependency keys.
  * Implemented with plain string operations so adversarial import strings
  * cannot trigger regex backtracking (CodeQL js/polynomial-redos, Sonar S8786).
+ *
+ * @internal
  */
 export function normalizeImportKey(value: string): string {
   let result = value;
@@ -150,6 +152,8 @@ function findCoveringExcludesForLocation(
  * recorded commit matches the commit the lockfile pins for the import;
  * with a missing or stale commit the findings reappear (PS040 reports the
  * mismatch separately). `--ignore-hashes` skips the binding check.
+ *
+ * @internal
  */
 export function isRuleExcludedForLocation(
   rule: { name: string; id: string },
@@ -166,7 +170,11 @@ export function isRuleExcludedForLocation(
   );
 }
 
-/** Lockfile dependency resolved for an exclude's import source. */
+/**
+ * Lockfile dependency resolved for an exclude's import source.
+ *
+ * @internal
+ */
 export interface ResolvedImportDependency {
   /** Lockfile dependency key the exclude bound to */
   key: string;
@@ -180,6 +188,8 @@ export interface ResolvedImportDependency {
  * Exact normalized match first; otherwise the longest lockfile key that is a
  * path prefix, so an exclude declared with a sub-path (`org/repo/skills/foo`)
  * still binds to its repository pin (`org/repo`).
+ *
+ * @internal
  */
 export function findLockfileDependency(
   importSource: string,

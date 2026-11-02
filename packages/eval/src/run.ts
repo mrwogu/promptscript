@@ -62,6 +62,11 @@ export interface RunEvalOptions {
   suites: readonly LoadedSuite[];
   /** Prompt bundles the project compiles; each is verified again before use */
   bundles: readonly PromptBundleV1[];
+  /**
+   * Bundles judge rubrics are looked up in; defaults to `bundles`. A rubric is not the
+   * prompt under test, so it may come from another source than the tested prompt.
+   */
+  rubrics?: readonly PromptBundleV1[];
   /** Model catalog with the project's profiles */
   catalog: ModelCatalog;
   /** Provider of a name; called only for calls the cache cannot answer */
@@ -294,7 +299,9 @@ function prepareJudges(loaded: LoadedSuite, options: RunEvalOptions, add: Add): 
   };
   for (const assertion of loaded.suite.assertions) {
     if (assertion.kind !== 'llm-judge') continue;
-    for (const rubric of options.bundles.filter((entry) => entry.id === assertion.rubric)) {
+    for (const rubric of (options.rubrics ?? options.bundles).filter(
+      (entry) => entry.id === assertion.rubric
+    )) {
       let prompt: Prompt;
       try {
         prompt = loadPrompt(rubric);
@@ -877,6 +884,7 @@ async function setUp(
   const badLimits = errors.length > 0;
   const checks = checkSuites(options.suites, {
     bundles: options.bundles,
+    ...(options.rubrics === undefined ? {} : { rubrics: options.rubrics }),
     catalog: options.catalog,
   });
   for (const finding of checks) {

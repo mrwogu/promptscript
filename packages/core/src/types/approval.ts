@@ -58,6 +58,14 @@ export interface ApprovalRecordV1 {
    * @pattern ^(?:[^\p{Cc}\p{Cs}]|\n){0,2000}$
    */
   comment?: string;
+  /**
+   * Highest arm weight, in basis points, the approval counts for. A record with it never
+   * approves the entry hash and names its `environment`. Absent: a full approval.
+   * @asType integer
+   * @minimum 1
+   * @maximum 10000
+   */
+  maxWeight?: number;
   /** Signature format, see `signature`. Reserved, not written or read in this version. */
   signatureType?: 'ssh';
   /**
@@ -93,9 +101,20 @@ export function isApproverHandle(value: string): boolean {
   return value.length <= MAX_APPROVER_LENGTH && GIT_HOST_USER_PATTERN.test(value);
 }
 
-// Same patterns as the schema JSDoc; the schema spec checks that both agree.
+// Private, so nobody can change it through RegExp.prototype.compile.
 const PROMPT_ID =
   /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
+
+/**
+ * Is this the prompt id of an approval record: ASCII only, at least two segments split by a
+ * slash, no segment ending in a dot. It has no limit on the number of segments; the CLI adds
+ * its own depth limit for the record path.
+ */
+export function isPromptId(value: string): boolean {
+  return PROMPT_ID.test(value);
+}
+
+// These patterns are the same as the schema JSDoc; the schema spec checks that both agree.
 const CONTENT_HASH = /^sha256-[0-9a-f]{64}$/u;
 const ROLE = /^(?!(?:con|prn|aux|nul|com\d|lpt\d)$)[a-z][a-z0-9-]{0,31}$/u;
 const CREATED_AT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
@@ -113,6 +132,7 @@ const RECORD_KEYS: ReadonlySet<string> = new Set([
   'createdAt',
   'environment',
   'comment',
+  'maxWeight',
   'signatureType',
   'signature',
 ]);
@@ -123,6 +143,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function matches(value: unknown, pattern: RegExp): boolean {
   return typeof value === 'string' && pattern.test(value);
+}
+
+function isCeiling(value: unknown): boolean {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 10000;
 }
 
 function isApprover(value: unknown): boolean {
@@ -136,7 +160,7 @@ function isApprover(value: unknown): boolean {
 }
 
 /**
- * Type guard for an approval record: exact keys, every field pattern of the schema.
+ * Type guard for an approval record: exact keys, every field pattern and the `maxWeight` range of the schema.
  * Use {@link parseApprovalRecord} on file content, it also checks the exact bytes.
  */
 export function isApprovalRecordV1(value: unknown): value is ApprovalRecordV1 {
@@ -152,6 +176,9 @@ export function isApprovalRecordV1(value: unknown): value is ApprovalRecordV1 {
     matches(value['createdAt'], CREATED_AT) &&
     optional('environment', ENVIRONMENT) &&
     optional('comment', COMMENT) &&
+    // A ceiling counts in one environment only, so it comes with `environment`
+    (!Object.hasOwn(value, 'maxWeight') ||
+      (isCeiling(value['maxWeight']) && Object.hasOwn(value, 'environment'))) &&
     (!Object.hasOwn(value, 'signatureType') || value['signatureType'] === 'ssh') &&
     optional('signature', SIGNATURE)
   );
@@ -171,6 +198,7 @@ export function serializeApprovalRecord(record: ApprovalRecordV1): string {
     createdAt: record.createdAt,
     environment: record.environment,
     comment: record.comment,
+    maxWeight: record.maxWeight,
     signatureType: record.signatureType,
     signature: record.signature,
   };

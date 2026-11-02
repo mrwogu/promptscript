@@ -11,6 +11,8 @@ export const resolveUses = resolveUseImport;
 
 /**
  * Check if a block name is an import marker.
+ *
+ * @internal
  */
 export function isImportMarker(blockName: string): boolean {
   return blockName.startsWith(IMPORT_MARKER_PREFIX);
@@ -18,6 +20,8 @@ export function isImportMarker(blockName: string): boolean {
 
 /**
  * Get the alias from an import marker block name.
+ *
+ * @internal
  */
 export function getImportAlias(blockName: string): string | undefined {
   if (!isImportMarker(blockName)) {
@@ -31,6 +35,8 @@ export function getImportAlias(blockName: string): string | undefined {
 
 /**
  * Get the original block name from an aliased import block.
+ *
+ * @internal
  */
 export function getOriginalBlockName(blockName: string): string | undefined {
   if (!isImportMarker(blockName)) {
@@ -100,6 +106,8 @@ export function extractReservedParams(params: ParamArgument[] | undefined): Rese
 
 /**
  * Filter options for block-level @use filtering.
+ *
+ * @internal
  */
 export interface BlockFilterOptions {
   /** Keep only these block names */
@@ -111,6 +119,8 @@ export interface BlockFilterOptions {
 /**
  * Filter an array of blocks based on only/exclude criteria.
  * Returns a new array; does not mutate the input.
+ *
+ * @internal
  */
 export function filterBlocks(blocks: Block[], options: BlockFilterOptions): Block[] {
   if (options.only) {
@@ -128,6 +138,8 @@ export function filterBlocks(blocks: Block[], options: BlockFilterOptions): Bloc
 
 /**
  * Filter options for skill-level @use filtering.
+ *
+ * @internal
  */
 export interface SkillFilterOptions {
   /** Keep only these skill names */
@@ -143,6 +155,8 @@ export interface SkillFilterOptions {
  *
  * Returns a new Program with a deep-cloned @skills block; does not mutate the
  * input (important for cached ASTs).
+ *
+ * @internal
  */
 export function filterSkillsBlock(program: Program, options: SkillFilterOptions): Program {
   if (!options.includes && !options.excludes) {

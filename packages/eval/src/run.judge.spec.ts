@@ -1035,6 +1035,38 @@ describe('runEval with llm-judge assertions', () => {
     expectValid(report);
   });
 
+  it('judges with the rubric of the rubrics list when bundles hold another one with the same id', async () => {
+    const stale = makeRubric(JUDGE_ID, {
+      messages: [
+        { role: 'system', content: 'You grade replies, strictly.' },
+        { role: 'user', content: '{{input.response}} {{input.boundary}}' },
+      ],
+    });
+    const fresh = makeRubric();
+    const { providers } = script();
+
+    const report = await runEval(
+      await options({
+        bundles: [makeBundle(), stale],
+        rubrics: [fresh],
+        providers,
+        cache: { mode: 'record', dir: '.promptscript/eval-cache' },
+        budget: { maxCostUsd: 1 },
+      })
+    );
+    const replayed = await runEval(
+      await options({ bundles: [makeBundle(), stale], rubrics: [fresh] })
+    );
+
+    expect(stale.contentHash).not.toBe(fresh.contentHash);
+    expect(report.suites[0]?.judges).toEqual([
+      { rubric: JUDGE_ID, contentHash: fresh.contentHash },
+    ]);
+    expect(judgeSamples[0]?.request.messages[0]?.content).toBe(fresh.messages[0]?.content);
+    // The cache key is made from the fresh rubric, so replay answers from it
+    expect(replayed).toMatchObject({ outcome: 'passed', cache: { live: 0, replayed: 8 } });
+  });
+
   it('stops a run whose rubric does not verify', async () => {
     const tampered = { ...makeRubric(), description: 'Changed after hashing' };
 

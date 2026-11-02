@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/validator",
-  "version": "0.0.1",
+  "version": "1.26.0",
   "description": "AST validation rules for PromptScript",
   "keywords": [
     "cli",
@@ -21,11 +21,37 @@
     "promptops"
   ],
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrwogu/promptscript.git",
+    "directory": "packages/validator"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "src",
+    "!src/**/__tests__/**",
+    "!src/**/*.d.ts.map",
+    "README.md"
+  ],
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "dependencies": {
     "@swc/helpers": "~0.5.23",
-    "@promptscript/core": "workspace:^"
+    "@promptscript/core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "./src/index.js",
+    "exports": {
+      ".": {
+        "types": "./src/index.d.ts",
+        "default": "./src/index.js"
+      },
+      "./package.json": "./package.json"
+    }
   }
 }

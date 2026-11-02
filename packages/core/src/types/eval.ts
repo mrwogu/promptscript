@@ -91,7 +91,11 @@ export interface EvalJudgeConfig {
   runs?: EvalJudgeRuns;
 }
 
-/** Kind of an eval assertion. */
+/**
+ * Kind of an eval assertion.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type EvalAssertionKind = 'equals' | 'contains' | 'regex' | 'json-schema' | 'llm-judge';
 
 export interface EvalAssertionBase {
@@ -262,7 +266,11 @@ export interface EvalSuiteV1 {
   thresholds?: EvalThresholds;
 }
 
-/** Verdict of a judge run or a human label. */
+/**
+ * Verdict of a judge run or a human label.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type EvalVerdict = 'pass' | 'fail';
 
 /** One human label of a judged case, version 1. */
@@ -386,13 +394,25 @@ export interface EvalCacheEntryV1 {
   response: EvalCacheResponseV1;
 }
 
-/** How a run uses the cache. */
+/**
+ * How a run uses the cache.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type EvalCacheMode = 'replay' | 'record' | 'refresh' | 'off';
 
-/** Outcome of a run. */
+/**
+ * Outcome of a run.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type EvalOutcome = 'passed' | 'failed' | 'regression' | 'budget-exceeded' | 'error';
 
-/** Status of one case. */
+/**
+ * Status of one case.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type EvalCaseStatus = 'passed' | 'failed' | 'error';
 
 /** Calls and tokens of a run, a model entry or a case. */
@@ -609,7 +629,11 @@ export interface EvalModelResultV1 {
   cases: EvalCaseResultV1[];
 }
 
-/** Name of a suite threshold. */
+/**
+ * Name of a suite threshold.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type EvalThresholdName =
   'passRate' | 'maxCostUsd' | 'maxCostPerCaseUsd' | 'latencyMs.p50' | 'latencyMs.p95';
 
@@ -627,7 +651,11 @@ export interface EvalThresholdResultV1 {
   passed: boolean;
 }
 
-/** Severity of a dataset finding. */
+/**
+ * Severity of a dataset finding.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type EvalFindingSeverity = 'error' | 'warning';
 
 /** One finding of the dataset scan. */
@@ -768,6 +796,12 @@ export interface EvalComparisonV1 {
    */
   $schema?: 'https://getpromptscript.dev/schema/eval-comparison/v1.json';
   /**
+   * Format version, 1 in standalone comparisons this CLI writes. Absent
+   * inside a report and in comparisons from older versions; read a missing
+   * value as 1.
+   */
+  version?: 1;
+  /**
    * Pass-rate drop that counts as a regression.
    * @minimum 0
    * @maximum 1
@@ -790,6 +824,11 @@ export interface EvalReportV1 {
    * @example "https://getpromptscript.dev/schema/eval-report/v1.json"
    */
   $schema: 'https://getpromptscript.dev/schema/eval-report/v1.json';
+  /**
+   * Format version, always 1 in reports this CLI writes. Older reports lack
+   * it; read a missing value as 1.
+   */
+  version?: 1;
   /** Outcome of the run */
   outcome: EvalOutcome;
   /** Whether every suite passed and nothing else went wrong */

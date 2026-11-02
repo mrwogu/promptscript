@@ -161,6 +161,8 @@ export interface BlobBatch {
   blobs: Map<string, Buffer>;
   /** Blobs larger than `maxBytes`, whose content is not kept */
   tooLarge: Set<string>;
+  /** Blobs within `maxBytes` whose content did not fit the byte budget; read them again */
+  skipped: Set<string>;
   /** Ids Git has no blob for */
   missing: Set<string>;
 }
@@ -175,17 +177,32 @@ const BATCH_MISSING_RE = /^(\S+) (?:missing|ambiguous)$/;
  * Parser of `git cat-file --batch` output: `<id> <type> <size>\n<content>\n` per object,
  * or `<id> missing\n`. Content is framed by its size, never by lines, so a record may hold
  * any bytes. An object that is no blob counts as missing. With `asked`, an answer for any
- * other id throws.
+ * other id throws. Content is kept while the kept total stays within `budgetBytes`; a blob
+ * past it is `skipped`, so memory is bounded however many blobs are asked for.
  */
 export class CatFileBatchParser {
-  readonly result: BlobBatch = { blobs: new Map(), tooLarge: new Set(), missing: new Set() };
+  readonly result: BlobBatch = {
+    blobs: new Map(),
+    tooLarge: new Set(),
+    skipped: new Set(),
+    missing: new Set(),
+  };
+  private keptBytes = 0;
   private buffered: Buffer = Buffer.alloc(0);
   private current:
-    { id: string; blob: boolean; remaining: number; kept: Buffer[] | undefined } | undefined;
+    | {
+        id: string;
+        blob: boolean;
+        remaining: number;
+        kept: Buffer[] | undefined;
+        skipped: boolean;
+      }
+    | undefined;
 
   constructor(
     private readonly maxBytes: number,
-    private readonly asked?: ReadonlySet<string>
+    private readonly asked?: ReadonlySet<string>,
+    private readonly budgetBytes = Number.POSITIVE_INFINITY
   ) {}
 
   /** Take the next chunk of output. Output Git does not print throws. */
@@ -224,12 +241,16 @@ export class CatFileBatchParser {
     this.askedFor(id);
     const bytes = Number(size);
     const blob = type === 'blob';
+    const fits = blob && bytes <= this.maxBytes;
+    const keep = fits && this.keptBytes + bytes <= this.budgetBytes;
+    if (keep) this.keptBytes += bytes;
     // The content and the line feed after it.
     this.current = {
       id,
       blob,
       remaining: bytes + 1,
-      kept: blob && bytes <= this.maxBytes ? [] : undefined,
+      kept: keep ? [] : undefined,
+      skipped: fits && !keep,
     };
     return true;
   }
@@ -254,6 +275,8 @@ export class CatFileBatchParser {
     this.current = undefined;
     if (!current.blob) {
       this.result.missing.add(current.id);
+    } else if (current.skipped) {
+      this.result.skipped.add(current.id);
     } else if (current.kept === undefined) {
       this.result.tooLarge.add(current.id);
     } else {
@@ -266,14 +289,15 @@ export class CatFileBatchParser {
 
 /**
  * Read blobs by id with one `git cat-file --batch`, in the environment of {@link runGit} and
- * under the same timeout. Ids go to stdin, so no id is an argument. A spawn failure, a
+ * under the same timeout. With `budgetBytes`, content past that total is not kept (see
+ * {@link CatFileBatchParser}), though Git still prints it. Ids go to stdin, so no id is an argument. A spawn failure, a
  * timeout, a non-zero exit, output Git does not print or an id with no answer throws:
  * a caller never takes a blob it could not read as one that is not there.
  */
 export function readBlobs(
   ids: readonly string[],
   cwd: string,
-  { maxBytes }: { maxBytes: number }
+  { maxBytes, budgetBytes }: { maxBytes: number; budgetBytes?: number }
 ): Promise<BlobBatch> {
   const asked = [...new Set(ids)];
   const malformed = asked.find((id) => !BLOB_ID_RE.test(id));
@@ -287,10 +311,15 @@ export function readBlobs(
     );
   }
   if (asked.length === 0) {
-    return Promise.resolve({ blobs: new Map(), tooLarge: new Set(), missing: new Set() });
+    return Promise.resolve({
+      blobs: new Map(),
+      tooLarge: new Set(),
+      skipped: new Set(),
+      missing: new Set(),
+    });
   }
   return new Promise((resolvePromise, reject) => {
-    const parser = new CatFileBatchParser(maxBytes, new Set(asked));
+    const parser = new CatFileBatchParser(maxBytes, new Set(asked), budgetBytes);
     let stderr = '';
     let settled = false;
     const refuse = (error: ReleaseError): void => {
@@ -362,7 +391,11 @@ export function readBlobs(
       try {
         const result = parser.finish();
         const unanswered = asked.filter(
-          (id) => !result.blobs.has(id) && !result.tooLarge.has(id) && !result.missing.has(id)
+          (id) =>
+            !result.blobs.has(id) &&
+            !result.tooLarge.has(id) &&
+            !result.skipped.has(id) &&
+            !result.missing.has(id)
         );
         if (unanswered.length > 0) {
           const more = unanswered.length > 1 ? ` and ${unanswered.length - 1} more` : '';
@@ -384,14 +417,47 @@ export function errorMessage(error: unknown): string {
 }
 
 /**
- * Characters that move, recolor or hide terminal text: C0, DEL, C1, the bidi controls and
- * marks, zero-width characters, line and paragraph separators, word joiner and BOM.
+ * Characters that move, recolor or hide terminal text: C0, DEL, C1, soft hyphen, combining grapheme
+ * joiner, the bidi controls and marks, zero-width characters, invisible math operators, line and
+ * paragraph separators, word joiner, variation selectors (also Mongolian and supplementary), BOM, Unicode tag characters and lone
+ * surrogates.
  */
 const TERMINAL_CONTROL_RE =
-  // eslint-disable-next-line no-control-regex
-  /[\u0000-\u001f\u007f-\u009f\u061c\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g;
+  // Combining characters are listed on purpose: they are matched one by one.
+  // eslint-disable-next-line no-control-regex, no-misleading-character-class
+  /[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u180b-\u180f\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufe00-\ufe0f\ufeff\u{e0000}-\u{e007f}\u{e0100}-\u{e01ef}\p{Cs}]/gu;
 
 /** Remove the characters that could rewrite terminal output, from text Git or a file supplies. */
 export function stripControlCharacters(text: string): string {
   return text.replaceAll(TERMINAL_CONTROL_RE, '');
+}
+
+/**
+ * Write a prompt id so that nothing in it can look like something else: every code point
+ * outside U+0021 to U+007E, and the backslash, becomes `\uXXXX` (or `\u{XXXXX}` above U+FFFF).
+ * A valid id is plain ASCII and stays as it is.
+ */
+export function escapeNonAscii(text: string): string {
+  let out = '';
+  for (const char of text) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code >= 0x21 && code <= 0x7e && char !== '\\') {
+      out += char;
+      continue;
+    }
+    const hex = code.toString(16).toUpperCase().padStart(4, '0');
+    out += code > 0xffff ? String.raw`\u{${hex}}` : String.raw`\u${hex}`;
+  }
+  return out;
+}
+
+/**
+ * Write the characters of `stripControlCharacters` as visible `\u` plus 4 to 6 uppercase hex
+ * digits, one escape for each character or lone surrogate.
+ */
+export function escapeControlCharacters(text: string): string {
+  return text.replaceAll(TERMINAL_CONTROL_RE, (char) => {
+    const hex = (char.codePointAt(0) ?? 0).toString(16).toUpperCase().padStart(4, '0');
+    return String.raw`\u${hex}`;
+  });
 }

@@ -31,6 +31,8 @@ export interface PolicyFinding {
  * Normalize text for `deny` matching: NFKC, default-ignorable code points
  * removed, whitespace collapsed, lowercase. It catches plain variants of a
  * phrase, not a determined author.
+ *
+ * @internal
  */
 export function normalizeDenyText(text: string): string {
   return text

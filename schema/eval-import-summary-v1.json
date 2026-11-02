@@ -275,7 +275,7 @@
         "error",
         "warning"
       ],
-      "description": "Severity of a dataset finding."
+      "description": "Severity of a dataset finding.\n\nClosed enum: a new value needs a new schema version."
     }
   }
 }

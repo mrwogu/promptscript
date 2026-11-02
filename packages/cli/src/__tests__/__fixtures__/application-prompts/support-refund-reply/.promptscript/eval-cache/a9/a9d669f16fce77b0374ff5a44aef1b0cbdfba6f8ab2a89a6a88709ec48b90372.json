@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "a9d669f16fce77b0374ff5a44aef1b0cbdfba6f8ab2a89a6a88709ec48b90372",
+  "request": {
+    "contentHash": "sha256-9eda77937050f385c2da0ef1242ce5bc51d7ed34b86d93b2cfd7b1ce299e5f55",
+    "inputsHash": "sha256-3c3bbe6a9945484cddb6d0430f351c51dc42887638d2b5e27a925ea590ba45b7",
+    "modelRef": "claude-haiku-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-haiku-5-5",
+    "params": {
+      "maxTokens": 200
+    },
+    "sample": 3
+  },
+  "response": {
+    "text": "{\"verdict\":\"pass\",\"reason\":\"The reply is polite, the order is within the 30-day window and under 500 EUR, so approving the 42.50 EUR refund is allowed by policy.\"}",
+    "usage": {
+      "inputTokens": 607,
+      "outputTokens": 157
+    },
+    "latencyMs": 1616,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}

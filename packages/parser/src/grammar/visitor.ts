@@ -264,6 +264,7 @@ const BaseVisitor = parser.getBaseCstVisitorConstructor();
  */
 export type EnvProvider = (name: string) => string | undefined;
 
+/** @internal */
 export interface VisitorDiagnostic {
   readonly message: string;
   readonly loc: SourceLocation;

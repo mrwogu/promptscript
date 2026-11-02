@@ -1,0 +1,8 @@
+version: '1'
+project:
+  id: runtime-otel-example
+targets:
+  - bundle
+includePromptScriptSkill: false
+releases:
+  environments: [staging, prod]

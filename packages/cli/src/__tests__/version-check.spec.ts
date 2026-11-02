@@ -707,11 +707,15 @@ describe('version-check', () => {
         status: 503,
       });
       vi.stubGlobal('fetch', mockFetch);
+      const stderr = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const stdout = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
       const { fetchLatestVersion } = await import('../utils/version-check.js');
       const result = await fetchLatestVersion();
 
       expect(result).toBeNull();
+      expect(String(stderr.mock.calls[0]?.[0])).toContain('Could not check for updates: HTTP 503');
+      expect(stdout).not.toHaveBeenCalled();
     });
 
     it('should log verbose message on network error', async () => {
@@ -719,11 +723,17 @@ describe('version-check', () => {
       (error as NodeJS.ErrnoException).code = 'ECONNREFUSED';
       const mockFetch = vi.fn().mockRejectedValue(error);
       vi.stubGlobal('fetch', mockFetch);
+      const stderr = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      const stdout = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
       const { fetchLatestVersion } = await import('../utils/version-check.js');
       const result = await fetchLatestVersion();
 
       expect(result).toBeNull();
+      expect(String(stderr.mock.calls[0]?.[0])).toContain(
+        'Could not check for updates: ECONNREFUSED'
+      );
+      expect(stdout).not.toHaveBeenCalled();
     });
   });
 });

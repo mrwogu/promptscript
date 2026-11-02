@@ -63,6 +63,10 @@ export interface BaseCheck {
   gates: ReleaseGateResult[];
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
+  /** The checkout config with the policies, governance, releases and validation of the base */
+  config: PromptScriptConfig;
+  /** The environments the base config names */
+  environments: string[];
 }
 
 function historyError(message: string): ReleaseError {
@@ -551,6 +555,8 @@ export async function checkAgainstBase(
   const checked = await Promise.all(labels.map((label) => checkEnvironment(rules, label)));
   return {
     base,
+    config,
+    environments,
     changes: checked.flatMap((result) => result.changes),
     gates: checked.flatMap((result) => result.gates),
     warnings: unique([

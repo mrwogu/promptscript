@@ -7,11 +7,12 @@
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
       "!{projectRoot}/tsconfig.spec.json"
     ],
-    "sharedGlobals": []
+    "sharedGlobals": ["{workspaceRoot}/LICENSE"]
   },
   "plugins": [
     {
       "plugin": "@nx/js/typescript",
+      "exclude": ["apps/docs/**/*"],
       "options": {
         "typecheck": {
           "targetName": "typecheck"
@@ -37,9 +38,32 @@
         "ciTargetName": "test-ci",
         "testMode": "watch"
       }
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "devTargetName": "dev",
+        "typecheckTargetName": "typecheck",
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static"
+      },
+      "include": ["packages/browser-compiler/**/*", "packages/playground/**/*"]
     }
   ],
   "targetDefaults": {
+    "typecheck": {
+      "command": "tsc -p tsconfig.lib.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
+      "options": { "cwd": "{projectRoot}" },
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/tsconfig.base.json",
+        { "externalDependencies": ["typescript", "vitest", "@types/node"] }
+      ]
+    },
     "@nx/js:swc": {
       "cache": true,
       "dependsOn": ["^build"],
@@ -47,7 +71,17 @@
     }
   },
   "release": {
-    "projects": ["cli"],
+    "projects": [
+      "cli",
+      "core",
+      "parser",
+      "resolver",
+      "validator",
+      "formatters",
+      "compiler",
+      "browser-compiler",
+      "schemas"
+    ],
     "version": {
       "generator": "@nx/js:release-version",
       "generatorOptions": {
@@ -55,5 +89,8 @@
         "currentVersionResolver": "disk"
       }
     }
+  },
+  "affected": {
+    "legacy": true
   }
 }

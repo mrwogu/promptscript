@@ -9,6 +9,8 @@ Complete reference for the PromptScript command-line interface.
 
 ## Commands at a Glance
 
+The JSON output of `prs diff`, `prs release`, `prs approve`, `prs audit log`, `prs eval run` and `prs eval compare` is stable. See [JSON Output](json-output.md) for the rules.
+
 | Task                          | Command                                                                                                        |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Start a project               | [`prs init`](#prs-init)                                                                                        |
@@ -105,7 +107,7 @@ Notes:
   `deno run` the worker gets read and write access scoped to the output
   directory, and a compiled binary re-executes itself.
 - Telemetry reports `runtime: deno`; `DO_NOT_TRACK=1` keeps it disabled.
-- Node.js 20+ remains fully supported with unchanged behavior.
+- Node.js 22.22+ remains fully supported with unchanged behavior.
 
 ## Global Options
 
@@ -547,11 +549,23 @@ prs validate --format json
 
 **Exit Codes:**
 
-| Code | Meaning                                   |
-| ---- | ----------------------------------------- |
-| 0    | Validation passed                         |
-| 1    | Validation errors found                   |
-| 2    | Validation warnings found (with --strict) |
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| 0    | Validation passed                                    |
+| 1    | Validation errors found, or warnings with `--strict` |
+
+With `--format json`, stdout holds one document that matches
+[`validate-report/v1.json`](json-output.md). It has `success`, `errors`, `warnings` and a `summary`
+with the counts. With `--strict`, a warning sets `success` to `false`, and it stays in `warnings`.
+An error has a `code` when it is a PromptScript error (`PS` and three or four digits). The code is
+absent when the run stops before the compile with another error, such as a missing entry file or a
+registry clone failure. A parse error carries the resolve code `PS2000`, and the parser code, such
+as `PS1000`, is in the optional `cause` field of the error. `cause` is absent on errors that do not
+wrap another PromptScript error. A location has `file`, `line`, `column` and, on some warnings,
+`offset`. A parse error without a position reports `-1` for `line` and `column`. Paths are as the
+compiler reports them, usually absolute. With several files, `errors` and `warnings` hold the
+results of all of them in file order.
+`--fix` cannot be combined with `--format json`: the command prints an error to stderr and exits 1.
 
 ---
 
@@ -1187,7 +1201,7 @@ With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/release-report/v1.json` and the human text goes to stderr. Exit
 code 0 means success or a no-op. Exit code 1 means an error or a failed verification.
 
-Errors use the codes `PS5001` to `PS5010`, listed in the
+Errors use the codes `PS5001` to `PS5011`, listed in the
 [releases guide](../guides/releases.md#error-codes).
 
 #### prs release build
@@ -1302,16 +1316,46 @@ List the released prompts of every environment and verify their bundles.
 prs release status [options]
 ```
 
-| Option          | Description                                                             |
-| --------------- | ----------------------------------------------------------------------- |
-| `--history <n>` | Show commit, date and subject of the last n label commits (1-1000)      |
-| `--base <ref>`  | Check every label entry changed since `<ref>` with the rules of `<ref>` |
+| Option                     | Description                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--history <n>`            | Show commit, date and subject of the last n label commits (1-1000)                                    |
+| `--base <ref>`             | Check every label entry changed since `<ref>` with the rules of `<ref>`                               |
+| `--check-models`           | Check the models of every labelled prompt against the model catalog                                   |
+| `--retiring-within <days>` | With `--check-models`, days ahead in which a deprecated model counts as retiring (0-3650, default 30) |
+| `--strict`                 | Exit with code 1 when CODEOWNERS does not bind the approval directories the gates need                |
 
 Shows, per environment, the prompt id, the hash, whether it is in the latest build and whether it
 verifies. Under an entry with an experiment it lists the arms with their weights and verifies each
 arm bundle. Exits with code 1 when a referenced bundle is missing or does not verify. With prompt
 policies it also runs the [release gates](../guides/releases.md#release-gates) on every entry and
 shows an `approvals` column (`ok`, `missing: <roles>` or `-`); a failed gate is a warning there.
+
+When an approval policy applies to an environment that has a label entry, status reads the
+configured CODEOWNERS output from the `HEAD` commit by exact path and compares it with what
+`prs governance codeowners` generates. With `--base <ref>` it also reads the file at that commit
+and checks only that, after the marker line, it has the exact owner line of each role directory the
+approval policies of the config at `<ref>` need, rendered from the governance at `<ref>`; other
+lines there are not compared. It gives one warning, with the file as its `location`, if the file is
+missing at a commit (`is missing at <ref>`), out of date at `HEAD`, does not bind roles at `<ref>`
+(`does not bind <roles> at <ref>`), shadowed there by a file at an earlier location, not
+manageable by prs at `HEAD`, or cannot be generated from `governance`:
+`<file> <reason>, so the approval directories of <roles> are not bound to their owners. Without it any committer can add a record in another person's name. Run
+prs governance codeowners and commit the result.` `--strict` makes this warning, and no other,
+exit with code 1. A clean result does not prove that the branch requires code owner review, nor
+that the owners have write access. For any location other than `.gitlab/CODEOWNERS` the lines are
+written for GitHub. When every owner of a role is a user handle like `@jane`, status also warns about
+an approval (with `--base`, in the governance at `<ref>`) that counts for a gate whose approver is not one of them (`<prompt>@<hash> in <env>:
+<approver> approved as <role>, but is not in governance.roles.<role> (<owners>). It still counts,
+since the approver is only asserted; ...`). A role with any team owner is not checked, the record
+still counts and the exit code stays.
+
+A label entry whose prompt id does not match the id pattern of an approval (for example one with a
+zero-width space), or has more than seven slash-separated segments, gives a warning, and a gate that needs approvals never passes for it. The id in
+the warning, in the id column and in the `--base` and gate output is written with every character
+outside printable ASCII, and the backslash, as `\u200B` (`\u{1D173}` above U+FFFF). The label is
+still valid and the exit code stays; it has no error code. The warning is in `warnings` of the JSON
+report with the label file as its `location`. With `--base`, new or changed entries in label files
+that no configured environment owns are checked for it too.
 
 With `--base <ref>`, every label file in the checkout and at `<ref>` is compared, configured or
 not, and every entry that is new or changed must pass the promotion rules of `<ref>`: the
@@ -1329,8 +1373,16 @@ code 1. A ref that is missing, not a commit, ambiguous (pass the full name, such
 `refs/remotes/origin/main`) or not fetched in a shallow checkout fails with `PS5006`. See
 [Check label changes with `--base`](../guides/releases.md#check-label-changes-with---base).
 
+With `--check-models`, the model of every verified label entry and experiment arm is checked
+against the model catalog of the running `prs` plus `models.profiles`. A retired model, or a
+deprecated one whose retirement date is within `--retiring-within` days, fails with `PS5011`; a
+model the catalog does not know gives a warning. See
+[Check the models of the labels](../guides/releases.md#check-the-models-of-the-labels). For a weekly check in GitHub Actions, see
+[Scheduled drift check](../guides/ci.md#scheduled-drift-check).
+
 ```bash
 prs release status --history 5
+prs release status --check-models --retiring-within 14
 prs release status --base refs/remotes/origin/main
 ```
 
@@ -1343,21 +1395,22 @@ record it checks the whole [`governance`](config.md#governance) section, and a p
 [Approvals](../guides/releases.md#approvals) in the releases guide.
 
 ```bash
-prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [options]
+prs approve <id>@<hash> --role <role> --approver @<handle> (--env <env> | --all-environments) [--max-weight <percent>] [options]
 prs approve --list [<id>] [options]
 ```
 
-| Option                | Description                                                                  | Default |
-| --------------------- | ---------------------------------------------------------------------------- | ------- |
-| `--role <role>`       | Approval role from `governance.roles` (required to approve)                  | -       |
-| `--approver <handle>` | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
-| `--env <env>`         | The one environment the approval counts for                                  | -       |
-| `--all-environments`  | Let the approval count for every environment                                 | -       |
-| `--comment <text>`    | Note in the record, at most 2000 characters                                  | -       |
-| `--list`              | List records with their scope and state                                      | -       |
-| `--format <format>`   | `text` or `json`                                                             | `text`  |
-| `-c, --config <path>` | Path to a custom config file                                                 | -       |
-| `--cwd <dir>`         | Working directory (project root)                                             | -       |
+| Option                   | Description                                                                  | Default |
+| ------------------------ | ---------------------------------------------------------------------------- | ------- |
+| `--role <role>`          | Approval role from `governance.roles` (required to approve)                  | -       |
+| `--approver <handle>`    | Your Git host user handle, like `@jane` or `@jane.doe` (required to approve) | -       |
+| `--env <env>`            | The one environment the approval counts for                                  | -       |
+| `--all-environments`     | Let the approval count for every environment                                 | -       |
+| `--max-weight <percent>` | Highest arm weight in percent the approval counts for; needs `--env`         | -       |
+| `--comment <text>`       | Note in the record, at most 2000 characters                                  | -       |
+| `--list`                 | List records with their scope and state                                      | -       |
+| `--format <format>`      | `text` or `json`                                                             | `text`  |
+| `-c, --config <path>`    | Path to a custom config file                                                 | -       |
+| `--cwd <dir>`            | Working directory (project root)                                             | -       |
 
 `<hash>` is the full `sha256-<64 hex>`. It must be what the source builds now or a release bundle of
 that prompt. Give `--env` or `--all-environments`, one of the two. Before writing, the command
@@ -1367,16 +1420,26 @@ stderr, with invisible characters shown as `<U+XXXX>`. It writes
 `.promptscript/approvals/.gitattributes`. An existing record is never replaced: the command fails
 with `PS5105` and exit code 2. Other errors exit with code 1.
 
+`--max-weight` caps the approval at an experiment arm weight, a percent from 0.01 to 100 with at
+most two decimals. It needs `--env` and is refused with `--all-environments`, and a bad value is
+`PS5110`. The record gets `maxWeight` in basis points. It counts only for an arm at or under that
+weight, never for the entry hash, a promote, `--end --keep` or a plain rollback, see
+[Capped approvals](../guides/releases.md#capped-approvals). `--list` shows such a record as
+`prod up to 25 %` and does not take the option.
+
 `--list` prints per prompt the hash the checkout builds and every record as `current`,
 `labelled:<env>`, `stale`, `untracked`, `modified`, `misplaced` or `unknown-role`. It compares the
 path and the bytes Git has for each record, so with record files it needs Git and a repository
-(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning.
+(`PS5108`). Invalid, modified, misplaced and unknown-role records get a `PS5109` warning. A record
+whose approver is not one of the owners of a role that lists user handles only, like `@jane`, gets a
+warning too if the record is `current` or `labelled`; a role with a team owner is not checked, and the record keeps its state.
 With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/approval-report/v1.json`.
 
 ```bash
 prs approve --list acme-support/refund-reply
 prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod
+prs approve acme-support/refund-reply@sha256-<64 hex> --role legal --approver @jane --env prod --max-weight 25
 ```
 
 ---
@@ -1387,7 +1450,8 @@ Run eval suites against the prompts of the project, compare two reports and impo
 samples into a dataset. A suite is a file
 `<name>.eval.yaml`, `.eval.yml` or `.eval.json` under `.promptscript/evals/` that names a prompt, a
 dataset and assertions. The prompts come from a fresh in-memory compile of the source, with the
-`bundle` target. The settings are in [`eval`](config.md#eval).
+`bundle` target. The settings are in [`eval`](config.md#eval). For a worked example, see
+[Evaluating Prompts](../guides/evals.md).
 
 #### prs eval run
 
@@ -1474,7 +1538,7 @@ Markdown print it as a count and a percentage.
 | `PS6604` | Warning: labels name rows the run did not read                                  |
 
 **Output.** With `json`, `markdown` or `junit`, stdout holds exactly one document. The JSON report
-matches `https://getpromptscript.dev/schema/eval-report/v1.json` and holds no timestamp, so two replay
+matches `https://getpromptscript.dev/schema/eval-report/v1.json`, starts with `$schema` and `version`, and holds no timestamp, so two replay
 runs give the same bytes. Progress, warnings and `sending` lines go to stderr. In JSON mode errors are
 inside the document, under `errors`. Control and bidi characters are removed from every string that
 comes from a model, a provider or a dataset, in all formats. Reports hold no responses, but a
@@ -1504,10 +1568,19 @@ runs that arm instead, only for prompts that have it. One run covers one arm, be
 each suite once. A suite whose prompt is not in the label, or has no such arm, is skipped with a
 warning `PS6311`, which counts for `--strict`. A suite you name on the command line is an error
 instead, and so is a run where every suite is skipped. The report records the hash of every suite
-under `prompt.contentHash`, and `--report-dir` names files after that hash. The cache is keyed by
+under `prompt.contentHash`, and `--report-dir` names files after that hash. Only the prompt under
+test comes from the label. The suite, its dataset and the rubric prompts of `llm-judge` assertions
+come from the working tree, so a run with a judge compiles the project (`PS6310` when it does not
+compile, `PS6203` when the rubric is not in it), and a run without judges does not. The rubrics are
+compiled with the validator settings of a release build, so `validation.excludes` cannot switch off
+the forced security rules for them. A rubric always comes from the working tree, also when the label
+serves the same prompt id; `judges` in the report holds the hash of the rubric that judged, and
+stderr gets one line `label <env>: suite <name> judged by <rubric> at <short hash> (working tree)`
+per judged suite, next to the `runs` line. The cache is keyed by
 the hash too: replay answers only from entries recorded for that hash, so a label that is behind the
 source needs `--cache record` once, or `--cache off --max-cost <usd>` for a live check of what the
-environment serves. Release gates do not read eval reports, so a report of a label run is not gate
+environment serves. For a weekly check in GitHub Actions, see
+[Scheduled drift check](../guides/ci.md#scheduled-drift-check). Release gates do not read eval reports, so a report of a label run is not gate
 evidence.
 
 | Exit code | Outcome (`outcome` in JSON)                                                                   |
@@ -1551,8 +1624,8 @@ baseline and does not pass in the candidate. A drop of the pass rate above the t
 regression too. Only cases both reports have are compared. When the dataset hash differs, that is
 noted, and a suite or model that only one report has is listed with its cases and is not a
 regression, but it is shown as a warning: on stderr for `json`, inside the document for `text` and
-`markdown`. With `--format json`, stdout holds one document that matches
-`https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
+`markdown`. With `--format json`, stdout holds one document that starts with `$schema` and `version`
+and matches `https://getpromptscript.dev/schema/eval-comparison/v1.json`. A comparison has no place for errors,
 so an unreadable report or a bad option goes to stderr in every format, with exit code 1.
 
 ```bash
@@ -1725,11 +1798,10 @@ Read the governance history of the project from Git.
 
 #### prs audit log
 
-List prompt file changes, approvals, promotions, rollbacks, label entries removed, config changes
-and changes of the generated CODEOWNERS section, newest commit first, merges and side branches
-included, plus the changes a merge dropped from a parent. See [Audit log](../guides/releases.md#audit-log)
-in the releases guide. Experiment arms and weights are not listed yet: read the label history with
-`git log -p`.
+List prompt file changes, approvals, promotions, rollbacks, label entries removed, experiments
+started, changed or ended, config changes and changes of the generated CODEOWNERS section, newest
+commit first, merges and side branches included, plus the changes a merge dropped from a parent.
+See [Audit log](../guides/releases.md#audit-log) in the releases guide.
 
 ```bash
 prs audit log [options]
@@ -1751,7 +1823,11 @@ The command runs in a Git checkout with the full history; a shallow clone, no re
 failure or a history the log cannot explain is `PS5108`. A malformed `--prompt` or `--hash` is `PS5102`. Exit code 0 means the log was
 read, 1 an error. With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/audit-log/v1.json`, with `head`, the commit the log was read
-from. `--format cef` prints one CEF line per event.
+from. `--format cef` prints one CEF line per event. Text and CEF lines show invisible and
+control characters as `\u` plus 4 to 6 hex digits, for example `\u200B` or `\uE0001`. Two
+exceptions: a line break in a CEF extension value is the CEF `\n`, and a comment in the text
+output goes on separate lines. In CEF that text is escaped like any other, so a SIEM shows
+`\u200B` and a literal backslash stays distinct. `--format json` keeps the exact values.
 
 ```bash
 prs audit log --prompt acme-support/refund-reply --env prod --hash 850dce44

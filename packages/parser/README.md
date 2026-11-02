@@ -49,7 +49,6 @@ the legacy parse functions.
 | :---------------- | :-------------------------------------- |
 | `PSLexer`         | Chevrotain lexer instance               |
 | `tokenize(input)` | Tokenize source text into a token array |
-| `tokens`          | All token type definitions              |
 
 ### Parser & Visitor
 

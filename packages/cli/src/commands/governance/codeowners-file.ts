@@ -74,15 +74,13 @@ function splitAtMarker(
   return above;
 }
 
-/** The current file and its lines above this project's marker; undefined when there is no file. */
-export async function readManaged(
-  path: string,
+/** Text of a CODEOWNERS file, read as latin1, split at this project's marker or refused with PS5106. */
+export function manageContent(
+  current: string,
   file: string,
   marker: string,
   host: CodeownersHost
-): Promise<ManagedFile | undefined> {
-  if (!existsSync(path)) return undefined;
-  const current = await readFile(path, 'latin1');
+): ManagedFile {
   if (current.includes('\0')) {
     refuse(
       file,
@@ -92,6 +90,17 @@ export async function readManaged(
   const bom = current.startsWith(BOM) ? BOM : '';
   const above = splitAtMarker(current.slice(bom.length), marker, file, host);
   return { current, bom, above };
+}
+
+/** The current file and its lines above this project's marker; undefined when there is no file. */
+export async function readManaged(
+  path: string,
+  file: string,
+  marker: string,
+  host: CodeownersHost
+): Promise<ManagedFile | undefined> {
+  if (!existsSync(path)) return undefined;
+  return manageContent(await readFile(path, 'latin1'), file, marker, host);
 }
 
 /** The new file: the kept bytes above the marker, then the generated section. */

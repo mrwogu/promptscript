@@ -51,9 +51,9 @@ import {
   writeOut,
   writeSuiteReports,
 } from './output.js';
-import { loadLabelProject, selectAtLabel, type LabelSelection } from './label.js';
+import { judgeLines, loadLabelProject, selectAtLabel, type LabelSelection } from './label.js';
 import { compileBundles, loadEvalProject, type EvalProject } from './project.js';
-import type { ReleaseProject } from '../release/project.js';
+import { releaseValidatorConfig, type ReleaseProject } from '../release/project.js';
 
 /** What `eval run` can be given besides the CLI services, for tests. */
 export interface EvalCommandServices extends CliServices {
@@ -118,7 +118,8 @@ function plural(count: number, word: string): string {
  * Exit 0 when everything passed, 1 for a failed case, threshold, regression, budget or
  * setup error, 2 for a pass with warnings under `--strict`, 130 on Ctrl+C. Live modes,
  * the budget and extra provider hosts come from flags only. With `--label` the prompts are
- * the verified bundles a release environment serves, not a fresh compile.
+ * the verified bundles a release environment serves, not a fresh compile; only judge
+ * rubrics are compiled from the working tree.
  */
 export async function evalRunCommand(
   names: string[],
@@ -298,13 +299,18 @@ function loadErrors(loaded: LoadSuitesResult): EvalReportErrorV1[] {
     }));
 }
 
+/** The selection of a run; rubrics are set only when a selected suite has a judge. */
+interface RunSelection extends LabelSelection {
+  rubrics?: PromptBundleV1[];
+}
+
 // With --label the suites and bundles come from the label; a suite that did not load is still
 // reported when the label step fails
 async function withLabel(
   context: RunContext,
   inputs: Inputs,
   loaded: LoadSuitesResult
-): Promise<LabelSelection> {
+): Promise<RunSelection> {
   const { release } = inputs;
   const { label, variant } = context.options;
   if (release === undefined || label === undefined) {
@@ -312,9 +318,26 @@ async function withLabel(
   }
   const target = { environment: label, ...maybe('variant', variant) };
   try {
-    return await orStop(EVAL_CODES.PROJECT_INVALID, () =>
-      selectAtLabel(release, target, loaded.suites, context.names.length > 0)
-    );
+    return await orStop(EVAL_CODES.PROJECT_INVALID, async () => {
+      const selection = await selectAtLabel(
+        release,
+        target,
+        loaded.suites,
+        context.names.length > 0
+      );
+      // Rubrics come from the working tree, like the suite; compile only when a judge needs it
+      const judged = selection.suites.some(({ suite }) =>
+        suite.assertions.some((assertion) => assertion.kind === 'llm-judge')
+      );
+      if (!judged) return selection;
+      // Same validator as a release build, so validation.excludes cannot switch off forced rules
+      const rubrics = await compileBundles(inputs.project, {
+        validator: releaseValidatorConfig(inputs.project.config),
+        consequence: 'the judge rubrics cannot be built',
+      });
+      const lines = judgeLines(target, selection.suites, rubrics);
+      return { ...selection, rubrics, runs: [...selection.runs, ...lines] };
+    });
   } catch (error) {
     // orStop turns every failure of the step into a StopRun
     throw new StopRun([...loadErrors(loaded), ...(error as StopRun).errors]);
@@ -363,7 +386,8 @@ function buildRunOptions(
   context: RunContext,
   inputs: Inputs,
   suites: LoadedSuite[],
-  providers: EvalProviderLookup
+  providers: EvalProviderLookup,
+  rubrics?: PromptBundleV1[]
 ): RunEvalOptions {
   const { options, parsed, reporter } = context;
   const { config } = inputs.project;
@@ -372,6 +396,7 @@ function buildRunOptions(
     projectRoot: resolveProjectRoot(options),
     suites,
     bundles: inputs.bundles,
+    ...maybe('rubrics', rubrics),
     catalog: getModelCatalog(config.models),
     providers,
     cache: { mode: parsed.cache, dir: CACHE_DIR },
@@ -478,9 +503,9 @@ async function runChecked(context: RunContext): Promise<void> {
   const inputs = await loadInputs(options, root);
   const loaded = await loadSuites({ projectRoot: root, ...(names.length > 0 ? { names } : {}) });
   const selection = await withLabel(context, inputs, loaded);
-  const { suites, bundles } = selection;
+  const { suites, bundles, rubrics } = selection;
   const providers = buildProviders(context, inputs.project.config);
-  const runOptions = buildRunOptions(context, { ...inputs, bundles }, suites, providers);
+  const runOptions = buildRunOptions(context, { ...inputs, bundles }, suites, providers, rubrics);
   await stopOnLoadErrors({ ...loaded, suites }, runOptions);
   requireLabelSuites(options, loaded.suites.length, suites.length);
   announceLabel(context, selection);

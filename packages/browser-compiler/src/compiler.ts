@@ -158,6 +158,8 @@ type FormatterConstructor = new () => Formatter;
 
 /**
  * Browser-compatible compiler for PromptScript.
+ *
+ * @internal
  */
 export class BrowserCompiler {
   private readonly resolver: BrowserResolver;
@@ -181,6 +183,7 @@ export class BrowserCompiler {
       cache: options.cache,
       logger: this.logger,
       envVars: options.envVars,
+      projectRoot: options.projectRoot,
     });
 
     this.validator = new Validator({ ...options.validator, logger: this.logger });
@@ -593,6 +596,8 @@ export class BrowserCompiler {
 
 /**
  * Create a new browser compiler instance.
+ *
+ * @internal
  */
 export function createBrowserCompiler(options: BrowserCompilerOptions): BrowserCompiler {
   return new BrowserCompiler(options);

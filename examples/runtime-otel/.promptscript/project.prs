@@ -1,0 +1,38 @@
+@meta {
+  id: "acme-support"
+  syntax: "1.6.0"
+}
+
+@inherit ./org
+
+@prompts {
+  refund-reply: {
+    description: "Decide on a refund request and write the reply"
+    risk: "high"
+    dataClasses: ["pii"]
+    compose: [identity, standards, restrictions]
+    model: { ref: "claude-haiku-5-5", maxTokens: 600 }
+    inputs: {
+      order_total: { type: "number", description: "Order total in EUR" }
+      days_since_delivery: { type: "number", description: "Days since the order arrived" }
+      message: { type: "string", description: "What the customer wrote" }
+    }
+    output: {
+      decision: {
+        type: "enum"
+        options: ["approve", "escalate", "deny"]
+        description: "What happens to the refund request"
+      }
+      reply: { type: "string", description: "The reply to send to the customer" }
+    }
+    system: """
+      Refunds are allowed within 30 days of delivery.
+      Send anything above 500 EUR to a human by choosing escalate.
+    """
+    user: """
+      Order total: {{input.order_total}} EUR
+      Days since delivery: {{input.days_since_delivery}}
+      Customer wrote: {{input.message}}
+    """
+  }
+}

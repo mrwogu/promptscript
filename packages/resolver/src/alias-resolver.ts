@@ -13,6 +13,8 @@ import { UnknownAliasError } from '@promptscript/core';
 
 /**
  * Result of expanding a registry alias path.
+ *
+ * @internal
  */
 export interface ExpandedAlias {
   /** Resolved Git repository URL (HTTPS or SSH) */
@@ -146,6 +148,8 @@ export function validateRegistriesConfig(registries: RegistriesConfig): Registri
  * });
  * // { repoUrl: 'git@gitlab.internal.com:company/monorepo', path: 'packages/prs/auth' }
  * ```
+ *
+ * @internal
  */
 export function expandAlias(aliasPath: string, registries: RegistriesConfig): ExpandedAlias {
   // Extract version suffix — find the first '@' after the initial alias segment
@@ -222,6 +226,8 @@ export function expandAlias(aliasPath: string, registries: RegistriesConfig): Ex
  * });
  * // 'git@github.com:acme/standards.git'
  * ```
+ *
+ * @internal
  */
 export function findFallbackUrl(repoUrl: string, registries: RegistriesConfig): string | undefined {
   for (const entry of Object.values(registries)) {
@@ -255,6 +261,8 @@ export function findFallbackUrl(repoUrl: string, registries: RegistriesConfig): 
  * });
  * // { url: 'https://gitlab.com/company/monorepo.git', timeout: 600000 }
  * ```
+ *
+ * @internal
  */
 export function findRegistryEntry(
   repoUrl: string,

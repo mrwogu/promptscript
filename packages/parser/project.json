@@ -19,9 +19,10 @@
         "outputPath": "dist/packages/parser",
         "main": "packages/parser/src/index.ts",
         "tsConfig": "packages/parser/tsconfig.lib.json",
-        "assets": ["packages/parser/*.md"]
+        "assets": ["packages/parser/*.md", { "input": ".", "glob": "LICENSE", "output": "." }]
       }
     },
+    "typecheck": {},
     "nx-release-publish": {
       "options": {
         "packageRoot": "dist/{projectRoot}"

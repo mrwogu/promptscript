@@ -33,6 +33,10 @@ CHANGELOG.md
 # CI compares both byte for byte with what the CLI and the example write.
 /examples/runtime-node/.promptscript/releases
 /examples/runtime-node/expected-output.json
+/examples/runtime-node/.promptscript/eval-cache
+/examples/runtime-node/.promptscript/eval-baselines
+/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/.promptscript/eval-cache
+/packages/cli/src/__tests__/__fixtures__/application-prompts/support-refund-reply/reports
 
 # Vendored third-party skill assets (HTML copied verbatim from upstream)
 **/skills/skill-creator/**/*.html
@@ -53,6 +57,11 @@ schema/eval-comparison-v1.json
 schema/approval-record-v1.json
 schema/eval-sample-v1.json
 schema/eval-import-summary-v1.json
+schema/validate-report-v1.json
 
 # Lock files - machine generated
 pnpm-lock.yaml
+
+# Release files are compared byte for byte in CI, the lockfile is npm's
+/examples/runtime-otel/.promptscript/releases
+/examples/runtime-otel/package-lock.json

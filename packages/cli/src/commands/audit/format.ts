@@ -1,5 +1,6 @@
-import { stripControlCharacters } from '../release/git.js';
-import type { AuditEvent, AuditEventType } from './events.js';
+import { escapeControlCharacters } from '../release/git.js';
+import { percentText } from '../release/layout.js';
+import type { AuditEvent, AuditEventType, AuditExperimentArm } from './events.js';
 
 /** CEF severity and name of each event type. */
 const CEF_TYPES: Readonly<Record<AuditEventType, { name: string; severity: number }>> = {
@@ -12,27 +13,81 @@ const CEF_TYPES: Readonly<Record<AuditEventType, { name: string; severity: numbe
   'merge-dropped': { name: 'Merge dropped a change', severity: 7 },
   generated: { name: 'CODEOWNERS section generated', severity: 3 },
   'config-changed': { name: 'Config changed', severity: 6 },
+  'experiment-started': { name: 'Experiment started', severity: 6 },
+  'experiment-changed': { name: 'Experiment changed', severity: 6 },
+  'experiment-ended': { name: 'Experiment ended', severity: 6 },
 };
 
 const CHANGE_WORDS = { A: 'added', M: 'modified', D: 'deleted' } as const;
 
-/** A CEF header value: `\` and `|` escaped, control characters dropped. */
-export function cefHeaderValue(value: string): string {
-  return stripControlCharacters(
-    value.replaceAll('\\', String.raw`\\`).replaceAll('|', String.raw`\|`)
-  );
+/** The visible text of a value: `\` doubled, invisible characters written as `\uXXXX`. */
+function visibleText(value: string): string {
+  return escapeControlCharacters(value.replaceAll('\\', String.raw`\\`));
 }
 
 /**
- * A CEF extension value: `\` and `=` escaped, line breaks as `\n`, other control
- * characters dropped.
+ * A CEF header value: the visible text with `\` and `|` escaped the CEF way, so a SIEM that
+ * decodes the line gets the same text as the text output.
+ */
+export function cefHeaderValue(value: string): string {
+  return visibleText(value)
+    .replaceAll('\\', String.raw`\\`)
+    .replaceAll('|', String.raw`\|`);
+}
+
+/**
+ * A CEF extension value: each line of the visible text with `\` and `=` escaped the CEF way,
+ * and the line breaks written as `\n`.
  */
 export function cefExtensionValue(value: string): string {
-  const escaped = value
-    .replaceAll('\\', String.raw`\\`)
-    .replaceAll('=', String.raw`\=`)
-    .replace(/\r\n|\r|\n/g, String.raw`\n`);
-  return stripControlCharacters(escaped);
+  return value
+    .split(/\r\n|\r|\n/)
+    .map((line) =>
+      visibleText(line)
+        .replaceAll('\\', String.raw`\\`)
+        .replaceAll('=', String.raw`\=`)
+    )
+    .join(String.raw`\n`);
+}
+
+/** `control@hash=90 %, warm@hash=10 %`: the arms with their share. */
+function armsText(arms: readonly AuditExperimentArm[]): string {
+  return arms
+    .map((arm) => `${arm.variant}@${arm.contentHash}=${percentText(arm.weight)}`)
+    .join(', ');
+}
+
+/** The CEF `msg` of an experiment event: the arms, and what they replaced or what was kept. */
+function experimentMessage(event: AuditEvent): string | undefined {
+  if (event.arms === undefined) return event.comment;
+  const previous =
+    event.previousArms === undefined ? [] : [`previous ${armsText(event.previousArms)}`];
+  const kept = event.type === 'experiment-ended' ? [`kept ${event.keptVariant ?? '-'}`] : [];
+  return [`arms ${armsText(event.arms)}`, ...previous, ...kept].join('; ');
+}
+
+/** Total weight of the variants (every arm but the control) in basis points. */
+function variantWeight(event: AuditEvent): string | undefined {
+  if (event.type === 'experiment-ended' || event.arms === undefined) return undefined;
+  return String(event.arms.slice(1).reduce((total, arm) => total + arm.weight, 0));
+}
+
+function approverLabel(event: AuditEvent): string | undefined {
+  return event.approverSource === undefined ? undefined : 'approverSource';
+}
+
+/**
+ * flexString2 is the approver source on approval events and the experiment name on experiment
+ * events; flexNumber2 is the variant weight of an experiment event.
+ */
+function experimentFields(event: AuditEvent): [string, string | undefined][] {
+  const weight = variantWeight(event);
+  return [
+    ['flexString2', event.experiment ?? event.approverSource],
+    ['flexString2Label', event.experiment === undefined ? approverLabel(event) : 'experiment'],
+    ['flexNumber2', weight],
+    ['flexNumber2Label', weight === undefined ? undefined : 'variantWeight'],
+  ];
 }
 
 /** One CEF line for an event; `head` is the commit the log was read from. */
@@ -71,11 +126,12 @@ export function cefLine(event: AuditEvent, head: string, version: string): strin
       [`cs${index + 1}Label`, value === undefined ? undefined : label],
     ]),
     ['outcome', outcome],
-    ['msg', event.comment],
+    ['msg', experimentMessage(event)],
     ['flexString1', head],
     ['flexString1Label', 'head'],
-    ['flexString2', event.approverSource],
-    ['flexString2Label', event.approverSource === undefined ? undefined : 'approverSource'],
+    ['flexNumber1', event.maxWeight === undefined ? undefined : String(event.maxWeight)],
+    ['flexNumber1Label', event.maxWeight === undefined ? undefined : 'maxWeight'],
+    ...experimentFields(event),
     ['cn1', event.viaMerge === true ? '1' : undefined],
     ['cn1Label', event.viaMerge === true ? 'viaMerge' : undefined],
     ['cn2', event.configured === false ? '0' : undefined],
@@ -90,10 +146,16 @@ export function cefLine(event: AuditEvent, head: string, version: string): strin
   return `${header}|${extension}`;
 }
 
-const shown = (value: string): string => stripControlCharacters(value);
+/** Text output: `\` doubled, control, bidi and zero-width characters shown as `\uXXXX`. */
+const shown = visibleText;
 
 function person(event: AuditEvent): string {
   return `by ${shown(event.author.name)} <${shown(event.author.email)}>`;
+}
+
+/** ` up to 5 %` for a record with a ceiling, so a capped approval never reads as a full one. */
+function ceilingText(event: AuditEvent): string {
+  return event.maxWeight === undefined ? '' : ` up to ${percentText(event.maxWeight)}`;
 }
 
 function details(event: AuditEvent): string[] {
@@ -106,7 +168,7 @@ function details(event: AuditEvent): string[] {
             shown(event.prompt),
             `role=${shown(event.role ?? '')}`,
             `approver=${shown(event.approver ?? '')} (${event.approverSource ?? 'asserted'})`,
-            `env=${shown(event.environment ?? 'all')}`,
+            `env=${shown(event.environment ?? 'all')}${ceilingText(event)}`,
             `state=${event.state ?? 'well-formed'}`,
             shown(event.path),
           ];
@@ -121,11 +183,29 @@ function details(event: AuditEvent): string[] {
     case 'changed':
     case 'config-changed':
       return [event.change ?? 'M', shown(event.path)];
+    case 'experiment-started':
+    case 'experiment-changed':
+    case 'experiment-ended':
+      return experimentDetails(event);
     case 'generated':
       return [shown(event.path)];
     case 'merge-dropped':
       return droppedDetails(event);
   }
+}
+
+function experimentDetails(event: AuditEvent): string[] {
+  const previous =
+    event.previousArms === undefined ? [] : [`previous=${shown(armsText(event.previousArms))}`];
+  const kept = event.type === 'experiment-ended' ? [`kept=${shown(event.keptVariant ?? '-')}`] : [];
+  return [
+    shown(event.prompt ?? ''),
+    `env=${shown(event.environment ?? '')}`,
+    `experiment=${shown(event.experiment ?? '')}`,
+    `arms=${shown(armsText(event.arms ?? []))}`,
+    ...previous,
+    ...kept,
+  ];
 }
 
 /** What the merge dropped: a label entry, a record change or the CODEOWNERS section. */
@@ -167,7 +247,7 @@ export function textLines(event: AuditEvent): string[] {
     event.comment === undefined
       ? []
       : event.comment
-          .split('\n')
+          .split(/\r?\n/)
           .map((text, index) => `    ${index === 0 ? 'comment: ' : '  '}${shown(text)}`);
   return [line, ...comment];
 }

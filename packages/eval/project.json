@@ -14,6 +14,7 @@
         "tsConfig": "packages/eval/tsconfig.lib.json",
         "assets": ["packages/eval/*.md"]
       }
-    }
+    },
+    "typecheck": {}
   }
 }

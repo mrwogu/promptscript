@@ -5,6 +5,7 @@ import {
   approvalRecordPath,
   compareCodeUnits,
   parseApprovalRecord,
+  isPromptId,
   serializeApprovalRecord,
   type ApprovalRecordV1,
 } from '@promptscript/core';
@@ -30,6 +31,13 @@ import { readRegularFile, UnreadableFileError } from '../release/layout.js';
 export const APPROVALS_DIRECTORY = '.promptscript/approvals';
 /** Directory levels read below the approvals directory: the role and up to 7 id segments. */
 export const MAX_APPROVAL_DEPTH = 8;
+
+/** Is this a prompt id an approval can name: the pattern, and few enough segments to fit. */
+export function isApprovalPromptId(id: string): boolean {
+  // The role takes one directory level, each id segment one more.
+  return isPromptId(id) && id.split('/').length <= MAX_APPROVAL_DEPTH - 1;
+}
+
 /** Most files and directories one read takes. */
 export const MAX_APPROVAL_ENTRIES = 10_000;
 /** Largest record file read. */
@@ -101,7 +109,7 @@ function assertDirectory(path: string, details: Stats): void {
 function existsError(record: ApprovalRecordV1, path: string): GovernanceError {
   return new GovernanceError(
     PS5105_APPROVAL_EXISTS,
-    `An approval by ${record.approver.value} as ${record.role} for this hash exists: ${path}. Delete it in a commit to withdraw it; approve again after that to change its scope or comment.`,
+    `An approval by ${record.approver.value} as ${record.role} for this hash exists: ${path}. To withdraw it, delete it in a commit. To change its scope, comment or ceiling, delete the file in the same change and approve again.`,
     path
   );
 }

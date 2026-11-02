@@ -10,9 +10,10 @@ export class ResolveError extends PSError {
   constructor(
     message: string,
     location?: SourceLocation,
-    code: ErrorCode = ErrorCode.RESOLVE_ERROR
+    code: ErrorCode = ErrorCode.RESOLVE_ERROR,
+    cause?: Error
   ) {
-    super(message, code, { location });
+    super(message, code, { location, cause });
     this.name = 'ResolveError';
   }
 }

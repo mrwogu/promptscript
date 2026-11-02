@@ -4,15 +4,21 @@ import { createToken, Lexer, TokenType } from 'chevrotain';
 // Whitespace & Comments (whitespace skipped, comments collected in a side group)
 // ============================================================
 
-/** Lexer group that holds comment tokens, outside the stream the parser sees. */
+/**
+ * Lexer group that holds comment tokens, outside the stream the parser sees.
+ *
+ * @internal
+ */
 export const COMMENT_GROUP = 'comments';
 
+/** @internal */
 export const WhiteSpace = createToken({
   name: 'WhiteSpace',
   pattern: /[ \t\r\n]+/,
   group: Lexer.SKIPPED,
 });
 
+/** @internal */
 export const LineComment = createToken({
   name: 'LineComment',
   pattern: /#[^\n\r]*/,
@@ -24,6 +30,7 @@ export const LineComment = createToken({
 // Text Blocks (greedy - must be before other tokens)
 // ============================================================
 
+/** @internal */
 export const TextBlock = createToken({
   name: 'TextBlock',
   pattern: /"""[\s\S]*?"""/,
@@ -43,6 +50,7 @@ export const TextBlock = createToken({
 const SCOPE_SEGMENT = String.raw`(?:@[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z0-9_/.-]*(?=@))?`;
 const VERSION_SUFFIX = String.raw`(?:@[a-zA-Z0-9^~./-]+)?`;
 
+/** @internal */
 export const PathReference = createToken({
   name: 'PathReference',
   pattern: new RegExp(
@@ -50,6 +58,7 @@ export const PathReference = createToken({
   ),
 });
 
+/** @internal */
 export const RelativePath = createToken({
   name: 'RelativePath',
   pattern: /\.\/[a-zA-Z0-9_/.-]+|\.\.\/[a-zA-Z0-9_/.-]+/,
@@ -58,6 +67,8 @@ export const RelativePath = createToken({
 /**
  * SCP-style Git path for private repositories.
  * Matches: git@host:org/repo[/path][@version]
+ *
+ * @internal
  */
 export const SshPath = createToken({
   name: 'SshPath',
@@ -70,6 +81,7 @@ export const SshPath = createToken({
 // Identifier (base for keywords)
 // ============================================================
 
+/** @internal */
 export const Identifier = createToken({
   name: 'Identifier',
   pattern: /[a-zA-Z_][a-zA-Z0-9_-]*/,
@@ -79,6 +91,8 @@ export const Identifier = createToken({
  * URL-style path for Go-style direct imports.
  * Matches: domain.tld/org/repo/path[@version]
  * Domain detection: first segment must contain a dot.
+ *
+ * @internal
  */
 export const UrlPath = createToken({
   name: 'UrlPath',
@@ -92,66 +106,77 @@ export const UrlPath = createToken({
 // Keywords (must have longer_alt: Identifier)
 // ============================================================
 
+/** @internal */
 export const Meta = createToken({
   name: 'Meta',
   pattern: /meta/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Inherit = createToken({
   name: 'Inherit',
   pattern: /inherit/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Use = createToken({
   name: 'Use',
   pattern: /use/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const As = createToken({
   name: 'As',
   pattern: /as/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Into = createToken({
   name: 'Into',
   pattern: /into/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Extend = createToken({
   name: 'Extend',
   pattern: /extend/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const True = createToken({
   name: 'True',
   pattern: /true/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const False = createToken({
   name: 'False',
   pattern: /false/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Null = createToken({
   name: 'Null',
   pattern: /null/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Range = createToken({
   name: 'Range',
   pattern: /range/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const Enum = createToken({
   name: 'Enum',
   pattern: /enum/,
@@ -159,18 +184,21 @@ export const Enum = createToken({
 });
 
 // Type keywords for param definitions (must come before Identifier)
+/** @internal */
 export const StringType = createToken({
   name: 'StringType',
   pattern: /string/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const NumberType = createToken({
   name: 'NumberType',
   pattern: /number/,
   longer_alt: Identifier,
 });
 
+/** @internal */
 export const BooleanType = createToken({
   name: 'BooleanType',
   pattern: /boolean/,
@@ -178,11 +206,13 @@ export const BooleanType = createToken({
 });
 
 // Template expression tokens
+/** @internal */
 export const TemplateOpen = createToken({
   name: 'TemplateOpen',
   pattern: /\{\{/,
 });
 
+/** @internal */
 export const TemplateClose = createToken({
   name: 'TemplateClose',
   pattern: /\}\}/,
@@ -192,76 +222,91 @@ export const TemplateClose = createToken({
 // Symbols
 // ============================================================
 
+/** @internal */
 export const At = createToken({
   name: 'At',
   pattern: /@/,
 });
 
+/** @internal */
 export const LBrace = createToken({
   name: 'LBrace',
   pattern: /\{/,
 });
 
+/** @internal */
 export const RBrace = createToken({
   name: 'RBrace',
   pattern: /\}/,
 });
 
+/** @internal */
 export const LBracket = createToken({
   name: 'LBracket',
   pattern: /\[/,
 });
 
+/** @internal */
 export const RBracket = createToken({
   name: 'RBracket',
   pattern: /\]/,
 });
 
+/** @internal */
 export const LParen = createToken({
   name: 'LParen',
   pattern: /\(/,
 });
 
+/** @internal */
 export const RParen = createToken({
   name: 'RParen',
   pattern: /\)/,
 });
 
+/** @internal */
 export const Colon = createToken({
   name: 'Colon',
   pattern: /:/,
 });
 
+/** @internal */
 export const Comma = createToken({
   name: 'Comma',
   pattern: /,/,
 });
 
+/** @internal */
 export const Equals = createToken({
   name: 'Equals',
   pattern: /=/,
 });
 
+/** @internal */
 export const Question = createToken({
   name: 'Question',
   pattern: /\?/,
 });
 
+/** @internal */
 export const Bang = createToken({
   name: 'Bang',
   pattern: /!/,
 });
 
+/** @internal */
 export const DotDot = createToken({
   name: 'DotDot',
   pattern: /\.\./,
 });
 
+/** @internal */
 export const Dot = createToken({
   name: 'Dot',
   pattern: /\./,
 });
 
+/** @internal */
 export const Dash = createToken({
   name: 'Dash',
   pattern: /-(?!\d)/,
@@ -271,6 +316,7 @@ export const Dash = createToken({
 // Literals
 // ============================================================
 
+/** @internal */
 export const StringLiteral = createToken({
   name: 'StringLiteral',
   pattern: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/,
@@ -279,12 +325,15 @@ export const StringLiteral = createToken({
 /**
  * Environment variable reference used where a value is expected:
  * `${NAME}` or `${NAME:-fallback}`.
+ *
+ * @internal
  */
 export const EnvVar = createToken({
   name: 'EnvVar',
   pattern: /\$\{[A-Za-z_]\w*(?::-[^}]*)?\}/,
 });
 
+/** @internal */
 export const NumberLiteral = createToken({
   name: 'NumberLiteral',
   pattern: /-?\d+(?:\.\d+)?/,
@@ -297,6 +346,8 @@ export const NumberLiteral = createToken({
 /**
  * All tokens in correct precedence order.
  * More specific patterns must come before less specific ones.
+ *
+ * @internal
  */
 export const allTokens: TokenType[] = [
   // Skipped

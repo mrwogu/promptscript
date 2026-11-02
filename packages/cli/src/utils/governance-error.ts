@@ -1,6 +1,6 @@
 import { PSError } from '@promptscript/core';
 
-// Governance codes take PS5101-PS5109, after the release codes PS5001-PS5008.
+// Governance codes take PS5101-PS5110, after the release codes PS5001-PS5008.
 
 /** `governance` is missing or invalid, or the role is not configured. */
 export const PS5101_GOVERNANCE_CONFIG = 'PS5101';
@@ -23,6 +23,8 @@ export const PS5108_GIT_UNAVAILABLE = 'PS5108';
  * approvals directory holds a link or a name that differs only in case.
  */
 export const PS5109_APPROVAL_INVALID = 'PS5109';
+/** --max-weight is not a percent from 0.01 to 100 with at most two decimals, or it comes without --env. */
+export const PS5110_APPROVAL_CEILING = 'PS5110';
 
 export type GovernanceErrorCode =
   | typeof PS5101_GOVERNANCE_CONFIG
@@ -33,7 +35,8 @@ export type GovernanceErrorCode =
   | typeof PS5106_CODEOWNERS_UNMANAGED
   | typeof PS5107_CODEOWNERS_REFUSED
   | typeof PS5108_GIT_UNAVAILABLE
-  | typeof PS5109_APPROVAL_INVALID;
+  | typeof PS5109_APPROVAL_INVALID
+  | typeof PS5110_APPROVAL_CEILING;
 
 /** An error of a governance command. Every message ends with the fix. */
 export class GovernanceError extends PSError {

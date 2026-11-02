@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "7bb4864048e6c9d23122f391fa79a5ae45d48a3792175862e6a519def4f0b932",
+  "request": {
+    "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+    "inputsHash": "sha256-b13da8970b24cbb3b17d95a1ecca7c2cd5c731c9fcb918d8ac6a3016506a1211",
+    "modelRef": "claude-sonnet-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-sonnet-5-5",
+    "params": {
+      "maxTokens": 600
+    },
+    "sample": 0
+  },
+  "response": {
+    "text": "{\"decision\":\"escalate\",\"reply\":\"I'm sorry your sofa arrived with a torn seat. Your order is within our 30-day refund window. Because the order total is above 500 EUR, I am passing your request to a member of our team who will review it. They will contact you soon about the next steps. Please keep any photos of the damage, as they may help speed things up. Thank you for your patience.\"}",
+    "usage": {
+      "inputTokens": 457,
+      "outputTokens": 125
+    },
+    "latencyMs": 3665,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}

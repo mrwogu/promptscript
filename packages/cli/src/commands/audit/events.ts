@@ -3,6 +3,7 @@ import {
   compareCodeUnits,
   parseApprovalRecord,
   type ApprovalRecordV1,
+  type PromptReleaseLabelEntryV2,
 } from '@promptscript/core';
 import { gitBlobId } from '../approve/records.js';
 import { parseLabel, RELEASE_DIRECTORY, RESERVED_RELEASE_NAMES } from '../release/layout.js';
@@ -14,8 +15,14 @@ import {
   type GitPerson,
   type HistoryCommit,
 } from './history.js';
+import { experimentEvents } from './experiments.js';
 import { inSequence } from './sequence.js';
 
+/**
+ * What an audit event records.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type AuditEventType =
   | 'changed'
   | 'approved'
@@ -25,14 +32,26 @@ export type AuditEventType =
   | 'label-removed'
   | 'merge-dropped'
   | 'generated'
-  | 'config-changed';
+  | 'config-changed'
+  | 'experiment-started'
+  | 'experiment-changed'
+  | 'experiment-ended';
 
 /**
  * State of an approval record from its bytes and its path alone: `well-formed` sits at the
  * path its fields give, `misplaced` elsewhere, `invalid` is no v1 record in the exact form.
  * A well-formed record still counts in a gate only with a configured role and the review.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
  */
 export type AuditRecordState = 'well-formed' | 'misplaced' | 'invalid';
+
+/** One arm of an experiment as a label has it; the weight is in basis points. */
+export interface AuditExperimentArm {
+  variant: string;
+  contentHash: string;
+  weight: number;
+}
 
 /** One audit event. Fields past `path` depend on the type. */
 export interface AuditEvent {
@@ -44,16 +63,23 @@ export interface AuditEvent {
   committer: GitPerson;
   /** Path relative to the repository top level */
   path: string;
-  /** `changed` and `config-changed`: added, modified or deleted */
+  /**
+   * `changed` and `config-changed`: added, modified or deleted.
+   *
+   * Closed enum: a new value needs a new schema version.
+   */
   change?: 'A' | 'M' | 'D';
   prompt?: string;
   contentHash?: string;
   role?: string;
   environment?: string;
   approver?: string;
+  /** Open enum: new values can be added in this version, so handle unknown values. */
   approverSource?: 'asserted';
   recordCreatedAt?: string;
   comment?: string;
+  /** Approval record ceiling in basis points; such a record never approves an entry hash */
+  maxWeight?: number;
   state?: AuditRecordState;
   previousContentHash?: string;
   /** The commit is on the first-parent chain of the head; off it, a branch's history */
@@ -66,6 +92,14 @@ export interface AuditEvent {
   droppedContentHash?: string;
   /** A label of an environment that is not in `releases.environments` */
   configured?: false;
+  /** Experiment events: the experiment name */
+  experiment?: string;
+  /** Experiment events: the arms after the change; for `experiment-ended`, the last arms */
+  arms?: AuditExperimentArm[];
+  /** `experiment-changed`: the arms before the change */
+  previousArms?: AuditExperimentArm[];
+  /** `experiment-ended`: the arm whose hash the entry serves now */
+  keptVariant?: string;
 }
 
 /** The files the log covers, by their path relative to the repository top level. */
@@ -137,6 +171,7 @@ export function recordFields(record: ApprovalRecordV1): Partial<AuditEvent> {
     approverSource: record.approver.source,
     recordCreatedAt: record.createdAt,
     ...(record.comment === undefined ? {} : { comment: record.comment }),
+    ...(record.maxWeight === undefined ? {} : { maxWeight: record.maxWeight }),
   };
 }
 
@@ -199,9 +234,36 @@ async function approvalEvents(
 }
 
 /**
- * Prompt id to hash of one side of a label change: empty when there is no file, undefined
+ * Prompt id to entry of one side of a label change: empty when there is no file, undefined
  * with a warning when the file is no readable label.
  */
+export async function labelEntryMap(
+  read: BlobReader,
+  blob: string,
+  mode: string,
+  environment: string,
+  path: string,
+  where: string,
+  warn: AuditWarn
+): Promise<Map<string, PromptReleaseLabelEntryV2> | undefined> {
+  if (isNullBlob(blob)) return new Map();
+  const text = isRegularMode(mode) ? await read(blob) : undefined;
+  try {
+    if (text === undefined) throw new Error('not a regular file or too large');
+    const label = parseLabel(text, environment, path);
+    const prompts: PromptReleaseLabelEntryV2[] = label.prompts;
+    return new Map(prompts.map((entry) => [entry.id, entry]));
+  } catch {
+    warn(`${path} at ${where} is not a release label, so its entries were not read.`);
+    return undefined;
+  }
+}
+
+function hashesOf(entries: ReadonlyMap<string, PromptReleaseLabelEntryV2>): Map<string, string> {
+  return new Map([...entries].map(([prompt, entry]) => [prompt, entry.contentHash]));
+}
+
+/** Prompt id to hash of one side of a label change, see `labelEntryMap`. */
 export async function labelEntries(
   read: BlobReader,
   blob: string,
@@ -211,16 +273,8 @@ export async function labelEntries(
   where: string,
   warn: AuditWarn
 ): Promise<Map<string, string> | undefined> {
-  if (isNullBlob(blob)) return new Map();
-  const text = isRegularMode(mode) ? await read(blob) : undefined;
-  try {
-    if (text === undefined) throw new Error('not a regular file or too large');
-    const label = parseLabel(text, environment, path);
-    return new Map(label.prompts.map((entry) => [entry.id, entry.contentHash]));
-  } catch {
-    warn(`${path} at ${where} is not a release label, so its entries were not read.`);
-    return undefined;
-  }
+  const entries = await labelEntryMap(read, blob, mode, environment, path, where, warn);
+  return entries === undefined ? undefined : hashesOf(entries);
 }
 
 /**
@@ -239,6 +293,8 @@ interface LabelContext {
   configured: boolean;
   /** Label paths that did not parse at some commit */
   unreadable: Set<string>;
+  /** Last readable parsed entries per label path, from mainline commits */
+  lastReadable: Map<string, Map<string, PromptReleaseLabelEntryV2>>;
 }
 
 function heldHashes(context: LabelContext, environment: string, prompt: string): Set<string> {
@@ -251,37 +307,15 @@ function heldHashes(context: LabelContext, environment: string, prompt: string):
   return seen;
 }
 
-async function labelEvents(
+/** Entry events of one label file change: removed, then promoted or rolled back. */
+function entryEvents(
   commit: AuditCommit,
-  file: FileChange,
+  path: string,
   environment: string,
   context: LabelContext,
-  read: BlobReader,
-  warn: AuditWarn
-): Promise<AuditEvent[]> {
-  const short = commit.commit.slice(0, 12);
-  const parent = commit.parents[0]?.slice(0, 12) ?? 'the parent';
-  const previous = await labelEntries(
-    read,
-    file.oldBlob,
-    file.oldMode,
-    environment,
-    file.path,
-    parent,
-    warn
-  );
-  const next = await labelEntries(
-    read,
-    file.newBlob,
-    file.newMode,
-    environment,
-    file.path,
-    short,
-    warn
-  );
-  if (previous === undefined || next === undefined) context.unreadable.add(file.path);
-  // A label that does not parse changes nothing: no entry was promoted or removed by it.
-  if (next === undefined) return [];
+  previous: Map<string, string> | undefined,
+  next: Map<string, string>
+): AuditEvent[] {
   const remember = (seen: Set<string>, hash: string): void => {
     if (context.mainline) seen.add(hash);
   };
@@ -291,7 +325,7 @@ async function labelEvents(
     if (next.has(prompt)) continue;
     remember(heldHashes(context, environment, prompt), before);
     events.push({
-      ...baseEvent(commit, 'label-removed', file.path),
+      ...baseEvent(commit, 'label-removed', path),
       environment,
       prompt,
       previousContentHash: before,
@@ -304,7 +338,7 @@ async function labelEvents(
     if (before !== undefined) remember(seen, before);
     if (before === contentHash) continue;
     events.push({
-      ...baseEvent(commit, seen.has(contentHash) ? 'rolled-back' : 'promoted', file.path),
+      ...baseEvent(commit, seen.has(contentHash) ? 'rolled-back' : 'promoted', path),
       environment,
       prompt,
       contentHash,
@@ -314,6 +348,65 @@ async function labelEvents(
     remember(seen, contentHash);
   }
   return events;
+}
+
+/**
+ * Events of one label file change: ended experiments, then the entry events, then started
+ * and changed experiments, so a kept variant reads as ended and then promoted.
+ */
+async function labelEvents(
+  commit: AuditCommit,
+  file: FileChange,
+  environment: string,
+  context: LabelContext,
+  read: BlobReader,
+  warn: AuditWarn
+): Promise<AuditEvent[]> {
+  const short = commit.commit.slice(0, 12);
+  const parent = commit.parents[0]?.slice(0, 12) ?? 'the parent';
+  const readPrevious = await labelEntryMap(
+    read,
+    file.oldBlob,
+    file.oldMode,
+    environment,
+    file.path,
+    parent,
+    warn
+  );
+  const next = await labelEntryMap(
+    read,
+    file.newBlob,
+    file.newMode,
+    environment,
+    file.path,
+    short,
+    warn
+  );
+  if (readPrevious === undefined || next === undefined) context.unreadable.add(file.path);
+  // A label that does not parse changes nothing: no entry was promoted or removed by it.
+  if (next === undefined) return [];
+  // On the mainline an unreadable old side is diffed against the last readable state of the
+  // path. A side commit can sit between newer mainline commits, so it never uses that state.
+  const previous =
+    readPrevious ?? (context.mainline ? context.lastReadable.get(file.path) : undefined);
+  if (context.mainline) context.lastReadable.set(file.path, next);
+  const entries = entryEvents(
+    commit,
+    file.path,
+    environment,
+    context,
+    previous === undefined ? undefined : hashesOf(previous),
+    hashesOf(next)
+  );
+  const configured = context.configured ? {} : { configured: false as const };
+  const { ended, startedOrChanged } = experimentEvents(
+    (type) => baseEvent(commit, type, file.path),
+    environment,
+    previous,
+    next,
+    configured
+  );
+  return [...ended, ...entries, ...startedOrChanged];
 }
 
 /** The lines from this project's marker to the end, or undefined without the marker. */
@@ -355,6 +448,7 @@ async function commitEvents(
   sources: AuditSources,
   history: LabelHistory,
   unreadable: Set<string>,
+  lastReadable: LabelContext['lastReadable'],
   read: BlobReader,
   warn: AuditWarn
 ): Promise<AuditEvent[]> {
@@ -369,7 +463,13 @@ async function commitEvents(
     }
     if (environment !== undefined) {
       const configured = sources.environments.has(environment);
-      const context: LabelContext = { history, mainline: commit.mainline, configured, unreadable };
+      const context: LabelContext = {
+        history,
+        mainline: commit.mainline,
+        configured,
+        unreadable,
+        lastReadable,
+      };
       return labelEvents(commit, file, environment, context, read, warn);
     }
     if (sources.configFiles.has(file.path)) {
@@ -402,6 +502,27 @@ export interface BuiltEvents {
 }
 
 /**
+ * The blobs the events of `commits` read, oldest commit first, as `blobReader` takes them:
+ * the sides of approval records, labels and CODEOWNERS files that are regular files.
+ */
+export function plannedBlobs(commits: readonly HistoryCommit[], sources: AuditSources): string[] {
+  const approvals = approvalsDirectory(sources);
+  const ids: string[] = [];
+  for (const commit of [...commits].reverse()) {
+    for (const file of commit.changes) {
+      const read =
+        (file.path.startsWith(approvals) && file.path.endsWith('.json')) ||
+        labelEnvironment(file.path, sources) !== undefined ||
+        sources.codeownersFiles.has(file.path);
+      if (!read) continue;
+      if (!isNullBlob(file.oldBlob) && isRegularMode(file.oldMode)) ids.push(file.oldBlob);
+      if (!isNullBlob(file.newBlob) && isRegularMode(file.newMode)) ids.push(file.newBlob);
+    }
+  }
+  return ids;
+}
+
+/**
  * The events of the commits, newest commit first. Commits are read oldest first, so a label entry
  * set back to a hash it held before on the mainline commits is a `rolled-back` event.
  */
@@ -414,6 +535,7 @@ export async function buildEvents(
 ): Promise<BuiltEvents> {
   const history: LabelHistory = new Map();
   const unreadable = new Set<string>();
+  const lastReadable: LabelContext['lastReadable'] = new Map();
   const unconfigured = new Set<string>();
   for (const commit of commits) {
     for (const file of commit.changes) {
@@ -432,7 +554,15 @@ export async function buildEvents(
   oldestFirst.reverse();
   const byCommit = await inSequence(oldestFirst, async (parsed) => {
     const commit: AuditCommit = { ...parsed, mainline: options.mainline.has(parsed.commit) };
-    const events = await commitEvents(commit, sources, history, unreadable, read, warn);
+    const events = await commitEvents(
+      commit,
+      sources,
+      history,
+      unreadable,
+      lastReadable,
+      read,
+      warn
+    );
     if (commit.parents.length > 1 && options.dropped !== undefined) {
       events.push(...(await options.dropped(commit)));
     }

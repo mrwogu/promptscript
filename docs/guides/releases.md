@@ -288,10 +288,13 @@ the label that keeps the entry hash is gated the same way and fails like `--end`
 
 Approvals and evals bind to a hash, not to a weight. Without an exposure policy, moving an arm from
 1 % to 99 % passes when 1 % did. Treat a weight change as a release: put CODEOWNERS on
-`.promptscript/releases/` and review it. `max-experiment-weight` is parsed, but the release gates
-do not judge weights in this version. An arm with traffic that such a policy selects is
-`unavailable`: it fails split, rollback and `status --base` at severity `error` and warns at
-`warning`. An arm at weight 0 is not judged.
+`.promptscript/releases/` and review it. A `max-experiment-weight` policy changes that: the gates
+judge the weight of every arm with traffic in split, rollback and `status --base`, and warn in plain
+`status`. Up to `maxWeight` an arm needs nothing. If the policy defines `approvals`, a higher weight
+needs a record from each role that covers the weight, made with
+`prs approve --env <env> --max-weight <percent>`. Without `approvals`, `maxWeight` is a hard cap.
+Above `ceiling` nothing passes. An arm at weight 0, the entry hash and the control arm are not judged. See
+[Max Experiment Weight](policy-engine.md#max-experiment-weight).
 
 A promote on an entry with a running experiment is refused with `PS5010`, so it can never drop
 arms. End the experiment first.
@@ -314,6 +317,15 @@ Status lists every environment with the prompt id, the hash (12 hex digits), whe
 the latest build (equals the manifest) and whether the bundle verifies. A missing label means an
 empty environment. A label file for an environment that is not configured gives a warning.
 
+A label accepts more prompt ids than an approval does: it only refuses control and bidi characters,
+while an approval needs the id pattern (ASCII letters, digits, `_`, `-` and `.`, in 2 to 7
+segments split by `/`). An entry with an id outside that pattern, a zero-width space inside a
+look-alike id for example, gives a warning. The warning writes the id with every character outside
+the printable ASCII range, and the backslash, as `\uXXXX` (`\u{XXXXX}` above U+FFFF), so a
+look-alike id never prints like the real one. No approval can name that id, so a gate that needs
+approvals never passes for it. The label is still read and status does not fail on it. With
+`--base` the changed entries of label files that no configured environment owns are checked too.
+
 Under an entry with an experiment status lists every arm with its weight. Every referenced bundle,
 arms included, is verified, and a failure exits with code 1, so CI can run it.
 `--history <n>` (1 to 1000) adds the commit, date and subject of the last n commits of each label.
@@ -323,6 +335,71 @@ With prompt policies, status also runs the [release gates](#release-gates) on ev
 an `approvals` column: `ok`, `missing: <roles>`, or `-` when no `required-approvals` policy applies.
 Plain status only reports: a gate that fails is a warning and the exit code does not change. The
 check that fails on it is `--base`.
+
+When an approval policy (`required-approvals`, or `max-experiment-weight` with `approvals`) applies
+to an environment that has a label entry, status also checks the CODEOWNERS file that
+`prs governance codeowners` generates (see [CODEOWNERS from Governance](codeowners.md)). It reads the
+configured output file from the `HEAD` commit by exact path, so a file that is only on disk does
+not count, and it must equal what `prs governance codeowners` generates from the checkout config.
+With `--base <ref>` it also checks the file at that commit, since the host applies the CODEOWNERS
+of the base branch to a pull request. There the roles come from the approval policies of the
+config at `<ref>` (the same rules the `--base` gates use) and the file is the configured output of
+that config. It must not be shadowed by an earlier location, and after the marker line of the
+project it must hold the exact owner line of each role directory, rendered from the governance at
+`<ref>`, and no other line for that path. Other lines of the file at `<ref>` are not compared. It
+gives one warning, with the file as its location, if the file is missing at a commit
+(`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
+(`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs
+cannot manage the file at `HEAD` (no marker line), or if the lines cannot be generated (for
+example `governance.admins` is missing). The warning lists the roles and tells you to run
+`prs governance codeowners` and commit the result. The policy `match` is not evaluated, so a role
+is named when some prompt could need it. Nothing is written. Without such a policy there is no
+warning. `--strict` makes this warning, and only it, exit with code 1.
+
+A clean result does not prove that the branch requires code owner review, nor that the owners have
+write access; check both on the Git host. For any location other than `.gitlab/CODEOWNERS` the
+lines are written for GitHub.
+
+When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
+and no email), status also warns about an approval that counts for a gate whose approver is not
+one of them, compared lowercased. With `--base` the roster comes from the governance of `<ref>`,
+the one the gates use. `prs approve --list` gives the same warning for a record in the state `current` or `labelled`, the ones a gate could count.
+A role with any team owner is not checked, since a team cannot be resolved offline. The record
+still counts and the exit code does not change.
+
+#### Check the models of the labels
+
+```bash
+prs release status --check-models
+prs release status --check-models --retiring-within 14
+```
+
+`--check-models` reads the model of every verified bundle that a label holds and checks it against
+the [model catalog](../reference/models.md). It looks at every entry and at every experiment arm
+besides control, an arm with weight 0 too, because a 0 arm can be ramped up without another check.
+A bundle that is missing or does not verify gives `PS5003` or `PS5004` as before and no model line.
+
+A model is retiring when the catalog marks it `retired`, or marks it `deprecated` with a
+retirement date that is not later than today plus `--retiring-within` days (0 to 3650, default
+30; today is the UTC date). A date that has already passed counts. Each one is a `PS5011` error
+at the label, with the environment, the prompt, the short hash, the arm, the
+model, the date and the replacement from the catalog, and the exit code is 1. A `deprecated`
+model with a later date, or with no date, is listed and does not fail. A model the catalog does
+not know gives a warning only.
+
+The catalog is the one of the `prs` you run, plus `models.profiles` of the checkout, the same as
+`prs release build` uses for prices. The built-in part changes with each `prs` release, so run the
+newest CLI to see current dates. A profile in `models.profiles` can change a built-in status. The
+profile that is judged is the one whose provider and API id equal the bundle's, so a floating
+alias in the source is not re-resolved to a newer model here.
+
+`PS041` checks the model of the source when you validate. This check covers what the labels run,
+so it also finds a released bundle whose source has moved on. In text output a Models section lists
+every labelled model, and control characters of label and bundle values are removed. In JSON the
+report has a `models` list with one item per labelled hash (`environment`, `prompt`,
+`contentHash`, `variant` for an arm, `ref`, `profile`, `provider`, `apiId`, `status`,
+`retirementDate`, `retiring`), with the values as they are in the files. Without `--check-models`
+the list is absent.
 
 ## One pull request per promotion
 
@@ -368,6 +445,7 @@ Approve the full hash, for one environment or for all of them:
 prs approve --list acme-support/refund-reply
 prs approve acme-support/refund-reply@sha256-<64 hex digits> --role legal --approver @jane --env prod
 prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --approver @bob --all-environments --comment "Checked in PR 123"
+prs approve acme-support/refund-reply@sha256-<64 hex digits> --role legal --approver @jane --env prod --max-weight 25
 ```
 
 `--list` prints the hash the checkout builds. The command checks, and fails without writing:
@@ -378,6 +456,9 @@ prs approve acme-support/refund-reply@sha256-<64 hex digits> --role security --a
   enough, and no id segment may end with a dot.
 - `--env` is a configured environment (`PS5002`), or `--all-environments` is given. One of the two
   is required.
+- `--max-weight <percent>` is a percent from 0.01 to 100 with at most two decimals, such as `5` or
+  `2.5`, and comes with `--env` (`PS5110`). It is refused with `--all-environments`: a capped
+  approval counts in one environment only. See [Capped approvals](#capped-approvals).
 - `--comment` has at most 2000 characters, no control characters except newlines and no invisible
   format characters such as bidi marks.
 - `--approver` is a Git host user handle like `@jane` (`PS5104`): `@`, a letter or digit, then
@@ -408,8 +489,8 @@ The approver part is the handle without `@`, lowercased, so `@Jane.Doe` writes
 On Windows a long prompt id plus a long handle can go over the 260 character `MAX_PATH` limit. Run
 `git config core.longpaths true` in the repository if Git can not check out or add a record.
 
-The file holds exactly these bytes, with `environment` only when `--env` was given and `comment` only
-when one was given:
+The file holds exactly these bytes, with `environment` only when `--env` was given, `comment` only
+when one was given and `maxWeight` only when `--max-weight` was given:
 
 ```json
 {
@@ -427,8 +508,18 @@ when one was given:
 }
 ```
 
-A record is never overwritten. When the file exists, the command fails with `PS5105` and exit code 2. To withdraw an approval, delete the file in a commit. To change its environment or comment,
-delete it in a commit and approve again.
+A record is never overwritten. When the file exists, the command fails with `PS5105` and exit code 2. To withdraw an approval, delete the file in a commit. To change its environment, comment or
+ceiling, delete it and approve again in the same change: the file has to go away in that commit,
+else `PS5105` refuses the new record. The gate suggests `--max-weight` for an arm even when the
+approver already has a lower capped record, and that is the case this covers.
+
+`maxWeight` is a whole number of basis points from 1 to 10000, so `--max-weight 25` writes
+`"maxWeight": 2500`. See [Capped approvals](#capped-approvals) for what it changes. A record with
+`maxWeight` always names its `environment`: a capped approval counts in one environment only, and a
+file with `maxWeight` and no `environment` is no valid record. An older `prs` reads a record with
+`maxWeight` as invalid and never counts it: `prs approve --list` warns with `PS5109` and
+`prs audit log` shows `state=invalid`. Upgrade CI and the people who audit together before anyone
+writes a capped record.
 
 A record counts only with these exact bytes. The first `prs approve` writes
 `.promptscript/approvals/.gitattributes` with `* -text`, so a checkout with `core.autocrlf` never
@@ -456,18 +547,18 @@ prs approve --list acme-support/refund-reply --format json
 
 `--list` compiles the source in memory, reads every record, asks Git with `git ls-files -s` which
 paths it tracks and which blob each holds, and prints, per prompt, the hash the checkout builds and
-each record with its role, approver, scope (`prod` or `all environments`) and state. When there are
+each record with its role, approver, scope (`prod`, `all environments`, or `prod up to 25 %` for a capped record) and state. When there are
 record files, it needs Git and a repository, else `PS5108`.
 
-| State            | Meaning                                                          |
-| ---------------- | ---------------------------------------------------------------- |
-| `current`        | The record approves the hash the checkout builds                 |
-| `labelled:<env>` | Not the current hash, but the label of that environment holds it |
-| `stale`          | Neither: the prompt changed since                                |
-| `untracked`      | Not added to Git yet. A staged record already counts as tracked  |
-| `modified`       | The bytes on disk are not the ones Git has for the path          |
-| `misplaced`      | Git tracks the file at another path than its fields give         |
-| `unknown-role`   | The role is not in `governance.roles`                            |
+| State            | Meaning                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `current`        | The record approves the hash the checkout builds                                                                         |
+| `labelled:<env>` | Not the current hash, but the label of that environment holds it, as the entry hash or as an experiment arm with traffic |
+| `stale`          | Neither: the prompt changed since                                                                                        |
+| `untracked`      | Not added to Git yet. A staged record already counts as tracked                                                          |
+| `modified`       | The bytes on disk are not the ones Git has for the path                                                                  |
+| `misplaced`      | Git tracks the file at another path than its fields give                                                                 |
+| `unknown-role`   | The role is not in `governance.roles`                                                                                    |
 
 Only `current` and `labelled` records can count. A file that is no valid record, for example one
 with CRLF line endings, gets a `PS5109` warning, and so do modified, misplaced and unknown-role
@@ -479,6 +570,20 @@ to 10 MiB; a longer one fails with `PS5108`.
 
 With `--format json`, stdout holds one document that matches
 `https://getpromptscript.dev/schema/approval-report/v1.json`.
+
+### Capped approvals
+
+A record with `maxWeight` approves traffic, not a promotion. It counts only for an experiment arm
+whose weight is at or under the ceiling. It never approves the entry hash, the control arm, a
+promote, `prs release split --end --keep` or a plain rollback, also not at `--max-weight 100`. A
+record without `maxWeight` is a full approval and counts everywhere, for an arm at any weight. Use
+`--max-weight` for a `max-experiment-weight` policy, see
+[Max Experiment Weight](policy-engine.md#max-experiment-weight): a legal reviewer can sign off a
+canary at 5 % without signing off the prompt for everyone.
+
+The gate lists a capped record that did not count as `capped` next to the approvers found. To raise
+a ceiling, delete the old record file and run `prs approve` again with a higher `--max-weight` in the
+same change. `prs approve` stops with `PS5105` while the old file exists.
 
 ### What an approval proves
 
@@ -511,6 +616,12 @@ the pull request of that commit. A `well-formed` record there only has the right
 right path. It does not mean a gate accepts it, and the review by the role team lives in the
 review log of the Git host, not in Git.
 
+`prs release status` warns when an approval policy applies and the CODEOWNERS file committed at
+`HEAD` (and at the `--base` commit) is missing or does not match what `prs governance codeowners`
+generates, and `--strict` turns that warning into exit code 1. It also
+warns, in `status` and `approve --list`, about a record whose approver is not in a role that lists
+user handles only. Neither warning changes what the gates count.
+
 ## Release gates
 
 The gates are the prompt policies, run on the prompt version a label is about to hold. They run
@@ -534,8 +645,11 @@ Without a prompt policy the gates pass and nothing else runs. With one:
   the source falls under.
 - `required-metadata`, `risk-floor`, `model-allowlist` and `content-rules` judge the bundle that
   ships: its governance, model, inputs and messages.
-- `required-approvals` counts approval records for that prompt, hash and environment. `required-evals`
-  is `unavailable`, see [Policy Engine](policy-engine.md#required-approvals-and-required-evals).
+- `required-approvals` counts approval records for that prompt, hash and environment.
+  `required-evals` is `unavailable`, see
+  [Policy Engine](policy-engine.md#required-approvals-and-required-evals).
+- `max-experiment-weight` judges the weight of an experiment arm with traffic, with the records that
+  cover that weight, see [Policy Engine](policy-engine.md#max-experiment-weight).
 
 A check of severity `error` that fails, or is `unavailable`, fails the command with a `PS030` error
 that names the policy and what to do. A check of severity `warning` is a warning. The skill policy
@@ -553,7 +667,8 @@ tell who wrote them. A record binds only through review: each `.promptscript/app
 needs that role's team as code owners, with required code owner review on the branch (see
 [What an approval proves](#what-an-approval-proves)). `prs governance codeowners` writes those
 lines, see [CODEOWNERS from Governance](codeowners.md). Without it, any author can add a record in
-another person's name and pass the gate.
+another person's name and pass the gate. `prs release status` warns when a gate needs approvals
+and these lines are missing or stale in the commit, see [Status](#status).
 
 A record counts for one approver when:
 
@@ -562,7 +677,10 @@ A record counts for one approver when:
 - its committed path is the one its fields give, `.promptscript/approvals/<role>/<prompt id>/...`.
   CODEOWNERS protects records by that path, so a record anywhere else had the wrong reviewers;
 - the role is still in `governance.roles`;
-- the bytes are a valid v1 record.
+- the bytes are a valid v1 record;
+- it has no `maxWeight`, or the item is an arm whose weight is at or under `maxWeight`. A record
+  with `maxWeight` never approves the entry hash. A record without it counts as a ceiling of
+  100 %, so existing records keep working.
 
 An approver counts once per role, compared lowercased. A record of the same prompt and role for
 another hash shows as stale. Two committed paths under `.promptscript/approvals/` that differ only
@@ -580,12 +698,13 @@ records committed at `HEAD`.
 Gates for acme-support/refund-reply@sha256-3f9a1c2b4d5e to prod (policy risk: high)
   passed       high-risk-models  model-allowlist
   failed       high-risk-signoff  legal 0 of 1 (stale: @bob for sha256-91bc0d2e1a2b)
+  failed       high-risk-exposure  legal 0 of 1 (capped: @bob up to 10 %)
   unavailable  prod-evals  acme-support/refund-reply needs passing evals for prod, but release gates do not read eval results in this version of prs
 Promotion refused. Label prod is unchanged.
 ```
 
 With `--format json`, the report holds every result under `gates`, with the status, message and,
-for approvals, the approvers found and the stale records per role.
+for approvals, the approvers found, the stale records and the capped records per role.
 
 ## In CI
 
@@ -599,7 +718,8 @@ prs release status --base refs/remotes/origin/main
 Build writes whatever the committed release files miss, so the `test -z` check fails when a pull
 request changes prompts without the build. It also catches new bundle files, which
 `git diff --exit-code` would not see because they are untracked. `status` fails when a label points
-at a bundle that is missing or does not verify. All five commands accept
+at a bundle that is missing or does not verify. `prs release status --check-models` can run as an
+extra step to fail on labels that run a retired or retiring model. All five commands accept
 `--format json`, which prints one document on stdout that matches
 `https://getpromptscript.dev/schema/release-report/v1.json`, and prints the human text on stderr.
 
@@ -704,7 +824,8 @@ What `--base` does not do:
 against a fresh compile of the source. Each bundle is verified against its hash first, so the run
 uses what the environment serves even when the source has moved on. For an experiment it runs the
 entry hash, and `--variant <name>` runs one arm. Every result carries the hash that ran, in
-`prompt.contentHash`. See [prs eval run](../reference/cli.md#prs-eval-run).
+`prompt.contentHash`. Judge rubrics of `llm-judge` assertions are the exception: they are compiled
+from the working tree, and `judges` in the report holds their hash. See [prs eval run](../reference/cli.md#prs-eval-run).
 
 ```bash
 prs eval run --label prod
@@ -758,8 +879,8 @@ content hash before use, as described in [Application Prompts](application-promp
 ## Audit log
 
 `prs audit log` reads the governance history of the project from Git: who changed a prompt file,
-who approved which hash, who promoted, rolled back or removed a label entry, and who changed the
-config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
+who approved which hash, who promoted, rolled back or removed a label entry, who started, changed
+or ended an experiment, and who changed the config or the generated CODEOWNERS section. Nothing is stored besides the repository, so the log is as good as
 the history on the branch.
 
 ```bash
@@ -786,17 +907,20 @@ them), `path` (relative to the repository top level) and `mainline`. `mainline` 
 commit on the first-parent chain of `HEAD`. An event with `mainline: false` is history of a branch:
 its change may never have reached `HEAD`, or reached it only through a merge.
 
-| Type               | When                                                                   | Extra fields                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `changed`          | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                            |
-| `approved`         | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `state` |
-| `approval-removed` | an approval record was deleted, read from the parent commit            | the same                                                                                                            |
-| `promoted`         | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                       |
-| `rolled-back`      | a label entry was set to a hash it held before in that label           | the same                                                                                                            |
-| `label-removed`    | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                      |
-| `merge-dropped`    | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`          |
-| `config-changed`   | a config file name of the project, the config or its `extends` changed | `change`                                                                                                            |
-| `generated`        | the CODEOWNERS section under this project's marker changed             | none                                                                                                                |
+| Type                 | When                                                                   | Extra fields                                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `changed`            | a `.prs` file of the project was added, modified or deleted            | `change` (`A`, `M`, `D`)                                                                                                         |
+| `approved`           | an approval record was added                                           | `prompt`, `contentHash`, `role`, `environment`, `approver`, `approverSource`, `recordCreatedAt`, `comment`, `maxWeight`, `state` |
+| `approval-removed`   | an approval record was deleted, read from the parent commit            | the same                                                                                                                         |
+| `promoted`           | a label entry was added or changed                                     | `environment`, `prompt`, `contentHash`, `previousContentHash`                                                                    |
+| `rolled-back`        | a label entry was set to a hash it held before in that label           | the same                                                                                                                         |
+| `label-removed`      | a label entry was removed, or the label file deleted                   | `environment`, `prompt`, `previousContentHash`                                                                                   |
+| `merge-dropped`      | a merge did not keep a change of a parent after the first              | `parent`, `change`, and the record fields, or `environment`, `prompt`, `contentHash`, `droppedContentHash`                       |
+| `config-changed`     | a config file name of the project, the config or its `extends` changed | `change`                                                                                                                         |
+| `experiment-started` | a label entry got an experiment                                        | `environment`, `prompt`, `experiment`, `arms`, `contentHash`                                                                     |
+| `experiment-changed` | the arms, their weights or their order changed, same name              | the same, and `previousArms`                                                                                                     |
+| `experiment-ended`   | a label entry lost its experiment, or the entry or label is gone       | `environment`, `prompt`, `experiment`, `arms` (the last ones), `contentHash`, `keptVariant`                                      |
+| `generated`          | the CODEOWNERS section under this project's marker changed             | none                                                                                                                             |
 
 A record file changed in place shows as `approval-removed` with the old content and `approved`
 with the new. `state` comes from the record bytes and the path alone: `well-formed` at the path
@@ -805,7 +929,24 @@ form `prs approve` writes, is a link or a submodule, or is larger than 1 MiB (an
 has no record fields). Well-formed does not mean a gate accepts the record: the gate also needs
 the role in `governance.roles` and the scope, and the review by the role team lives in the review
 log of the Git host. A misplaced or invalid record never counts in a gate. `approverSource` is
-always `asserted`.
+always `asserted`. `maxWeight` is the ceiling of a capped record in basis points and is absent for a
+full approval; the text format prints it as `env=prod up to 5 %`.
+
+Experiments are read per label entry. Every arm is `variant`, `contentHash` and `weight` in basis
+points, the control first; JSON keeps basis points, text and CEF print percent. A new experiment
+on an entry is `experiment-started`, and a label that goes from v1 to v2 by `prs release split`
+starts one without a `promoted`, because the entry hash did not change. A change of a weight, an
+arm added, removed or paused at 0, or the arms in another order is `experiment-changed`, with
+`previousArms` for the comparison. The order matters because it decides which bucket a key lands
+in. `prs release split --end` gives `experiment-ended` with `keptVariant: "control"`. With
+`--keep <variant>` it gives `experiment-ended` with that variant and the hash it serves, and then
+the usual `promoted` (or `rolled-back`) for the entry. A rename, only possible by a hand edit or a
+rollback, is `experiment-ended` and then `experiment-started` in the same commit. When the entry
+or the label file goes while an experiment runs, `experiment-ended` has no `contentHash` and no
+`keptVariant`, and `label-removed` follows. Inside one label file the order is: ended
+experiments, `label-removed`, `promoted` or `rolled-back`, then started and changed experiments.
+`keptVariant` is also absent when a hand edit sets the entry to a hash that is no arm. Arm hashes
+do not count as hashes the label held, so `rolled-back` still means the entry hash held before.
 
 Commits of merged side branches are read too, each with its own events. A merge commit is read
 against its first parent: its events are what it brought to the branch it was merged into, and
@@ -828,7 +969,7 @@ what the parent did (`A`, `M` or `D`) and the record fields come from the parent
 from the merge's when the parent deleted it.
 
 After reading the history, the command replays the `mainline` events and compares the result with
-the approval records and label entries at `HEAD`. Any difference fails with `PS5108`: the history
+the approval records, label entries and experiments at `HEAD`. Any difference fails with `PS5108`: the history
 has a change the log cannot explain, and the log is not printed as if it were complete. Labels
 that did not parse at some commit are left out of this check.
 
@@ -841,14 +982,14 @@ carry `configured: false`, so a look-alike file such as `prodd.json` stands apar
 
 ### Filters
 
-| Option            | Keeps                                                                                                                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                  |
-| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                               |
-| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash) starts with these hex digits (`sha256-` optional, at least 4 digits) |
-| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                     |
-| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                  |
-| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                  |
+| Option            | Keeps                                                                                                                                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--prompt <id>`   | approval and release events of the prompt, and `changed` events of the files it is built from in the checkout                                                                                                                        |
+| `--env <env>`     | release events of the environment, and approvals for it or for every environment                                                                                                                                                     |
+| `--hash <prefix>` | events whose `contentHash` (for `label-removed`, `previousContentHash`; for `merge-dropped`, either hash; for experiment events, any arm hash, before or after) starts with these hex digits (`sha256-` optional, at least 4 digits) |
+| `--since <date>`  | events committed at or after the ISO date or date and time                                                                                                                                                                           |
+| `--until <date>`  | events committed at or before it; a date alone means the end of that day, UTC                                                                                                                                                        |
+| `--limit <n>`     | the newest `n` events after the other filters, at most 100000                                                                                                                                                                        |
 
 An event without the filtered field does not match: with `--hash`, only approval and release
 events remain. `--prompt` finds the files of a prompt by resolving the checkout, so a prompt file
@@ -872,27 +1013,37 @@ zero-width characters in strings are written as `\uXXXX` escapes.
 CEF:0|PromptScript|prs|<cli version>|prs-approved|Prompt approved|5|rt=1792591331000 act=approved suser=jane@acme.example duser=@jane filePath=... cs1=acme-support/refund-reply cs1Label=prompt cs2=sha256-... cs2Label=contentHash cs3=legal cs3Label=role cs4=prod cs4Label=environment cs5=9ffb3347... cs5Label=commit outcome=well-formed msg=Refund wording checked flexString1=4452d509... flexString1Label=head flexString2=asserted flexString2Label=approverSource
 ```
 
-| Key            | Value                                                                                                 |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| `rt`           | commit time in milliseconds                                                                           |
-| `act`          | event type                                                                                            |
-| `suser`        | author email                                                                                          |
-| `duser`        | approver                                                                                              |
-| `filePath`     | path                                                                                                  |
-| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`) |
-| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                    |
-| `msg`          | record comment                                                                                        |
-| `flexString1`  | `head`, the commit the log was read from                                                              |
-| `flexString2`  | `approverSource`, always `asserted`, on approval events                                               |
-| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                     |
-| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                 |
-| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                   |
-| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                 |
+| Key            | Value                                                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `rt`           | commit time in milliseconds                                                                                                          |
+| `act`          | event type                                                                                                                           |
+| `suser`        | author email                                                                                                                         |
+| `duser`        | approver                                                                                                                             |
+| `filePath`     | path                                                                                                                                 |
+| `cs1` to `cs6` | prompt, contentHash, role, environment, commit, previous contentHash (the parent for `merge-dropped`)                                |
+| `outcome`      | record `state`, or `added`, `modified`, `deleted` for file changes                                                                   |
+| `msg`          | record comment; on experiment events the arms, `; previous <arms>` or `; kept <variant>`                                             |
+| `flexString1`  | `head`, the commit the log was read from                                                                                             |
+| `flexString2`  | `approverSource`, always `asserted`, on approval events; the experiment name with `flexString2Label=experiment` on experiment events |
+| `flexNumber1`  | `maxWeight` in basis points, with `flexNumber1Label=maxWeight`, on capped approval events                                            |
+| `flexNumber2`  | sum of the variant weights in basis points, with `flexNumber2Label=variantWeight`, on `experiment-started` and `experiment-changed`  |
+| `cn1`          | `1` with `cn1Label=viaMerge` on events of a merge                                                                                    |
+| `cn2`          | `0` with `cn2Label=configured` on labels of unconfigured environments                                                                |
+| `cn3`          | `1` or `0` with `cn3Label=mainline`                                                                                                  |
+| `oldFileHash`  | `droppedContentHash` of a `merge-dropped` label entry                                                                                |
+
+`flexString2` means the approver source on approval events and the experiment name on experiment
+events, so a SIEM rule should check `flexString2Label` first.
 
 Severities: `changed` and `generated` 3, `approved` 5, `approval-removed`, `promoted` and
-`config-changed` 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
-and `=`, line breaks become `\n`, and other control characters are dropped. Text and CEF output
-drop control, bidi and zero-width characters from Git and record fields.
+`config-changed` and the three experiment events 6, `rolled-back`, `label-removed` and `merge-dropped` 7. Header values escape `\` and `|`; extension values escape `\`
+and `=`, and line breaks become `\n`. The raw text and CEF lines show other control, bidi,
+zero-width and similar invisible characters, tag characters and lone surrogates of Git and record
+fields as `\u` and 4 to 6 hex digits, so two ids that differ only by an invisible character print
+differently, and the text output doubles a backslash. In CEF that visible text is escaped like any
+other text, so each backslash of it is doubled: a SIEM that decodes the line shows `\u200B` for a
+hidden character, and a literal backslash stays distinct from it. `--format json` keeps the exact
+value, so take prompt ids and other values from the JSON export.
 
 ### Limits
 
@@ -911,12 +1062,26 @@ drop control, bidi and zero-width characters from Git and record fields.
   reads from `git log`, which fails with `PS5108`.
 - A shallow clone, a missing `git`, a timeout or a blob a partial clone would fetch fails with
   `PS5108`. In CI check out the full history, for example `actions/checkout` with
-  `fetch-depth: 0`.
+  `fetch-depth: 0`. `PROMPTSCRIPT_GIT_TIMEOUT` applies to each Git call, and the log reads files
+  with a few calls that each take up to 256 files, so a very slow disk or network mount may need
+  a higher value.
 - Git runs with replace refs and grafts off, so a `git replace` ref or a `.git/info/grafts` file
   cannot change what the log shows.
 - The output holds email addresses. Treat exports like other personal data.
-- Experiment arms and weights are not listed in the log yet, and an experiment change that keeps
-  the entry hash shows no event. Read the label history with `git log -p` on the label.
+- A merge that drops an experiment change of a side branch shows no `merge-dropped`, because that
+  check compares hashes only. The change shows on the side commit.
+- A label that does not parse is read as no change, and it stays out of the check against `HEAD`.
+  The next readable version of it on the mainline is compared against the last readable version
+  before it, so an entry or experiment removed or changed meanwhile shows as `label-removed`,
+  `experiment-ended` or `experiment-changed` on that commit. A label with no readable version
+  before it on the mainline, and a side-branch commit whose parent label is unreadable, are
+  compared against nothing: its experiments show as `experiment-started` and its entries as
+  `promoted`, or as `rolled-back` when the hash was held before. A side-branch commit with a
+  readable parent label is diffed against that parent as usual. The warning about an unreadable
+  label is printed once.
+- The experiment events are new in the JSON document, and the schema URL and `version` stay 1. A
+  consumer that switches on `type` sees types it does not know, and one that validates against a
+  copy of the schema from before them rejects the document. Update the copy.
 
 ## Error codes
 
@@ -932,6 +1097,7 @@ drop control, bidi and zero-width characters from Git and record fields.
 | PS5008 | A compile output lies inside `.promptscript/releases/`                               |
 | PS5009 | A split breaks the experiment rules, or targets the first environment                |
 | PS5010 | A promote on an entry with a running experiment                                      |
+| PS5011 | A labelled prompt runs a retired model, or one that retires within the window        |
 
 `prs approve` uses these codes:
 
@@ -944,6 +1110,7 @@ drop control, bidi and zero-width characters from Git and record fields.
 | PS5105 | The record exists (exit code 2)                                                                |
 | PS5108 | `--list` cannot run Git, or the project is not in a repository                                 |
 | PS5109 | A record is invalid, modified, misplaced or has an unknown role, or the record path has a link |
+| PS5110 | `--max-weight` is not a percent from 0.01 to 100, or it comes without `--env`                  |
 
 `prs audit log` uses `PS5102` for a `--prompt` or `--hash` value of the wrong shape and `PS5108`
 when Git cannot give the history: no repository, no commit, a shallow clone, a timeout, a

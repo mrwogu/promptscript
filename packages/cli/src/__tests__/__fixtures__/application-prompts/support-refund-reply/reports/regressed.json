@@ -1,0 +1,342 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-report/v1.json",
+  "version": 1,
+  "outcome": "failed",
+  "passed": false,
+  "cache": {
+    "mode": "replay",
+    "replayed": 20,
+    "live": 0,
+    "digest": "sha256-c707224638ca1f0067ccd63040a34233ad8822369d2a52d5bc98b10a699ab9b0"
+  },
+  "usage": {
+    "calls": 20,
+    "inputTokens": 11377,
+    "outputTokens": 1876
+  },
+  "costUsd": 0.012237,
+  "suites": [
+    {
+      "name": "refund-reply",
+      "suiteHash": "sha256-e9489ec42e715c898953926547f2ffb64db8483f52be0e862767e673a5a3c51c",
+      "prompt": {
+        "id": "acme-support/refund-reply",
+        "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824"
+      },
+      "dataset": {
+        "path": ".promptscript/evals/datasets/refund-reply.jsonl",
+        "rows": 5,
+        "hash": "sha256-8542f27e9a6922bfc58750a3e308459829aea605215d228c28a3bea12f4515a0"
+      },
+      "judges": [
+        {
+          "rubric": "acme-support/judge-refund-reply",
+          "contentHash": "sha256-9eda77937050f385c2da0ef1242ce5bc51d7ed34b86d93b2cfd7b1ce299e5f55"
+        }
+      ],
+      "passed": false,
+      "thresholds": [
+        {
+          "name": "passRate",
+          "model": "claude-sonnet-5-5",
+          "limit": 1,
+          "actual": 0.8,
+          "passed": false
+        },
+        {
+          "name": "maxCostUsd",
+          "limit": 0.1,
+          "actual": 0.012237,
+          "passed": true
+        }
+      ],
+      "findings": [],
+      "models": [
+        {
+          "ref": "claude-sonnet-5-5",
+          "provider": "anthropic",
+          "apiId": "claude-sonnet-5-5",
+          "passRate": 0.8,
+          "usage": {
+            "calls": 20,
+            "inputTokens": 11377,
+            "outputTokens": 1876
+          },
+          "costUsd": 0.012237,
+          "latencyMs": {
+            "p50": 2929,
+            "p95": 3669
+          },
+          "cases": [
+            {
+              "id": "broken-kettle",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "output-valid",
+                  "kind": "json-schema",
+                  "passed": true
+                },
+                {
+                  "id": "decision-matches",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "reply-tone",
+                  "kind": "llm-judge",
+                  "passed": true,
+                  "reason": "2 of 3 runs said pass",
+                  "judge": {
+                    "verdicts": [
+                      "pass",
+                      "pass"
+                    ],
+                    "runs": 3,
+                    "costUsd": 0.000449
+                  }
+                }
+              ],
+              "usage": {
+                "calls": 4,
+                "inputTokens": 2287,
+                "outputTokens": 645
+              },
+              "costUsd": 0.002491,
+              "latencyMs": 3669,
+              "cache": {
+                "replayed": 4,
+                "live": 0
+              },
+              "cacheKeys": [
+                "bb25cbc230beeeb74b423ae31afabed39a14bda738ebffbf9cc65c4421780466",
+                "d2e79f0fe1942584c5e4b774e6955ef0b2e7e6eefac23cfc8151a1cee43cd98e",
+                "e39482c02854aa11401e7f96475f3b6862f2d42c41eec5ee7a771321df5c3157",
+                "a9d669f16fce77b0374ff5a44aef1b0cbdfba6f8ab2a89a6a88709ec48b90372"
+              ]
+            },
+            {
+              "id": "changed-mind",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "output-valid",
+                  "kind": "json-schema",
+                  "passed": true
+                },
+                {
+                  "id": "decision-matches",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "reply-tone",
+                  "kind": "llm-judge",
+                  "passed": true,
+                  "reason": "3 of 3 runs said pass",
+                  "judge": {
+                    "verdicts": [
+                      "pass",
+                      "pass",
+                      "pass"
+                    ],
+                    "runs": 3,
+                    "costUsd": 0.000272
+                  }
+                }
+              ],
+              "usage": {
+                "calls": 4,
+                "inputTokens": 2284,
+                "outputTokens": 310
+              },
+              "costUsd": 0.002496,
+              "latencyMs": 2044,
+              "cache": {
+                "replayed": 4,
+                "live": 0
+              },
+              "cacheKeys": [
+                "938ed98dc2e0e3408dda727e6c3396557c1d9ab57c1b0ef7485a3bcb39cd24c9",
+                "07bbbd88d5229e8c5fb95c2d4e1cba79a2936c32ac8c4b911b64a0a92878cf64",
+                "aa768a223a07b467d69d6aa5d93b92690409c6e6440a9ba169690ae7acd14fe2",
+                "f8685ba928c90596d5e306c3c1ed4c03073be24eb0a362daec655b4f0ea80e81"
+              ]
+            },
+            {
+              "id": "large-order",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "output-valid",
+                  "kind": "json-schema",
+                  "passed": true
+                },
+                {
+                  "id": "decision-matches",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "reply-tone",
+                  "kind": "llm-judge",
+                  "passed": true,
+                  "reason": "3 of 3 runs said pass",
+                  "judge": {
+                    "verdicts": [
+                      "pass",
+                      "pass",
+                      "pass"
+                    ],
+                    "runs": 3,
+                    "costUsd": 0.000278
+                  }
+                }
+              ],
+              "usage": {
+                "calls": 4,
+                "inputTokens": 2266,
+                "outputTokens": 319
+              },
+              "costUsd": 0.002442,
+              "latencyMs": 3665,
+              "cache": {
+                "replayed": 4,
+                "live": 0
+              },
+              "cacheKeys": [
+                "7bb4864048e6c9d23122f391fa79a5ae45d48a3792175862e6a519def4f0b932",
+                "9e2b2549ac521166501b72bcc14ac4623e5f88ec254ac0fe26da727c37cf2690",
+                "bf025f2e26064f2787621f898f7bf503ab9dc72f6f79c6c441605e4caf810217",
+                "cba747306fe3cde3adde17a6d3063058c1b3397140ea771b03cf5f342b354ea5"
+              ]
+            },
+            {
+              "id": "late-return",
+              "status": "failed",
+              "assertions": [
+                {
+                  "id": "output-valid",
+                  "kind": "json-schema",
+                  "passed": true
+                },
+                {
+                  "id": "decision-matches",
+                  "kind": "equals",
+                  "passed": false,
+                  "reason": "Expected \"deny\", got \"approve\""
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "reply-tone",
+                  "kind": "llm-judge",
+                  "passed": true,
+                  "reason": "3 of 3 runs said pass",
+                  "judge": {
+                    "verdicts": [
+                      "pass",
+                      "pass",
+                      "pass"
+                    ],
+                    "runs": 3,
+                    "costUsd": 0.000267
+                  }
+                }
+              ],
+              "usage": {
+                "calls": 4,
+                "inputTokens": 2256,
+                "outputTokens": 299
+              },
+              "costUsd": 0.002439,
+              "latencyMs": 2929,
+              "cache": {
+                "replayed": 4,
+                "live": 0
+              },
+              "cacheKeys": [
+                "8f413494903b7917aae3e467932dd724e36e0d7e53848698b295c1de79468705",
+                "f4b0e2e7f53b42319c2a1d8227f657cbadf3ffcc212d065cb400056c4f763dba",
+                "99fd975707ee885e280b1676ee90f17d1edea31b43bafd5fa698fe0a37737c68",
+                "79d1d4168afa03dff32dbcab3790d144e3d97b6f5fd1bb8d504af41244f34841"
+              ]
+            },
+            {
+              "id": "wrong-size",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "output-valid",
+                  "kind": "json-schema",
+                  "passed": true
+                },
+                {
+                  "id": "decision-matches",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "reply-tone",
+                  "kind": "llm-judge",
+                  "passed": true,
+                  "reason": "3 of 3 runs said pass",
+                  "judge": {
+                    "verdicts": [
+                      "pass",
+                      "pass",
+                      "pass"
+                    ],
+                    "runs": 3,
+                    "costUsd": 0.000275
+                  }
+                }
+              ],
+              "usage": {
+                "calls": 4,
+                "inputTokens": 2284,
+                "outputTokens": 303
+              },
+              "costUsd": 0.002369,
+              "latencyMs": 2513,
+              "cache": {
+                "replayed": 4,
+                "live": 0
+              },
+              "cacheKeys": [
+                "4c4a752d909458ec6423f2a38301ff4c1a576c2fe343c49e4d8eb3f27ad36d65",
+                "96255d2b734990f35f0be7f6f0918f9e9f9367c8449c664af295e8817d7d47f0",
+                "cacf25d9c6bdb18dd027caafe417aa55a368d140e10020f2fec2406d9e1bf71c",
+                "e076364c1e28f55ce0641e6da7e3bff8e76a73ede7235ce3d57697460f8d2045"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- PromptScript 2026-10-30T16:57:29.704Z | source: .promptscript/project.prs | target: factory - do not edit -->
+<!-- PromptScript 2026-11-01T20:29:22.041Z | source: .promptscript/project.prs | target: factory - do not edit -->
 
 ## Project
 
@@ -14,7 +14,7 @@ You write clean, type-safe, and well-tested code following strict TypeScript pra
 
 ## Tech Stack
 
-typescript, Node.js 20+, Nx + pnpm
+typescript, Node.js 22.22+, Nx + pnpm
 
 ## Architecture
 
@@ -117,7 +117,7 @@ flowchart TB
 
 - Format: Conventional Commits
 - Types: feat, fix, docs, style, refactor, test, chore
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime, eval) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime, eval, schemas) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 - Reference: https://www.conventionalcommits.org/
 - Max Subject Length: 70

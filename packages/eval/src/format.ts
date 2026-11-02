@@ -536,7 +536,7 @@ export function formatComparison(
   const clean = cleanValue(comparison);
   switch (format) {
     case 'json':
-      return `${JSON.stringify({ $schema: COMPARISON_SCHEMA, ...clean }, null, 2)}\n`;
+      return `${JSON.stringify({ $schema: COMPARISON_SCHEMA, version: 1, ...clean }, null, 2)}\n`;
     case 'markdown':
       return comparisonMarkdown(clean, cleanValue([...(options.missing ?? [])]));
     case 'text':

@@ -20,14 +20,18 @@ import {
   PS5104_APPROVER_IDENTITY,
   PS5105_APPROVAL_EXISTS,
   PS5109_APPROVAL_INVALID,
+  PS5110_APPROVAL_CEILING,
 } from '../../utils/governance-error.js';
 import { checkGovernanceConfig } from '../../utils/governance-config.js';
 import type { ProjectPathOptions } from '../../utils/project-config.js';
 import type { ReleaseDiagnostic } from '../../utils/release-report.js';
+import { gateEntriesOf, parsePercent, shortened } from '../release/experiment.js';
 import { stripControlCharacters } from '../release/git.js';
+import { individualRosters, outsideRosterWarning } from './roster.js';
 import {
   CONTENT_HASH_RE,
   checkBundleFields,
+  percentText,
   readLabel,
   readReleaseText,
   shortHash,
@@ -52,6 +56,7 @@ import {
   findApprovalRecords,
   gitBlobId,
   gitPathsOf,
+  isApprovalPromptId,
   MAX_APPROVAL_DEPTH,
   trackedApprovals,
   writeApprovalRecord,
@@ -62,8 +67,6 @@ export const APPROVAL_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/approval-report/v1.json';
 
 // Same patterns as the approval record guard in core, checked here to name the failing field.
-const PROMPT_ID_RE =
-  /^(?!.*\.\.)(?:@?[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(?<!\.)\/)+[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/u;
 const ROLE_RE = /^[a-z][a-z0-9-]{0,31}$/;
 // Stricter than the core guard: format characters (bidi, BOM, zero-width) are refused too.
 const COMMENT_RE = /^(?:[^\p{Cc}\p{Cs}\p{Cf}]|\n){0,2000}$/u;
@@ -77,6 +80,8 @@ export interface ApproveOptions extends ProjectPathOptions {
   approver?: string;
   env?: string;
   allEnvironments?: boolean;
+  /** Percent text, such as `5` or `2.5`; needs `env` */
+  maxWeight?: string;
   comment?: string;
   list?: boolean;
   /** `text` (default) or `json` */
@@ -89,6 +94,8 @@ export interface ApproveOptions extends ProjectPathOptions {
  * count: `untracked` (not added to Git yet), `modified` (the bytes on disk are not the
  * ones Git has), `misplaced` (Git tracks it at another path than its fields give) and
  * `unknown-role` (the role is not in governance.roles).
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
  */
 export type ApprovalState =
   'current' | 'labelled' | 'stale' | 'untracked' | 'modified' | 'misplaced' | 'unknown-role';
@@ -117,6 +124,7 @@ export interface ApprovalPromptStatus {
 export interface ApprovalReport {
   $schema: typeof APPROVAL_REPORT_SCHEMA_URL;
   version: 1;
+  /** Open enum: new values can be added in this version, so handle unknown values. */
   command: 'approve' | 'list';
   success: boolean;
   /** The record written */
@@ -216,8 +224,7 @@ export function parseApprovalReference(reference: string | undefined): {
 
 /** A prompt id as an approval names it, or PS5102. */
 export function checkPromptId(id: string): void {
-  // The role takes one directory level, each id segment one more.
-  if (!PROMPT_ID_RE.test(id) || id.split('/').length > MAX_APPROVAL_DEPTH - 1) {
+  if (!isApprovalPromptId(id)) {
     throw new GovernanceError(
       PS5102_APPROVAL_REFERENCE,
       `"${stripControlCharacters(id)}" is not a prompt id. Use <@meta.id>/<key> as the bundle names it: up to ${MAX_APPROVAL_DEPTH - 1} segments of letters, digits, "_", "-" and ".", none ending in a dot.`
@@ -240,6 +247,26 @@ function approvalScope(project: ReleaseProject, options: ApproveOptions): string
   }
   environmentIndex(project, options.env);
   return options.env;
+}
+
+/** The ceiling in basis points, or undefined without --max-weight; PS5110 when it is not usable. */
+function checkCeiling(project: ReleaseProject, options: ApproveOptions): number | undefined {
+  const { maxWeight } = options;
+  if (maxWeight === undefined) return undefined;
+  if (options.allEnvironments === true || options.env === undefined) {
+    throw new GovernanceError(
+      PS5110_APPROVAL_CEILING,
+      `--max-weight needs --env <environment> and no --all-environments: a capped approval counts in one environment only. Configured: ${project.environments.join(', ')}.`
+    );
+  }
+  const points = parsePercent(maxWeight);
+  if (points === undefined || points < 1) {
+    throw new GovernanceError(
+      PS5110_APPROVAL_CEILING,
+      `--max-weight takes a percent from 0.01 to 100 with at most two decimals, such as 5 or 2.5; got "${shortened(stripControlCharacters(maxWeight))}".`
+    );
+  }
+  return points;
 }
 
 function checkComment(comment: string | undefined): string | undefined {
@@ -327,6 +354,14 @@ function visible(text: string): string {
   return stripControlCharacters(marked);
 }
 
+/** The scope of a record: its environment, with the ceiling when it has one. */
+function scopeText(record: ApprovalRecordV1, none = 'every environment'): string {
+  const environment = record.environment ?? none;
+  return record.maxWeight === undefined
+    ? environment
+    : `${environment} up to ${percentText(record.maxWeight)}`;
+}
+
 function shownJson(value: unknown, none: string): string {
   const text = JSON.stringify(value);
   return text === undefined || text === '{}' ? none : visible(text);
@@ -342,7 +377,7 @@ function indented(text: string): string[] {
  */
 function showBundle(bundle: PromptBundleV1, record: ApprovalRecordV1): void {
   const lines = [
-    `Approving ${record.prompt}@${record.contentHash} as ${record.role} for ${record.environment ?? 'every environment'}`,
+    `Approving ${record.prompt}@${record.contentHash} as ${record.role} for ${scopeText(record)}`,
     `  Description: ${visible(String(bundle.description))}`,
     `  Governance: ${shownJson(bundle.governance, 'none')}`,
     `  Model: ${shownJson(bundle.model, 'none, the application picks it')}`,
@@ -364,6 +399,7 @@ async function approve(
   const project = await loadReleaseProject(options);
   const { role, owners } = checkRole(project, options.role);
   const { id, contentHash } = parseApprovalReference(reference);
+  const maxWeight = checkCeiling(project, options);
   const environment = approvalScope(project, options);
   const comment = checkComment(options.comment);
   const approver = checkApprover(options.approver);
@@ -378,6 +414,7 @@ async function approve(
     createdAt: new Date().toISOString(),
     ...(environment === undefined ? {} : { environment }),
     ...(comment === undefined ? {} : { comment }),
+    ...(maxWeight === undefined ? {} : { maxWeight }),
   };
   showBundle(bundle, record);
 
@@ -385,6 +422,11 @@ async function approve(
     const { path, warning } = writeApprovalRecord(project.root, record);
     if (warning !== undefined) warnings.push(warning);
     output.success(`Wrote ${path}`);
+    if (maxWeight !== undefined) {
+      output.info(
+        `It counts only for experiment arms at up to ${percentText(maxWeight)} in ${environment}, never for the entry hash or a promote.`
+      );
+    }
     output.info(`Commit the file. Its pull request needs a review from ${owners.join(' or ')}.`);
     return Promise.resolve({ record, path, warnings });
   });
@@ -441,12 +483,24 @@ function signatureWarning(listed: ListedApproval): ReleaseDiagnostic {
 }
 
 /** The warnings a listed record adds, besides its state. */
-function listedWarnings(listed: ListedApproval): ReleaseDiagnostic[] {
+function listedWarnings(listed: ListedApproval, context: ListContext): ReleaseDiagnostic[] {
   const warnings: ReleaseDiagnostic[] = [];
   if (listed.state === 'modified') warnings.push(modifiedWarning(listed));
   if (listed.state === 'misplaced') warnings.push(misplacedWarning(listed));
   if (listed.state === 'unknown-role') warnings.push(unknownRoleWarning(listed));
   const { record } = listed;
+  // Only a record the gates could count: a stale, untracked, modified or misplaced one never does.
+  const counts = listed.state === 'current' || listed.state === 'labelled';
+  const outside = counts
+    ? outsideRosterWarning(
+        context.rosters,
+        record.role,
+        record.approver.value,
+        stripControlCharacters(listed.path),
+        listed.path
+      )
+    : undefined;
+  if (outside !== undefined) warnings.push(outside);
   if (record.signature !== undefined || record.signatureType !== undefined) {
     warnings.push(signatureWarning(listed));
   }
@@ -466,7 +520,7 @@ function printList(prompts: ApprovalPromptStatus[]): void {
     if (prompt.records.length === 0) ConsoleOutput.muted('  no approvals');
     for (const entry of prompt.records) {
       const { record } = entry;
-      const scope = record.environment ?? 'all environments';
+      const scope = scopeText(record, 'all environments');
       const where =
         entry.state === 'misplaced' || entry.state === 'untracked'
           ? `  ${stripControlCharacters(entry.path)}`
@@ -490,6 +544,8 @@ interface ListContext {
   labels: EnvironmentLabel[];
   /** Role names in governance.roles */
   roles: Set<string>;
+  /** Owners of the roles that list user handles only */
+  rosters: ReadonlyMap<string, readonly string[]>;
   /** The path Git tracks for each record file on disk */
   gitPaths: Map<string, string | undefined>;
   /** The blob id Git has, by tracked path */
@@ -504,8 +560,11 @@ function listedApproval(
 ): ListedApproval {
   const labels = context.labels
     .filter(({ label }) =>
+      // The entry hash and every experiment arm with traffic are what a gate judges.
       label?.prompts.some(
-        (prompt) => prompt.id === record.prompt && prompt.contentHash === record.contentHash
+        (prompt) =>
+          prompt.id === record.prompt &&
+          gateEntriesOf(prompt).some((item) => item.contentHash === record.contentHash)
       )
     )
     .map(({ environment }) => environment);
@@ -551,7 +610,7 @@ function promptStatuses(
       warnings.push(invalidWarning(entry));
     } else if (id === undefined || entry.record.prompt === id) {
       const listed = listedApproval(entry.path, entry.record, context);
-      warnings.push(...listedWarnings(listed));
+      warnings.push(...listedWarnings(listed, context));
       status(entry.record.prompt).records.push(listed);
     }
   }
@@ -573,11 +632,12 @@ function checkListOptions(options: ApproveOptions): void {
     options.approver,
     options.env,
     options.allEnvironments,
+    options.maxWeight,
     options.comment,
   ];
   if (approveOnly.some((value) => value !== undefined)) {
     throw new Error(
-      '--list takes only an optional prompt id. Drop --role, --approver, --env, --all-environments and --comment.'
+      '--list takes only an optional prompt id. Drop --role, --approver, --env, --all-environments, --max-weight and --comment.'
     );
   }
 }
@@ -607,6 +667,7 @@ async function list(
     built: new Map(compiled.bundles.map((bundle) => [bundle.id, bundle.contentHash])),
     labels,
     roles: configuredRoles(project),
+    rosters: individualRosters(project.config.governance),
     gitPaths: gitPathsOf(project.root, read.found, blobs),
     blobs,
   };

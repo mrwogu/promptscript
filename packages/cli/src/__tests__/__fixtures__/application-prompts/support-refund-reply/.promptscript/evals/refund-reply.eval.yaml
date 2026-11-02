@@ -1,0 +1,18 @@
+$schema: https://getpromptscript.dev/schema/eval-suite/v1.json
+prompt: acme-support/refund-reply
+dataset: datasets/refund-reply.jsonl
+assertions:
+  - { id: output-valid, kind: json-schema }
+  - { id: decision-matches, kind: equals, field: decision }
+  - {
+      id: no-guarantee,
+      kind: regex,
+      field: reply,
+      pattern: '\b(we|i) guarantee\b|\bguaranteed refund\b',
+      flags: i,
+      negate: true,
+    }
+  - { id: reply-tone, kind: llm-judge, rubric: acme-support/judge-refund-reply, field: reply }
+thresholds:
+  passRate: 1
+  maxCostUsd: 0.1

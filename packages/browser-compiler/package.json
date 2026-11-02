@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/browser-compiler",
-  "version": "0.0.1",
+  "version": "1.26.0",
   "description": "Browser-compatible PromptScript compiler with in-memory file system",
   "keywords": [
     "browser",
@@ -10,6 +10,20 @@
     "playground"
   ],
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrwogu/promptscript.git",
+    "directory": "packages/browser-compiler"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "index.js",
+    "types",
+    "README.md"
+  ],
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
@@ -20,10 +34,22 @@
     }
   },
   "dependencies": {
-    "@promptscript/core": "workspace:^",
-    "@promptscript/parser": "workspace:^",
-    "@promptscript/validator": "workspace:^",
-    "@promptscript/formatters": "workspace:^",
+    "@promptscript/core": "workspace:*",
+    "@promptscript/parser": "workspace:*",
+    "@promptscript/validator": "workspace:*",
+    "@promptscript/formatters": "workspace:*",
     "path-browserify": "^1.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "./index.js",
+    "types": "./types/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./types/index.d.ts",
+        "default": "./index.js"
+      },
+      "./package.json": "./package.json"
+    }
   }
 }

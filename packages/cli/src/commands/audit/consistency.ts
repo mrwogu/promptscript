@@ -1,13 +1,15 @@
-import { compareCodeUnits } from '@promptscript/core';
+import { compareCodeUnits, type PromptReleaseLabelEntryV2 } from '@promptscript/core';
 import { runGit, stripControlCharacters } from '../release/git.js';
 import { RELEASE_DIRECTORY } from '../release/layout.js';
 import {
   approvalsDirectory,
-  labelEntries,
+  labelEntryMap,
   labelEnvironment,
   type AuditEvent,
+  type AuditExperimentArm,
   type AuditSources,
 } from './events.js';
+import { armsOf } from './experiments.js';
 import { gitError, type BlobReader } from './history.js';
 import { inSequence } from './sequence.js';
 
@@ -16,6 +18,8 @@ export interface ReplayedState {
   records: Set<string>;
   /** Label path to prompt id to hash */
   labels: Map<string, Map<string, string>>;
+  /** Label path to prompt id to the experiment as text, see `experimentKey` */
+  experiments: Map<string, Map<string, string>>;
 }
 
 /**
@@ -25,7 +29,7 @@ export interface ReplayedState {
  * @param events - Newest first, as the log has them
  */
 export function replayMainline(events: readonly AuditEvent[]): ReplayedState {
-  const state: ReplayedState = { records: new Set(), labels: new Map() };
+  const state: ReplayedState = { records: new Set(), labels: new Map(), experiments: new Map() };
   for (const event of oldestCommitFirst(events)) {
     if (event.mainline) applyEvent(state, event);
   }
@@ -44,11 +48,43 @@ function oldestCommitFirst(events: readonly AuditEvent[]): AuditEvent[] {
   return commits.flat();
 }
 
+function isExperimentEvent(event: AuditEvent): boolean {
+  return (
+    event.type === 'experiment-started' ||
+    event.type === 'experiment-changed' ||
+    event.type === 'experiment-ended'
+  );
+}
+
+/** An experiment event applied: started and changed set the experiment, ended drops it. */
+function applyExperiment(state: ReplayedState, event: AuditEvent, prompt: string): void {
+  const experiments = state.experiments.get(event.path) ?? new Map<string, string>();
+  state.experiments.set(event.path, experiments);
+  if (event.type === 'experiment-ended') {
+    experiments.delete(prompt);
+  } else {
+    experiments.set(prompt, experimentKey(event.experiment ?? '', event.arms ?? []));
+  }
+}
+
+/**
+ * `tone control@hash=9000 warm@hash=1000`. Names, variants and hashes hold no space, `@` or
+ * `=`, so the text tells two experiments apart and can be shown as it is.
+ */
+function experimentKey(name: string, arms: readonly AuditExperimentArm[]): string {
+  const text = arms.map((arm) => `${arm.variant}@${arm.contentHash}=${arm.weight}`).join(' ');
+  return `${name} ${text}`;
+}
+
 /** One event applied to the record paths and label entries. */
 function applyEvent(state: ReplayedState, event: AuditEvent): void {
   if (event.type === 'approved') state.records.add(event.path);
   if (event.type === 'approval-removed') state.records.delete(event.path);
   if (event.prompt === undefined) return;
+  if (isExperimentEvent(event)) {
+    applyExperiment(state, event, event.prompt);
+    return;
+  }
   const label = state.labels.get(event.path) ?? new Map<string, string>();
   state.labels.set(event.path, label);
   if (event.type === 'promoted' || event.type === 'rolled-back') {
@@ -81,7 +117,7 @@ export async function headState(
     throw gitError(error instanceof Error ? error.message : String(error));
   }
   if (listed.status !== 0) throw gitError(stripControlCharacters(listed.stderr.trim()));
-  const state: ReplayedState = { records: new Set(), labels: new Map() };
+  const state: ReplayedState = { records: new Set(), labels: new Map(), experiments: new Map() };
   const labels: { mode: string; blob: string; path: string; environment: string }[] = [];
   for (const entry of listed.stdout.split('\0')) {
     const [, mode = '', blob = '', path = ''] = TREE_ENTRY_RE.exec(entry) ?? [];
@@ -93,19 +129,43 @@ export async function headState(
     // A label that does not parse at the head was warned about at its commit.
   };
   const entries = await inSequence(labels, (label) =>
-    labelEntries(read, label.blob, label.mode, label.environment, label.path, 'HEAD', ignore)
+    labelEntryMap(read, label.blob, label.mode, label.environment, label.path, 'HEAD', ignore)
   );
   labels.forEach((label, index) => {
     const found = entries[index];
-    if (found !== undefined) state.labels.set(label.path, found);
+    if (found !== undefined) addLabel(state, label.path, found);
   });
   return state;
+}
+
+function addLabel(
+  state: ReplayedState,
+  path: string,
+  entries: ReadonlyMap<string, PromptReleaseLabelEntryV2>
+): void {
+  const hashes = new Map<string, string>();
+  const experiments = new Map<string, string>();
+  for (const [prompt, entry] of entries) {
+    hashes.set(prompt, entry.contentHash);
+    if (entry.experiment === undefined) continue;
+    experiments.set(prompt, experimentKey(entry.experiment.name, armsOf(entry.experiment)));
+  }
+  state.labels.set(path, hashes);
+  state.experiments.set(path, experiments);
 }
 
 function shown(entries: Map<string, string> | undefined): string {
   return [...(entries ?? [])]
     .sort(([a], [b]) => compareCodeUnits(a, b))
     .map(([prompt, hash]) => `${prompt}@${hash}`)
+    .join(', ');
+}
+
+/** `prompt:name control@hash=9000, warm@hash=1000` per experiment. */
+function shownExperiments(experiments: Map<string, string> | undefined): string {
+  return [...(experiments ?? [])]
+    .sort(([a], [b]) => compareCodeUnits(a, b))
+    .map(([prompt, key]) => `${prompt}:${key}`)
     .join(', ');
 }
 
@@ -125,13 +185,23 @@ export function stateMismatches(
   for (const path of [...head.records].filter((record) => !replayed.records.has(record))) {
     problems.push(`${path} is at the head but no event added it`);
   }
-  const labels = new Set([...replayed.labels.keys(), ...head.labels.keys()]);
+  const labels = new Set([
+    ...replayed.labels.keys(),
+    ...head.labels.keys(),
+    ...replayed.experiments.keys(),
+    ...head.experiments.keys(),
+  ]);
   for (const path of [...labels].sort(compareCodeUnits)) {
     if (unreadableLabels.has(path)) continue;
     const logged = shown(replayed.labels.get(path));
     const actual = shown(head.labels.get(path));
     if (logged !== actual) {
       problems.push(`${path} holds [${actual}] at the head, but the log leads to [${logged}]`);
+    }
+    const runs = shownExperiments(head.experiments.get(path));
+    const logRuns = shownExperiments(replayed.experiments.get(path));
+    if (runs !== logRuns) {
+      problems.push(`${path} runs [${runs}] at the head, but the log leads to [${logRuns}]`);
     }
   }
   return problems.sort(compareCodeUnits);

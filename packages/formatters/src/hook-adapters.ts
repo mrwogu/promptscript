@@ -10,6 +10,8 @@ import type { FormatterWarning } from './types.js';
 /**
  * Portable hook event names (kebab-case).
  * These map to target-native event names per target contract.
+ *
+ * @internal
  */
 export type PortableHookEvent =
   | 'pre-terminal-command'
@@ -21,6 +23,7 @@ export type PortableHookEvent =
   | 'notification'
   | 'stop';
 
+/** @internal */
 export type HookTarget =
   | 'claude'
   | 'cursor'
@@ -33,6 +36,7 @@ export type HookTarget =
   | 'grok'
   | 'opencode';
 
+/** @internal */
 export interface HookTargetOverride {
   event?: PortableHookEvent;
   matcher?: string;
@@ -47,6 +51,8 @@ export interface HookTargetOverride {
 
 /**
  * A parsed hook definition from the @hooks block.
+ *
+ * @internal
  */
 export interface HookDefinition {
   /** Stable hook ID (from object key). */
@@ -73,6 +79,7 @@ export interface HookDefinition {
   targets?: Partial<Record<HookTarget, HookTargetOverride>>;
 }
 
+/** @internal */
 export interface HookScriptDefinition {
   /** Script path under .promptscript/scripts/. */
   path: string;
@@ -317,6 +324,8 @@ function extractHookScript(value: Value | undefined): HookScriptDefinition | und
 
 /**
  * Extract hook definitions from a parsed @hooks block.
+ *
+ * @internal
  */
 export function extractHooks(hooksBlock: {
   content: { type: string; properties?: Record<string, Value> };
@@ -401,6 +410,7 @@ export function extractHooks(hooksBlock: {
   return hooks;
 }
 
+/** @internal */
 export function applyHookTargetOverrides(
   hooks: HookDefinition[],
   target: HookTarget
@@ -415,6 +425,7 @@ export function applyHookTargetOverrides(
   });
 }
 
+/** @internal */
 export function getEnabledHookScriptResources(hook: HookDefinition): HookScriptDefinition[] {
   const resources = new Map<string, HookScriptDefinition>();
   const addScript = (candidate: HookDefinition): void => {
@@ -576,6 +587,8 @@ const EVENT_MAPS: Readonly<
 
 /**
  * Get the target-native event name for a portable event.
+ *
+ * @internal
  */
 export function mapEvent(event: PortableHookEvent, target: HookTarget): string | null {
   if (target === 'windsurf') return WINDSURF_EVENT_MAP[event][0] ?? null;
@@ -602,6 +615,8 @@ function getEffectiveMatcher(hook: HookDefinition, target: HookTarget): string |
 
 /**
  * Convert timeout from milliseconds to target units.
+ *
+ * @internal
  */
 export function convertTimeout(timeoutMs: number, target: HookTarget): number {
   if (target === 'gemini') return timeoutMs;
@@ -622,6 +637,8 @@ export function convertTimeout(timeoutMs: number, target: HookTarget): number {
 
 /**
  * Generate Claude settings.json hook entries from portable hook definitions.
+ *
+ * @internal
  */
 export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unknown> {
   const result: Record<string, unknown[]> = {};
@@ -658,6 +675,8 @@ export function generateClaudeHooks(hooks: HookDefinition[]): Record<string, unk
  * Generate Cursor hooks.json entries from portable hook definitions.
  *
  * Cursor uses a flat JSON structure keyed by event name.
+ *
+ * @internal
  */
 export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unknown> {
   const result: Record<string, unknown[]> = {};
@@ -682,6 +701,8 @@ export function generateCursorHooks(hooks: HookDefinition[]): Record<string, unk
 /**
  * Generate Factory Droid hooks for .factory/hooks.json.
  * Factory uses a structure similar to Claude (event -> array of entries).
+ *
+ * @internal
  */
 export function generateFactoryHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
@@ -715,6 +736,7 @@ const GITHUB_MATCHER_EVENTS = new Set([
   'notification',
 ]);
 
+/** @internal */
 export function getHookCompatibilityWarnings(
   hooks: HookDefinition[],
   target: HookTarget
@@ -852,6 +874,8 @@ export function getHookCompatibilityWarnings(
 
 /**
  * Generate GitHub Copilot repository hook entries.
+ *
+ * @internal
  */
 export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
@@ -888,6 +912,8 @@ export function generateGitHubHooks(hooks: HookDefinition[]): Record<string, unk
  * workspace hook loader currently ignores matcher values. The matcher is
  * retained for readability and the compatibility warning directs users to
  * filter tool input inside the command when exact filtering matters.
+ *
+ * @internal
  */
 export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
@@ -919,6 +945,8 @@ export function generateVSCodeHooks(hooks: HookDefinition[]): Record<string, unk
 
 /**
  * Generate Gemini CLI settings.json hook entries.
+ *
+ * @internal
  */
 export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
@@ -947,6 +975,8 @@ export function generateGeminiHooks(hooks: HookDefinition[]): Record<string, unk
 
 /**
  * Generate Windsurf Cascade hook entries.
+ *
+ * @internal
  */
 export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
@@ -973,6 +1003,8 @@ export function generateWindsurfHooks(hooks: HookDefinition[]): Record<string, u
 
 /**
  * Generate native Grok Build hook entries.
+ *
+ * @internal
  */
 export function generateGrokHooks(hooks: HookDefinition[]): Record<string, unknown[]> {
   const result: Record<string, unknown[]> = {};
@@ -1000,6 +1032,8 @@ export function generateGrokHooks(hooks: HookDefinition[]): Record<string, unkno
 
 /**
  * Generate Codex config.toml hook entries from portable hook definitions.
+ *
+ * @internal
  */
 export function generateCodexHooks(hooks: HookDefinition[]): string {
   const lines: string[] = [];
@@ -1072,11 +1106,15 @@ function escapeTomlHookString(value: string): string {
 
 /**
  * Project-local OpenCode plugin path PromptScript owns.
+ *
+ * @internal
  */
 export const OPENCODE_PLUGIN_PATH = '.opencode/plugins/promptscript.ts';
 
 /**
  * Serialized hook rule embedded in the generated OpenCode plugin.
+ *
+ * @internal
  */
 export interface OpenCodeHookRule {
   id: string;
@@ -1288,6 +1326,8 @@ export const PromptScriptHooks = async (context: OpenCodePluginContext) => {
  *
  * Returns the plugin source, or null when no enabled hook maps to an OpenCode
  * tool execution event. Output is deterministic for equal hook input.
+ *
+ * @internal
  */
 export function generateOpenCodePlugin(hooks: HookDefinition[]): string | null {
   const rules: OpenCodeHookRule[] = [];

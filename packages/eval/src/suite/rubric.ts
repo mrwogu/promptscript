@@ -244,9 +244,10 @@ export function checkJudges(
   const unpriced = new Set<string>();
   for (const assertion of suite.assertions) {
     if (assertion.kind !== 'llm-judge') continue;
-    const rubric = context.bundles.find((candidate) => candidate.id === assertion.rubric);
+    const rubrics = context.rubrics ?? context.bundles;
+    const rubric = rubrics.find((candidate) => candidate.id === assertion.rubric);
     if (rubric === undefined) {
-      const nearest = nearestIds(assertion.rubric, context.bundles);
+      const nearest = nearestIds(assertion.rubric, rubrics);
       const hint =
         nearest.length > 0
           ? `nearest ids: ${nearest.join(', ')}`

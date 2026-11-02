@@ -1,0 +1,8 @@
+prompt: acme-support/refund-reply
+dataset: datasets/refund-reply.jsonl
+assertions:
+  - { id: decision, kind: equals, field: decision }
+  - { id: reply-written, kind: regex, field: reply, pattern: '\S' }
+  - { id: no-guarantee, kind: regex, field: reply, pattern: '\bguarantee(d)?\b', negate: true }
+thresholds:
+  passRate: 1

@@ -8,6 +8,7 @@ import { extractHooks } from './hook-adapters.js';
 import type { HookTarget } from './hook-adapters.js';
 import type { FormatterWarning } from './types.js';
 
+/** @internal */
 export function getTargetHookCapabilityWarnings(
   ast: Program,
   target: string,
@@ -47,6 +48,7 @@ export function getTargetHookCapabilityWarnings(
   return [];
 }
 
+/** @internal */
 export function appendTargetHookCapabilityWarnings(
   output: import('./types.js').FormatterOutput,
   ast: Program,

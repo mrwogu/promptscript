@@ -10,7 +10,7 @@ import {
   sameEntry,
 } from './experiment.js';
 import { checkPromotionGates, gateLines } from './gates.js';
-import { runGit, stripControlCharacters } from './git.js';
+import { escapeNonAscii, runGit, stripControlCharacters } from './git.js';
 import {
   PROMPT_RELEASE_LABEL_SCHEMA_URL,
   fileAction,
@@ -127,7 +127,7 @@ function assertNoFirstEnvironmentExperiment(
   if (index !== 0 || ids.length === 0) return;
   throw new ReleaseError(
     PS5009_INVALID_SPLIT,
-    `${relativePath} would bring back the experiment of ${ids.map(stripControlCharacters).join(', ')}, but ${environment} is the first environment and runs no experiment. Revert the label in a reviewed change instead.`,
+    `${relativePath} would bring back the experiment of ${ids.map(escapeNonAscii).join(', ')}, but ${environment} is the first environment and runs no experiment. Revert the label in a reviewed change instead.`,
     relativePath
   );
 }
@@ -158,12 +158,12 @@ async function restoredLimitWarnings(
 /** One line of text per entry item, and one per arm item. */
 function changeLine(entry: ReleaseChange): string {
   if (entry.experiment !== undefined) {
-    return `  ${stripControlCharacters(String(entry.id))} ${armChangeText(entry.experiment)}`;
+    return `  ${escapeNonAscii(String(entry.id))} ${armChangeText(entry.experiment)}`;
   }
   const from =
     entry.previousContentHash === undefined ? 'none' : shortHash(entry.previousContentHash);
   const to = entry.contentHash === undefined ? 'removed' : shortHash(entry.contentHash);
-  return `${stripControlCharacters(String(entry.id))}  ${from} -> ${to}`;
+  return `${escapeNonAscii(String(entry.id))}  ${from} -> ${to}`;
 }
 
 /**

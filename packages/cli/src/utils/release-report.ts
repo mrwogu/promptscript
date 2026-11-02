@@ -3,15 +3,24 @@
  *
  * The shape is pinned by `schema/release-report-v1.json`.
  */
-import type { PolicyKind, PolicySeverity, RiskLevel } from '@promptscript/core';
+import type { ModelStatus, PolicyKind, PolicySeverity, RiskLevel } from '@promptscript/core';
 
 export const RELEASE_REPORT_SCHEMA_URL =
   'https://getpromptscript.dev/schema/release-report/v1.json';
 export const RELEASE_REPORT_VERSION = 1 as const;
 
+/**
+ * Name of the release command.
+ *
+ * Open enum: new values can be added in this version, so handle unknown values.
+ */
 export type ReleaseCommandName = 'build' | 'promote' | 'rollback' | 'split' | 'status';
 
-/** What a command did, or would do under `--dry-run`, to one file entry. */
+/**
+ * What a command did, or would do under `--dry-run`, to one file entry.
+ *
+ * Closed enum: a new value needs a new schema version.
+ */
 export type ReleaseChangeAction = 'created' | 'updated' | 'unchanged' | 'removed';
 
 /** The experiment arm a label change describes. */
@@ -131,14 +140,25 @@ export interface ReleaseGateApprovals {
   found: string[];
   /** Records of this prompt and role for another hash, as `<approver> for <short hash>` */
   stale: string[];
+  /**
+   * Records of this hash and role that do not count, as `<approver> up to <percent> %`: the
+   * ceiling is below the arm weight, or the item is not an arm. Absent when there are none.
+   */
+  capped?: string[];
 }
 
 /** One policy as a release gate judged it for one prompt. */
 export interface ReleaseGateCheck {
   policy: string;
+  /** Open enum: new values can be added in this version, so handle unknown values. */
   kind: PolicyKind;
+  /** Closed enum: a new value needs a new schema version. */
   severity: PolicySeverity;
-  /** `unavailable` never passes at error severity */
+  /**
+   * `unavailable` never passes at error severity.
+   *
+   * Closed enum: a new value needs a new schema version.
+   */
   status: 'passed' | 'failed' | 'unavailable';
   message?: string;
   suggestion?: string;
@@ -150,7 +170,11 @@ export interface ReleaseGateResult {
   prompt: string;
   contentHash: string;
   environment: string;
-  /** The highest of the bundle's and the source's risk and risk floors */
+  /**
+   * The highest of the bundle's and the source's risk and risk floors.
+   *
+   * Closed enum: a new value needs a new schema version.
+   */
   policyRisk: RiskLevel;
   /** False when a check of severity error failed or is unavailable */
   passed: boolean;
@@ -163,6 +187,30 @@ export interface ReleaseBaseRef {
   ref: string;
   /** The commit it named */
   commit: string;
+}
+
+/** One labelled hash and the model its bundle runs, as `status --check-models` judged it. */
+export interface ReleaseModelStatus {
+  environment: string;
+  prompt: string;
+  contentHash: string;
+  /** Arm name, for an experiment arm other than control */
+  variant?: string;
+  /** The model as the bundle carries it */
+  ref: string;
+  profile?: string;
+  provider: string;
+  apiId: string;
+  /**
+   * Catalog status of the profile that runs it, `unknown` when the catalog has none.
+   *
+   * Open enum: new values can be added in this version, so handle unknown values.
+   */
+  status: ModelStatus | 'unknown';
+  /** Retirement date from the catalog, YYYY-MM-DD */
+  retirementDate?: string;
+  /** True when PS5011 reports it: retired, or deprecated with a date within the window */
+  retiring: boolean;
 }
 
 export interface ReleaseReport {
@@ -178,6 +226,8 @@ export interface ReleaseReport {
   base?: ReleaseBaseRef;
   /** The gates of every prompt version a policy applies to; absent without prompt policies */
   gates?: ReleaseGateResult[];
+  /** Present when status runs with --check-models */
+  models?: ReleaseModelStatus[];
   warnings: ReleaseDiagnostic[];
   errors: ReleaseDiagnostic[];
 }
@@ -199,6 +249,7 @@ export function createReleaseReport(
     ...(partial.history === undefined ? {} : { history: partial.history }),
     ...(partial.base === undefined ? {} : { base: partial.base }),
     ...(partial.gates === undefined ? {} : { gates: partial.gates }),
+    ...(partial.models === undefined ? {} : { models: partial.models }),
     warnings: partial.warnings ?? [],
     errors,
   };

@@ -1827,11 +1827,13 @@ pre.init-demo__file-preview-content {
 }
 
 .home-proof {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  align-items: center;
-  gap: 3.125rem;
   padding: 4.375rem 0;
+}
+
+.home-video {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.625rem 0 3.125rem;
 }
 
 .sl-markdown-content .home-video-card {
@@ -1855,7 +1857,7 @@ pre.init-demo__file-preview-content {
 }
 
 .home-proof__copy {
-  max-width: 480px;
+  max-width: 680px;
 }
 
 .home-proof__actions {
@@ -1966,13 +1968,11 @@ pre.init-demo__file-preview-content {
   }
 
   .home-proof {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
     padding: 3.75rem 0;
   }
 
-  .home-proof__copy {
-    max-width: 680px;
+  .home-video {
+    padding-bottom: 2.5rem;
   }
 
   .home-final-cta {

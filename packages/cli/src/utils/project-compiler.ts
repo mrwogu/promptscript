@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import type { Lockfile, Logger, PromptScriptConfig } from '@promptscript/core';
 import { Compiler, type CompilerOptions } from '@promptscript/compiler';
+import type { ValidatorConfig } from '@promptscript/validator';
 import type { ResolvedRegistry } from './registry-resolver.js';
 import { registryReferenceRoots, resolveUniversalDir } from './project-config.js';
 
@@ -18,6 +19,8 @@ export interface ProjectCompilerOptions {
   formatters: CompilerOptions['formatters'];
   /** Logger for verbose and debug output */
   logger?: Logger;
+  /** Validator settings; defaults to `validation` of the config */
+  validator?: ValidatorConfig;
   /** Prettier options for Markdown output */
   prettier?: NonNullable<CompilerOptions['prettier']>;
   /** Content of the bundled language skill */
@@ -51,7 +54,7 @@ export function createProjectCompiler(
       skillTargets: config.skillTargets,
       skills: resolveUniversalDir(config.universalDir),
     },
-    validator: config.validation,
+    validator: options.validator ?? config.validation,
     formatters: options.formatters,
     customConventions: config.customConventions,
     prettier: options.prettier,

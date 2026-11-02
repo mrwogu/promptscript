@@ -1,8 +1,7 @@
 /// <reference types='vitest' />
+import { cpSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import { defineConfig, type Plugin } from 'vite';
 
 const browserFsShim = resolve(__dirname, 'src/shims/fs.ts');
 
@@ -12,15 +11,34 @@ export const BROWSER_NODE_ALIASES = {
   'node:path': 'path-browserify',
 } as const;
 
+// Copies package.json, README, LICENSE and the type declarations next to the bundle.
+// The declarations come from the typecheck target, which build depends on.
+const copyPackageFiles = (): Plugin => ({
+  name: 'copy-package-files',
+  writeBundle(options) {
+    const outDir = options.dir ?? resolve(__dirname, '../../dist/packages/browser-compiler');
+    cpSync(
+      resolve(__dirname, '../../dist/declarations/browser-compiler/packages/browser-compiler/src'),
+      resolve(outDir, 'types'),
+      { recursive: true, filter: (src) => !src.endsWith('.map') }
+    );
+    cpSync(resolve(__dirname, '../../LICENSE'), resolve(outDir, 'LICENSE'));
+    cpSync(resolve(__dirname, 'README.md'), resolve(outDir, 'README.md'));
+    cpSync(resolve(__dirname, 'package.json'), resolve(outDir, 'package.json'));
+  },
+});
+
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/browser-compiler',
-  plugins: [nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
+  plugins: [copyPackageFiles()],
   resolve: {
+    tsconfigPaths: true,
     // Keep prefixed imports browser-safe after the Deno portability sweep.
     alias: BROWSER_NODE_ALIASES,
   },
   build: {
+    outDir: '../../dist/packages/browser-compiler',
     lib: {
       entry: 'src/index.ts',
       name: 'BrowserCompiler',
@@ -33,7 +51,6 @@ export default defineConfig(() => ({
     },
     target: 'es2020',
     minify: false,
-    // Don't emit types - just bundle JS
     emptyOutDir: true,
   },
   test: {

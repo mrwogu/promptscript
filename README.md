@@ -12,7 +12,7 @@ files for every tool._
 [![CI](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml/badge.svg)](https://github.com/mrwogu/promptscript/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/mrwogu/promptscript/graph/badge.svg?token=MPUCPQLVWR)](https://codecov.io/github/mrwogu/promptscript)
 [![npm version](https://img.shields.io/npm/v/@promptscript/cli.svg)](https://www.npmjs.com/package/@promptscript/cli)
-[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://getpromptscript.dev/getting-started/#installation)
+[![Node.js 22.22+](https://img.shields.io/badge/Node.js-22.22%2B-5FA04E?logo=nodedotjs&logoColor=white)](https://getpromptscript.dev/getting-started/#installation)
 [![Deno 2.9+](https://img.shields.io/badge/Deno-2.9%2B-70FFAF?logo=deno&logoColor=000000)](https://getpromptscript.dev/reference/cli/#running-under-deno)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/mrwogu/promptscript/pkgs/container/promptscript)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -283,6 +283,7 @@ Build organization, team, and project layers with deterministic merge rules:
 - Typed parameters turn shared stacks into reusable templates.
 - Sealed properties, reference negation, and overlay drift warnings keep extension layers safe.
 - `prs inspect <skill>` shows property and layer provenance.
+- Composed skill comments name each source by its path relative to the project root (file name only outside the root), never an absolute path.
 - `prs explain <path>` shows source locations and composition history for any resolved path.
   Text and JSON paths are project-relative by default; use `--absolute-paths` to opt in to
   absolute paths. JSON includes `version`, `path`, `entries`, and `diagnostics`. The command exits
@@ -446,8 +447,14 @@ code owner review of its role directory. See
 prompt files go to their owners, approval directories to their role teams, and the config and
 release files to the admins. See [CODEOWNERS from Governance](https://getpromptscript.dev/guides/codeowners/).
 
-`prs audit log` reads who changed, approved, promoted or rolled back a prompt from the Git history,
+`prs audit log` reads who changed, approved, promoted, rolled back or split a prompt from the Git history,
 as text, JSON or CEF for a SIEM. See [Audit log](https://getpromptscript.dev/guides/releases/#audit-log).
+
+`prs eval run` runs a prompt over a dataset and checks every answer with assertions and, if you
+want, an LLM judge. The default cache mode replays recorded answers, so a pull request check needs
+no key and no network. `prs eval compare --fail-on-regression` fails when a later report is
+worse than an earlier one. Without the flag it only prints the regression.
+See the [evals guide](https://getpromptscript.dev/guides/evals/).
 
 The `@promptscript/runtime` package in this repository loads, verifies and renders the released
 bundles in an application, with no dependencies. It is not published to npm yet and its API can
@@ -474,6 +481,11 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
   and `prs governance codeowners` writes CODEOWNERS lines that route prompt files, approvals and
   release labels to the right teams. Turn on required code-owner review in branch protection. See
   [enterprise setup](https://getpromptscript.dev/guides/enterprise/#governed-application-prompts).
+- **Prompt evals and checks** - `prs eval run --label prod` runs eval suites against the bundles an
+  environment serves, with datasets, assertions, an LLM judge, a replay cache, a cost limit and a
+  baseline compare. The default cache mode is replay, so record the answers once with
+  `--cache record --max-cost 0.5`. `prs release status --check-models` fails on labels that run a retired or
+  retiring model. See [the releases guide](https://getpromptscript.dev/guides/releases/#eval-what-an-environment-serves).
 - **Reproducible builds** - lockfile hashes, version pins, vendor mode, and strict validation.
 - **Safe automation** - lifecycle hook commands use arrays, while generated-file protection keeps
   agents pointed at `.prs` source.
@@ -481,7 +493,10 @@ still change. See the [releases guide](https://getpromptscript.dev/guides/releas
   `prs diff --build <name>`, or compile every profile with `prs compile --all-builds`.
 - **CI-ready output** - use `prs validate --strict --format json`, `prs compile --dry-run`,
   `prs diff --format json`, and `prs fmt --check` for deterministic machine-readable changes
-  and formatting checks without generated-file writes.
+  and formatting checks without generated-file writes. The JSON of `prs diff`, `prs release`,
+  `prs approve`, `prs audit log`, `prs eval run`, `prs eval compare` and `prs validate` is
+  versioned and stable, see
+  [JSON Output](https://getpromptscript.dev/reference/json-output/).
 
 ## Adopt Without a Rewrite
 
@@ -521,8 +536,10 @@ with `includePromptScriptSkill: false`.
 | [Agent Platform](https://getpromptscript.dev/features/)                       | Skills, agents, MCP, plugins, hooks, workflows, and targets |
 | [Language Reference](https://getpromptscript.dev/reference/language/)         | Complete PromptScript syntax                                |
 | [CLI Reference](https://getpromptscript.dev/reference/cli/)                   | Commands and options                                        |
+| [JSON Output](https://getpromptscript.dev/reference/json-output/)             | Stable JSON of prs commands, stdout rules, exit codes       |
 | [Configuration Reference](https://getpromptscript.dev/reference/config/)      | Targets, registries, builds, policies, and formatting       |
 | [Security Guide](https://getpromptscript.dev/guides/security/)                | Validation rules, injection detection, and safe registries  |
+| [Evaluating Prompts](https://getpromptscript.dev/guides/evals/)               | Eval suites, the LLM judge, the replay cache, and reports   |
 | [Model Catalog](https://getpromptscript.dev/reference/models/)                | Model aliases and per-target model names                    |
 | [Anonymous Usage Telemetry](https://getpromptscript.dev/reference/telemetry/) | Collected fields, delivery, and opt-out controls            |
 | [Glossary](https://getpromptscript.dev/glossary/)                             | Every PromptScript term in one place                        |

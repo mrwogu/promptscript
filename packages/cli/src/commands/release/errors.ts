@@ -20,6 +20,8 @@ export const PS5008_OUTPUT_IN_RELEASE_DIRECTORY = 'PS5008';
 export const PS5009_INVALID_SPLIT = 'PS5009';
 /** A promotion would drop a running experiment of the entry. */
 export const PS5010_PROMOTE_ON_EXPERIMENT = 'PS5010';
+/** A labelled prompt runs a retired model, or one that retires within the window. */
+export const PS5011_MODEL_RETIRING = 'PS5011';
 
 export type ReleaseErrorCode =
   | typeof PS5001_RELEASE_CONFIG
@@ -31,7 +33,8 @@ export type ReleaseErrorCode =
   | typeof PS5007_RELEASE_LOCKED
   | typeof PS5008_OUTPUT_IN_RELEASE_DIRECTORY
   | typeof PS5009_INVALID_SPLIT
-  | typeof PS5010_PROMOTE_ON_EXPERIMENT;
+  | typeof PS5010_PROMOTE_ON_EXPERIMENT
+  | typeof PS5011_MODEL_RETIRING;
 
 /** An error of a `prs release` command. Every message ends with the fix. */
 export class ReleaseError extends PSError {

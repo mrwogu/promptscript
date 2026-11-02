@@ -12,6 +12,9 @@ First off, thank you for considering contributing to PromptScript! 🎉
 - [Testing](#testing)
 - [Documentation](#documentation)
 - [Updating the Model Catalog](#updating-the-model-catalog)
+- [Publishing (Maintainers Only)](#publishing-maintainers-only)
+  - [Library Packages](#library-packages)
+  - [Deprecation Policy](#deprecation-policy)
 
 ## Code of Conduct
 
@@ -22,7 +25,7 @@ By participating, you are expected to uphold this code.
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22.22+
 - pnpm 8+
 - Git
 
@@ -55,6 +58,7 @@ promptscript/
 │   ├── browser-compiler/ # Browser-compatible compiler bundle
 │   ├── playground/     # Web-based playground UI (private)
 │   ├── server/         # Local dev server for playground (private)
+│   ├── schemas/        # schema/*.json as package subpaths (private)
 │   └── cli/            # CLI application
 ├── apps/docs/          # Docs site (Astro Starlight, reads docs/)
 ├── docs/               # Documentation
@@ -149,6 +153,29 @@ fix(cli): handle missing config file gracefully
 docs(readme): update installation instructions
 ```
 
+### Breaking Changes
+
+`pnpm api:breaking` runs in CI on every pull request to `main`. It is not part of the local verify steps. It compares `packages/*/api/*.api.md` and `schema/*.json` with the merge base of your branch and `main`.
+
+What counts as breaking:
+
+- In an API report: a removed or changed line. `@internal` declarations and comment lines are ignored.
+- In a schema: a removed property, a new required property, a narrowed type, enum or union, a changed `const`, a type added to an untyped property, or `additionalProperties` narrowed or set to `false`.
+- For the schemas that only `prs` writes (`approval-report-v1`, `audit-log-v1`, `diff-v1`, `eval-comparison-v1`, `eval-import-summary-v1`, `eval-report-v1`, `release-report-v1` and `validate-report-v1`), a new required property is fine and a removed one is breaking.
+- Not checked: `if`, `not`, `pattern`, min and max bounds, `propertyNames` and `dependencies`. A new `allOf` entry and a new `then` or `else` are not checked. Also not caught: a base union branch split across two head branches and a narrowing `type` added next to a union. A missing `additionalProperties` changed to `{}` is reported, even though it changes nothing.
+
+Additions pass. Reports of private packages are listed but not enforced.
+
+Pull requests are squash-merged. With one commit, the subject of that commit becomes the commit on `main`. With more commits, the pull request title does. A merge commit from "Update branch" counts as a commit, so after it the pull request title is the one that is checked. The commit messages go into the squash body, the pull request description is not used. So mark a breaking change with `!` in that subject, for example `feat(core)!: drop parseLegacy`. A line that starts with `BREAKING CHANGE:` in any commit message also passes the check.
+
+To run it locally:
+
+```bash
+pnpm api:breaking
+PR_TITLE='feat(core)!: drop parseLegacy' pnpm api:breaking   # with more than one commit
+pnpm exec vitest run --dir scripts                           # the spec of the check
+```
+
 ## Coding Standards
 
 ### TypeScript
@@ -202,13 +229,23 @@ export function parsePath(path: string): ParsedPath {
 
 ### API Reports
 
-Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.md`. Today that is `core`.
+Packages with an `api-extractor.json` have a committed report in `api/<pkg>.api.md`. That is `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler` and `browser-compiler`.
 
 - `pnpm api:check` builds the package and fails if the exported API changed and the report was not updated.
 - `pnpm api:update` rewrites the report. Review the diff, it is the list of exported types and functions.
 - A type used by an exported declaration must be exported too. A missing export fails the check.
 - Do not edit the report by hand and do not format it.
 - Exports that only other PromptScript packages use get `@internal` in their TSDoc. The report marks them with `// @internal` and they are not part of the API contract.
+
+### Package Checks
+
+`pnpm package:check` first checks the release wiring of the library packages (see [Library Packages](#library-packages)), then packs `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler` and `browser-compiler` the way a registry would ship them. It also packs `schemas`, runs publint on it and imports every exported JSON file. Nothing is published and the packages stay private.
+
+- It builds the packages, packs them from a copy in a temp folder and runs publint (strict) and are-the-types-wrong (`--profile esm-only`) on each tarball.
+- It installs all tarballs into a temp project, checks the packed `package.json` files (exports, `files`, `engines`, `license`, the MIT `LICENSE` file, no test files and no declaration maps), imports every package in plain Node and compiles one tiny file with `compiler` and with `browser-compiler`.
+- It bundles `browser-compiler` with esbuild for the browser platform.
+- Run it on Node.js 22 or newer, the `engines` minimum of these packages. CI runs it on the Node 22 leg. The install needs network for the third-party dependencies.
+- In these `package.json` files the top-level `main` points at the TypeScript source, because workspace tools such as the docs app resolve the packages that way. What ships (`main` and `exports`, and `types` for `browser-compiler`) is in `publishConfig`, which `pnpm pack` applies. A plain `npm pack` of a dist folder does not apply it.
 
 ## Testing
 
@@ -398,6 +435,36 @@ pnpm pack --dry-run
 - **Prereleases** (1.0.0-alpha.0) → published as `next`
 
 Install prerelease: `npm install @promptscript/cli@next`
+
+### Library Packages
+
+Eight packages are wired for a future npm publish: `core`, `parser`, `resolver`, `validator`, `formatters`, `compiler`, `browser-compiler` and `schemas`. They are all `"private": true` and nothing is on npm yet.
+
+- **Lockstep with the CLI.** They share the CLI version. One tag, one release-please PR. The manifests are listed in `extra-files` of `release-please-config.json`, so release-please bumps them with the CLI. They are also in `release.projects` in `nx.json`.
+- **Breaking library API means a CLI major.** There is no separate version for a library.
+- **Node.** `engines.node` is `>=22` in every library manifest.
+- **Internal dependencies.** In the repo they are `workspace:*`. `pnpm library:prepare-publish` rewrites them to the exact version in `dist/packages/<lib>/package.json`. `pnpm publish` would rewrite `workspace:*` too, but the prepare step pins explicitly and checks the wiring first.
+- **Checks.** `pnpm package:check` fails when a version, an `extra-files` entry, an `nx.json` project, the `nx-release-publish` target, `private` or `engines` is out of line. The CI step "Publish dry run" builds the libraries, runs `library:prepare-publish` and `nx release publish --dry-run`. Private libraries get no `nx-release-publish` target, so only the CLI runs here. `package:check` covers the libraries.
+
+The list of libraries and the `LIBRARIES_PUBLISHED` flag live in `scripts/library-packages.mts`.
+
+Checklist for the PR that really publishes them:
+
+1. Remove `"private": true` from the 8 manifests.
+2. Set `LIBRARIES_PUBLISHED` to `true` in `scripts/library-packages.mts`.
+3. Add the `pnpm library:prepare-publish` step to `.github/workflows/publish.yml`, after the build and before `nx release publish`.
+4. Rewrite the 8 package READMEs.
+5. Add `docs/guides/library-usage.md`.
+6. Answer issue #658.
+
+### Deprecation Policy
+
+- Mark the old API with a TSDoc `@deprecated` tag that names the replacement.
+- Keep it for at least one minor release and at least 90 days. Both must pass before removal.
+- Remove it only in a major release.
+- Mention the deprecation in the changelog.
+
+JSON schemas follow their own rules, see [Schema versioning](docs/reference/json-output.md#schema-versioning).
 
 ## Questions?
 

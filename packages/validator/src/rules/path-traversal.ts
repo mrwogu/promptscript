@@ -46,6 +46,8 @@ const EMBEDDED_TRAVERSAL =
 
 /**
  * Check if a path contains dangerous traversal patterns.
+ *
+ * @internal
  */
 export function hasPathTraversal(path: string): boolean {
   // Check for excessive parent traversal (../../.. etc)

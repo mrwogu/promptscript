@@ -24,14 +24,43 @@ const approved: AuditEvent = {
   state: 'well-formed',
 };
 
+describe('a capped approval', () => {
+  it('shows its ceiling in text and as a CEF number, and nothing without one', () => {
+    const capped: AuditEvent = { ...approved, maxWeight: 250 };
+
+    expect(textLines(capped)[0]).toContain('  env=prod up to 2.5 %  state=well-formed  ');
+    expect(cefLine(capped, HEAD, '1')).toContain(' flexNumber1=250 flexNumber1Label=maxWeight');
+    expect(textLines(approved)[0]).toContain('  env=prod  state=well-formed  ');
+    expect(cefLine(approved, HEAD, '1')).not.toContain('flexNumber1');
+  });
+});
+
+/** What a SIEM gets from a CEF extension value: `\\`, `\=` and `\|` as the character, `\n` as a line break. */
+function cefDecode(value: string): string {
+  return value.replace(/\\(.)/g, (_, char: string) => (char === 'n' ? '\n' : char));
+}
+
 describe('CEF escaping', () => {
+  it('decodes to the visible text, so a hidden and a literal escape stay distinct', () => {
+    // Arrange
+    const hidden = cefExtensionValue('acme/ref\u200bund');
+    const literal = cefExtensionValue(String.raw`acme/ref\u200Bund`);
+
+    // Act, Assert
+    expect(hidden).not.toBe(literal);
+    expect(cefDecode(hidden)).toBe(String.raw`acme/ref\u200Bund`);
+    expect(cefDecode(literal)).toBe(String.raw`acme/ref\\u200Bund`);
+    expect(cefDecode(hidden)).not.toBe(cefDecode(literal));
+    expect(cefDecode(cefExtensionValue('a\nb=c'))).toBe('a\nb=c');
+  });
+
   it.each([
     ['plain', 'plain'],
     ['a|b', 'a\\|b'],
-    ['back\\slash', 'back\\\\slash'],
+    ['back\\slash', String.raw`back\\\\slash`],
     ['a=b', 'a=b'],
-    ['bell\u0007\u009b[2J', 'bell[2J'],
-    ['line\nbreak', 'linebreak'],
+    ['bell\u0007\u009b[2J', String.raw`bell\\u0007\\u009B[2J`],
+    ['line\nbreak', String.raw`line\\u000Abreak`],
   ])('escapes the header value %j', (input, expected) => {
     // Arrange, Act
     const escaped = cefHeaderValue(input);
@@ -43,11 +72,11 @@ describe('CEF escaping', () => {
   it.each([
     ['plain', 'plain'],
     ['a=b', 'a\\=b'],
-    ['back\\slash', 'back\\\\slash'],
+    ['back\\slash', String.raw`back\\\\slash`],
     ['a|b', 'a|b'],
     ['one\ntwo\r\nthree\rfour', 'one\\ntwo\\nthree\\nfour'],
-    ['esc\u001b[31m\u202eflip\u200b', 'esc[31mflip'],
-    ['\\=', '\\\\\\='],
+    ['esc\u001b[31m\u202eflip\u200b', String.raw`esc\\u001B[31m\\u202Eflip\\u200B`],
+    ['\\=', String.raw`\\\\\=`],
   ])('escapes the extension value %j', (input, expected) => {
     // Arrange, Act
     const escaped = cefExtensionValue(input);
@@ -87,6 +116,9 @@ describe('cefLine', () => {
       ['label-removed', 7],
       ['generated', 3],
       ['config-changed', 6],
+      ['experiment-started', 6],
+      ['experiment-changed', 6],
+      ['experiment-ended', 6],
     ];
 
     // Act
@@ -229,7 +261,7 @@ describe('textLines', () => {
     expect(lines.slice(1)).toEqual(['    comment: ok=fine', '      second line']);
   });
 
-  it('strips control, bidi and zero-width characters from Git and record fields', () => {
+  it('shows control, bidi and zero-width characters as escapes in Git and record fields', () => {
     // Arrange
     const event: AuditEvent = {
       ...approved,
@@ -241,10 +273,65 @@ describe('textLines', () => {
     const text = textLines(event).join('\n');
 
     // Assert
-    expect(text).toContain('by Evil[2J <e@x>');
-    expect(text).toContain('comment: hithere');
+    expect(text).toContain(String.raw`by Evil\u001B[2J\u202E <e\u200B@x\u2028>`);
+    expect(text).toContain(String.raw`comment: hi\u0007\u2029there`);
     // eslint-disable-next-line no-control-regex
     expect(text).not.toMatch(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u200b\u2028\u2029\u202e]/);
+  });
+
+  it('shows a tag character, a variation selector and a lone surrogate in text and CEF', () => {
+    // Arrange
+    const event: AuditEvent = {
+      ...approved,
+      prompt: 'a\u{e0041}b\ufe0fc\ud800d',
+      comment: 'x\r\ny',
+    };
+
+    // Act
+    const text = textLines(event);
+    const cef = cefLine(event, HEAD, '1');
+
+    // Assert
+    expect(text[0]).toContain(String.raw`a\uE0041b\uFE0Fc\uD800d`);
+    expect(cef).toContain(String.raw`cs1=a\\uE0041b\\uFE0Fc\\uD800d `);
+    expect(text.join('\n')).not.toContain('u000D');
+  });
+
+  it('tells two prompt ids apart that differ only by a zero-width space', () => {
+    // Arrange
+    const plain: AuditEvent = { ...approved, prompt: 'acme/refund' };
+    const hidden: AuditEvent = { ...approved, prompt: 'acme/ref\u200bund' };
+
+    // Act
+    const texts = [plain, hidden].map((event) => textLines(event)[0]);
+    const cef = [plain, hidden].map((event) => cefLine(event, HEAD, '1'));
+
+    // Assert
+    expect(texts[0]).not.toBe(texts[1]);
+    expect(texts[1]).toContain(String.raw`acme/ref\u200Bund`);
+    expect(cef[0]).not.toBe(cef[1]);
+    expect(cef[1]).toContain(String.raw`acme/ref\\u200Bund`);
+  });
+
+  it('shows a bidi override as an escape in text and CEF, and a backslash as two', () => {
+    // Arrange
+    const event: AuditEvent = {
+      ...approved,
+      prompt: 'acme/a\u202eb',
+      author: { name: 'Ann\u202e', email: 'ann@example.com\u202e' },
+      path: String.raw`dir\u200bx`,
+    };
+
+    // Act
+    const text = textLines(event)[0];
+    const cef = cefLine(event, HEAD, '1');
+
+    // Assert
+    expect(text).toContain(String.raw`acme/a\u202Eb`);
+    expect(text).toContain(String.raw`by Ann\u202E <`);
+    expect(text).toContain(String.raw`dir\\u200bx`);
+    expect(cef).toContain(String.raw`suser=ann@example.com\\u202E `);
+    expect(cef).toContain(String.raw`dir\\\\u200bx`);
   });
 
   it('shows a dash for events without a hash', () => {
@@ -260,5 +347,133 @@ describe('textLines', () => {
     expect(lines).toEqual([
       `-  ${approved.at}  generated  cccccccccccc  .github/CODEOWNERS  by Jane Doe <jane@example.com>`,
     ]);
+  });
+});
+
+const HASH_B = `sha256-${'b'.repeat(64)}`;
+
+const started: AuditEvent = {
+  type: 'experiment-started',
+  commit: approved.commit,
+  at: approved.at,
+  author: approved.author,
+  committer: approved.committer,
+  path: '.promptscript/releases/prod.json',
+  mainline: true,
+  environment: 'prod',
+  prompt: 'acme-support/refund-reply',
+  contentHash: HASH,
+  experiment: 'tone',
+  arms: [
+    { variant: 'control', contentHash: HASH, weight: 9000 },
+    { variant: 'warm', contentHash: HASH_B, weight: 1000 },
+  ],
+};
+
+describe('experiment events', () => {
+  it('writes a started experiment as text with the arms in percent', () => {
+    // Arrange, Act
+    const text = textLines(started);
+
+    // Assert
+    expect(text).toEqual([
+      [
+        HASH,
+        started.at,
+        'experiment-started',
+        'cccccccccccc',
+        'acme-support/refund-reply',
+        'env=prod',
+        'experiment=tone',
+        `arms=control@${HASH}=90 %, warm@${HASH_B}=10 %`,
+        'by Jane Doe <jane@example.com>',
+      ].join('  '),
+    ]);
+  });
+
+  it('adds the previous arms of a changed experiment', () => {
+    // Arrange
+    const changed: AuditEvent = {
+      ...started,
+      type: 'experiment-changed',
+      arms: [
+        { variant: 'control', contentHash: HASH, weight: 8000 },
+        { variant: 'warm', contentHash: HASH_B, weight: 2000 },
+      ],
+      previousArms: started.arms ?? [],
+    };
+
+    // Act
+    const text = textLines(changed)[0] ?? '';
+    const line = cefLine(changed, HEAD, '1');
+
+    // Assert
+    expect(text).toContain(`arms=control@${HASH}=80 %, warm@${HASH_B}=20 %  previous=control@`);
+    expect(text).toContain(`warm@${HASH_B}=10 %  by Jane Doe`);
+    expect(line).toContain(String.raw`=20 %; previous control@${HASH}\=90 %, warm@`);
+    expect(line).toContain(' flexNumber2=2000 flexNumber2Label=variantWeight');
+  });
+
+  it('shows the kept variant of an ended experiment, and dashes without hash or variant', () => {
+    // Arrange
+    const kept: AuditEvent = { ...started, type: 'experiment-ended', keptVariant: 'warm' };
+    const gone: AuditEvent = { ...kept };
+    delete gone.contentHash;
+    delete gone.keptVariant;
+
+    // Act
+    const keptText = textLines(kept)[0] ?? '';
+    const goneText = textLines(gone)[0] ?? '';
+    const line = cefLine(kept, HEAD, '1');
+
+    // Assert
+    expect(keptText).toContain('=10 %  kept=warm  by Jane Doe');
+    expect(goneText.startsWith(`-  ${started.at}  experiment-ended  `)).toBe(true);
+    expect(goneText).toContain('  kept=-  by Jane Doe');
+    expect(line).toContain(String.raw`; kept warm flexString1=`);
+    expect(cefLine(gone, HEAD, '1')).toContain('; kept - flexString1=');
+    expect(line).not.toContain('flexNumber2');
+  });
+
+  it('writes the experiment name and arms into CEF fields next to the approval ones', () => {
+    // Arrange, Act
+    const line = cefLine(started, HEAD, '1.2.3');
+
+    // Assert
+    expect(line).toBe(
+      [
+        'CEF:0|PromptScript|prs|1.2.3|prs-experiment-started|Experiment started|6|',
+        `rt=${Date.parse(started.at)} act=experiment-started suser=jane@example.com`,
+        ` filePath=${started.path}`,
+        ' cs1=acme-support/refund-reply cs1Label=prompt',
+        ` cs2=${HASH} cs2Label=contentHash cs4=prod cs4Label=environment`,
+        ` cs5=${'c'.repeat(40)} cs5Label=commit`,
+        String.raw` msg=arms control@${HASH}\=90 %, warm@${HASH_B}\=10 %`,
+        ` flexString1=${HEAD} flexString1Label=head`,
+        ' flexString2=tone flexString2Label=experiment',
+        ' flexNumber2=1000 flexNumber2Label=variantWeight cn3=1 cn3Label=mainline',
+      ].join('')
+    );
+  });
+
+  it('escapes a path and persons with separators, line breaks and controls', () => {
+    // Arrange
+    const event: AuditEvent = {
+      ...started,
+      path: 'a|b=c\\d\ne',
+      author: { name: 'Na|me=\u0007x', email: 'a|b@x' },
+    };
+
+    // Act
+    const line = cefLine(event, HEAD, '1');
+
+    // Assert
+    expect(line).toContain(String.raw` filePath=a|b\=c\\\\d\ne `);
+    expect(line).toContain(' suser=a|b@x ');
+    expect(line).not.toContain('\u0007');
+    expect(textLines(event)[0]).toContain(String.raw`by Na|me=\u0007x <a|b@x>`);
+    expect(line).toMatch(
+      /^CEF:0\|PromptScript\|prs\|1\|prs-experiment-started\|Experiment started\|6\|rt=/
+    );
   });
 });

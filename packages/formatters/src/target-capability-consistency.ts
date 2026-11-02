@@ -21,6 +21,8 @@ const PROBE_MCP_URL = `https://capability-probe.example/${PROBE_MCP_MARKER}`;
  *
  * The returned messages are intended for CI assertions and include the target
  * and metadata field that needs correction.
+ *
+ * @internal
  */
 export function validateBuiltinFormatterCapabilities(): string[] {
   const issues: string[] = [];
@@ -229,6 +231,8 @@ function createCapabilityProbeProgram(): Program {
 
 /**
  * Narrow a string to a known target for callers validating external registries.
+ *
+ * @internal
  */
 export function isCanonicalTarget(value: string): value is KnownTarget {
   return (KNOWN_TARGETS as readonly string[]).includes(value);

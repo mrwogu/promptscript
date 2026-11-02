@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "8f413494903b7917aae3e467932dd724e36e0d7e53848698b295c1de79468705",
+  "request": {
+    "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+    "inputsHash": "sha256-46b0e24aa19ea8c406a1e194bc0202e634cafa0d793dcfe00926c52e9929b163",
+    "modelRef": "claude-sonnet-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-sonnet-5-5",
+    "params": {
+      "maxTokens": 600
+    },
+    "sample": 0
+  },
+  "response": {
+    "text": "{\"decision\":\"deny\",\"reply\":\"Hello, thank you for contacting Acme. I am sorry, but we can only refund orders within 30 days of delivery, and your lamp was delivered 45 days ago. This means we cannot approve a return or refund for this order. If the lamp has a fault, please tell us what is wrong and we will see what else we can do. Thank you for understanding.\"}",
+    "usage": {
+      "inputTokens": 456,
+      "outputTokens": 126
+    },
+    "latencyMs": 2929,
+    "status": 200,
+    "stopReason": "end_turn"
+  }
+}

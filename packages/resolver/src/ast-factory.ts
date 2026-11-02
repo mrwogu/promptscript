@@ -7,6 +7,8 @@ import type { Block, ObjectContent, TextContent, Value, SourceLocation } from '@
  * programmatically rather than parsed from real source. Prefer passing a
  * real file to the factory functions so findings on synthesized nodes stay
  * traceable; fall back to this only when no source file exists.
+ *
+ * @internal
  */
 export const VIRTUAL_LOC: SourceLocation = {
   file: '<synthesized>',
@@ -27,6 +29,8 @@ export function fileLoc(file: string): SourceLocation {
  *
  * @param properties - Property values keyed by name
  * @param file - Optional source file for the loc; falls back to VIRTUAL_LOC
+ *
+ * @internal
  */
 export function makeObjectContent(properties: Record<string, Value>, file?: string): ObjectContent {
   return {
@@ -41,6 +45,8 @@ export function makeObjectContent(properties: Record<string, Value>, file?: stri
  *
  * @param value - The text value
  * @param file - Optional file path for the loc; falls back to VIRTUAL_LOC
+ *
+ * @internal
  */
 export function makeTextContent(value: string, file?: string): TextContent {
   return {
@@ -56,6 +62,8 @@ export function makeTextContent(value: string, file?: string): TextContent {
  * @param name - Block name
  * @param content - Block content
  * @param file - Optional source file for the loc; falls back to VIRTUAL_LOC
+ *
+ * @internal
  */
 export function makeBlock(
   name: string,

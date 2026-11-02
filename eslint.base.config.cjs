@@ -190,6 +190,8 @@ function createBaseConfig(baseDirectory) {
               'ora',
               'commander',
               'yaml',
+              // Optional peer of the runtime: the app passes the namespace, so nothing imports it
+              '@opentelemetry/api',
             ],
           },
         ],

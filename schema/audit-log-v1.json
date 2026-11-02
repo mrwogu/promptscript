@@ -116,7 +116,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["changed", "config-changed"]
+              "enum": ["changed", "config-changed"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -142,7 +143,7 @@
             "change": {
               "type": "string",
               "enum": ["A", "M", "D"],
-              "description": "Added, modified or deleted."
+              "description": "Added, modified or deleted. Closed enum: a new value needs a new schema version."
             },
             "viaMerge": {
               "const": true,
@@ -162,7 +163,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["approved", "approval-removed"]
+              "enum": ["approved", "approval-removed"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -208,7 +210,7 @@
             },
             "approverSource": {
               "const": "asserted",
-              "description": "The approver is a claim; the host review of the commit binds it."
+              "description": "The approver is a claim; the host review of the commit binds it. Open enum: new values can be added in this version, so handle unknown values."
             },
             "recordCreatedAt": {
               "type": "string",
@@ -218,10 +220,16 @@
             "comment": {
               "type": "string"
             },
+            "maxWeight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "description": "Highest arm weight in basis points the approval counts for. Such a record never approves an entry hash. Absent: a full approval."
+            },
             "state": {
               "type": "string",
               "enum": ["well-formed", "misplaced", "invalid"],
-              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields."
+              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields. Open enum: new values can be added in this version, so handle unknown values."
             },
             "viaMerge": {
               "const": true,
@@ -252,7 +260,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": ["promoted", "rolled-back"]
+              "enum": ["promoted", "rolled-back"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -323,7 +332,8 @@
           "additionalProperties": false,
           "properties": {
             "type": {
-              "const": "label-removed"
+              "const": "label-removed",
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -374,11 +384,169 @@
         },
         {
           "type": "object",
+          "description": "An experiment of a label entry started, changed (arms, weights or their order) or ended; the arms are those after the change, the last ones for an ended experiment. Weights are in basis points.",
+          "required": [
+            "type",
+            "commit",
+            "at",
+            "author",
+            "committer",
+            "path",
+            "environment",
+            "prompt",
+            "experiment",
+            "arms",
+            "mainline"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["experiment-started", "experiment-changed", "experiment-ended"],
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+              "description": "Commit that made the change."
+            },
+            "at": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Committer date, ISO 8601."
+            },
+            "author": {
+              "$ref": "#/definitions/Person"
+            },
+            "committer": {
+              "$ref": "#/definitions/Person"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path relative to the repository top level."
+            },
+            "environment": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prompt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "viaMerge": {
+              "const": true,
+              "description": "The commit is a merge; the change is what it brought to its first parent."
+            },
+            "configured": {
+              "const": false,
+              "description": "The label belongs to an environment that is not in releases.environments."
+            },
+            "mainline": {
+              "type": "boolean",
+              "description": "The commit is on the first-parent chain of head. Off it, the event is history of a branch and may never have reached head."
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^sha256-[0-9a-f]{64}$",
+              "description": "The hash the entry serves after the change; absent when the entry is gone."
+            },
+            "experiment": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+              "description": "Experiment name."
+            },
+            "arms": {
+              "$ref": "#/definitions/ExperimentArms"
+            },
+            "previousArms": {
+              "$ref": "#/definitions/ExperimentArms"
+            },
+            "keptVariant": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,31}$",
+              "description": "experiment-ended: the arm whose hash the entry serves now."
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "enum": ["experiment-started", "experiment-ended"]
+                  }
+                },
+                "required": ["type"]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "previousArms": false
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "enum": ["experiment-started", "experiment-changed"]
+                  }
+                },
+                "required": ["type"]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "keptVariant": false
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "const": "experiment-changed"
+                  }
+                },
+                "required": ["type"]
+              },
+              "then": {
+                "properties": {
+                  "previousArms": {
+                    "$ref": "#/definitions/ExperimentArms"
+                  }
+                },
+                "required": ["previousArms"]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "enum": ["experiment-started", "experiment-changed"]
+                  }
+                },
+                "required": ["type"]
+              },
+              "then": {
+                "properties": {
+                  "contentHash": {
+                    "type": "string"
+                  }
+                },
+                "required": ["contentHash"]
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
           "description": "A merge did not keep a change of a parent after the first: an approval record, a label entry or the generated CODEOWNERS section that parent changed since the merge base.",
           "additionalProperties": false,
           "properties": {
             "type": {
-              "const": "merge-dropped"
+              "const": "merge-dropped",
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -425,7 +593,7 @@
             },
             "approverSource": {
               "const": "asserted",
-              "description": "The approver is a claim; the host review of the commit binds it."
+              "description": "The approver is a claim; the host review of the commit binds it. Open enum: new values can be added in this version, so handle unknown values."
             },
             "recordCreatedAt": {
               "type": "string",
@@ -435,10 +603,16 @@
             "comment": {
               "type": "string"
             },
+            "maxWeight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "description": "Highest arm weight in basis points the approval counts for. Such a record never approves an entry hash. Absent: a full approval."
+            },
             "state": {
               "type": "string",
               "enum": ["well-formed", "misplaced", "invalid"],
-              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields."
+              "description": "From the record and its path alone: well-formed sits at the path its fields give. Well-formed does not mean a gate accepts it. An invalid record has no other record fields. Open enum: new values can be added in this version, so handle unknown values."
             },
             "viaMerge": {
               "const": true
@@ -454,7 +628,7 @@
             "change": {
               "type": "string",
               "enum": ["A", "M", "D"],
-              "description": "What the parent did to the file: added, modified or deleted."
+              "description": "What the parent did to the file: added, modified or deleted. Closed enum: a new value needs a new schema version."
             },
             "parent": {
               "type": "string",
@@ -486,7 +660,8 @@
           "additionalProperties": false,
           "properties": {
             "type": {
-              "const": "generated"
+              "const": "generated",
+              "description": "Open enum: new values can be added in this version, so handle unknown values."
             },
             "commit": {
               "type": "string",
@@ -550,6 +725,122 @@
           }
         }
       }
+    },
+    "ExperimentArm": {
+      "type": "object",
+      "required": ["variant", "contentHash", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^sha256-[0-9a-f]{64}$"
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Share of the assigned traffic in basis points."
+        }
+      },
+      "description": "One arm of an experiment as the label has it."
+    },
+    "ExperimentControlArm": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ExperimentArm"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "const": "control"
+            },
+            "weight": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      ],
+      "description": "The first arm: named control, with a share above 0."
+    },
+    "ExperimentVariantArm": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ExperimentArm"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "variant": {
+              "not": {
+                "const": "control"
+              }
+            }
+          }
+        }
+      ],
+      "description": "Every arm after the first; control is the name of the first arm only."
+    },
+    "ExperimentArms": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "oneOf": [
+        {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/ExperimentControlArm"
+            },
+            {
+              "$ref": "#/definitions/ExperimentVariantArm"
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/ExperimentControlArm"
+            },
+            {
+              "$ref": "#/definitions/ExperimentVariantArm"
+            },
+            {
+              "$ref": "#/definitions/ExperimentVariantArm"
+            }
+          ],
+          "minItems": 3,
+          "maxItems": 3
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/ExperimentControlArm"
+            },
+            {
+              "$ref": "#/definitions/ExperimentVariantArm"
+            },
+            {
+              "$ref": "#/definitions/ExperimentVariantArm"
+            },
+            {
+              "$ref": "#/definitions/ExperimentVariantArm"
+            }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        }
+      ],
+      "description": "The control arm first, then 1 to 3 variants."
     }
   }
 }

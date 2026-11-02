@@ -22,12 +22,16 @@ import type { StructuredMergePlan } from '@promptscript/core';
 /**
  * Ownership marker key. Set to `true` on every object that PromptScript
  * owns in a merged settings file.
+ *
+ * @internal
  */
 export const OWNERSHIP_KEY = '_promptscript';
 
 /**
  * Parse a dotted path into segments.
  * @example 'hooks.PreToolUse' -> ['hooks', 'PreToolUse']
+ *
+ * @internal
  */
 export function parsePath(path: string): string[] {
   return path.split('.');
@@ -45,6 +49,8 @@ export function parsePath(path: string): string[] {
  * @param target - The parsed existing settings (mutated in place)
  * @param plan - The merge plan to apply
  * @returns The mutated target object
+ *
+ * @internal
  */
 export function applyMergeOperations(
   target: Record<string, unknown>,
@@ -99,6 +105,8 @@ export function applyMergeOperations(
  *
  * @param target - The parsed settings object (mutated in place)
  * @param plan - The current merge plan
+ *
+ * @internal
  */
 export function removeStaleOwned(target: Record<string, unknown>, plan: StructuredMergePlan): void {
   const activePaths = new Set(plan.operations.map((op) => op.path));
@@ -136,6 +144,8 @@ export function removeStaleOwned(target: Record<string, unknown>, plan: Structur
  * @param data - The settings object to serialize
  * @param format - Target format ('json' or 'toml')
  * @returns Serialized string
+ *
+ * @internal
  */
 export function serializeMerged(data: Record<string, unknown>, format: 'json' | 'toml'): string {
   if (format === 'json') {
@@ -151,6 +161,8 @@ export function serializeMerged(data: Record<string, unknown>, format: 'json' | 
  *
  * @param data - The parsed settings object
  * @returns True if any entry has the ownership marker
+ *
+ * @internal
  */
 export function hasOwnedEntries(data: Record<string, unknown>): boolean {
   if (data[OWNERSHIP_KEY] === true) return true;

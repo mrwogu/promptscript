@@ -11,6 +11,8 @@ import { expandAlias } from './alias-resolver.js';
  *
  * These markers are intercepted by the Resolver to perform async
  * Git-based import resolution while keeping FileLoader synchronous.
+ *
+ * @internal
  */
 export const REGISTRY_MARKER_PREFIX = '__registry__:';
 
@@ -45,6 +47,8 @@ export function parseRegistryMarker(
  * @param path - Path within the repository
  * @param version - Version tag (use empty string for latest/default)
  * @returns Marker string for Resolver to intercept
+ *
+ * @internal
  */
 export function buildRegistryMarker(repoUrl: string, path: string, version: string): string {
   return `${REGISTRY_MARKER_PREFIX}${repoUrl}${MARKER_SEP}${path}${MARKER_SEP}${version}`;

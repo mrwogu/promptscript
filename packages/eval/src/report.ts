@@ -294,6 +294,7 @@ export function buildReport(input: ReportInput): EvalReportV1 {
   const priced = plans.length > 0 && plans.every((plan) => plan.priced);
   return {
     $schema: REPORT_SCHEMA,
+    version: 1,
     outcome,
     passed: outcome === 'passed',
     cache: {

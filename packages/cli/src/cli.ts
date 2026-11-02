@@ -83,6 +83,9 @@ program
       setContext({ logLevel: LogLevel.Verbose });
     }
 
+    // JSON owns stdout: human, verbose and debug lines go to stderr.
+    setContext({ outputStream: actionCommand.opts()['format'] === 'json' ? 'stderr' : 'stdout' });
+
     await prepareCliTelemetry(actionCommand, CLI_VERSION);
 
     // Skip version check when the command performs its own networking or is internal.

@@ -57,7 +57,11 @@ interface LoadedFormatter {
   config?: TargetConfig;
 }
 
-/** Maximum number of project-scoped resolvers retained by a long-lived compiler. */
+/**
+ * Maximum number of project-scoped resolvers retained by a long-lived compiler.
+ *
+ * @internal
+ */
 export const MAX_ENTRY_RESOLVERS = 50;
 /** Maximum number of resolved dependency sets retained by a compiler. */
 export const MAX_RESOLVED_DEPENDENCIES = 50;
@@ -1386,11 +1390,15 @@ export class Compiler {
   private toCompileError(err: Error | PSError): CompileError {
     const psError = err as PSError;
     const agentConflict = err instanceof AgentConflictError ? err : undefined;
+    const cause: unknown = psError.cause;
+    const causeCode =
+      this.isPSErrorLike(cause) && typeof cause.code === 'string' ? cause.code : undefined;
 
     return {
       name: err.name,
       code: psError.code ?? 'PS0000',
       message: err.message,
+      ...(causeCode ? { causeCode } : {}),
       location: psError.location
         ? {
             file: psError.location.file,

@@ -83,7 +83,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
 - [x] **Playground preview** - preview prompt bundles in the browser with the Support Refund Reply example; four runnable [examples](docs/examples/application-prompts.md) in the docs
 - [x] **Prompt policies** - required metadata, risk floors, model allowlists and content rules on `@prompts` entries through PS030, owner, reviewer and data class checks through PS047 ([guide](docs/guides/policy-engine.md#prompt-policies))
 - [x] **CODEOWNERS from governance** - `prs governance codeowners` gives prompt files to their owners, approval roles to their teams and config and release files to the admins ([guide](docs/guides/codeowners.md))
-- [x] **Releases** - `prs release build`, `promote`, `split`, `rollback` and `status` store bundles under their content hash and record which hash each environment serves, `status --base` checks labels against a base ref ([guide](docs/guides/releases.md))
+- [x] **Releases** - `prs release build`, `promote`, `split`, `rollback` and `status` store bundles under their content hash and record which hash each environment serves, `status --base` checks labels against a base ref, and `status --check-models` flags labels on retired or retiring models ([guide](docs/guides/releases.md))
 - [x] **Approvals and promotion gates** - `prs approve` writes approval records bound to the content hash, and `prs release promote` refuses a prompt version when a `required-approvals` policy at severity `error` finds no record for it (a `warning` is reported, not blocking)
 
 ### Formatting and Configuration Layers
@@ -231,7 +231,7 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - [x] Track who changed what and when
   - [x] Git-native audit trail
   - [x] Export to SIEM systems (JSON and CEF)
-  - [ ] Experiment arms and weights as audit log events (today `git log -p` on the label shows them)
+  - [x] Experiment arms and weights as audit log events (`experiment-started`, `experiment-changed`, `experiment-ended`)
 
 ### 8. Security & Compliance
 
@@ -265,8 +265,8 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - Alert on configuration changes
 
 - [ ] **A/B testing framework**
-  - Compare prompt effectiveness
-  - Track developer satisfaction metrics
+  - [x] Compare prompt effectiveness offline - `prs eval compare` ([guide](docs/guides/evals.md))
+  - [ ] Track developer satisfaction metrics
 
 ---
 
@@ -296,10 +296,11 @@ GitHub Copilot, Claude Code, Cursor, Google Antigravity, Factory AI, OpenCode, G
   - Token budget warnings
   - Context window management
 
-- [ ] **Prompt testing framework**
+- [x] **Prompt testing framework** ([guide](docs/guides/evals.md))
   - [x] Define test cases for prompts - eval suites with JSONL, CSV or YAML datasets and assertions
   - [x] Run against multiple models - `prs eval run` with a replay cache and a cost budget, `prs eval compare` for reports
   - [x] Run suites against what an environment serves - `prs eval run --label <env>`
+  - [x] Scheduled live check of what an environment serves - drift workflow recipe ([guide](docs/guides/ci.md#scheduled-drift-check))
   - [x] Score effectiveness with an LLM judge - llm-judge assertions with rubric prompts, majority runs and agreement with human labels
 
 - [ ] **Model version targeting**

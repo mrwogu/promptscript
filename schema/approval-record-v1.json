@@ -51,6 +51,12 @@
       "maxLength": 2000,
       "pattern": "^(?:[^\\p{Cc}\\p{Cs}]|\\n){0,2000}$"
     },
+    "maxWeight": {
+      "type": "integer",
+      "description": "Highest arm weight, in basis points, the approval counts for. A record with it never approves the entry hash and names its `environment`. Absent: a full approval.",
+      "minimum": 1,
+      "maximum": 10000
+    },
     "signatureType": {
       "type": "string",
       "const": "ssh",
@@ -109,5 +115,10 @@
       "description": "Name of a release environment.",
       "pattern": "^[a-z][a-z0-9-]{0,31}$"
     }
+  },
+  "dependencies": {
+    "maxWeight": [
+      "environment"
+    ]
   }
 }

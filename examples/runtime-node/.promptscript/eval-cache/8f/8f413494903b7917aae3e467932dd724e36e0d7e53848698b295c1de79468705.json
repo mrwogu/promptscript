@@ -1,0 +1,24 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-cache-entry/v1.json",
+  "key": "8f413494903b7917aae3e467932dd724e36e0d7e53848698b295c1de79468705",
+  "request": {
+    "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+    "inputsHash": "sha256-46b0e24aa19ea8c406a1e194bc0202e634cafa0d793dcfe00926c52e9929b163",
+    "modelRef": "claude-sonnet-5-5",
+    "provider": "anthropic",
+    "apiId": "claude-sonnet-5-5",
+    "params": {
+      "maxTokens": 600
+    },
+    "sample": 0
+  },
+  "response": {
+    "text": "{\"decision\":\"deny\",\"reply\":\"Thanks for writing. Here is what happens next.\"}",
+    "usage": {
+      "inputTokens": 94,
+      "outputTokens": 18
+    },
+    "latencyMs": 380,
+    "status": 200
+  }
+}

@@ -37,6 +37,7 @@ export const SIDEBAR = [
       { label: 'Target Output Families', slug: 'features/target-platforms' },
       { label: 'Application Prompts', slug: 'guides/application-prompts' },
       { label: 'Releasing Prompts', slug: 'guides/releases' },
+      { label: 'Evaluating Prompts', slug: 'guides/evals' },
       { label: 'AI Tool Hooks', slug: 'guides/hooks' },
       { label: 'Examples (Few-Shot)', slug: 'guides/examples' },
     ],
@@ -116,6 +117,7 @@ export const SIDEBAR = [
         label: 'CLI',
         items: [
           { label: 'Commands', slug: 'reference/cli' },
+          { label: 'JSON Output', slug: 'reference/json-output' },
           { label: 'Hook Management', slug: 'reference/cli/hooks' },
           { label: 'Hook Runtime', slug: 'reference/cli/hook' },
         ],

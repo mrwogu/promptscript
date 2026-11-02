@@ -81,6 +81,7 @@ export interface ApprovalRecordV1 {
     contentHash: string;
     createdAt: string;
     environment?: ReleaseEnvironmentName;
+    maxWeight?: number;
     prompt: string;
     role: GovernanceRoleName;
     signature?: string;
@@ -130,7 +131,7 @@ export interface BasePolicyDefinition {
     severity: PolicySeverity;
 }
 
-// @public
+// @internal
 export function bindParams(args: ParamArgument[] | undefined, defs: ParamDefinition[] | undefined, templatePath: string, callLocation?: SourceLocation): Map<string, Value>;
 
 // @public
@@ -355,6 +356,9 @@ export interface BuildProfileConfig {
     output?: string;
     targets?: TargetEntry[];
 }
+
+// @public
+export function buildSkillPhaseSection(phase: SkillPhaseContent, sourceLabel: string): string;
 
 // @public
 export const BUILT_IN_CONVENTIONS: Record<BuiltInConventionName, OutputConvention>;
@@ -864,6 +868,7 @@ export interface EvalComparisonV1 {
     entries: EvalComparisonEntryV1[];
     regression: boolean;
     tolerance: number;
+    version?: 1;
 }
 
 // @public
@@ -1141,6 +1146,7 @@ export interface EvalReportV1 {
     passed: boolean;
     suites: EvalSuiteResultV1[];
     usage: EvalUsageV1;
+    version?: 1;
 }
 
 // @public
@@ -1332,10 +1338,10 @@ export function getAgentProvenance(program: Program, name: string): AgentProvena
 // @public
 export function getAgentProvenanceEntries(program: Program, name: string): AgentProvenance[];
 
-// @public (undocumented)
+// @internal
 export function getBlockItems(block: BlockInput): Value[];
 
-// @public (undocumented)
+// @internal
 export function getBlockProperties(block: BlockInput): Record<string, Value>;
 
 // @public
@@ -1344,7 +1350,7 @@ export function getBlocksForVersion(version: string): readonly string[] | undefi
 // @public
 export function getBlockShapeContract(name: string): BlockShapeContract | undefined;
 
-// @public (undocumented)
+// @internal
 export function getBlockText(block: BlockInput): string | undefined;
 
 // @public
@@ -1353,7 +1359,7 @@ export function getBuiltInConvention(name: BuiltInConventionName): OutputConvent
 // @public
 export function getCanonicalBlockName(name: string): string;
 
-// @public (undocumented)
+// @internal
 export function getCanonicalBlocks(input: ProgramInput): readonly CanonicalBlock[];
 
 // @public
@@ -1403,6 +1409,9 @@ export function getSectionContract(sectionIdOrAlias: string): SectionContract | 
 
 // @public (undocumented)
 export function getSectionsForBlock(blockName: string): readonly SectionContract[];
+
+// @public
+export function getSkillPhaseSourceLabel(source: string, projectRoot?: string): string;
 
 // @public
 export function getSyntaxFeatureUsages(ast: Program): SyntaxFeatureUsage[];
@@ -2844,10 +2853,10 @@ export interface InlineUseEntry extends CanonicalNode {
     readonly type: 'InlineUseEntry';
 }
 
-// @public
+// @internal
 export function interpolateAST(ast: Program, ctx: TemplateContext): Program;
 
-// @public
+// @internal
 export function interpolateContent(content: BlockContent, ctx: TemplateContext): BlockContent;
 
 // @internal
@@ -2908,6 +2917,9 @@ export function isPortableHookScriptPath(value: string): boolean;
 export function isPortablePathSegment(segment: string): boolean;
 
 // @public
+export function isPromptId(value: string): boolean;
+
+// @public
 export function isPromptTarget(name: string): boolean;
 
 // @internal
@@ -2945,13 +2957,13 @@ export interface LayerBoundaryPolicy extends BasePolicyDefinition {
     maxDistance?: number;
 }
 
-// @public (undocumented)
+// @public
 export type LegacyContentType = BlockContent['type'];
 
 // @public
 export type LegacyProgram = Program;
 
-// @public (undocumented)
+// @public
 export interface LegacyProjectionOptions {
     // (undocumented)
     readonly preserveCanonicalBody?: boolean;
@@ -4090,7 +4102,7 @@ export function reconcileBlockBody(body: BlockBody, content: BlockContent): Bloc
 // @internal
 export function reconcileBlockBodyAtPath(baseBody: BlockBody | undefined, incomingBody: BlockBody | undefined, baseContent: BlockContent, incomingContent: BlockContent, mergedContent: BlockContent, path: readonly string[]): BlockBody;
 
-// @public (undocumented)
+// @internal
 export function reconcileValueNode(node: ValueNode, value: Value): ValueNode;
 
 // @internal
@@ -4200,7 +4212,7 @@ export function resolveAgentTargetPath(pathParts: readonly string[], agentsIndex
 
 // @public
 export class ResolveError extends PSError {
-    constructor(message: string, location?: SourceLocation, code?: ErrorCode);
+    constructor(message: string, location?: SourceLocation, code?: ErrorCode, cause?: Error);
 }
 
 // @public
@@ -4367,6 +4379,17 @@ export interface SkillPathConfig {
     basePath: string | null;
     // (undocumented)
     fileName: string | null;
+}
+
+// @public
+export interface SkillPhaseContent {
+    contextBlocks: {
+        blockType: string;
+        text: string;
+    }[];
+    name: string;
+    phaseNumber: number;
+    skillContent?: string;
 }
 
 // @public
@@ -4680,10 +4703,10 @@ export interface TextValueNode extends CanonicalNode {
     readonly value: string;
 }
 
-// @public (undocumented)
+// @public
 export function toLegacyBlock(block: CanonicalBlock, options?: LegacyProjectionOptions): Block;
 
-// @public (undocumented)
+// @public
 export function toLegacyProgram(program: CanonicalProgram, options?: LegacyProjectionOptions): Program;
 
 // @internal
@@ -4743,10 +4766,10 @@ export class UnknownParamError extends PSError {
     readonly templatePath: string;
 }
 
-// @public (undocumented)
+// @internal
 export function updateCanonicalBlockBody(block: CanonicalBlock, body: BlockBody): CanonicalBlock;
 
-// @public (undocumented)
+// @internal
 export function updateCanonicalProgramOperations(program: CanonicalProgram, operations: readonly ProgramOperation[]): CanonicalProgram;
 
 // @internal
@@ -4815,16 +4838,56 @@ export function usesSequentialOperations(ast: Program): boolean;
 export function validateAgentFieldMatrix(groups?: AgentFieldMatrix, nativeTargets?: readonly KnownTarget[]): string[];
 
 // @public
+export interface ValidateErrorV1 {
+    cause?: string;
+    code?: string;
+    location?: ValidateLocationV1;
+    message: string;
+}
+
+// @public
 export function validateGovernanceFields(fields: Record<string, Value>): string[];
+
+// @public
+export interface ValidateLocationV1 {
+    column?: number;
+    file?: string;
+    line?: number;
+    offset?: number;
+}
 
 // @internal
 export function validateModelCatalog(profiles?: readonly ModelProfile[]): string[];
+
+// @public
+export interface ValidateReportV1 {
+    $schema: 'https://getpromptscript.dev/schema/validate-report/v1.json';
+    errors: ValidateErrorV1[];
+    success: boolean;
+    summary: ValidateSummaryV1;
+    version: 1;
+    warnings: ValidateWarningV1[];
+}
+
+// @public
+export interface ValidateSummaryV1 {
+    errorCount: number;
+    warningCount: number;
+}
 
 // @internal
 export function validateTargetCapabilities(capabilities: Readonly<Partial<Record<KnownTarget, TargetCapability>>>): string[];
 
 // @internal
 export function validateTargetDefinitionConsistency(definitions?: Readonly<Record<KnownTarget, TargetDefinition>>): string[];
+
+// @public
+export interface ValidateWarningV1 {
+    location?: ValidateLocationV1;
+    message: string;
+    ruleId: string;
+    suggestion?: string;
+}
 
 // @public
 export class ValidationError extends PSError {

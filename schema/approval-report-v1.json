@@ -16,7 +16,7 @@
     "command": {
       "type": "string",
       "enum": ["approve", "list"],
-      "description": "approve writes a record, list is prs approve --list."
+      "description": "approve writes a record, list is prs approve --list. Open enum: new values can be added in this version, so handle unknown values."
     },
     "success": {
       "type": "boolean",
@@ -96,7 +96,7 @@
             "misplaced",
             "unknown-role"
           ],
-          "description": "current: the hash the checkout builds. labelled: a hash an environment label holds. stale: neither. These never count: untracked (not added to Git yet), modified (the bytes on disk are not the ones Git has), misplaced (Git tracks it at another path than its fields give) and unknown-role (the role is not in governance.roles)."
+          "description": "current: the hash the checkout builds. labelled: a hash an environment label holds. stale: neither. These never count: untracked (not added to Git yet), modified (the bytes on disk are not the ones Git has), misplaced (Git tracks it at another path than its fields give) and unknown-role (the role is not in governance.roles). Open enum: new values can be added in this version, so handle unknown values."
         },
         "labels": {
           "type": "array",

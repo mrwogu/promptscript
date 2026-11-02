@@ -4,7 +4,7 @@
   project: "PromptScript"
 
   languages: ["typescript"]
-  runtime: "Node.js 20+"
+  runtime: "Node.js 22.22+"
 
   monorepo: {
     tool: "Nx"

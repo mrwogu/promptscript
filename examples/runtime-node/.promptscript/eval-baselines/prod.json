@@ -1,0 +1,209 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/eval-report/v1.json",
+  "version": 1,
+  "outcome": "passed",
+  "passed": true,
+  "cache": {
+    "mode": "record",
+    "replayed": 0,
+    "live": 4,
+    "digest": "sha256-c2afdce168947e1b85104466adeb6f02ffc3fe14b634d3412752025e148702e8"
+  },
+  "usage": {
+    "calls": 4,
+    "inputTokens": 379,
+    "outputTokens": 72
+  },
+  "costUsd": 0.001478,
+  "budget": {
+    "maxUsd": 1,
+    "spentUsd": 0.001478
+  },
+  "suites": [
+    {
+      "name": "refund-reply",
+      "suiteHash": "sha256-bddbbb69a59213d9d2c3e540ea645b2e1d29ca31d464454b2c0b96609b06450d",
+      "prompt": {
+        "id": "acme-support/refund-reply",
+        "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824"
+      },
+      "dataset": {
+        "path": ".promptscript/evals/datasets/refund-reply.jsonl",
+        "rows": 4,
+        "hash": "sha256-3ebb6b735a21f3eaf0a8ea306077b045d8beb8e97c726ccf87710a88607e7cbf"
+      },
+      "passed": true,
+      "thresholds": [
+        {
+          "name": "passRate",
+          "model": "claude-sonnet-5-5",
+          "limit": 1,
+          "actual": 1,
+          "passed": true
+        }
+      ],
+      "findings": [],
+      "models": [
+        {
+          "ref": "claude-sonnet-5-5",
+          "provider": "anthropic",
+          "apiId": "claude-sonnet-5-5",
+          "passRate": 1,
+          "usage": {
+            "calls": 4,
+            "inputTokens": 379,
+            "outputTokens": 72
+          },
+          "costUsd": 0.001478,
+          "latencyMs": {
+            "p50": 400,
+            "p95": 450
+          },
+          "cases": [
+            {
+              "id": "broken-kettle",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "decision",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "reply-written",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                }
+              ],
+              "usage": {
+                "calls": 1,
+                "inputTokens": 96,
+                "outputTokens": 18
+              },
+              "costUsd": 0.000372,
+              "latencyMs": 410,
+              "cache": {
+                "replayed": 0,
+                "live": 1
+              },
+              "cacheKeys": [
+                "bb25cbc230beeeb74b423ae31afabed39a14bda738ebffbf9cc65c4421780466"
+              ]
+            },
+            {
+              "id": "large-order",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "decision",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "reply-written",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                }
+              ],
+              "usage": {
+                "calls": 1,
+                "inputTokens": 95,
+                "outputTokens": 18
+              },
+              "costUsd": 0.00037,
+              "latencyMs": 450,
+              "cache": {
+                "replayed": 0,
+                "live": 1
+              },
+              "cacheKeys": [
+                "7bb4864048e6c9d23122f391fa79a5ae45d48a3792175862e6a519def4f0b932"
+              ]
+            },
+            {
+              "id": "last-day",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "decision",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "reply-written",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                }
+              ],
+              "usage": {
+                "calls": 1,
+                "inputTokens": 94,
+                "outputTokens": 18
+              },
+              "costUsd": 0.000368,
+              "latencyMs": 400,
+              "cache": {
+                "replayed": 0,
+                "live": 1
+              },
+              "cacheKeys": [
+                "f299cbea9e61477f012f77754a7dd75e473630563b39e1878071432e021395a4"
+              ]
+            },
+            {
+              "id": "late-return",
+              "status": "passed",
+              "assertions": [
+                {
+                  "id": "decision",
+                  "kind": "equals",
+                  "passed": true
+                },
+                {
+                  "id": "reply-written",
+                  "kind": "regex",
+                  "passed": true
+                },
+                {
+                  "id": "no-guarantee",
+                  "kind": "regex",
+                  "passed": true
+                }
+              ],
+              "usage": {
+                "calls": 1,
+                "inputTokens": 94,
+                "outputTokens": 18
+              },
+              "costUsd": 0.000368,
+              "latencyMs": 380,
+              "cache": {
+                "replayed": 0,
+                "live": 1
+              },
+              "cacheKeys": [
+                "8f413494903b7917aae3e467932dd724e36e0d7e53848698b295c1de79468705"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

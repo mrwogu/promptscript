@@ -5,6 +5,7 @@ import {
   GIT_HOST_USER_PATTERN,
   isApprovalRecordV1,
   isApproverHandle,
+  isPromptId,
   MAX_APPROVER_LENGTH,
   parseApprovalRecord,
   serializeApprovalRecord,
@@ -26,6 +27,22 @@ function record(overrides: Partial<ApprovalRecordV1> = {}): ApprovalRecordV1 {
 }
 
 const as = (value: string): ApprovalRecordV1['approver'] => ({ source: 'asserted', value });
+
+describe('isPromptId', () => {
+  it.each(['team/support', '@acme/support/triage', 'a/b.c/d_e-f'])('accepts %s', (value) => {
+    expect(isPromptId(value)).toBe(true);
+  });
+
+  it.each([
+    ['one segment', 'support'],
+    ['a zero-width space', 'team/sup\u200Bport'],
+    ['a segment ending in a dot', 'team./support'],
+    ['two dots', 'team/../support'],
+    ['an empty segment', 'team//support'],
+  ])('rejects %s', (_name, value) => {
+    expect(isPromptId(value)).toBe(false);
+  });
+});
 
 describe('isApproverHandle', () => {
   it.each(['@jane', '@Jane-Doe', '@jane.doe', '@name_shortcode', '@a-b-c', `@${'a'.repeat(100)}`])(
@@ -85,6 +102,10 @@ describe('isApprovalRecordV1', () => {
     expect(isApprovalRecordV1(full)).toBe(true);
   });
 
+  it.each([1, 2500, 10000])('accepts a maxWeight of %i with an environment', (weight) => {
+    expect(isApprovalRecordV1(record({ environment: 'prod', maxWeight: weight }))).toBe(true);
+  });
+
   it('accepts a scoped meta id and a comment of 2000 code points', () => {
     const value = record({
       prompt: '@acme/support.v2/refund_reply',
@@ -133,6 +154,20 @@ describe('isApprovalRecordV1', () => {
     ['a numeric comment', { ...record(), comment: 1 }],
     ['another signature type', { ...record(), signatureType: 'gpg' }],
     ['a bare signature', { ...record(), signature: 'U1NIU0lH' }],
+    ['a maxWeight without environment', { ...record(), maxWeight: 500 }],
+    ['a maxWeight of 0', { ...record({ environment: 'prod' }), maxWeight: 0 }],
+    ['a negative zero maxWeight', { ...record({ environment: 'prod' }), maxWeight: -0 }],
+    ['a maxWeight of 10001', { ...record({ environment: 'prod' }), maxWeight: 10001 }],
+    ['a fractional maxWeight', { ...record({ environment: 'prod' }), maxWeight: 2.5 }],
+    ['a negative maxWeight', { ...record({ environment: 'prod' }), maxWeight: -1 }],
+    ['a string maxWeight', { ...record({ environment: 'prod' }), maxWeight: '25' }],
+    ['a null maxWeight', { ...record({ environment: 'prod' }), maxWeight: null }],
+    ['a NaN maxWeight', { ...record({ environment: 'prod' }), maxWeight: Number.NaN }],
+    [
+      'an infinite maxWeight',
+      { ...record({ environment: 'prod' }), maxWeight: Number.POSITIVE_INFINITY },
+    ],
+    ['a boolean maxWeight', { ...record({ environment: 'prod' }), maxWeight: true }],
   ])('rejects %s', (_name, value) => {
     expect(isApprovalRecordV1(value)).toBe(false);
   });
@@ -174,6 +209,61 @@ describe('serializeApprovalRecord', () => {
   });
 });
 
+describe('serializeApprovalRecord with a ceiling', () => {
+  it('writes maxWeight after comment and before signatureType', () => {
+    const text = serializeApprovalRecord(
+      record({
+        environment: 'prod',
+        comment: 'ok',
+        maxWeight: 2500,
+        signatureType: 'ssh',
+        signature: '-----BEGIN SSH SIGNATURE-----\nU1NIU0lH\n-----END SSH SIGNATURE-----\n',
+      })
+    );
+
+    expect(text).toBe(
+      [
+        '{',
+        `  "$schema": "${APPROVAL_RECORD_SCHEMA_URL}",`,
+        '  "prompt": "acme-support/refund-reply",',
+        `  "contentHash": "${HASH}",`,
+        '  "role": "legal",',
+        '  "approver": {',
+        '    "source": "asserted",',
+        '    "value": "@jane"',
+        '  },',
+        '  "createdAt": "2026-10-22T09:14:03.120Z",',
+        '  "environment": "prod",',
+        '  "comment": "ok",',
+        '  "maxWeight": 2500,',
+        '  "signatureType": "ssh",',
+        '  "signature": "-----BEGIN SSH SIGNATURE-----\\nU1NIU0lH\\n-----END SSH SIGNATURE-----\\n"',
+        '}',
+        '',
+      ].join('\n')
+    );
+  });
+
+  it('keeps the bytes of a record without maxWeight', () => {
+    expect(serializeApprovalRecord(record())).toBe(
+      [
+        '{',
+        `  "$schema": "${APPROVAL_RECORD_SCHEMA_URL}",`,
+        '  "prompt": "acme-support/refund-reply",',
+        `  "contentHash": "${HASH}",`,
+        '  "role": "legal",',
+        '  "approver": {',
+        '    "source": "asserted",',
+        '    "value": "@jane"',
+        '  },',
+        '  "createdAt": "2026-10-22T09:14:03.120Z"',
+        '}',
+        '',
+      ].join('\n')
+    );
+  });
+});
+
 describe('parseApprovalRecord', () => {
   const bytes = (text: string): Uint8Array => new TextEncoder().encode(text);
 
@@ -202,6 +292,24 @@ describe('parseApprovalRecord', () => {
 
     expect(parseApprovalRecord(bytes(change(text)))).toBeUndefined();
   });
+
+  it('reads a record with a ceiling', () => {
+    const value = record({ environment: 'prod', maxWeight: 500 });
+
+    expect(parseApprovalRecord(bytes(serializeApprovalRecord(value)))).toEqual(value);
+  });
+
+  it.each(['5.0', '1e3', '05', '+5', '0x10', '-0', '500.0', '10001'])(
+    'refuses the maxWeight bytes %s',
+    (written) => {
+      const text = serializeApprovalRecord(record({ environment: 'prod', maxWeight: 500 })).replace(
+        '"maxWeight": 500',
+        `"maxWeight": ${written}`
+      );
+
+      expect(parseApprovalRecord(bytes(text))).toBeUndefined();
+    }
+  );
 
   it('refuses a byte that is not UTF-8', () => {
     const content = bytes(serializeApprovalRecord(record({ comment: 'aXb' })));
@@ -247,6 +355,12 @@ describe('approvalRecordPath', () => {
       `.promptscript/approvals/legal/acme-support/refund-reply/${HASH}.${slug}.json`
     );
     expect(path.split('/').filter((segment) => segment === '..' || segment === '.')).toEqual([]);
+  });
+
+  it('is the same with and without a ceiling', () => {
+    expect(approvalRecordPath(record({ environment: 'prod', maxWeight: 500 }))).toBe(
+      approvalRecordPath(record({ environment: 'prod' }))
+    );
   });
 
   it('refuses a record that fails the guard instead of building a path', () => {

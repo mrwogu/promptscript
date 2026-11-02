@@ -1,0 +1,25 @@
+{
+  "$schema": "https://getpromptscript.dev/schema/prompt-release-label/v2.json",
+  "environment": "prod",
+  "prompts": [
+    {
+      "id": "acme-support/refund-reply",
+      "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+      "experiment": {
+        "name": "small-model",
+        "arms": [
+          {
+            "variant": "control",
+            "contentHash": "sha256-9d17fe561c43d29f1dc4306b982b727c55eddeacff3e7c0a8cfbf7809eeca824",
+            "weight": 7000
+          },
+          {
+            "variant": "small",
+            "contentHash": "sha256-05d5bfcc68990ebd4d72d280be12550ff4208aef364550f45fbcfe39cad489a9",
+            "weight": 3000
+          }
+        ]
+      }
+    }
+  ]
+}

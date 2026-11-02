@@ -62,6 +62,11 @@ const MAX_NAME_LENGTH = 64;
 export const isObject = (value: unknown): value is Json =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 const isString = (value: unknown): value is string => typeof value === 'string';
+/** A prompt id: a path with a slash, whose last segment is a plain name. */
+export const isPromptId = (value: unknown): value is string =>
+  isString(value) &&
+  value.includes('/') &&
+  ID_SEGMENT.test(value.slice(value.lastIndexOf('/') + 1));
 const isNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 const isStrings = (value: unknown): value is string[] =>
@@ -237,10 +242,7 @@ function checkStructure(bundle: Json): { fields: CheckedFields; rawMessages: Raw
   const inputs = read(bundle, 'inputs');
   const output = read(bundle, 'output');
   const model = read(bundle, 'model');
-  need(
-    isString(id) && id.includes('/') && ID_SEGMENT.test(id.slice(id.lastIndexOf('/') + 1)),
-    'id'
-  );
+  need(isPromptId(id), 'id');
   need(isString(description), 'description');
   need(isString(contentHash) && HASH_PATTERN.test(contentHash), 'contentHash');
   const rawMessages = checkMessages(read(bundle, 'messages'));

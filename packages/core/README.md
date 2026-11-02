@@ -50,17 +50,17 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 | **utils/diagnostic**     | Diagnostic formatting utilities                                                                              |
 | **utils/merge**          | Deep merge for AST nodes                                                                                     |
 | **utils/package**        | Package metadata helpers                                                                                     |
-| **utils/path**           | Path parsing and formatting (`parsePath`, `formatPath`)                                                      |
-| **utils/version**        | Semantic version comparison (`parseVersion`)                                                                 |
-| **utils/levenshtein**    | Edit-distance utilities (`levenshteinDistance`, `findClosestMatch`)                                          |
-| **utils/canonical-json** | RFC 8785 canonical JSON (`canonicalizeJson`)                                                                 |
-| **utils/sha256**         | Synchronous, browser-safe SHA-256 as hex (`sha256Hex`)                                                       |
+| **utils/path**           | Path parsing and formatting                                                                                  |
+| **utils/version**        | Semantic version comparison                                                                                  |
+| **utils/levenshtein**    | Edit-distance utilities                                                                                      |
+| **utils/canonical-json** | RFC 8785 canonical JSON                                                                                      |
+| **utils/sha256**         | Synchronous, browser-safe SHA-256 as hex                                                                     |
 | **utils/runtime-slots**  | Scanner for `{{input.name}}` slots and `\{{` escapes (`findRuntimeSlots`)                                    |
 | **prompt-bundle-hash**   | Content hash of a prompt bundle (`hashPromptBundle`)                                                         |
-| **url-rules**            | Checks the URL of a remote prompt file: https only, no local or metadata hosts (`refuseUrl`)                 |
-| **provenance-files**     | Rewrites provenance files so no machine path remains (`normalizeProvenanceFiles`)                            |
+| **url-rules**            | Checks the URL of a remote prompt file: https only, no local or metadata hosts                               |
+| **provenance-files**     | Rewrites provenance files so no machine path remains                                                         |
 | **syntax-versions**      | Syntax version registry and lookup helpers (see API reference below)                                         |
-| **model-profiles**       | Built-in model profiles (`MODEL_PROFILES`) with lifecycle status and successors                              |
+| **model-profiles**       | Built-in model profiles with lifecycle status and successors                                                 |
 | **model-catalog**        | Model catalog, alias resolution, model sets, and per-target model name mapping                               |
 | **logger**               | `Logger` interface for verbose/debug output                                                                  |
 | **template**             | Template interpolation for parameterized skills                                                              |
@@ -68,6 +68,10 @@ The `core` package is a foundational dependency used by `parser`, `resolver`, `v
 The modules `block-merge`, `url-rules`, `provenance-files`, `model-profiles`, `utils/diagnostic`,
 `utils/merge`, `utils/package`, `utils/path`, `utils/version`, `utils/levenshtein`,
 `utils/canonical-json` and `utils/sha256` are shared helpers marked `@internal`.
+In `template` the helpers `bindParams`, `interpolateAST` and `interpolateContent` are `@internal`
+too. In `canonical-ast` the readers and updaters of the form editor are `@internal`. The factories
+and the legacy projection stay public. The legacy projection (`toLegacyProgram`, `toLegacyBlock`
+and the `Legacy*` types) is a compatibility layer and may be removed in a later major version.
 
 ## API Reference
 
@@ -143,7 +147,7 @@ profile. No default selection includes them.
 | `hashPromptBundle(bundle)`             | `sha256-` plus SHA-256 over the canonical JSON without `contentHash` and `provenance`                        |
 | `readMetaGovernance(fields)`           | Reads the governance defaults of `@meta`                                                                     |
 | `effectiveGovernance(entry, defaults)` | Governance a bundle carries: entry value, else the `@meta` default; data classes joined, lists sorted        |
-| `isApprovalRecordV1(value)`            | Checks the keys and every field pattern of an approval record                                                |
+| `isApprovalRecordV1(value)`            | Checks the keys, every field pattern and the maxWeight range of an approval record                           |
 | `serializeApprovalRecord(record)`      | The exact bytes of a record file: fixed key order, two-space indent, trailing newline                        |
 | `parseApprovalRecord(bytes)`           | Reads record file bytes; refuses invalid UTF-8 and bytes that differ from its own serialization              |
 | `approvalRecordPath(record)`           | `.promptscript/approvals/<role>/<prompt id>/<contentHash>.<approver slug>.json`; throws on an invalid record |
@@ -192,6 +196,14 @@ write paths retain their original case.
 previews, and diffs must consume the same final plan after all output
 transformations, including headers, formatting, migrations, and injected
 resources. Consumers must not recompute paths from raw formatter outputs.
+
+### Composed skill phases
+
+`buildSkillPhaseSection(phase, sourceLabel)` renders the phase heading, source marker,
+context blocks and optional instructions. Both compilers use this renderer.
+`getSkillPhaseSourceLabel(source, projectRoot?)` builds the label: the source path relative
+to the project root with `/` separators, or just the file name when the source is outside
+the root or no root is given. Full source paths stay in resolver provenance.
 
 ## Usage (internal)
 

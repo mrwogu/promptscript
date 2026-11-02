@@ -117,6 +117,8 @@ export interface CanonicalFormatter extends Formatter {
 
 /**
  * Formatter class constructor type.
+ *
+ * @internal
  */
 export type FormatterConstructor = new () => Formatter;
 
@@ -199,6 +201,8 @@ export interface CompileError {
   code: string;
   /** Error message */
   message: string;
+  /** Code of the underlying error, such as the parser code behind a resolve error */
+  causeCode?: string;
   /** Source location */
   location?: {
     file?: string;

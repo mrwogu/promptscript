@@ -195,6 +195,7 @@ describe('prs eval run', () => {
     const document = JSON.parse(replayed.stdout);
     expect(reportSchema(document), JSON.stringify(reportSchema.errors)).toBe(true);
     expect(document).toMatchObject({
+      version: 1,
       outcome: 'passed',
       cache: { mode: 'replay', live: 0, replayed: 2 },
     });

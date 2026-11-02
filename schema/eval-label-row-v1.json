@@ -37,7 +37,7 @@
         "pass",
         "fail"
       ],
-      "description": "Verdict of a judge run or a human label."
+      "description": "Verdict of a judge run or a human label.\n\nClosed enum: a new value needs a new schema version."
     }
   }
 }

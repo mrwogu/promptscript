@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-<!-- PromptScript 2026-10-30T16:57:29.704Z | source: .promptscript/project.prs | target: github - do not edit -->
+<!-- PromptScript 2026-11-01T20:29:22.041Z | source: .promptscript/project.prs | target: github - do not edit -->
 
 ## project
 
@@ -15,7 +15,7 @@ You write clean, type-safe, and well-tested code following strict TypeScript pra
 ## tech-stack
 
 - **Language:** typescript
-- **Runtime:** Node.js 20+
+- **Runtime:** Node.js 22.22+
 - **Monorepo:** Nx with pnpm workspaces
 
 ## architecture
@@ -137,7 +137,7 @@ pnpm prs compile          # Compile .prs files (uses local dev version)
 - Keep commit message subject line max 70 characters
 - Format: `<type>(<scope>): <description>`
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime, eval) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
+- Scope: always include package scope (core, parser, resolver, validator, compiler, formatters, cli, importer, playground, browser-compiler, server, vscode, telemetry, runtime, eval, schemas) or domain scope (ci, docker) - scopes appear in the release changelog grouped by package
 - Example: `feat(parser): add support for multiline strings`
 
 ## configuration-files

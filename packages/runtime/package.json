@@ -29,7 +29,19 @@
       "types": "./src/node.d.ts",
       "default": "./src/node.js"
     },
+    "./otel": {
+      "types": "./src/otel.d.ts",
+      "default": "./src/otel.js"
+    },
     "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": ">=1.9.0 <2"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": true
+    }
   },
   "files": [
     "src",

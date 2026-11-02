@@ -1,0 +1,107 @@
+name: Runtime Traces in Langfuse
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/runtime/**'
+      - 'examples/runtime-otel/**'
+      - '.github/workflows/runtime-langfuse.yml'
+  schedule:
+    # Mondays, 05:00 UTC. The images are pinned, so this catches changes on main outside the paths
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  otel-langfuse:
+    name: Runtime Traces in Langfuse
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Throwaway project keys of langfuse/compose.yaml, valid only on this runner
+      LANGFUSE_PUBLIC_KEY: pk-lf-promptscript-example
+      LANGFUSE_SECRET_KEY: sk-lf-promptscript-example
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # First, in the background, so the image pull overlaps the install and the build
+      - name: Start Langfuse
+        working-directory: examples/runtime-otel/langfuse
+        run: nohup docker compose up -d --quiet-pull > "$RUNNER_TEMP/compose.log" 2>&1 &
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '25'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check the assignment code of the example
+        run: node examples/runtime-otel/scenario.mjs --vectors conformance/prompt-release-label/v2/assignment.json
+
+      - name: Build and pack the runtime
+        run: |
+          pnpm nx build runtime
+          mkdir -p "$RUNNER_TEMP/runtime"
+          npm pack dist/packages/runtime --pack-destination "$RUNNER_TEMP/runtime"
+
+      - name: Install the example from its lockfile and the packed runtime
+        run: |
+          cp -R examples/runtime-otel "$RUNNER_TEMP/example"
+          cd "$RUNNER_TEMP/example"
+          npm ci --ignore-scripts --no-audit --no-fund
+          # The runtime is not published to npm: --offline fails if anything asks the registry
+          npm install --no-save --offline --ignore-scripts --no-audit --no-fund "$RUNNER_TEMP"/runtime/promptscript-runtime-*.tgz
+
+      - name: Wait for Langfuse
+        run: |
+          curl -fsS -o /dev/null --retry 150 --retry-delay 2 --retry-all-errors http://localhost:3030/api/health
+          curl -fsS -o /dev/null --retry 60 --retry-delay 2 --retry-all-errors \
+            -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+            'http://localhost:3000/api/public/v2/observations?limit=1'
+
+      - name: Send 200 traced calls with feedback
+        working-directory: ${{ runner.temp }}/example
+        env:
+          OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://localhost:3000/api/public/otel/v1/traces
+        run: |
+          AUTH=$(printf '%s' "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" | base64 | tr -d '\n')
+          export OTEL_EXPORTER_OTLP_TRACES_HEADERS="Authorization=Basic%20$AUTH,x-langfuse-ingestion-version=4"
+          node index.mjs > "$RUNNER_TEMP/run.json"
+
+      - name: Check the observations in Langfuse
+        working-directory: ${{ runner.temp }}/example
+        run: node langfuse/check.mjs --url http://localhost:3000 --run "$RUNNER_TEMP/run.json" --out "$RUNNER_TEMP/langfuse-report"
+
+      - name: Langfuse logs
+        if: failure()
+        working-directory: examples/runtime-otel/langfuse
+        run: |
+          cat "$RUNNER_TEMP/compose.log" || true
+          docker compose ps -a
+          docker compose logs --no-color --tail 200
+
+      - name: Stop Langfuse
+        if: always()
+        working-directory: examples/runtime-otel/langfuse
+        run: docker compose down -v
+
+      - name: Upload the Langfuse report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: langfuse-report
+          path: ${{ runner.temp }}/langfuse-report
+          retention-days: 30
+          if-no-files-found: ignore

@@ -38,6 +38,7 @@ export function errorOf(error: unknown, fallback: EvalCode): EvalReportErrorV1 {
 export function errorReport(mode: EvalCacheMode, errors: EvalReportErrorV1[]): EvalReportV1 {
   return {
     $schema: 'https://getpromptscript.dev/schema/eval-report/v1.json',
+    version: 1,
     outcome: 'error',
     passed: false,
     cache: { mode, replayed: 0, live: 0, digest: `sha256-${sha256Hex('')}` },
