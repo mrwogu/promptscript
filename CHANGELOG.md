@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.27.0](https://github.com/mrwogu/promptscript/compare/v1.26.0...v1.27.0) (2026-11-02)
+
+
+### Features
+
+* **cli:** warn on label ids an approval would reject ([#723](https://github.com/mrwogu/promptscript/issues/723)) ([9eddb46](https://github.com/mrwogu/promptscript/commit/9eddb46ab891981410be7366fc9aba3e44322762))
+* **cli:** warn when CODEOWNERS does not bind approval roles ([#728](https://github.com/mrwogu/promptscript/issues/728)) ([c261c8a](https://github.com/mrwogu/promptscript/commit/c261c8a2a0e3d0f08d8ac08060f66fa5ccdbbeff))
+* **resolver:** keep the parser code as cause of PS2000 ([#721](https://github.com/mrwogu/promptscript/issues/721)) ([77e1d09](https://github.com/mrwogu/promptscript/commit/77e1d09d1d43ade0233b6f117940d4d4eb28eb59))
+
+
+### Bug Fixes
+
+* **cli:** require Node.js 22.22 or newer ([#719](https://github.com/mrwogu/promptscript/issues/719)) ([5fd8e4c](https://github.com/mrwogu/promptscript/commit/5fd8e4c5ae33c5e5e0a8325ac4e12bcf8ad97ca2))
+* **resolver:** omit local paths from composed skill markers ([#699](https://github.com/mrwogu/promptscript/issues/699)) ([54d4f8e](https://github.com/mrwogu/promptscript/commit/54d4f8ef04d98b5b39cc6de09ffb293ed7961982))
+
+
+### Performance Improvements
+
+* **cli:** read audit blobs with one git cat-file batch ([#722](https://github.com/mrwogu/promptscript/issues/722)) ([cab7876](https://github.com/mrwogu/promptscript/commit/cab7876cb61d705fd375dd8c9b60b8c9b624fb56))
+
 ## [1.26.0](https://github.com/mrwogu/promptscript/compare/v1.25.0...v1.26.0) (2026-11-01)
 
 
