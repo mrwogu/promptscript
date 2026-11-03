@@ -8,8 +8,10 @@ import {
   cleanupManagedOutputs,
   createHookOutputSafely,
   removeHookOutputIfUnchanged,
+  removeStaleGeneratedFiles,
   rewriteHookOutputIfUnchanged,
 } from '../managed-output-cleanup.js';
+import { createHash } from 'node:crypto';
 
 // Fail-closed suite: no resolvable self-invocation means every guarded
 // operation must skip, report nothing removed, and leave files untouched.
@@ -74,6 +76,20 @@ describe('guarded cleanup without a resolvable self-invocation', () => {
     expect(result.removed).toEqual([]);
     expect(result.unresolvedSelfInvocation).toBe(true);
     await expect(readFile(join(rules, 'stale.md'), 'utf-8')).resolves.toContain('# Stale');
+  });
+
+  it('keeps stale manifest files and reports the unresolved runtime', async () => {
+    const project = await createProject('cleanup-unresolved-stale-');
+    await writeFile(join(project, 'old.md'), 'old');
+
+    const result = await removeStaleGeneratedFiles(
+      [{ path: 'old.md', sha256: createHash('sha256').update('old').digest('hex') }],
+      { outputRoot: project }
+    );
+
+    expect(result.removed).toEqual([]);
+    expect(result.unresolvedSelfInvocation).toBe(true);
+    await expect(readFile(join(project, 'old.md'), 'utf-8')).resolves.toBe('old');
   });
 
   it('refuses hook rewrites when the worker cannot be spawned', async () => {

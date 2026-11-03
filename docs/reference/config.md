@@ -1269,7 +1269,7 @@ formatting:
 
 By default every generated Markdown file goes through Prettier after
 compilation, and the Claude formatter normalizes skill and agent bodies for it
-(for example `*` list markers become `-`). With `postFormat: false` neither
+(for example a blank line goes in before a list). With `postFormat: false` neither
 happens, so bodies stay as you wrote them. Skill resource files such as
 templates, references and scripts are never reformatted, with or without this
 option.

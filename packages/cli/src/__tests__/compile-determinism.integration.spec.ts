@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { existsSync } from 'node:fs';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { lstat, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { compileCommand } from '../commands/compile.js';
@@ -283,6 +283,21 @@ describe('stale generated files', () => {
     expect(existsSync(join(directory, '.factory/skills/alpha/SKILL.md'))).toBe(true);
     const manifest = await readFile(join(directory, '.promptscript-generated.json'), 'utf-8');
     expect(manifest).toContain('.factory/skills/alpha/SKILL.md');
+  });
+
+  it('does not write the manifest through a symbolic link', async () => {
+    const directory = await project('output:\n  manifest: true\n');
+    const elsewhere = join(directory, 'elsewhere.json');
+    await writeFile(elsewhere, 'mine\n');
+    await symlink(elsewhere, join(directory, '.promptscript-generated.json'));
+
+    await compile(directory);
+
+    expect((await lstat(join(directory, '.promptscript-generated.json'))).isSymbolicLink()).toBe(
+      true
+    );
+    expect(await readFile(elsewhere, 'utf-8')).toBe('mine\n');
+    expect(outputText()).toContain('it is a symbolic link');
   });
 
   it('leaves stale files alone without the manifest option', async () => {

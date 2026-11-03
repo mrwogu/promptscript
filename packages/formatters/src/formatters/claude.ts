@@ -1000,7 +1000,8 @@ export class ClaudeFormatter extends BaseFormatter {
   /** Push `key: ['a', 'b']` when the list has values. */
   private pushQuotedList(lines: string[], key: string, values: string[] | undefined): void {
     if (!values || values.length === 0) return;
-    lines.push(`${key}: [${values.map((value) => `'${value}'`).join(', ')}]`);
+    const quoted = values.map((value) => `'${value}'`).join(', ');
+    lines.push(`${key}: [${quoted}]`);
   }
 
   /**
