@@ -19,6 +19,7 @@ import {
   type McpServerDefinition,
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
+import { applyAgentTargeting } from '../agent-targeting.js';
 
 /**
  * Supported Codex output format versions.
@@ -374,6 +375,11 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     };
   }
 
+  /** Codex keeps its own files in `.codex`; skills live in `.agents/skills`. */
+  override getDotDir(): string | null {
+    return '.codex';
+  }
+
   /**
    * Override format to inject additional agent fields from the AST.
    */
@@ -485,10 +491,12 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       }
     }
 
-    // Override agent files with full TOML including all fields
-    const agentsBlock = ast.blocks.find((b) => b.name === 'agents');
+    // Override agent files with full TOML including all fields.
+    // super.format() already applied the agent targeting, do the same here.
+    const targetedAst = applyAgentTargeting(ast, this.name, options?.targetConfig);
+    const agentsBlock = targetedAst.blocks.find((b) => b.name === 'agents');
     if (agentsBlock && agentsBlock.content.type === 'ObjectContent') {
-      const nativeNames = this.getNativeAgentNameMap(ast);
+      const nativeNames = this.getNativeAgentNameMap(targetedAst);
       for (const [agentName, agentValue] of Object.entries(agentsBlock.content.properties)) {
         if (typeof agentValue !== 'object' || agentValue === null || Array.isArray(agentValue))
           continue;

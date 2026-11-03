@@ -7,6 +7,7 @@ import { extractHooks, generateGrokHooks, getHookCompatibilityWarnings } from '.
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import { appendModelCompatibilityWarnings } from '../model-mapping.js';
+import { appendAgentSpawnToolWarnings, applyAgentTargeting } from '../agent-targeting.js';
 
 /**
  * Supported Grok Build output format versions.
@@ -77,7 +78,8 @@ export class GrokFormatter extends BaseFormatter {
     return 'directory';
   }
 
-  format(ast: Program, options?: FormatOptions): FormatterOutput {
+  format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     const version = (options?.version ?? 'simple') as GrokVersion;
     let output: FormatterOutput;
 
@@ -92,6 +94,7 @@ export class GrokFormatter extends BaseFormatter {
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
     output = appendAgentCapabilityWarnings(output, ast, this.name, version);
     output = appendModelCompatibilityWarnings(output, ast, this.name, version, options?.models);
+    if (version === 'full') output = appendAgentSpawnToolWarnings(output, ast, this.name);
     return {
       ...output,
       managedOutputFiles: [

@@ -120,6 +120,8 @@ export class AntigravityFormatter extends BaseFormatter {
     readonly description = "Google Antigravity rules (Markdown)";
     // (undocumented)
     format(ast: Program, options?: FormatOptions): FormatterOutput;
+    // (undocumented)
+    getDotDir(): string | null;
     static getSupportedVersions(): typeof ANTIGRAVITY_VERSIONS;
     // (undocumented)
     readonly name = "antigravity";
@@ -197,6 +199,7 @@ export abstract class BaseFormatter implements Formatter {
     protected getArrayElements(content: BlockContent): Value[];
     // (undocumented)
     protected getBlockArrayElements(block: Block): Value[];
+    getDotDir(): string | null;
     protected getMetaField(ast: Program, key: string): string | undefined;
     protected getNativeAgentName(ast: Program, name: string): string;
     protected getNativeAgentNameMap(ast: Program): ReadonlyMap<string, string>;
@@ -481,7 +484,7 @@ export class ClaudeFormatter extends BaseFormatter {
     // (undocumented)
     readonly description = "Claude Code instructions (concise Markdown)";
     // (undocumented)
-    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    format(input: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
     getSkillBasePath(): string | null;
     // (undocumented)
@@ -532,6 +535,7 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     format(ast: Program, options?: FormatOptions): FormatterOutput;
     protected generateAgentFile(config: MarkdownAgentConfig): FormatterOutput;
     protected generateFrontmatter(ast: Program, options?: FormatOptions): string | undefined;
+    getDotDir(): string | null;
     // (undocumented)
     static getSupportedVersions(): FormatterVersionMap;
 }
@@ -686,7 +690,9 @@ export class CursorFormatter extends BaseFormatter {
     // (undocumented)
     readonly description = "Cursor rules (MDC with frontmatter)";
     // (undocumented)
-    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    format(input: Program, options?: FormatOptions): FormatterOutput;
+    // (undocumented)
+    getDotDir(): string | null;
     // (undocumented)
     getSkillBasePath(): string | null;
     // (undocumented)
@@ -834,7 +840,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     // (undocumented)
     protected extractSkills(ast: Program, options?: FormatOptions): FactorySkillConfig[];
     // (undocumented)
-    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    format(input: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
     protected formatFull(ast: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
@@ -948,6 +954,7 @@ export interface Formatter {
     readonly description: string;
     format(ast: Program, options?: FormatOptions): FormatterOutput;
     formatCanonical?(ast: CanonicalProgram, options?: FormatOptions): FormatterOutput;
+    getDotDir?(): string | null;
     getSkillBasePath(): string | null;
     getSkillFileName(): string | null;
     readonly name: string;
@@ -1151,7 +1158,7 @@ export class GitHubFormatter extends BaseFormatter {
     // (undocumented)
     readonly description = "GitHub Copilot instructions (Markdown)";
     // (undocumented)
-    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    format(input: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
     getSkillBasePath(): string | null;
     // (undocumented)
@@ -1215,7 +1222,7 @@ export class GrokFormatter extends BaseFormatter {
     // (undocumented)
     readonly description = "Grok Build instructions (AGENTS.md + Claude delegation)";
     // (undocumented)
-    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    format(input: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
     getSkillBasePath(): string | null;
     // (undocumented)
@@ -1488,7 +1495,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     // (undocumented)
     protected extractTechStackFromStandards(standards: ReturnType<typeof MarkdownInstructionFormatter.findBlock>): string[];
     // (undocumented)
-    format(ast: Program, options?: FormatOptions): FormatterOutput;
+    format(input: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
     protected formatFull(ast: Program, options?: FormatOptions): FormatterOutput;
     // (undocumented)
@@ -1502,6 +1509,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     // (undocumented)
     protected generateFrontmatter(_ast: Program, _options?: FormatOptions): string | undefined;
     protected generateMcpConfig(ast: Program): FormatterOutput | undefined;
+    // (undocumented)
+    getDotDir(): string | null;
     // (undocumented)
     protected getRenderedSectionName(ast: Program, key: SectionNameKey, renderer: ConventionRenderer, defaultTitle?: string): string;
     // (undocumented)
@@ -2123,6 +2132,6 @@ export type ZencoderVersion = 'simple' | 'multifile' | 'full';
 
 // Warnings were encountered during analysis:
 //
-// src/formatters/cursor.ts:537:3 - (ae-unresolved-link) The @link reference could not be resolved: The package "@promptscript/formatters" does not have an export "GlobCategorizer"
+// src/formatters/cursor.ts:543:3 - (ae-unresolved-link) The @link reference could not be resolved: The package "@promptscript/formatters" does not have an export "GlobCategorizer"
 
 ```

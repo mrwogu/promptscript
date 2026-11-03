@@ -107,6 +107,11 @@ export interface Formatter {
   getSkillBasePath(): string | null;
   /** Skill file name (e.g., 'SKILL.md' or 'skill.md'), or null if no skill support */
   getSkillFileName(): string | null;
+  /**
+   * Dot directory of the target (e.g., '.claude'), used for the `{{prs.dotDir}}`
+   * path token. Null or not implemented leaves the token as written.
+   */
+  getDotDir?(): string | null;
   /** How this formatter handles skill references: 'directory', 'inline', or 'none' */
   referencesMode(): 'directory' | 'inline' | 'none';
   /**

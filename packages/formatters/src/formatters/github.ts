@@ -20,6 +20,7 @@ import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import { appendModelCompatibilityWarnings, toTargetModel } from '../model-mapping.js';
 import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
+import { applyAgentTargeting } from '../agent-targeting.js';
 
 /**
  * GitHub formatter version information.
@@ -213,7 +214,8 @@ export class GitHubFormatter extends BaseFormatter {
     return 'directory';
   }
 
-  format(ast: Program, options?: FormatOptions): FormatterOutput {
+  format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     const version = this.resolveVersion(options?.version);
     let output: FormatterOutput;
 

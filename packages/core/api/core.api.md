@@ -2904,6 +2904,9 @@ export function isKnownTarget(name: string): name is KnownTarget;
 // @internal
 export function isOutputResourceKind(value: string): value is OutputResourceKind;
 
+// @public
+export function isPathTokenName(name: string): boolean;
+
 // @internal
 export function isPlainObject(val: unknown): val is Record<string, unknown>;
 
@@ -3516,6 +3519,9 @@ export function parsePath(path: string): ParsedPath;
 export function parseVersion(version: string): SemVer;
 
 // @public
+export const PATH_TOKEN_NAMES: readonly ["dotDir", "skillsDir", "skillDir"];
+
+// @public
 export interface PathReference extends BaseNode {
     isRelative: boolean;
     namespace?: string;
@@ -3525,6 +3531,12 @@ export interface PathReference extends BaseNode {
     readonly type: 'PathReference';
     version?: string;
 }
+
+// @public
+export type PathTokenName = (typeof PATH_TOKEN_NAMES)[number];
+
+// @public
+export type PathTokenValues = Partial<Record<PathTokenName, string>>;
 
 // @public
 export type PolicyDefinition = LayerBoundaryPolicy | PropertyProtectionPolicy | RegistryAllowlistPolicy | RequiredMetadataPolicy | RiskFloorPolicy | ModelAllowlistPolicy | RequiredApprovalsPolicy | RequiredEvalsPolicy | ContentRulesPolicy | MaxExperimentWeightPolicy;
@@ -4171,6 +4183,12 @@ export interface ReplaceModifier extends BaseNode {
 }
 
 // @public
+export function replacePathTokens(text: string, values: PathTokenValues): {
+    text: string;
+    unresolved: PathTokenName[];
+};
+
+// @public
 export interface RequiredApproval {
     count?: number;
     role: GovernanceRoleName;
@@ -4573,8 +4591,10 @@ export interface TargetConfig {
     autoMode?: 'acceptEdits' | 'plan' | 'bypassPermissions';
     convention?: ConventionName;
     enabled?: boolean;
+    excludeAgents?: string[];
     guardsAsSkills?: boolean;
     guardsSkillsListing?: boolean;
+    includeAgents?: boolean | string[];
     includeSkills?: boolean | string[];
     maxDepth?: number;
     maxThreads?: number;

@@ -92,6 +92,10 @@ export class AntigravityFormatter extends BaseFormatter {
     return ANTIGRAVITY_VERSIONS;
   }
 
+  override getDotDir(): string | null {
+    return '.agent';
+  }
+
   override referencesMode(): 'directory' | 'inline' | 'none' {
     return 'inline';
   }

@@ -18,6 +18,7 @@ import {
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
+import { applyAgentTargeting } from '../agent-targeting.js';
 
 /**
  * Supported Cursor format versions.
@@ -158,6 +159,10 @@ export class CursorFormatter extends BaseFormatter {
     return 'inline';
   }
 
+  override getDotDir(): string | null {
+    return '.cursor';
+  }
+
   override getSkillBasePath(): string | null {
     return CURSOR_SKILL_BASE_PATH;
   }
@@ -166,7 +171,8 @@ export class CursorFormatter extends BaseFormatter {
     return 'SKILL.md';
   }
 
-  format(ast: Program, options?: FormatOptions): FormatterOutput {
+  format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     // Validate convention - Cursor only supports markdown
     const convention = options?.convention ?? this.defaultConvention;
     if (convention !== 'markdown') {

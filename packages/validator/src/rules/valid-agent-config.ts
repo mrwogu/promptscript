@@ -1,5 +1,14 @@
 import type { ValidationRule } from '../types.js';
-import type { Value } from '@promptscript/core';
+import { isKnownTarget, type Value } from '@promptscript/core';
+
+function isPlainObject(value: Value): value is Record<string, Value> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    (value as { type?: unknown }).type === undefined
+  );
+}
 
 /** Valid reasoningEffort values (union of Factory and Codex accepted values). */
 const VALID_REASONING_EFFORT = new Set(['low', 'medium', 'high']);
@@ -15,6 +24,7 @@ const VALID_SANDBOX_MODE = new Set(['read-only', 'workspace-write', 'danger-full
  * - `reasoningEffort` values against the fixture-confirmed enum
  * - `sandboxMode` values against Codex fixture-confirmed values
  * - `nicknameCandidates` as a non-empty unique string array
+ * - `targets` as an object of per-target field objects with known target names
  * - Rejects `modelReasoningEffort` (duplicate of `reasoningEffort`)
  * - Rejects `developerInstructions` (use `content` instead)
  * - Rejects generic agent `mode` (not portable)
@@ -125,6 +135,42 @@ export const validAgentConfig: ValidationRule = {
           location: agentsBlock.loc,
           severity: 'error',
         });
+      }
+
+      // Validate per-target overrides
+      const targets = agent['targets'];
+      if (targets !== undefined) {
+        if (!isPlainObject(targets)) {
+          ctx.report({
+            message: `Agent "${agentName}": targets must be an object of per-target fields`,
+            location: agentsBlock.loc,
+            severity: 'error',
+          });
+        } else {
+          for (const [target, override] of Object.entries(targets)) {
+            if (!isKnownTarget(target)) {
+              ctx.report({
+                message: `Agent "${agentName}": unknown target "${target}" in targets`,
+                location: agentsBlock.loc,
+                suggestion:
+                  'Use a target name from promptscript.yaml, for example claude or factory.',
+              });
+            }
+            if (!isPlainObject(override)) {
+              ctx.report({
+                message: `Agent "${agentName}": targets.${target} must be an object of agent fields`,
+                location: agentsBlock.loc,
+                severity: 'error',
+              });
+            } else if (override['targets'] !== undefined) {
+              ctx.report({
+                message: `Agent "${agentName}": targets.${target} can not contain targets`,
+                location: agentsBlock.loc,
+                severity: 'error',
+              });
+            }
+          }
+        }
       }
 
       if (agent['mode'] !== undefined) {

@@ -8,6 +8,7 @@ import {
   getTargetHookCapabilityWarnings,
 } from './hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from './agent-capability-warnings.js';
+import { applyAgentTargeting } from './agent-targeting.js';
 import { appendModelCompatibilityWarnings } from './model-mapping.js';
 import {
   findMcpServersBlock,
@@ -180,11 +181,16 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
     return this.config.skillFileName;
   }
 
+  override getDotDir(): string | null {
+    return this.config.dotDir;
+  }
+
   override referencesMode(): 'directory' | 'inline' | 'none' {
     return this.config.hasSkills ? 'directory' : 'none';
   }
 
-  format(ast: Program, options?: FormatOptions): FormatterOutput {
+  format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     const version = this.resolveVersion(options?.version);
     let output: FormatterOutput;
 

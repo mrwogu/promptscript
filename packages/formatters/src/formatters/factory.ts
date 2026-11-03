@@ -23,6 +23,7 @@ import {
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
 import { resolveSourceSectionTitle } from '../section-title-resolver.js';
 import { toTargetModel } from '../model-mapping.js';
+import { applyAgentTargeting } from '../agent-targeting.js';
 
 /**
  * Supported Factory AI format versions.
@@ -279,7 +280,8 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       .join('\n');
   }
 
-  override format(ast: Program, options?: FormatOptions): FormatterOutput {
+  override format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     if (
       options?.version !== undefined &&
       !Object.prototype.hasOwnProperty.call(FACTORY_VERSIONS, options.version)

@@ -736,6 +736,8 @@ error.
 | `rulesMode`     | `monolith` or `split`   | `monolith`      | Factory always-on rule layout                          |
 | `skillBaseDir`  | string                  | target-specific | Custom base directory for generated skill files        |
 | `includeSkills` | boolean or string array | `true`          | Emit all skills, no skills, or only listed skill names |
+| `includeAgents` | boolean or string array | `true`          | Emit all agents, no agents, or only listed agent names |
+| `excludeAgents` | string array            | `[]`            | Agent names never emitted, after `includeAgents`       |
 
 :::caution[Output paths stay inside the output directory]
 A target `output` that resolves outside the output directory (`../`, or an

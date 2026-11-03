@@ -1162,6 +1162,11 @@ Define specialized AI agents for target platforms with native agent support:
 | `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude, grok only)                         |
 | `background`          | boolean  | No       | Run the agent as a background process (Claude, grok only)                            |
 | `isolation`           | string   | No       | Isolation mode: `worktree` (Claude, grok only)                                       |
+| `targets`             | object   | No       | Per-target field overrides, e.g. `targets: { claude: { tools: [...] } }`             |
+
+See [Per-Target Overrides](../features/agents.md#per-target-overrides) for
+`targets`, the Factory and Claude Code tool name mapping, and `includeAgents` /
+`excludeAgents`.
 
 Every canonical field has an explicit per-target status in the
 [Field Support Matrix](../features/agents.md#field-support-matrix). A field a

@@ -123,9 +123,87 @@ that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` poin
 | `mcpServers`          | No       | Grants access to named top-level `@mcpServers`        |
 | `sandboxMode`         | No       | Selects target-native sandbox policy                  |
 | `nicknameCandidates`  | No       | Provides target-native display names                  |
+| `targets`             | No       | Overrides fields for one target, see below            |
 
 Validators check supported enum values and forbidden fields before formatters generate output.
 Target-specific fields are emitted only where the native agent format supports them.
+
+## Per-Target Overrides
+
+`targets.<target>` sets agent fields for one target only. The fields in it
+replace the shared fields of the same name for that target. Other targets
+keep the shared fields:
+
+```promptscript
+@agents {
+  builder: {
+    description: "Build features end to end"
+    tools: ["Read", "Grep", "Glob", "Create", "Edit", "Execute"]
+    model: "gpt-5.3-codex"
+    targets: {
+      claude: {
+        tools: ["Read", "Grep", "Glob", "Write", "Edit", "Bash"]
+        model: "sonnet"
+      }
+    }
+    content: "Implement the change and run the tests."
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH34NTlNeQKteACM3aClqMMrg4Kk4RmoINCwINhSQACE6qBkwGGw3agNOGSx5GbyWhWZmKDgw5AiAJXHvEDpwkABxKbQIg4ijqGZq88OAYSnsGDuIgFFxE1eQN8IYRjcHAiAF04sESMwpFB+upugBaACsFAAzHCWFJCIsWiJqOphOsKmCWowoBg3FImkSlnNVgTNiAdhJvicYGd9ocrjdvgB1TpA9nvT5Yb4DDBwHAgqktCFQ-pyVisYRYpaFKrBVVLFjsMr9ACS0RgWiwChwdkYOAwrDxYk8vGoHhNdg4cFMFCxqvyIHywIYZWojnwRFI5BgVFo+xAADcYLReqx8KkvUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Any agent field can be overridden, for example `tools`, `disallowedTools`,
+`model` or `content`. The key is the target name from `promptscript.yaml`.
+PS033 reports an unknown target name and a `targets` value that is not an
+object of fields.
+
+### Tool Names Between Factory and Claude Code
+
+Factory droids and Claude Code subagents name some tools differently. When
+`tools` or `disallowedTools` hold a name of the other tool, the Claude and
+Grok targets write the Claude Code name and the Factory target writes the
+Factory name. Duplicates made this way are dropped.
+
+| Factory      | Claude Code |
+| ------------ | ----------- |
+| `Create`     | `Write`     |
+| `Execute`    | `Bash`      |
+| `FetchUrl`   | `WebFetch`  |
+| `ApplyPatch` | `Edit`      |
+| `LS`         | `Glob`      |
+
+For the Factory target, `Write`, `Bash` and `WebFetch` map back, and Claude
+Code `MultiEdit` becomes `Edit`. `ApplyPatch` and `LS` have no own Claude Code
+tool, so they map only one way. Names that are the same in both tools (`Read`,
+`Grep`, `Glob`, `Edit`, `WebSearch`, `TodoWrite`, `Task`) and MCP tool names
+stay as written. Other targets get `tools` as before.
+
+A Claude Code subagent can not start other subagents. When a Claude or Grok
+agent lists `Task` or `Agent` in `tools`, compilation reports `PS4003`. Set
+`targets.claude.tools` without it, or leave the agent out for that target.
+
+### Leaving Agents Out of a Target
+
+`includeAgents` and `excludeAgents` in the target config choose which agents a
+target gets, the same way `includeSkills` does for skills:
+
+```yaml
+targets:
+  - factory:
+      version: full
+  - claude:
+      version: full
+      excludeAgents: [orchestrator]
+```
+
+`includeAgents: false` emits no agents and a list emits only the listed ones.
+`excludeAgents` is applied after `includeAgents`. Both accept the source name
+(`team.reviewer`) or the native name (`team-reviewer`).
 
 ## Field Support Matrix
 

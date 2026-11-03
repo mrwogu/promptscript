@@ -62,6 +62,47 @@ describe('PS033: valid-agent-config', () => {
     expect(messages).toHaveLength(0);
   });
 
+  it('should accept per-target overrides', () => {
+    const messages = validate({
+      reviewer: {
+        description: 'Review',
+        tools: ['Read', 'Execute'],
+        targets: { claude: { tools: ['Read', 'Bash'], model: 'sonnet' } },
+      },
+    });
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should reject targets that is not an object', () => {
+    const messages = validate({ reviewer: { description: 'Review', targets: ['claude'] } });
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('targets must be an object');
+    expect(messages[0]!.severity).toBe('error');
+  });
+
+  it('should reject a target override that is not an object', () => {
+    const messages = validate({ reviewer: { description: 'Review', targets: { claude: 'x' } } });
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('targets.claude must be an object');
+  });
+
+  it('should reject nested targets in an override', () => {
+    const messages = validate({
+      reviewer: { description: 'Review', targets: { claude: { targets: {} } } },
+    });
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('can not contain targets');
+  });
+
+  it('should warn about an unknown target in targets', () => {
+    const messages = validate({
+      reviewer: { description: 'Review', targets: { claud: { model: 'opus' } } },
+    });
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toContain('unknown target "claud"');
+    expect(messages[0]!.severity).toBe('warning');
+  });
+
   it('should accept agent with only description', () => {
     const messages = validate({
       simple: { description: 'Simple agent' },

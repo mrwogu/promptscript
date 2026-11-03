@@ -9,6 +9,7 @@ import {
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
+import { appendAgentSpawnToolWarnings, applyAgentTargeting } from '../agent-targeting.js';
 import {
   appendModelCompatibilityWarnings,
   findRawFrontmatterModel,
@@ -197,7 +198,8 @@ export class ClaudeFormatter extends BaseFormatter {
     return 'directory';
   }
 
-  format(ast: Program, options?: FormatOptions): FormatterOutput {
+  format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.modelTarget, options?.targetConfig);
     const version = this.resolveVersion(options?.version);
     let output: FormatterOutput;
 
@@ -212,6 +214,7 @@ export class ClaudeFormatter extends BaseFormatter {
     output = appendTargetHookCapabilityWarnings(output, ast, this.name, version);
     output = appendAgentCapabilityWarnings(output, ast, this.name, version);
     output = appendModelCompatibilityWarnings(output, ast, this.name, version, options?.models);
+    if (version === 'full') output = appendAgentSpawnToolWarnings(output, ast, this.name);
     output = {
       ...output,
       managedOutputFiles: [

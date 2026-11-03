@@ -54,6 +54,10 @@ export interface TargetConfig {
   skillBaseDir?: string;
   /** Controls which skills are emitted for this target */
   includeSkills?: boolean | string[];
+  /** Controls which agents are emitted for this target */
+  includeAgents?: boolean | string[];
+  /** Agent names never emitted for this target */
+  excludeAgents?: string[];
 }
 
 /**

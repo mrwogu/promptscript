@@ -1,6 +1,7 @@
 import {
   compareVersions,
   getMinimumVersionForFeature,
+  isPathTokenName,
   SYNTAX_FEATURES,
   TEMPLATE_VARIABLE_PATTERN,
   type Block,
@@ -71,6 +72,8 @@ function scan(ctx: RuleContext, program: Program, skipDotted: boolean): void {
     for (const match of masked.matchAll(templatePattern())) {
       if (masked[match.index - 1] === '\\') continue;
       const name = match[1]!;
+      // Target path tokens like {{prs.dotDir}} are replaced by every formatter.
+      if (isPathTokenName(name)) continue;
       const dotted = name.includes('.');
       if (dotted && skipDotted) continue;
       ctx.report({
