@@ -49,9 +49,10 @@ export function resolveOutputPathTokens(
     : (methods.getSkillBasePath?.() ?? undefined);
   const skillFileName = methods.getSkillFileName?.();
 
-  const paths = files.map((file) => file.path);
   const skillDirs = skillFileName
-    ? paths.filter((path) => posix.basename(path) === skillFileName).map(posix.dirname)
+    ? files
+        .filter((file) => posix.basename(file.path) === skillFileName)
+        .map((file) => posix.dirname(file.path))
     : [];
 
   const warnings: FormatterWarning[] = [];
