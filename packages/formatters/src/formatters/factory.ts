@@ -384,6 +384,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
           commands.push({
             name: commandName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
+            argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
             content: obj['content'] ? this.valueToString(obj['content']) : '',
             agent: obj['agent']
               ? this.getNativeAgentName(ast, this.valueToString(obj['agent']))
@@ -408,6 +409,9 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     // YAML frontmatter
     lines.push('---');
     lines.push(`description: ${this.yamlString(factoryConfig.description)}`);
+    if (factoryConfig.argumentHint) {
+      lines.push(`argument-hint: ${this.yamlString(factoryConfig.argumentHint)}`);
+    }
     if (factoryConfig.agent) {
       lines.push(`agent: ${factoryConfig.agent}`);
     }

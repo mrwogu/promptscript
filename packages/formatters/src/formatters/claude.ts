@@ -100,6 +100,12 @@ interface ClaudeCommandConfig {
   name: string;
   /** Description */
   description: string;
+  /** Hint shown in autocomplete when the command takes arguments */
+  argumentHint?: string;
+  /** Tools the command may use without asking */
+  allowedTools?: string[];
+  /** Model for this command */
+  model?: string;
   /** Command content/instructions */
   content: string;
 }
@@ -276,7 +282,7 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     // Generate command files
-    const commands = this.extractCommands(ast);
+    const commands = this.extractCommands(ast, options);
     for (const command of commands) {
       additionalFiles.push(this.generateCommandFile(command));
     }
@@ -328,7 +334,7 @@ export class ClaudeFormatter extends BaseFormatter {
     }
 
     // Generate command files
-    const commands = this.extractCommands(ast);
+    const commands = this.extractCommands(ast, options);
     for (const command of commands) {
       additionalFiles.push(this.generateCommandFile(command));
     }
@@ -773,7 +779,7 @@ export class ClaudeFormatter extends BaseFormatter {
    * Extract command configurations from @shortcuts block.
    * Commands are shortcuts with `prompt: true` or multiline `content`.
    */
-  private extractCommands(ast: Program): ClaudeCommandConfig[] {
+  private extractCommands(ast: Program, options?: FormatOptions): ClaudeCommandConfig[] {
     const shortcuts = this.findBlock(ast, 'shortcuts');
     if (!shortcuts) return [];
 
@@ -805,6 +811,9 @@ export class ClaudeFormatter extends BaseFormatter {
           commands.push({
             name: commandName,
             description: obj['description'] ? this.valueToString(obj['description']) : name,
+            argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
+            allowedTools: this.parseStringArray(obj['allowedTools']),
+            model: this.claudeModel(obj['model'], options),
             content: obj['content'] ? this.valueToString(obj['content']) : '',
           });
         }
@@ -820,11 +829,22 @@ export class ClaudeFormatter extends BaseFormatter {
   private generateCommandFile(config: ClaudeCommandConfig): FormatterOutput {
     const lines: string[] = [];
 
-    // YAML frontmatter with just description
     lines.push('---');
-    // Use double quotes if description contains apostrophe, single quotes otherwise
-    const descQuote = config.description.includes("'") ? '"' : "'";
-    lines.push(`description: ${descQuote}${config.description}${descQuote}`);
+    // Single quotes by default. Double quotes (escaped) when the text has an
+    // apostrophe, a double quote, a backslash or a line break.
+    const description = /['"\\\r\n]/.test(config.description)
+      ? JSON.stringify(config.description)
+      : `'${config.description}'`;
+    lines.push(`description: ${description}`);
+    if (config.argumentHint) {
+      lines.push(`argument-hint: ${this.yamlString(config.argumentHint)}`);
+    }
+    if (config.allowedTools && config.allowedTools.length > 0) {
+      lines.push(`allowed-tools: ${this.yamlString(config.allowedTools.join(', '))}`);
+    }
+    if (config.model) {
+      lines.push(`model: ${this.yamlString(config.model)}`);
+    }
     lines.push('---');
     lines.push('');
 
@@ -904,6 +924,13 @@ export class ClaudeFormatter extends BaseFormatter {
    * Parse an array of strings from a Value.
    */
   private parseStringArray(value: Value | undefined): string[] | undefined {
+    if (typeof value === 'string') {
+      const arr = value
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      return arr.length > 0 ? arr : undefined;
+    }
     if (!value || !Array.isArray(value)) return undefined;
     const arr = value.map((v) => this.valueToString(v)).filter((s) => s.length > 0);
     return arr.length > 0 ? arr : undefined;
@@ -960,7 +987,7 @@ export class ClaudeFormatter extends BaseFormatter {
     // YAML frontmatter
     lines.push('---');
     lines.push(`name: ${config.name}`);
-    lines.push(`description: ${config.description}`);
+    lines.push(`description: ${this.yamlString(config.description)}`);
 
     if (config.tools && config.tools.length > 0) {
       const arr = config.tools.map((t) => `'${t}'`).join(', ');

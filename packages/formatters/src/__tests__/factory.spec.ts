@@ -1046,6 +1046,47 @@ describe('FactoryFormatter', () => {
       expect(cmdFile?.content).toContain('Create a detailed spec for the given feature.');
     });
 
+    it('should emit argument-hint for commands', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/migrate': {
+                  description: 'Migrate a module',
+                  argumentHint: '<module> [--dry-run]',
+                  prompt: true,
+                  content: 'Migrate $ARGUMENTS.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/commands/migrate.md'
+      );
+      expect(cmdFile?.content).toBe(
+        [
+          '---',
+          'description: Migrate a module',
+          'argument-hint: <module> [--dry-run]',
+          '---',
+          '',
+          'Migrate $ARGUMENTS.',
+          '',
+        ].join('\n')
+      );
+    });
+
     it('should generate command files from shortcuts with content', () => {
       const ast: Program = {
         ...createMinimalProgram(),

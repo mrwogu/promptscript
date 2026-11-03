@@ -975,6 +975,35 @@ describe('ClaudeFormatter', () => {
         expect(paths.some((p) => p.includes('..'))).toBe(false);
       });
 
+      it('should quote an agent description that is not a plain YAML scalar', () => {
+        const ast: Program = {
+          ...createMinimalProgram(),
+          blocks: [
+            {
+              type: 'Block',
+              name: 'agents',
+              content: {
+                type: 'ObjectContent',
+                properties: {
+                  reviewer: {
+                    description: 'Reviews code. Use when: a PR is ready',
+                    tools: 'Read, Grep',
+                    content: 'Body.',
+                  },
+                },
+                loc: createLoc(),
+              },
+              loc: createLoc(),
+            },
+          ],
+        };
+
+        const result = formatter.format(ast, { version: 'full' });
+        const agent = result.additionalFiles?.find((f) => f.path === '.claude/agents/reviewer.md');
+        expect(agent?.content).toContain("description: 'Reviews code. Use when: a PR is ready'");
+        expect(agent?.content).toContain("tools: ['Read', 'Grep']");
+      });
+
       it('should generate agent files in full mode with @agents block', () => {
         const ast: Program = {
           ...createMinimalProgram(),
@@ -1683,6 +1712,51 @@ describe('ClaudeFormatter', () => {
   });
 
   describe('command file generation', () => {
+    it('should emit argument-hint, allowed-tools and model for commands', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'shortcuts',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                '/migrate': {
+                  prompt: true,
+                  description: 'Migrate a module',
+                  argumentHint: '<module>',
+                  allowedTools: ['Read', 'Bash(git:*)'],
+                  model: 'sonnet',
+                  content: 'Migrate $ARGUMENTS.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const commandFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/commands/migrate.md'
+      );
+      expect(commandFile?.content).toBe(
+        [
+          '---',
+          "description: 'Migrate a module'",
+          'argument-hint: <module>',
+          "allowed-tools: 'Read, Bash(git:*)'",
+          'model: sonnet',
+          '---',
+          '',
+          'Migrate $ARGUMENTS.',
+          '',
+        ].join('\n')
+      );
+    });
+
     it('should generate command files in multifile mode for shortcuts with prompt: true', () => {
       const ast: Program = {
         ...createMinimalProgram(),
