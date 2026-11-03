@@ -839,6 +839,69 @@ describe('compile command - createCliLogger warn path', () => {
     );
   });
 
+  it('should write generated Factory settings together with the legacy migration', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      model: 'user-model',
+      hooks: {
+        PreToolUse: [{ matcher: 'Execute', hooks: [{ type: 'command', command: 'audit' }] }],
+      },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    const generatedHooks = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Execute',
+            hooks: [{ type: 'command', command: 'audit # promptscript-generated:audit' }],
+          },
+        ],
+      },
+    };
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/hooks.json',
+          { path: '.factory/hooks.json', content: JSON.stringify(generatedHooks) },
+        ],
+        [
+          '.factory/settings.json',
+          {
+            path: '.factory/settings.json',
+            content: JSON.stringify({ enabledPlugins: { 'team@market': true } }),
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project' }, mockServices);
+
+    const canonicalWrite = mockWriteFile.mock.calls.find(([path]) =>
+      String(path).endsWith('.factory/hooks.json')
+    );
+    expect(JSON.parse(String(canonicalWrite?.[1]))).toEqual(generatedHooks);
+    expect(
+      mockWriteFile.mock.calls.some(([path]) => String(path).endsWith('.factory/settings.json'))
+    ).toBe(false);
+    expect(mockRewriteHookOutputIfUnchanged).toHaveBeenCalledWith(
+      '/mock/project/.factory/settings.json',
+      '/mock/project',
+      legacyContent,
+      JSON.stringify({ model: 'user-model', enabledPlugins: { 'team@market': true } }, null, 2) +
+        '\n'
+    );
+  });
+
   it('should remove legacy Factory settings that only held hooks', async () => {
     mockLoadConfig.mockResolvedValue({
       targets: ['factory'],

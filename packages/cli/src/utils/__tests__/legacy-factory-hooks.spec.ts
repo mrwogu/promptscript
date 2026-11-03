@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import type { FormatterOutput } from '@promptscript/compiler';
 import {
   detectLegacyFactorySettingsHooks,
+  getFactoryHooksFile,
   migrateLegacyFactoryHooks,
   planLegacyFactoryHooksMigration,
+  prepareLegacyFactoryMigration,
 } from '../legacy-factory-hooks.js';
 
 describe('migrateLegacyFactoryHooks', () => {
@@ -14,9 +17,81 @@ describe('migrateLegacyFactoryHooks', () => {
       canonical: {},
       legacy: {},
       migrated: 0,
+      duplicates: 0,
       ambiguous: [],
       changed: false,
     });
+  });
+
+  it('drops legacy handlers that @hooks already generates (#745)', () => {
+    const generated = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: 'Execute',
+            hooks: [{ type: 'command', command: 'npx lint-staged # promptscript-generated:lint' }],
+          },
+        ],
+        SessionStart: [
+          {
+            matcher: '.*',
+            hooks: [
+              {
+                type: 'command',
+                command:
+                  'if [ -z "${FACTORY_PROJECT_DIR:-}" ]; then printf \'%s\\n\' \'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.\' >&2; exit 1; fi; cd "$FACTORY_PROJECT_DIR" && ./setup.sh # promptscript-generated:setup',
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const result = migrateLegacyFactoryHooks(
+      {
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: 'Execute',
+              hooks: [
+                { type: 'command', command: 'npx lint-staged' },
+                { type: 'command', command: 'audit.sh' },
+              ],
+            },
+            { matcher: 'Edit', hooks: [{ type: 'command', command: 'npx lint-staged' }] },
+          ],
+          SessionStart: [
+            { hooks: [{ type: 'command', command: 'cd "$FACTORY_PROJECT_DIR" && ./setup.sh' }] },
+          ],
+        },
+      },
+      generated
+    );
+
+    expect(result.duplicates).toBe(2);
+    expect(result.migrated).toBe(2);
+    expect(result.changed).toBe(true);
+    expect(result.legacy).toEqual({});
+    expect(result.canonical).toEqual({
+      hooks: {
+        PreToolUse: [
+          ...generated.hooks.PreToolUse,
+          { matcher: 'Execute', hooks: [{ type: 'command', command: 'audit.sh' }] },
+          { matcher: 'Edit', hooks: [{ type: 'command', command: 'npx lint-staged' }] },
+        ],
+        SessionStart: generated.hooks.SessionStart,
+      },
+    });
+  });
+
+  it('is idempotent when the canonical output already carries the migrated hooks', () => {
+    const legacy = {
+      hooks: { Stop: [{ hooks: [{ type: 'command', command: 'notify.sh' }] }] },
+    };
+    const first = migrateLegacyFactoryHooks(legacy, {});
+    const second = migrateLegacyFactoryHooks(legacy, first.canonical);
+
+    expect(second.canonical).toEqual(first.canonical);
+    expect((second.canonical['hooks'] as Record<string, unknown[]>)['Stop']).toHaveLength(1);
   });
 
   it('migrates legacy event names and preserves unrelated settings', () => {
@@ -493,5 +568,107 @@ describe('planLegacyFactoryHooksMigration', () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe('prepareLegacyFactoryMigration', () => {
+  const generatedHooks = JSON.stringify({
+    hooks: {
+      PreToolUse: [
+        {
+          matcher: 'Execute',
+          hooks: [{ type: 'command', command: 'audit.sh # promptscript-generated:audit' }],
+        },
+      ],
+    },
+  });
+
+  async function withLegacySettings(
+    settings: Record<string, unknown>,
+    run: (root: string) => Promise<void>
+  ): Promise<void> {
+    const root = await mkdtemp(join(tmpdir(), 'promptscript-legacy-prepare-'));
+    await mkdir(join(root, '.factory'), { recursive: true });
+    await writeFile(join(root, '.factory', 'settings.json'), JSON.stringify(settings));
+    try {
+      await run(root);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+
+  const legacySettings = {
+    model: 'user-model',
+    hooks: {
+      PreToolUse: [{ matcher: 'Execute', hooks: [{ type: 'command', command: 'audit.sh' }] }],
+    },
+  };
+
+  it('writes each hook once when settings.json repeats a generated hook (#745)', async () => {
+    await withLegacySettings(legacySettings, async (root) => {
+      const outputs = new Map<string, FormatterOutput>([
+        ['.factory/hooks.json', { path: '.factory/hooks.json', content: generatedHooks }],
+      ]);
+
+      const plan = await prepareLegacyFactoryMigration(outputs, root);
+
+      expect(plan?.migration.duplicates).toBe(1);
+      expect(plan?.migration.legacy).toEqual({ model: 'user-model' });
+      expect(JSON.parse(outputs.get('.factory/hooks.json')!.content)).toEqual(
+        JSON.parse(generatedHooks)
+      );
+    });
+  });
+
+  it('folds generated settings keys into the migrated settings', async () => {
+    await withLegacySettings(legacySettings, async (root) => {
+      const outputs = new Map<string, FormatterOutput>([
+        ['.factory/hooks.json', { path: '.factory/hooks.json', content: generatedHooks }],
+        [
+          '.factory/settings.json',
+          {
+            path: '.factory/settings.json',
+            content: JSON.stringify({ enabledPlugins: { 'team@market': true } }),
+          },
+        ],
+      ]);
+
+      const plan = await prepareLegacyFactoryMigration(outputs, root);
+
+      expect(plan?.settingsFolded).toBe(true);
+      expect(plan?.migration.legacy).toEqual({
+        model: 'user-model',
+        enabledPlugins: { 'team@market': true },
+      });
+      expect(JSON.parse(outputs.get('.factory/settings.json')!.content)).toEqual(
+        plan?.migration.legacy
+      );
+    });
+  });
+
+  it('leaves settings.json hooks alone with hooksFile: settings.json', async () => {
+    await withLegacySettings(legacySettings, async (root) => {
+      const outputs = new Map<string, FormatterOutput>();
+
+      await expect(
+        prepareLegacyFactoryMigration(outputs, root, { hooksFile: 'settings.json' })
+      ).resolves.toBeUndefined();
+      expect(outputs.size).toBe(0);
+    });
+  });
+});
+
+describe('getFactoryHooksFile', () => {
+  it('returns settings.json only when a Factory target asks for it', () => {
+    expect(getFactoryHooksFile([{ name: 'factory' }])).toBe('hooks.json');
+    expect(getFactoryHooksFile([{ name: 'claude', config: { hooksFile: 'settings.json' } }])).toBe(
+      'hooks.json'
+    );
+    expect(
+      getFactoryHooksFile([
+        { name: 'factory', config: { hooksFile: 'hooks.json' } },
+        { name: 'factory', config: { hooksFile: 'settings.json' } },
+      ])
+    ).toBe('settings.json');
   });
 });

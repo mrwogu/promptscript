@@ -803,6 +803,15 @@
             "bypassPermissions"
           ],
           "description": "Claude: auto mode setting for project settings.json. Maps to `.claude/settings.json` `autoMode` field. Only valid for Claude target with fixture-confirmed project-local schema."
+        },
+        "settings": {
+          "$ref": "#/definitions/TargetSettingsConfig",
+          "description": "Project settings written to the target settings file. Claude: `.claude/settings.json` (`model`, `permissions`, `env`, `enabledPlugins`). Factory: `.factory/settings.json` (`model`, `enabledPlugins`). Keys are merged into an existing settings file; other user keys are kept."
+        },
+        "hooksFile": {
+          "$ref": "#/definitions/FactoryHooksFile",
+          "description": "Factory: file that receives the generated `@hooks`.\n- `hooks.json`: `.factory/hooks.json` (preferred by Factory, read first)\n- `settings.json`: `hooks` key of `.factory/settings.json` (Factory reads it   only when `.factory/hooks.json` is absent)",
+          "default": "hooks.json"
         }
       },
       "additionalProperties": false,
@@ -834,6 +843,79 @@
         "split"
       ],
       "description": "Factory always-on rules output mode.\n- `monolith`: Keep all rule content in AGENTS.md\n- `split`: Emit rule content under .factory/rules"
+    },
+    "TargetSettingsConfig": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "Default model ID (Claude, Factory)."
+        },
+        "permissions": {
+          "$ref": "#/definitions/TargetSettingsPermissions",
+          "description": "Permission rules (Claude only)."
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables for every session (Claude only)."
+        },
+        "enabledPlugins": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "description": "Enabled plugins as `plugin@marketplace` to `true` or `false` (Claude, Factory).",
+          "examples": [
+            {
+              "code-standards@acme-plugins": true
+            }
+          ],
+          "example": {
+            "code-standards@acme-plugins": true
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Settings keys PromptScript writes to the target project settings file."
+    },
+    "TargetSettingsPermissions": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rules that are allowed without a prompt, e.g. `Bash(npm run test:*)`."
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rules that are always denied, e.g. `Read(./.env)`."
+        },
+        "ask": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rules that always ask for confirmation."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Permission rules for Claude Code project settings."
+    },
+    "FactoryHooksFile": {
+      "type": "string",
+      "enum": [
+        "hooks.json",
+        "settings.json"
+      ],
+      "description": "Factory file that receives generated hooks."
     },
     "FormattingConfig": {
       "type": "object",

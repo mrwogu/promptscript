@@ -90,7 +90,7 @@ sidebar:
 - `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
 - `pre-terminal-command` maps to `PreToolUse` with the deterministic `Execute` matcher unless `targets.factory.matcher` overrides it
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
-- `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks
+- `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks. `hooksFile: settings.json` writes `@hooks` there instead (see [Hooks File](#hooks-file))
 - When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.factory/hooks.json`; directories emptied by cleanup (`.factory/rules` and its subdirectories) are pruned as well
 - Three output modes: `simple`, `multifile`, `full`
 - Always-on rules default to the byte-compatible `monolith` mode
@@ -106,6 +106,58 @@ ownership are ambiguous. `--dry-run` previews the migration, while
 `--no-migrate-factory-hooks` leaves the fallback unchanged and reports
 `PS4002`. `prs hooks install factory` remains available for explicit migration
 and hook installation.
+
+A legacy handler is written only once. When `@hooks` already generates the same
+command for the same event and matcher, the migration drops the hand-written
+copy instead of moving it next to the generated one, so Factory does not run
+the hook twice. Running the migration again gives the same result.
+
+## Hooks File
+
+Factory reads project hooks from `.factory/hooks.json`. Only when that file is
+absent does it read the `hooks` key of `.factory/settings.json`. Factory does
+not merge the two files. See the
+[Factory hooks reference](https://docs.factory.ai/reference/hooks-reference).
+
+`hooksFile` picks where PromptScript writes `@hooks`:
+
+```yaml
+targets:
+  - factory:
+      version: multifile
+      hooksFile: settings.json # default: hooks.json
+```
+
+| Value                  | Generated file                          | Notes                                                            |
+| ---------------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| `hooks.json` (default) | `.factory/hooks.json`                   | Legacy `settings.json` hooks are migrated into it                |
+| `settings.json`        | `hooks` key of `.factory/settings.json` | No legacy migration; other settings keys and user hooks are kept |
+
+With `settings.json`, a PromptScript-owned `.factory/hooks.json` is removed by
+cleanup. If a `.factory/hooks.json` with your own hooks is still there,
+`prs compile` reports `PS4002`, because Factory would ignore the hooks in
+`settings.json`.
+
+## Settings
+
+`settings` writes Factory project settings to `.factory/settings.json` in
+`multifile` and `full` modes:
+
+```yaml
+targets:
+  - factory:
+      version: multifile
+      settings:
+        model: claude-sonnet-4-5
+        enabledPlugins:
+          code-standards@acme-plugins: true
+```
+
+Supported keys are `model` and `enabledPlugins`. Other `settings` keys
+(`permissions`, `env`) are Claude only; Factory reports `PS4002` and skips
+them. PromptScript merges the keys into an existing `.factory/settings.json`:
+keys it does not generate stay, and for `enabledPlugins` only the listed
+plugins are set. A key removed from the config is not removed from the file.
 
 ## Split Rules
 

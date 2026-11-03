@@ -1,12 +1,16 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { isPromptScriptHookCommand } from '../hooks/tool-configs/claude.js';
+import { mergeGeneratedSettings } from './managed-output-cleanup.js';
 import type { FormatterOutput } from '@promptscript/compiler';
+import type { FactoryHooksFile, TargetConfig } from '@promptscript/core';
 
 export interface LegacyFactoryMigrationResult {
   canonical: Record<string, unknown>;
   legacy: Record<string, unknown>;
   migrated: number;
+  /** Legacy handlers dropped because `@hooks` already generates the same command. */
+  duplicates: number;
   ambiguous: string[];
   changed: boolean;
 }
@@ -21,12 +25,39 @@ export interface LegacyFactoryMigrationPlan {
   hooksPath: string;
   expectedSettingsContent: string;
   migration: LegacyFactoryMigrationResult;
+  /**
+   * The generated `.factory/settings.json` keys were merged into
+   * `migration.legacy`, so the migration writes settings.json in one step.
+   */
+  settingsFolded?: boolean;
+}
+
+export interface PrepareLegacyFactoryMigrationOptions {
+  /** Factory target `hooksFile`; `settings.json` keeps hooks where they are. */
+  hooksFile?: FactoryHooksFile;
+}
+
+/**
+ * Factory hooks file of the compiled targets. `settings.json` wins when any
+ * Factory target asks for it, so the legacy migration never moves those hooks.
+ */
+export function getFactoryHooksFile(
+  targets: readonly { name: string; config?: TargetConfig }[]
+): FactoryHooksFile {
+  return targets.some(
+    (target) => target.name === 'factory' && target.config?.hooksFile === 'settings.json'
+  )
+    ? 'settings.json'
+    : 'hooks.json';
 }
 
 export async function prepareLegacyFactoryMigration(
   outputs: Map<string, FormatterOutput>,
-  outputRoot: string
+  outputRoot: string,
+  options: PrepareLegacyFactoryMigrationOptions = {}
 ): Promise<LegacyFactoryMigrationPlan | undefined> {
+  // With hooksFile: settings.json the settings `hooks` key is the canonical place.
+  if (options.hooksFile === 'settings.json') return undefined;
   const factoryOutput = outputs.get('.factory/hooks.json');
   const plan = await planLegacyFactoryHooksMigration(outputRoot, factoryOutput?.content);
   if (!plan) return undefined;
@@ -46,6 +77,16 @@ export async function prepareLegacyFactoryMigration(
       path: '.factory/hooks.json',
       content,
     });
+  }
+
+  // Settings keys generated for the same file must land together with the
+  // migration rewrite; a separate write would race with it.
+  const settingsOutput = outputs.get('.factory/settings.json');
+  if (settingsOutput) {
+    const generated = parseJsonObject(settingsOutput.content, 'generated .factory/settings.json');
+    plan.migration.legacy = mergeGeneratedSettings(plan.migration.legacy, generated);
+    settingsOutput.content = JSON.stringify(plan.migration.legacy, null, 2) + '\n';
+    plan.settingsFolded = true;
   }
   return plan;
 }
@@ -177,7 +218,7 @@ export function migrateLegacyFactoryHooks(
 ): LegacyFactoryMigrationResult {
   const legacyHooksValue = legacy['hooks'];
   if (legacyHooksValue === undefined) {
-    return { canonical, legacy, migrated: 0, ambiguous: [], changed: false };
+    return { canonical, legacy, migrated: 0, duplicates: 0, ambiguous: [], changed: false };
   }
   const legacyHooks = getObject(legacyHooksValue);
   if (!legacyHooks) {
@@ -185,6 +226,7 @@ export function migrateLegacyFactoryHooks(
       canonical,
       legacy,
       migrated: 0,
+      duplicates: 0,
       ambiguous: ['hooks'],
       changed: false,
     };
@@ -197,6 +239,7 @@ export function migrateLegacyFactoryHooks(
       canonical,
       legacy,
       migrated: 0,
+      duplicates: 0,
       ambiguous: ['canonical.hooks'],
       changed: false,
     };
@@ -209,6 +252,7 @@ export function migrateLegacyFactoryHooks(
       canonical,
       legacy,
       migrated: 0,
+      duplicates: 0,
       ambiguous: malformedCanonicalEvents,
       changed: false,
     };
@@ -217,6 +261,7 @@ export function migrateLegacyFactoryHooks(
   const remainingLegacyHooks: Record<string, unknown> = {};
   const ambiguous: string[] = [];
   let migrated = 0;
+  let duplicates = 0;
 
   for (const [eventName, value] of Object.entries(legacyHooks)) {
     const nativeEvent = LEGACY_EVENT_NAMES[eventName];
@@ -234,8 +279,12 @@ export function migrateLegacyFactoryHooks(
         continue;
       }
       if (migration.userEntry !== undefined) {
+        const canonicalEntries = canonicalHooks[nativeEvent] as unknown[] | undefined;
+        const deduplicated = dropGeneratedDuplicates(migration.userEntry, canonicalEntries ?? []);
+        duplicates += deduplicated.dropped;
+        if (deduplicated.entry === undefined) continue;
         const target = migratedByEvent[nativeEvent] ?? [];
-        target.push(migration.userEntry);
+        target.push(deduplicated.entry);
         migratedByEvent[nativeEvent] = target;
         migrated++;
       }
@@ -243,7 +292,7 @@ export function migrateLegacyFactoryHooks(
   }
 
   if (ambiguous.length > 0) {
-    return { canonical, legacy, migrated: 0, ambiguous, changed: false };
+    return { canonical, legacy, migrated: 0, duplicates: 0, ambiguous, changed: false };
   }
 
   const mergedHooks: Record<string, unknown> = { ...canonicalHooks };
@@ -265,6 +314,7 @@ export function migrateLegacyFactoryHooks(
     canonical: nextCanonical,
     legacy: nextLegacy,
     migrated,
+    duplicates,
     ambiguous,
     changed:
       migrated > 0 ||
@@ -364,6 +414,67 @@ function splitLegacyEntry(
     userEntry: { ...object, hooks: migratedHandlers },
     ambiguous: false,
   };
+}
+
+const GENERATED_MARKER_SUFFIX = /\s*# promptscript-generated:[A-Za-z0-9._-]+\s*$/;
+const FACTORY_ROOT_GUARD_PREFIX = 'if [ -z "${FACTORY_PROJECT_DIR:-}" ]; then ';
+const MATCH_ALL = new Set(['', '*', '.*']);
+
+/**
+ * Drop legacy handlers that `@hooks` already generates for the same event.
+ *
+ * A project moving to PromptScript often keeps its hand-written hooks in
+ * settings.json and declares the same hooks in `@hooks`. Without this the
+ * migration copies the hand-written handler next to the generated one and
+ * Factory runs the hook twice. A handler is a duplicate when the matcher is
+ * the same and its command equals a generated command without the ownership
+ * marker and the project-root guard.
+ */
+function dropGeneratedDuplicates(
+  entry: unknown,
+  canonicalEntries: unknown[]
+): { entry?: unknown; dropped: number } {
+  const object = getObject(entry);
+  const handlers = object?.['hooks'];
+  if (!object || !Array.isArray(handlers)) return { entry, dropped: 0 };
+
+  const matcher = normalizeMatcher(object['matcher']);
+  const generatedCommands = new Set<string>();
+  for (const canonicalEntry of canonicalEntries) {
+    const canonicalObject = getObject(canonicalEntry);
+    const canonicalHandlers = canonicalObject?.['hooks'];
+    if (!canonicalObject || !Array.isArray(canonicalHandlers)) continue;
+    if (normalizeMatcher(canonicalObject['matcher']) !== matcher) continue;
+    if (canonicalObject['commandRegex'] !== object['commandRegex']) continue;
+    for (const handler of canonicalHandlers) {
+      const command = getObject(handler)?.['command'];
+      if (isGeneratedCommandObject(handler) && typeof command === 'string') {
+        generatedCommands.add(stripGeneratedWrapping(command));
+      }
+    }
+  }
+  if (generatedCommands.size === 0) return { entry, dropped: 0 };
+
+  const kept = handlers.filter((handler) => {
+    const command = getObject(handler)?.['command'];
+    return typeof command !== 'string' || !generatedCommands.has(command.trim());
+  });
+  const dropped = handlers.length - kept.length;
+  if (dropped === 0) return { entry, dropped: 0 };
+  return kept.length === 0 ? { dropped } : { entry: { ...object, hooks: kept }, dropped };
+}
+
+function normalizeMatcher(value: unknown): unknown {
+  return value === undefined || (typeof value === 'string' && MATCH_ALL.has(value)) ? '*' : value;
+}
+
+function stripGeneratedWrapping(command: string): string {
+  let stripped = command.replace(GENERATED_MARKER_SUFFIX, '');
+  if (stripped.startsWith(FACTORY_ROOT_GUARD_PREFIX)) {
+    const guardEnd = stripped.indexOf('; fi; ');
+    if (guardEnd !== -1) stripped = stripped.slice(guardEnd + '; fi; '.length);
+  }
+  return stripped.trim();
 }
 
 function appendUnique(existing: unknown[], additions: unknown[]): unknown[] {

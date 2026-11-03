@@ -178,6 +178,57 @@ export interface TargetConfig {
    * Only valid for Claude target with fixture-confirmed project-local schema.
    */
   autoMode?: 'acceptEdits' | 'plan' | 'bypassPermissions';
+
+  /**
+   * Project settings written to the target settings file.
+   * Claude: `.claude/settings.json` (`model`, `permissions`, `env`, `enabledPlugins`).
+   * Factory: `.factory/settings.json` (`model`, `enabledPlugins`).
+   * Keys are merged into an existing settings file; other user keys are kept.
+   */
+  settings?: TargetSettingsConfig;
+
+  /**
+   * Factory: file that receives the generated `@hooks`.
+   * - `hooks.json`: `.factory/hooks.json` (preferred by Factory, read first)
+   * - `settings.json`: `hooks` key of `.factory/settings.json` (Factory reads it
+   *   only when `.factory/hooks.json` is absent)
+   * @default 'hooks.json'
+   */
+  hooksFile?: FactoryHooksFile;
+}
+
+/**
+ * Factory file that receives generated hooks.
+ */
+export type FactoryHooksFile = 'hooks.json' | 'settings.json';
+
+/**
+ * Permission rules for Claude Code project settings.
+ */
+export interface TargetSettingsPermissions {
+  /** Rules that are allowed without a prompt, e.g. `Bash(npm run test:*)`. */
+  allow?: string[];
+  /** Rules that are always denied, e.g. `Read(./.env)`. */
+  deny?: string[];
+  /** Rules that always ask for confirmation. */
+  ask?: string[];
+}
+
+/**
+ * Settings keys PromptScript writes to the target project settings file.
+ */
+export interface TargetSettingsConfig {
+  /** Default model ID (Claude, Factory). */
+  model?: string;
+  /** Permission rules (Claude only). */
+  permissions?: TargetSettingsPermissions;
+  /** Environment variables for every session (Claude only). */
+  env?: Record<string, string>;
+  /**
+   * Enabled plugins as `plugin@marketplace` to `true` or `false` (Claude, Factory).
+   * @example { 'code-standards@acme-plugins': true }
+   */
+  enabledPlugins?: Record<string, boolean>;
 }
 
 /**

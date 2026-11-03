@@ -3677,6 +3677,91 @@ license: MIT
     });
   });
 
+  describe('settings and hooksFile', () => {
+    const hooksProgram = (): Program => ({
+      type: 'Program',
+      uses: [],
+      extends: [],
+      loc: createLoc(),
+      blocks: [
+        {
+          type: 'Block',
+          name: 'hooks',
+          content: {
+            type: 'ObjectContent',
+            properties: {
+              lint: { event: 'pre-tool-use', command: ['npx', 'lint'] } as unknown as Value,
+            },
+            loc: createLoc(),
+          },
+          loc: createLoc(),
+        },
+      ],
+    });
+    const generatedHooks = {
+      PreToolUse: [
+        {
+          matcher: '.*',
+          hooks: [{ type: 'command', command: 'npx lint # promptscript-generated:lint' }],
+        },
+      ],
+    };
+
+    it('should write model and enabledPlugins to .factory/settings.json', () => {
+      const result = new FactoryFormatter().format(hooksProgram(), {
+        version: 'full',
+        targetConfig: {
+          settings: { model: 'claude-sonnet-4-5', enabledPlugins: { 'standards@acme': true } },
+        },
+      });
+
+      const settings = result.additionalFiles?.find((f) => f.path === '.factory/settings.json');
+      expect(JSON.parse(settings!.content)).toEqual({
+        model: 'claude-sonnet-4-5',
+        enabledPlugins: { 'standards@acme': true },
+      });
+      const hooks = result.additionalFiles?.find((f) => f.path === '.factory/hooks.json');
+      expect(JSON.parse(hooks!.content)).toEqual({ hooks: generatedHooks });
+      expect(result.managedOutputFiles).toEqual(['.factory/hooks.json']);
+    });
+
+    it('should warn about settings Factory does not support', () => {
+      const result = new FactoryFormatter().format(hooksProgram(), {
+        version: 'full',
+        targetConfig: { settings: { permissions: { allow: ['Read'] }, env: { CI: '1' } } },
+      });
+
+      expect(result.additionalFiles?.find((f) => f.path === '.factory/settings.json')).toBe(
+        undefined
+      );
+      expect(result.warnings?.map((warning) => warning.message)).toEqual([
+        expect.stringContaining('settings.permissions'),
+        expect.stringContaining('settings.env'),
+      ]);
+    });
+
+    it('should put hooks in .factory/settings.json with hooksFile: settings.json', () => {
+      const result = new FactoryFormatter().format(hooksProgram(), {
+        version: 'multifile',
+        targetConfig: { hooksFile: 'settings.json', settings: { model: 'gpt-5' } },
+      });
+
+      expect(result.additionalFiles?.find((f) => f.path === '.factory/hooks.json')).toBe(undefined);
+      const settings = result.additionalFiles?.find((f) => f.path === '.factory/settings.json');
+      expect(JSON.parse(settings!.content)).toEqual({ model: 'gpt-5', hooks: generatedHooks });
+      expect(result.managedOutputFiles).toEqual(['.factory/hooks.json', '.factory/settings.json']);
+    });
+
+    it('should reject an unknown hooksFile', () => {
+      expect(() =>
+        new FactoryFormatter().format(hooksProgram(), {
+          version: 'full',
+          targetConfig: { hooksFile: 'hooks.yaml' as never },
+        })
+      ).toThrow("Invalid Factory hooksFile 'hooks.yaml'");
+    });
+  });
+
   describe('hooks support', () => {
     it.each(['multifile', 'full'] as const)(
       'should emit current .factory/hooks.json in %s mode',

@@ -377,6 +377,87 @@ describe('cleanupManagedOutputs', () => {
     });
   });
 
+  it('should merge generated Claude settings keys into existing ones', () => {
+    const merged = mergePromptScriptHookOutput(
+      '.claude/settings.json',
+      JSON.stringify({
+        permissions: { allow: ['Read'], defaultMode: 'plan' },
+        env: { USER_VAR: '1' },
+        statusLine: { type: 'command', command: 'status.sh' },
+        model: 'opus',
+      }),
+      JSON.stringify({
+        permissions: { allow: ['Bash(npm test)'], deny: ['Read(./.env)'] },
+        env: { CI: 'true' },
+        model: 'sonnet',
+      })
+    );
+
+    expect(JSON.parse(merged!)).toEqual({
+      permissions: {
+        allow: ['Bash(npm test)'],
+        deny: ['Read(./.env)'],
+        defaultMode: 'plan',
+      },
+      env: { USER_VAR: '1', CI: 'true' },
+      statusLine: { type: 'command', command: 'status.sh' },
+      model: 'sonnet',
+    });
+  });
+
+  it('should merge Factory settings and keep user hooks next to generated ones', () => {
+    const userHook = { matcher: 'Execute', hooks: [{ type: 'command', command: 'audit.sh' }] };
+    const merged = mergePromptScriptHookOutput(
+      '.factory/settings.json',
+      JSON.stringify({
+        enabledPlugins: { 'user@market': true },
+        hooks: {
+          PreToolUse: [
+            userHook,
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'old # promptscript-generated:old' }],
+            },
+          ],
+        },
+      }),
+      JSON.stringify({
+        enabledPlugins: { 'team@market': true },
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: '*',
+              hooks: [{ type: 'command', command: 'lint # promptscript-generated:lint' }],
+            },
+          ],
+        },
+      })
+    );
+
+    expect(JSON.parse(merged!)).toEqual({
+      enabledPlugins: { 'user@market': true, 'team@market': true },
+      hooks: {
+        PreToolUse: [
+          userHook,
+          {
+            matcher: '*',
+            hooks: [{ type: 'command', command: 'lint # promptscript-generated:lint' }],
+          },
+        ],
+      },
+    });
+  });
+
+  it('should merge Factory settings without generated hooks and keep existing hooks', () => {
+    const merged = mergePromptScriptHookOutput(
+      '.factory/settings.json',
+      '{"model":"old","hooks":{"Stop":[]}}',
+      '{"model":"claude-sonnet-4-5"}'
+    );
+
+    expect(JSON.parse(merged!)).toEqual({ model: 'claude-sonnet-4-5', hooks: { Stop: [] } });
+  });
+
   it('should reject malformed hook output contracts', () => {
     expect(isHookOutputPath('.github/hooks/promptscript.json')).toBe(true);
     expect(isHookOutputPath('.codex/config.toml')).toBe(true);

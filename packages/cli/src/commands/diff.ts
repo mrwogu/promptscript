@@ -16,7 +16,10 @@ import {
   getPlannedContent,
 } from '../utils/diff-report.js';
 import { loadBundledSkillContent } from '../utils/bundled-skill.js';
-import { prepareLegacyFactoryMigration } from '../utils/legacy-factory-hooks.js';
+import {
+  getFactoryHooksFile,
+  prepareLegacyFactoryMigration,
+} from '../utils/legacy-factory-hooks.js';
 import { finalizeOutputPlan } from '../utils/output-plan.js';
 import { getBuildProfile } from '../utils/build-profile.js';
 import { parseTargetEntries } from '../utils/target-config.js';
@@ -284,7 +287,9 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
 
     const hasFactoryTarget = targets.some((target) => target.name === 'factory');
     if (hasFactoryTarget) {
-      await prepareLegacyFactoryMigration(result.outputs, outputRoot);
+      await prepareLegacyFactoryMigration(result.outputs, outputRoot, {
+        hooksFile: getFactoryHooksFile(targets),
+      });
     }
     const finalized = await finalizeOutputPlan(result, {
       header: config.output?.header,

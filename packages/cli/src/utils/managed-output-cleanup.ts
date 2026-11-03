@@ -1067,6 +1067,7 @@ const OWNED_HOOK_OUTPUT_FIELDS: ReadonlyArray<{
   fields: ReadonlySet<string>;
 }> = [
   { suffix: '.factory/hooks.json', fields: new Set(['hooks']) },
+  { suffix: '.factory/settings.json', fields: new Set(['hooks']) },
   { suffix: '.codex/hooks.json', fields: new Set(['hooks']) },
   {
     suffix: '.github/hooks/promptscript.json',
@@ -1143,26 +1144,69 @@ export function mergePromptScriptHookOutput(
   if (!generatedHooks) {
     const generatedFields = Object.keys(generated);
     if (
-      !path.replaceAll('\\', '/').endsWith('.claude/settings.json') ||
-      generatedFields.length !== 1 ||
-      generatedFields[0] !== 'autoMode'
+      !isSettingsOutputPath(path) ||
+      generatedFields.length === 0 ||
+      generatedFields.some((field) => !GENERATED_SETTINGS_KEYS.has(field))
     ) {
       return undefined;
     }
-    return JSON.stringify({ ...existing, ...generated }, null, 2) + '\n';
+    return JSON.stringify(mergeGeneratedSettings(existing, generated), null, 2) + '\n';
+  }
+  if (
+    isSettingsOutputPath(path) &&
+    Object.keys(generated).some((field) => field !== 'hooks' && !GENERATED_SETTINGS_KEYS.has(field))
+  ) {
+    return undefined;
   }
 
   return (
     JSON.stringify(
       {
-        ...existing,
-        ...generated,
+        ...mergeGeneratedSettings(existing, generated),
         hooks: mergeHookEvents(existingHooks ?? {}, generatedHooks),
       },
       null,
       2
     ) + '\n'
   );
+}
+
+const SETTINGS_OUTPUT_SUFFIXES = ['.claude/settings.json', '.factory/settings.json'];
+// Settings keys the Claude and Factory formatters generate next to `hooks`.
+const GENERATED_SETTINGS_KEYS: ReadonlySet<string> = new Set([
+  'autoMode',
+  'model',
+  'permissions',
+  'env',
+  'enabledPlugins',
+]);
+
+function isSettingsOutputPath(path: string): boolean {
+  const normalized = path.replaceAll('\\', '/');
+  return SETTINGS_OUTPUT_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
+}
+
+/**
+ * Merge generated settings keys into an existing settings object.
+ *
+ * Keys PromptScript does not generate stay as they are. For object values
+ * (`permissions`, `env`, `enabledPlugins`) only the generated sub-keys are
+ * replaced, so a user's `permissions.defaultMode` or own `env` entries survive.
+ * The `hooks` key is left to the hook merge.
+ */
+export function mergeGeneratedSettings(
+  existing: Record<string, unknown>,
+  generated: Record<string, unknown>
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...existing };
+  for (const [key, value] of Object.entries(generated)) {
+    if (key === 'hooks') continue;
+    const existingObject = getJsonObject(existing[key]);
+    const generatedObject = getJsonObject(value);
+    merged[key] =
+      existingObject && generatedObject ? { ...existingObject, ...generatedObject } : value;
+  }
+  return merged;
 }
 
 export interface RemovedOwnedHooks {

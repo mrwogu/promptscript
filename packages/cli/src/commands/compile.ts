@@ -43,6 +43,7 @@ import {
 } from '../utils/managed-output-cleanup.js';
 import {
   detectLegacyFactorySettingsHooks,
+  getFactoryHooksFile,
   prepareLegacyFactoryMigration,
   type LegacyFactoryMigrationPlan,
 } from '../utils/legacy-factory-hooks.js';
@@ -234,7 +235,9 @@ async function finishLegacyFactoryMigration(
   const action =
     plan.migration.migrated > 0
       ? `migrate ${plan.migration.migrated} legacy Factory hook(s)`
-      : 'remove legacy PromptScript-owned Factory hooks';
+      : plan.migration.duplicates > 0
+        ? `remove ${plan.migration.duplicates} legacy Factory hook(s) already generated from @hooks`
+        : 'remove legacy PromptScript-owned Factory hooks';
   if (dryRun) {
     ConsoleOutput.dryRun(`Would ${action} from ${plan.settingsPath} to ${plan.hooksPath}`);
     return;
@@ -956,12 +959,15 @@ async function compileCommandWithResult(
     // Resource-only runs skip legacy hook migration: the migration rewrites
     // .factory/settings.json as a side effect of a full compile.
     const migrateFactoryHooks = options.migrateFactoryHooks !== false && resourceKinds.size === 0;
+    const factoryHooksFile = getFactoryHooksFile(targets);
     const legacyMigration =
       hasFactoryTarget && migrateFactoryHooks
-        ? await prepareLegacyFactoryMigration(result.outputs, effectiveOptions.output)
+        ? await prepareLegacyFactoryMigration(result.outputs, effectiveOptions.output, {
+            hooksFile: factoryHooksFile,
+          })
         : undefined;
     const legacySettingsPath =
-      hasFactoryTarget && !migrateFactoryHooks
+      hasFactoryTarget && !migrateFactoryHooks && factoryHooksFile !== 'settings.json'
         ? await detectLegacyFactorySettingsHooks(effectiveOptions.output, true)
         : undefined;
     const finalized = await finalizeOutputPlan(result, {
@@ -971,6 +977,10 @@ async function compileCommandWithResult(
       additionalOutputPaths: legacyMigration ? ['.factory/hooks.json'] : [],
     });
     let effectiveOutputs = finalized.outputs;
+    if (legacyMigration?.settingsFolded) {
+      // The migration rewrites settings.json with the generated keys already merged.
+      effectiveOutputs.delete('.factory/settings.json');
+    }
     if (resourceKinds.size > 0) {
       // A configured skillBaseDir relocates skill outputs off the catalog
       // default path, so classification needs the per-target base directory.
@@ -1096,6 +1106,23 @@ async function compileCommandWithResult(
           `${legacySettingsPath} contains a legacy "hooks" section. ` +
           'Run "prs hooks install factory" to migrate unambiguous hooks to .factory/hooks.json, ' +
           'or remove the "hooks" key manually after reviewing ambiguous entries.',
+      });
+    }
+
+    const shadowingHooksPath = resolve(effectiveOptions.output, '.factory', 'hooks.json');
+    if (
+      hasFactoryTarget &&
+      factoryHooksFile === 'settings.json' &&
+      !options.dryRun &&
+      existsSync(shadowingHooksPath)
+    ) {
+      result.warnings.push({
+        ruleId: 'PS4002',
+        ruleName: 'hook-compatibility',
+        severity: 'warning',
+        message:
+          `${shadowingHooksPath} exists, so Factory ignores the hooks in .factory/settings.json ` +
+          '(hooksFile: settings.json). Move its hooks to @hooks or remove the file.',
       });
     }
 
