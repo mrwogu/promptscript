@@ -1,6 +1,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { compile, type CompileResult } from '@promptscript/browser-compiler';
-import { isPromptTarget } from '@promptscript/core';
+import { isPromptTarget, normalizeOutputCollisionKey } from '@promptscript/core';
+import type { OutputPlan, OutputPlanFile } from '@promptscript/core';
 import { useShallow } from 'zustand/react/shallow';
 import { usePlaygroundStore, selectFilesAsMap, type FormatterName } from '../store';
 
@@ -65,17 +66,55 @@ function dedupe<T extends LocatedMessage>(items: T[], idOf: (item: T) => string)
   });
 }
 
+// Same order as the planner in core.
+function comparePaths(left: OutputPlanFile, right: OutputPlanFile): number {
+  if (left.path < right.path) return -1;
+  return Number(left.path > right.path);
+}
+
+function mergePlans(plans: (OutputPlan | undefined)[]): OutputPlan | undefined {
+  const present = plans.filter((plan): plan is OutputPlan => plan !== undefined);
+  if (present.length === 0) return undefined;
+  if (present.length === 1) return present[0];
+
+  // A path written by both passes goes to the later pass, without a collision entry.
+  const selected = new Map<string, OutputPlanFile>();
+  for (const plan of present) {
+    for (const file of plan.files) {
+      selected.set(normalizeOutputCollisionKey(file.path), file);
+    }
+  }
+  const files = [...selected.values()].sort(comparePaths);
+
+  const directories = [...new Set(present.flatMap((plan) => plan.managedPaths.directories))].sort();
+  const managedFiles = [...new Set(present.flatMap((plan) => plan.managedPaths.files))].sort();
+  const withOmitted = present.filter((plan) => plan.omittedManagedDirectories !== undefined);
+
+  return {
+    files,
+    outputs: new Map(files.map((file) => [file.path, file])),
+    owners: new Map(files.map((file) => [file.path, file.owner])),
+    collisions: present.flatMap((plan) => plan.collisions),
+    managedPaths: { directories, files: managedFiles },
+    resources: files.filter((file) => file.role === 'resource'),
+    injected: files.filter((file) => file.role === 'injected'),
+    managedOutputDirectories: directories,
+    managedOutputFiles: managedFiles,
+    ...(withOmitted.length > 0 && {
+      omittedManagedDirectories: withOmitted.flatMap(
+        (plan) => plan.omittedManagedDirectories ?? []
+      ),
+    }),
+  };
+}
+
 function mergeResults(results: CompileResult[]): CompileResult {
   const slowest = (time: (r: CompileResult) => number): number => Math.max(...results.map(time));
   return {
     success: results.every((r) => r.success),
     outputs: new Map(results.flatMap((r) => [...r.outputs])),
     outputOwners: new Map(results.flatMap((r) => [...(r.outputOwners ?? [])])),
-    // The passes never write the same path, so the plan that has collisions is
-    // the one the Output tabs need to see shared files.
-    outputPlan:
-      results.map((r) => r.outputPlan).find((plan) => (plan?.collisions.length ?? 0) > 0) ??
-      results.find((r) => r.outputPlan)?.outputPlan,
+    outputPlan: mergePlans(results.map((r) => r.outputPlan)),
     errors: dedupe(
       results.flatMap((r) => r.errors),
       (e) => e.code
