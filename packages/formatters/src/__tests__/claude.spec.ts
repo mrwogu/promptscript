@@ -1757,6 +1757,36 @@ describe('ClaudeFormatter', () => {
       );
     });
 
+    it('should keep commas inside parentheses of a tool string', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'agents',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                committer: {
+                  description: 'Commits work',
+                  tools: 'Read, Bash(git add:*, git commit:*)',
+                  content: 'Commit the work.',
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'full' });
+      const agentFile = result.additionalFiles?.find(
+        (f) => f.path === '.claude/agents/committer.md'
+      );
+      expect(agentFile?.content).toContain("tools: ['Read', 'Bash(git add:*, git commit:*)']");
+    });
+
     it('should generate command files in multifile mode for shortcuts with prompt: true', () => {
       const ast: Program = {
         ...createMinimalProgram(),

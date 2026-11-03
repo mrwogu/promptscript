@@ -1,4 +1,4 @@
-import { ResolveError } from '@promptscript/core';
+import { ResolveError, splitToolList } from '@promptscript/core';
 import type { SourceLocation, Value } from '@promptscript/core';
 
 /**
@@ -23,28 +23,6 @@ function fileLocation(file: string): SourceLocation {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-/**
- * Split a comma separated tool list. Commas inside parentheses stay, so
- * `Bash(git add:*, git commit:*)` is one tool.
- */
-function splitToolList(value: string): string[] {
-  const items: string[] = [];
-  let depth = 0;
-  let current = '';
-  for (const char of value) {
-    if (char === '(') depth++;
-    if (char === ')' && depth > 0) depth--;
-    if (char === ',' && depth === 0) {
-      items.push(current.trim());
-      current = '';
-      continue;
-    }
-    current += char;
-  }
-  items.push(current.trim());
-  return items.filter((item) => item.length > 0);
 }
 
 /**
