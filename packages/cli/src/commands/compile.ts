@@ -226,18 +226,23 @@ interface WriteResult {
   unchanged: string[];
 }
 
+function describeLegacyFactoryMigration(plan: LegacyFactoryMigrationPlan): string {
+  if (plan.migration.migrated > 0) {
+    return `migrate ${plan.migration.migrated} legacy Factory hook(s)`;
+  }
+  if (plan.migration.duplicates > 0) {
+    return `remove ${plan.migration.duplicates} legacy Factory hook(s) already generated from @hooks`;
+  }
+  return 'remove legacy PromptScript-owned Factory hooks';
+}
+
 async function finishLegacyFactoryMigration(
   plan: LegacyFactoryMigrationPlan,
   outputRoot: string,
   dryRun: boolean | undefined,
   canonicalCreated: boolean
 ): Promise<void> {
-  const action =
-    plan.migration.migrated > 0
-      ? `migrate ${plan.migration.migrated} legacy Factory hook(s)`
-      : plan.migration.duplicates > 0
-        ? `remove ${plan.migration.duplicates} legacy Factory hook(s) already generated from @hooks`
-        : 'remove legacy PromptScript-owned Factory hooks';
+  const action = describeLegacyFactoryMigration(plan);
   if (dryRun) {
     ConsoleOutput.dryRun(`Would ${action} from ${plan.settingsPath} to ${plan.hooksPath}`);
     return;

@@ -2653,9 +2653,9 @@ describe('ClaudeFormatter', () => {
         targetConfig: { settings: { permissions: {} } },
       });
 
-      expect(result.additionalFiles?.find((f) => f.path === '.claude/settings.json')).toBe(
-        undefined
-      );
+      expect(
+        result.additionalFiles?.find((f) => f.path === '.claude/settings.json')
+      ).toBeUndefined();
     });
 
     it('should not write settings outside the full version', () => {
@@ -2664,9 +2664,9 @@ describe('ClaudeFormatter', () => {
         targetConfig: { settings: { model: 'claude-sonnet-4-5' } },
       });
 
-      expect(result.additionalFiles?.find((f) => f.path === '.claude/settings.json')).toBe(
-        undefined
-      );
+      expect(
+        result.additionalFiles?.find((f) => f.path === '.claude/settings.json')
+      ).toBeUndefined();
     });
   });
 });

@@ -416,7 +416,7 @@ function splitLegacyEntry(
   };
 }
 
-const GENERATED_MARKER_SUFFIX = /\s*# promptscript-generated:[A-Za-z0-9._-]+\s*$/;
+const GENERATED_MARKER = '# promptscript-generated:';
 const FACTORY_ROOT_GUARD_PREFIX = 'if [ -z "${FACTORY_PROJECT_DIR:-}" ]; then ';
 const MATCH_ALL = new Set(['', '*', '.*']);
 
@@ -438,21 +438,7 @@ function dropGeneratedDuplicates(
   const handlers = object?.['hooks'];
   if (!object || !Array.isArray(handlers)) return { entry, dropped: 0 };
 
-  const matcher = normalizeMatcher(object['matcher']);
-  const generatedCommands = new Set<string>();
-  for (const canonicalEntry of canonicalEntries) {
-    const canonicalObject = getObject(canonicalEntry);
-    const canonicalHandlers = canonicalObject?.['hooks'];
-    if (!canonicalObject || !Array.isArray(canonicalHandlers)) continue;
-    if (normalizeMatcher(canonicalObject['matcher']) !== matcher) continue;
-    if (canonicalObject['commandRegex'] !== object['commandRegex']) continue;
-    for (const handler of canonicalHandlers) {
-      const command = getObject(handler)?.['command'];
-      if (isGeneratedCommandObject(handler) && typeof command === 'string') {
-        generatedCommands.add(stripGeneratedWrapping(command));
-      }
-    }
-  }
+  const generatedCommands = collectGeneratedCommands(object, canonicalEntries);
   if (generatedCommands.size === 0) return { entry, dropped: 0 };
 
   const kept = handlers.filter((handler) => {
@@ -464,12 +450,39 @@ function dropGeneratedDuplicates(
   return kept.length === 0 ? { dropped } : { entry: { ...object, hooks: kept }, dropped };
 }
 
+/** Generated commands of canonical entries with the same matcher and command regex. */
+function collectGeneratedCommands(
+  legacyEntry: Record<string, unknown>,
+  canonicalEntries: unknown[]
+): Set<string> {
+  const matcher = normalizeMatcher(legacyEntry['matcher']);
+  const commands = new Set<string>();
+  for (const canonicalEntry of canonicalEntries) {
+    const canonicalObject = getObject(canonicalEntry);
+    const canonicalHandlers = canonicalObject?.['hooks'];
+    if (
+      !canonicalObject ||
+      !Array.isArray(canonicalHandlers) ||
+      normalizeMatcher(canonicalObject['matcher']) !== matcher ||
+      canonicalObject['commandRegex'] !== legacyEntry['commandRegex']
+    ) {
+      continue;
+    }
+    for (const handler of canonicalHandlers.filter(isGeneratedCommandObject)) {
+      commands.add(stripGeneratedWrapping(String(getObject(handler)?.['command'])));
+    }
+  }
+  return commands;
+}
+
 function normalizeMatcher(value: unknown): unknown {
   return value === undefined || (typeof value === 'string' && MATCH_ALL.has(value)) ? '*' : value;
 }
 
 function stripGeneratedWrapping(command: string): string {
-  let stripped = command.replace(GENERATED_MARKER_SUFFIX, '');
+  // Callers pass generated commands only, so the marker is the last token.
+  const markerStart = command.lastIndexOf(GENERATED_MARKER);
+  let stripped = (markerStart === -1 ? command : command.slice(0, markerStart)).trim();
   if (stripped.startsWith(FACTORY_ROOT_GUARD_PREFIX)) {
     const guardEnd = stripped.indexOf('; fi; ');
     if (guardEnd !== -1) stripped = stripped.slice(guardEnd + '; fi; '.length);

@@ -1272,6 +1272,78 @@ describe('compile command - createCliLogger warn path', () => {
     expect(mockWarning).toHaveBeenCalledWith(expect.stringContaining('legacy "hooks"'));
   });
 
+  it('should keep settings.json hooks and warn when hooks.json shadows them', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: [{ factory: { hooksFile: 'settings.json' } }],
+      registry: { path: './registry' },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) {
+        return '{"hooks":{"PreToolUse":[{"hooks":[{"type":"command","command":"audit"}]}]}}';
+      }
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockExistsSync.mockImplementation((path: string) => {
+      const value = String(path);
+      return (
+        value.includes('project.prs') ||
+        value.endsWith('promptscript.yaml') ||
+        value.endsWith('.factory/hooks.json')
+      );
+    });
+
+    await compileCommand({ cwd: '/mock/project', migrateFactoryHooks: false }, mockServices);
+
+    expect(mockWarning).not.toHaveBeenCalledWith(expect.stringContaining('legacy "hooks"'));
+    expect(mockWarning).toHaveBeenCalledWith(
+      expect.stringContaining('Factory ignores the hooks in .factory/settings.json')
+    );
+  });
+
+  it('should report legacy Factory hooks dropped as duplicates', async () => {
+    mockLoadConfig.mockResolvedValue({
+      targets: ['factory'],
+      registry: { path: './registry' },
+    });
+    const legacyContent = JSON.stringify({
+      model: 'm',
+      hooks: { Stop: [{ hooks: [{ type: 'command', command: 'notify' }] }] },
+    });
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (String(path).endsWith('.factory/settings.json')) return legacyContent;
+      throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+    });
+    mockCompile.mockResolvedValue({
+      success: true,
+      outputs: new Map([
+        [
+          '.factory/hooks.json',
+          {
+            path: '.factory/hooks.json',
+            content: JSON.stringify({
+              hooks: {
+                Stop: [
+                  {
+                    hooks: [{ type: 'command', command: 'notify # promptscript-generated:n' }],
+                  },
+                ],
+              },
+            }),
+          },
+        ],
+      ]),
+      stats: { totalTime: 10, resolveTime: 5, validateTime: 3, formatTime: 2 },
+      warnings: [],
+      errors: [],
+    });
+
+    await compileCommand({ cwd: '/mock/project', dryRun: true }, mockServices);
+
+    expect(mockDryRun).toHaveBeenCalledWith(
+      expect.stringContaining('remove 1 legacy Factory hook(s) already generated from @hooks')
+    );
+  });
+
   it('should not warn about legacy settings hooks when .factory/hooks.json exists', async () => {
     // Arrange
     mockLoadConfig.mockResolvedValue({

@@ -3731,9 +3731,9 @@ license: MIT
         targetConfig: { settings: { permissions: { allow: ['Read'] }, env: { CI: '1' } } },
       });
 
-      expect(result.additionalFiles?.find((f) => f.path === '.factory/settings.json')).toBe(
-        undefined
-      );
+      expect(
+        result.additionalFiles?.find((f) => f.path === '.factory/settings.json')
+      ).toBeUndefined();
       expect(result.warnings?.map((warning) => warning.message)).toEqual([
         expect.stringContaining('settings.permissions'),
         expect.stringContaining('settings.env'),
@@ -3746,7 +3746,7 @@ license: MIT
         targetConfig: { hooksFile: 'settings.json', settings: { model: 'gpt-5' } },
       });
 
-      expect(result.additionalFiles?.find((f) => f.path === '.factory/hooks.json')).toBe(undefined);
+      expect(result.additionalFiles?.find((f) => f.path === '.factory/hooks.json')).toBeUndefined();
       const settings = result.additionalFiles?.find((f) => f.path === '.factory/settings.json');
       expect(JSON.parse(settings!.content)).toEqual({ model: 'gpt-5', hooks: generatedHooks });
       expect(result.managedOutputFiles).toEqual(['.factory/hooks.json', '.factory/settings.json']);
@@ -3758,7 +3758,7 @@ license: MIT
           version: 'full',
           targetConfig: { hooksFile: 'hooks.yaml' as never },
         })
-      ).toThrow("Invalid Factory hooksFile 'hooks.yaml'");
+      ).toThrow('Invalid Factory hooksFile "hooks.yaml"');
     });
   });
 

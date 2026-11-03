@@ -490,6 +490,9 @@ describe('cleanupManagedOutputs', () => {
         '{"autoMode":"acceptEdits","other":true}'
       )
     ).toBeUndefined();
+    expect(
+      mergePromptScriptHookOutput('.factory/settings.json', '{}', '{"other":true,"hooks":{}}')
+    ).toBeUndefined();
   });
 
   it('should remove owned entries while preserving user hooks and settings', () => {
