@@ -590,11 +590,12 @@ export class Resolver {
 
     // The entry file also adds skills found on disk, so it has its own cache entry.
     const isEntry = context.resolving.size === 0;
-    const cacheKey = isEntry
-      ? `${ENTRY_CACHE_PREFIX}${absPath}`
-      : viaInherit
-        ? `${INHERIT_CACHE_PREFIX}${absPath}`
-        : absPath;
+    let cacheKey = absPath;
+    if (isEntry) {
+      cacheKey = `${ENTRY_CACHE_PREFIX}${absPath}`;
+    } else if (viaInherit) {
+      cacheKey = `${INHERIT_CACHE_PREFIX}${absPath}`;
+    }
 
     // Check cache
     if (!compositionContext && this.cacheEnabled && this.cache.has(cacheKey)) {

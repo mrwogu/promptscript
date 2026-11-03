@@ -1,5 +1,5 @@
 ---
-# promptscript-generated: 2026-11-03T14:19:59.275Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-11-03T15:58:24.434Z | source: .promptscript/project.prs | target: factory
 name: promptscript
 description: >-
   PromptScript language expert for reading, writing, modifying, and
@@ -1157,7 +1157,8 @@ sections without changing filenames, frontmatter, XML tags, or structured keys:
 - **PS029 (`valid-sealed-property`)**: warns when `sealed` contains non-replace-strategy property names.
 - **PS030 (`policy-compliance`)**: validates skill extensions and `@prompts` entries against the policies defined in `promptscript.yaml`. Prompt findings point at the entry. An unknown policy kind is an error, and so is an unknown key in a prompt kind (skill kinds ignore unknown keys).
 - **PS047 (`governance-values`)**: with a `governance` section in `promptscript.yaml`, warns on a prompt `owner` or reviewer that is not a Git host identity (`@user`, `@org/team` or an email) and on data classes outside `governance.dataClasses`.
-- **PS048 (`skill-without-content`)**: warns when a declared skill has no `SKILL.md` and no `content`, so targets would get an empty skill. The `SKILL.md` of a skill declared in an inherited local project is read from that project's `.promptscript/skills/`.
+- **PS048 (`duplicate-blocks`)**: errors on a second block with the same name in one file, because formatters read only the first block of a name. Merge the blocks into one. Same-name blocks from `@inherit` and `@use` are merged and not reported. At syntax 1.5.0 and later, `@shortcuts` plus `@commands` in one file is reported; before 1.5.0 they are merged as aliases.
+- **PS049 (`skill-without-content`)**: warns when a declared skill has no `SKILL.md` and no `content`, so targets would get an empty skill. The `SKILL.md` of a skill declared in an inherited local project is read from that project's `.promptscript/skills/`.
 - **PS034 (`valid-hooks`)**: validates portable hook events, commands/scripts, paths, interpreters, timeouts, cwd, and target overrides.
 
 Target formatters report **PS4002** when a hook event or field has no native equivalent,

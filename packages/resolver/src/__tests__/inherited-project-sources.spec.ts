@@ -162,4 +162,45 @@ describe('native sources of an inherited project', () => {
     expect(Object.keys(properties(blocks, 'shortcuts'))).not.toContain('/ship');
     expect(Object.keys(properties(blocks, 'agents'))).not.toContain('helper');
   });
+
+  it('keeps the workspace sources for a file inherited from its own .promptscript', async () => {
+    const { workspace } = await createLayout(false);
+    await put(
+      join(workspace, '.promptscript/base.prs'),
+      `@meta {
+  id: "base"
+  syntax: "1.4.0"
+}
+
+@skills {
+  local-skill: {
+    description: "local-skill skill"
+  }
+}
+`
+    );
+    await put(
+      join(workspace, '.promptscript/skills/local-skill/SKILL.md'),
+      skillMd('local-skill', 'Local body.')
+    );
+    await put(
+      join(workspace, '.promptscript/project.prs'),
+      `@meta {
+  id: "workspace"
+  syntax: "1.4.0"
+}
+
+@inherit ./base
+`
+    );
+
+    const result = await resolverFor(workspace).resolve(
+      join(workspace, '.promptscript/project.prs')
+    );
+
+    expect(result.errors).toEqual([]);
+    const blocks = result.ast!.blocks;
+    expect((skill(blocks, 'local-skill')['content'] as TextContent).value).toContain('Local body.');
+    expect(Object.keys(properties(blocks, 'skills'))).not.toContain('check-code');
+  });
 });

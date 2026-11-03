@@ -15,9 +15,11 @@ import type {
 import {
   blockContentToBody,
   buildSkillPhaseSection,
+  bindParams,
   deepClone,
   getSkillPhaseSourceLabel,
   getSyntaxFeatureUsages,
+  interpolateAST,
   isTextContent,
   reconcileBlockBody,
   ResolveError,
@@ -270,6 +272,29 @@ interface ExtractedContext {
 }
 
 /**
+ * Bind the params of an inline @use to the sub-skill and interpolate them.
+ * Defaults apply even when the @use passes no args.
+ */
+function bindSubSkillParams(
+  subAst: Program,
+  inlineUse: InlineUseDeclaration,
+  absPath: string
+): Program {
+  if (!subAst.meta?.params && !inlineUse.params?.length) {
+    return subAst;
+  }
+  try {
+    const params = bindParams(inlineUse.params, subAst.meta?.params, absPath, inlineUse.loc);
+    return params.size > 0 ? interpolateAST(subAst, { params, sourceFile: absPath }) : subAst;
+  } catch (err) {
+    throw new ResolveError(
+      `Failed to bind params for sub-skill '${inlineUse.path.raw}': ${err instanceof Error ? err.message : String(err)}`,
+      inlineUse.loc
+    );
+  }
+}
+
+/**
  * Resolve a single inline @use declaration to a phase.
  */
 async function resolveInlineUse(
@@ -332,6 +357,8 @@ async function resolveInlineUse(
       inlineUse.loc
     );
   }
+
+  subAst = bindSubSkillParams(subAst, inlineUse, absPath);
 
   // Extract skill definition from the sub-skill's @skills block
   const skillDef = extractSkillDefinition(subAst, absPath);

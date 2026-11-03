@@ -196,7 +196,7 @@ When PromptScript encounters a skill name in `@skills {}`, it looks for `SKILL.m
 
 Local skills take priority over registry skills with the same name, letting you override or customize registry-provided skills per project.
 
-A declared skill with no `SKILL.md` and no `content` in the declaration is reported as `PS048`. It is a warning, so `prs validate --strict` fails on it. Before, such a skill was written as an empty stub with only its description.
+A declared skill with no `SKILL.md` and no `content` in the declaration is reported as `PS049`. It is a warning, so `prs validate --strict` fails on it. Before, such a skill was written as an empty stub with only its description.
 
 ### Skills of an inherited project
 

@@ -9,14 +9,14 @@ function hasText(content: Value | undefined): boolean {
 }
 
 /**
- * PS048: a declared skill must have content.
+ * PS049: a declared skill must have content.
  *
  * The resolver fills a skill from its SKILL.md. When no SKILL.md was found
  * and the declaration has no `content`, targets would get an empty stub with
  * only the description, so this is reported instead of passing silently.
  */
 export const skillWithoutContent: ValidationRule = {
-  id: 'PS048',
+  id: 'PS049',
   name: 'skill-without-content',
   description: 'Declared skills must have a SKILL.md or content',
   defaultSeverity: 'warning',

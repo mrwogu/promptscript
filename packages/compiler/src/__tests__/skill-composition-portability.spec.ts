@@ -63,3 +63,39 @@ describe('composed skill portability', () => {
     expect(outputs[0]).toBe(outputs[1]);
   });
 });
+
+describe('composed skill params', () => {
+  it('interpolates args and defaults into the compiled SKILL.md', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'prs-params-'));
+    directories.push(root);
+    mkdirSync(join(root, 'phases'));
+    writeFileSync(
+      join(root, 'project.prs'),
+      `@meta { id: "ops" syntax: "1.2.0" }
+@skills {
+  ops: { description: "Ops" content: "Follow the phases." }
+  @use ./phases/triage(severity: "critical")
+  @use ./phases/triage as fallback
+}`
+    );
+    writeFileSync(
+      join(root, 'phases/triage.prs'),
+      `@meta { id: "triage" syntax: "1.2.0" params: { severity: string = "all" } }
+@restrictions { - "Never rank above {{severity}} threshold" }
+@skills { triage: { description: "Triage" content: "Only include findings at or above {{severity}} level." } }`
+    );
+    const compiler = new Compiler({
+      resolver: { registryPath: root, projectRoot: root, localPath: root },
+      formatters: [{ name: 'claude', config: { version: 'full' } }],
+    });
+
+    const result = await compiler.compile('project.prs');
+
+    expect(result.errors).toEqual([]);
+    const content = result.outputs.get('.claude/skills/ops/SKILL.md')?.content;
+    expect(content).toContain('Only include findings at or above critical level.');
+    expect(content).toContain('Only include findings at or above all level.');
+    expect(content).toContain('Never rank above critical threshold');
+    expect(content).not.toContain('{{severity}}');
+  });
+});

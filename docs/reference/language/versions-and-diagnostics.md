@@ -71,6 +71,11 @@ PS030 error too. With a `governance` section, PS047 warns on owners and reviewer
 not a Git host identity and on data classes outside `governance.dataClasses`. See the
 [Policy Engine guide](../../guides/policy-engine.md#prompt-policies).
 
+PS048 is an error for a second block with the same name in one file, because formatters read only
+the first block of a name. Same-name blocks from `@inherit` and `@use` are merged by name and are
+not reported. At syntax 1.5.0 and later, `@shortcuts` followed by `@commands` in one file is
+reported; before 1.5.0 the two are merged as aliases.
+
 ## Model Versions
 
 `@meta.syntax` does not track AI models. Agent and skill `model` values resolve
@@ -98,7 +103,8 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS045      | `{{name}}` left in text (syntax 1.6.0+)                                                         | Bind it with a parameter or remove it                                  |
 | PS046      | Runtime slot in the system message                                                              | Move the slot to the user message                                      |
 | PS047      | Owner, reviewer or data class off the config                                                    | Use a Git host identity or a listed class                              |
-| PS048      | Declared skill has no SKILL.md and no content                                                   | Add the SKILL.md next to the declaring project or set content          |
+| PS048      | Second block with the same name in one file                                                     | Merge the blocks into one                                              |
+| PS049      | Declared skill has no SKILL.md and no content                                                   | Add the SKILL.md next to the declaring project or set content          |
 | PS4002     | Target cannot preserve requested capability                                                     | Use documented target fallback                                         |
 | PS4004     | Target cannot run or write the model                                                            | Pick another model or set a target name                                |
 | PS5001     | `releases` missing or invalid                                                                   | Add `releases.environments`                                            |

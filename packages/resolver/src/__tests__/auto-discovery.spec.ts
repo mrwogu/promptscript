@@ -676,3 +676,46 @@ describe('discoverNativeContent', () => {
     }
   });
 });
+
+describe('discoverNativeContent __baseSource', () => {
+  const SKILL_MD = '---\nname: root-skill\ndescription: A skill\n---\n\n# Skill\n\nBody.';
+
+  async function withTmpDir(run: (tmpDir: string) => Promise<void>): Promise<void> {
+    const { mkdtemp, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-base-'));
+    try {
+      await run(tmpDir);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  async function discoverSkill(tmpDir: string, key: string): Promise<Record<string, unknown>> {
+    const result = await discoverNativeContent(tmpDir);
+    const skills = result!.blocks.find((b) => b.name === 'skills')!.content as ObjectContent;
+    return skills.properties[key] as Record<string, unknown>;
+  }
+
+  it.each([
+    ['a subdirectory SKILL.md', 'my-skill/SKILL.md', 'my-skill'],
+    ['a <dirname>.md file when SKILL.md is absent', 'my-skill/my-skill.md', 'my-skill'],
+    ['a root-level SKILL.md', 'SKILL.md', 'root-skill'],
+    [
+      'a skill under the skills/ wrapper directory',
+      'skills/wrapped-skill/SKILL.md',
+      'wrapped-skill',
+    ],
+  ])('should stamp __baseSource for %s', async (_layout, relativePath, key) => {
+    const { mkdir, writeFile } = await import('fs/promises');
+    await withTmpDir(async (tmpDir) => {
+      const skillFile = resolve(tmpDir, relativePath);
+      await mkdir(dirname(skillFile), { recursive: true });
+      await writeFile(skillFile, SKILL_MD);
+
+      const skill = await discoverSkill(tmpDir, key);
+
+      expect(skill['__baseSource']).toBe(skillFile);
+    });
+  });
+});

@@ -27,9 +27,9 @@ function validate(ast: Program): { message: string; suggestion?: string }[] {
   return messages;
 }
 
-describe('PS048: skill-without-content', () => {
+describe('PS049: skill-without-content', () => {
   it('should have correct metadata', () => {
-    expect(skillWithoutContent.id).toBe('PS048');
+    expect(skillWithoutContent.id).toBe('PS049');
     expect(skillWithoutContent.name).toBe('skill-without-content');
     expect(skillWithoutContent.defaultSeverity).toBe('warning');
   });

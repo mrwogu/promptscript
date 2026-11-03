@@ -1,45 +1,59 @@
----
-description: "Project-specific rules"
-alwaysApply: true
----
+# CLAUDE.md
+
+## Project
 
 You are a careful TypeScript maintainer.
 
-Tech stack: Node.js 20+
+## Tech Stack
 
-Context:
+Node.js 20+
+
+## Context
+
 This project demonstrates canonical PromptScript block bodies.
 
 - Project: Shape Reference
 
-Code style:
+## Code Style
+
 - Use strict TypeScript
 - Use named exports
 - Use Vitest
 - Follow Arrange, Act, Assert
 
-Commands:
-/review - Review code quality
-/test - Run tests
+## Commands
 
-Reference:
+```
+/review    - Review code quality
+/test      - Run tests
+/typecheck - Check types
+```
+
+## Reference
+
 Keep generated instructions aligned with PromptScript source.
 
-Examples:
+## Don'ts
+
+- Don't expose secrets
+- Don't skip required validation
+
+## Examples
 
 ### Example: rename
+
 Use a precise name
 
 **Input:**
+
 ```
 const x = loadUsers()
 ```
 
 **Output:**
+
 ```
 const users = loadUsers()
 ```
 
-Never:
-- Never expose secrets
-- Never skip required validation
+@CLAUDE.local.md

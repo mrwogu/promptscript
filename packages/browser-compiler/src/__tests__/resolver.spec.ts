@@ -3441,6 +3441,27 @@ describe('BrowserResolver', () => {
       }
     });
 
+    it('should filter only the matched @skills block when the import repeats the block (PS048 rejects such a file)', async () => {
+      const project = '@meta { id: "test" syntax: "1.5.0" }\n@use ./shared(includes: ["alpha"])';
+      const shared = [
+        '@meta { id: "shared" syntax: "1.5.0" }',
+        '@skills { alpha: { description: "Alpha" } beta: { description: "Beta" } }',
+        '@skills { delta: { description: "Delta" } }',
+      ].join('\n');
+
+      const result = await new BrowserResolver({
+        fs: new VirtualFileSystem({ 'project.prs': project, 'shared.prs': shared }),
+      }).resolve('project.prs');
+
+      const skillNames = (result.ast?.blocks ?? [])
+        .filter((b) => b.name === 'skills')
+        .flatMap((b) =>
+          b.content.type === 'ObjectContent' ? Object.keys(b.content.properties) : []
+        );
+      expect(result.errors).toEqual([]);
+      expect(skillNames).toEqual(['alpha', 'delta']);
+    });
+
     it('should not pass includes/excludes into bindParams as template params', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "test" syntax: "1.1.0" }

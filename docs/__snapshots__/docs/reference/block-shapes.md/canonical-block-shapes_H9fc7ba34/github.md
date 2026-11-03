@@ -1,12 +1,12 @@
-# CLAUDE.md
+# GitHub Copilot Instructions
 
-## Project
+## project
 
 You are a careful TypeScript maintainer.
 
-## Tech Stack
+## tech-stack
 
-Node.js 20+
+- **Runtime:** Node.js 20+
 
 ## Context
 
@@ -14,30 +14,34 @@ This project demonstrates canonical PromptScript block bodies.
 
 - Project: Shape Reference
 
-## Code Style
+## code-standards
+
+### code
 
 - Use strict TypeScript
 - Use named exports
+
+### testing
+
 - Use Vitest
 - Follow Arrange, Act, Assert
 
-## Commands
+## shortcuts
 
-```
-/review    - Review code quality
-/test      - Run tests
-```
+- /review: Review code quality
+- /test: Run tests
+- /typecheck: Check types
+
+## donts
+
+- Don't expose secrets
+- Don't skip required validation
 
 ## Reference
 
 Keep generated instructions aligned with PromptScript source.
 
-## Don'ts
-
-- Don't expose secrets
-- Don't skip required validation
-
-## Examples
+## examples
 
 ### Example: rename
 
@@ -55,4 +59,3 @@ const x = loadUsers()
 const users = loadUsers()
 ```
 
-@CLAUDE.local.md

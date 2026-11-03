@@ -47,6 +47,7 @@ import { unusedPromptDeclaration } from './unused-prompt-declaration.js';
 import { unresolvedTemplateVariable } from './unresolved-template-variable.js';
 import { slotInSystemMessage } from './slot-in-system-message.js';
 import { governanceValues } from './governance-values.js';
+import { duplicateBlocks } from './duplicate-blocks.js';
 import { skillWithoutContent } from './skill-without-content.js';
 
 // Re-export all rules
@@ -126,6 +127,7 @@ export { unusedPromptDeclaration } from './unused-prompt-declaration.js';
 export { unresolvedTemplateVariable } from './unresolved-template-variable.js';
 export { slotInSystemMessage } from './slot-in-system-message.js';
 export { governanceValues } from './governance-values.js';
+export { duplicateBlocks } from './duplicate-blocks.js';
 export { skillWithoutContent } from './skill-without-content.js';
 
 /**
@@ -215,7 +217,9 @@ export const allRules: ValidationRule[] = [
   slotInSystemMessage,
   // Governance values against the governance config (PS047)
   governanceValues,
-  // Declared skills without SKILL.md or content (PS048)
+  // Duplicate blocks in one file (PS048)
+  duplicateBlocks,
+  // Declared skills without SKILL.md or content (PS049)
   skillWithoutContent,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,

@@ -1,0 +1,14 @@
+@meta {
+  id: "ops-missing"
+  syntax: "1.1.0"
+}
+
+@skills {
+  ops: {
+    description: "Production triage"
+    content: """
+      Follow the phases below in order.
+    """
+  }
+  @use ./phases/needs-scope
+}

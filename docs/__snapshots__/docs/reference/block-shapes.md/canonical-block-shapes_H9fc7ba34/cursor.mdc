@@ -1,60 +1,46 @@
-# GitHub Copilot Instructions
-
-## project
+---
+description: "Project-specific rules"
+alwaysApply: true
+---
 
 You are a careful TypeScript maintainer.
 
-## tech-stack
+Tech stack: Node.js 20+
 
-- **Runtime:** Node.js 20+
-
-## Context
-
+Context:
 This project demonstrates canonical PromptScript block bodies.
 
 - Project: Shape Reference
 
-## code-standards
-
-### code
-
+Code style:
 - Use strict TypeScript
 - Use named exports
-
-### testing
-
 - Use Vitest
 - Follow Arrange, Act, Assert
 
-## shortcuts
+Commands:
+/review - Review code quality
+/test - Run tests
+/typecheck - Check types
 
-- /review: Review code quality
-- /test: Run tests
-
-## donts
-
-- Don't expose secrets
-- Don't skip required validation
-
-## Reference
-
+Reference:
 Keep generated instructions aligned with PromptScript source.
 
-## examples
+Examples:
 
 ### Example: rename
-
 Use a precise name
 
 **Input:**
-
 ```
 const x = loadUsers()
 ```
 
 **Output:**
-
 ```
 const users = loadUsers()
 ```
 
+Never:
+- Never expose secrets
+- Never skip required validation

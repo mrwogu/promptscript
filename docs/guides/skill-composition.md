@@ -138,7 +138,7 @@ All existing `@use` features work inside skill blocks:
     @use ./phases/health-scan
 
     # With parameters
-    @use ./phases/triage(severity: "critical", timeout: 30)
+    @use ./phases/triage(severity: "critical")
 
     # With alias (determines phase name)
     @use ./phases/code-fix as autofix
@@ -148,6 +148,8 @@ All existing `@use` features work inside skill blocks:
   }
 }
 ```
+
+Params passed to a composed phase are bound against the `params` declared in the phase's `@meta`. Declared defaults apply when an argument is omitted, and `{{name}}` is replaced in the phase's skill content, `@restrictions`, `@knowledge` and `@standards`. An unknown argument, a value of the wrong type, or a required param with no default and no argument is a compile error.
 
 ## How Composition Works
 

@@ -1323,6 +1323,24 @@ describe('filterSkillsBlock', () => {
     expect(Object.keys(props)).toEqual(['skill-a', 'skill-c']);
   });
 
+  it('should filter only the first @skills block when blocks repeat', () => {
+    const first = createBlock('skills', createObjectContent(threeSkills));
+    const second: Block = {
+      ...createBlock('skills', createObjectContent({ 'skill-d': { description: 'D' } })),
+      loc: { file: '<test>', line: 12, column: 1 },
+    };
+    const program = createProgram({ blocks: [first, second] });
+
+    const result = filterSkillsBlock(program, { includes: ['skill-a'] });
+
+    expect(result.blocks).toHaveLength(2);
+    expect(Object.keys((result.blocks[0]!.content as ObjectContent).properties)).toEqual([
+      'skill-a',
+    ]);
+    expect(result.blocks[1]).toBe(second);
+    expect(result.blocks[1]!.loc.line).toBe(12);
+  });
+
   it('should return program unchanged when no filter is specified', () => {
     const program = makeSkillsProgram(threeSkills);
     const result = filterSkillsBlock(program, {});
