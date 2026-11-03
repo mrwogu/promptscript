@@ -172,6 +172,7 @@ export class CursorFormatter extends BaseFormatter {
   }
 
   format(input: Program, options?: FormatOptions): FormatterOutput {
+    this.startFormat(options);
     const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     // Validate convention - Cursor only supports markdown
     const convention = options?.convention ?? this.defaultConvention;

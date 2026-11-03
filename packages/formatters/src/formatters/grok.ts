@@ -79,6 +79,7 @@ export class GrokFormatter extends BaseFormatter {
   }
 
   format(input: Program, options?: FormatOptions): FormatterOutput {
+    this.startFormat(options);
     const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     const version = (options?.version ?? 'simple') as GrokVersion;
     let output: FormatterOutput;

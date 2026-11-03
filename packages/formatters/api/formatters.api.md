@@ -238,6 +238,7 @@ export abstract class BaseFormatter implements Formatter {
     protected shouldIncludeSkill(name: string, options?: FormatOptions): boolean;
     // Warning: (ae-forgotten-export) The symbol "StandardsExtractor" needs to be exported by the entry point index.d.ts
     protected readonly standardsExtractor: StandardsExtractor;
+    protected startFormat(options?: FormatOptions): void;
     protected stripAllIndent(content: string): string;
     transformInjectedSkillContent(content: string): string;
     protected truncate(str: string, max: number): string;
@@ -603,6 +604,7 @@ export class ConventionRenderer {
 export interface ConventionRendererOptions {
     convention?: OutputConvention | string;
     prettier?: PrettierMarkdownOptions;
+    verbatim?: boolean;
 }
 
 // @public
@@ -2136,6 +2138,6 @@ export type ZencoderVersion = 'simple' | 'multifile' | 'full';
 
 // Warnings were encountered during analysis:
 //
-// src/formatters/cursor.ts:543:3 - (ae-unresolved-link) The @link reference could not be resolved: The package "@promptscript/formatters" does not have an export "GlobCategorizer"
+// src/formatters/cursor.ts:544:3 - (ae-unresolved-link) The @link reference could not be resolved: The package "@promptscript/formatters" does not have an export "GlobCategorizer"
 
 ```

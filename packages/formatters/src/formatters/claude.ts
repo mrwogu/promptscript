@@ -213,6 +213,7 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   format(input: Program, options?: FormatOptions): FormatterOutput {
+    this.startFormat(options);
     const ast = applyAgentTargeting(input, this.modelTarget, options?.targetConfig);
     const version = this.resolveVersion(options?.version);
     let output: FormatterOutput;

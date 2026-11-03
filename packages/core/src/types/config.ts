@@ -45,8 +45,9 @@ export interface FormattingConfig {
 
   /**
    * Run Prettier over generated markdown after compilation and normalize
-   * skill, agent and command bodies for it. Set to `false` to keep bodies as
-   * written. Skill resource files are never reformatted.
+   * the text for it. Set to `false` to keep the text as written (only the
+   * indentation of a text block is removed). Skill resource files are never
+   * reformatted.
    * @default true
    */
   postFormat?: boolean;

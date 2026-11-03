@@ -135,6 +135,7 @@ export class AntigravityFormatter extends BaseFormatter {
   }
 
   format(ast: Program, options?: FormatOptions): FormatterOutput {
+    this.startFormat(options);
     const version = this.resolveVersion(options?.version);
     const renderer = this.createRenderer(options);
     const sections: string[] = [];
