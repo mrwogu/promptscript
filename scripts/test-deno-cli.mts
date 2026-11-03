@@ -325,10 +325,10 @@ async function cleanupScenario(
     'stale restrictions.md was not removed'
   );
   const hooksPath = join(projectDir, '.factory/hooks.json');
-  const hooks = JSON.parse(readFileSync(hooksPath, 'utf-8')) as Record<string, unknown>;
-  (hooks as { hooks: Record<string, unknown[]> })['hooks']['PreToolUse'] = [
-    { hooks: [{ type: 'command', command: 'echo foreign' }] },
-  ];
+  // Factory hooks.json is the bare event map, without a `hooks` wrapper.
+  const hooks = JSON.parse(readFileSync(hooksPath, 'utf-8')) as Record<string, unknown[]>;
+  assert(!('hooks' in hooks), 'hooks.json must not wrap the event map in a hooks key');
+  hooks['PreToolUse'] = [{ hooks: [{ type: 'command', command: 'echo foreign' }] }];
   writeFileSync(hooksPath, JSON.stringify(hooks, null, 2));
 
   // Drop every managed block: the mixed hook file must be rewritten, user

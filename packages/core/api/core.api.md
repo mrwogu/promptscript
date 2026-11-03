@@ -1256,6 +1256,9 @@ export interface ExtendOperation extends CanonicalNode {
 export function extractPromptDefinitions(program: ProgramInput): PromptExtraction;
 
 // @public
+export type FactoryHooksFile = 'hooks.json' | 'settings.json';
+
+// @public
 export type FactoryRulesMode = 'monolith' | 'split';
 
 // @public
@@ -4597,12 +4600,14 @@ export interface TargetConfig {
     excludeAgents?: string[];
     guardsAsSkills?: boolean;
     guardsSkillsListing?: boolean;
+    hooksFile?: FactoryHooksFile;
     includeAgents?: boolean | string[];
     includeSkills?: boolean | string[];
     maxDepth?: number;
     maxThreads?: number;
     output?: string;
     rulesMode?: FactoryRulesMode;
+    settings?: TargetSettingsConfig;
     skillBaseDir?: string;
     skillPath?: 'agents' | 'gemini' | 'both';
     version?: string;
@@ -4665,6 +4670,21 @@ export type TargetSectionMap = Readonly<Record<string, TargetSectionCapability>>
 
 // @public (undocumented)
 export type TargetSectionSupport = 'required' | 'optional';
+
+// @public
+export interface TargetSettingsConfig {
+    enabledPlugins?: Record<string, boolean>;
+    env?: Record<string, string>;
+    model?: string;
+    permissions?: TargetSettingsPermissions;
+}
+
+// @public
+export interface TargetSettingsPermissions {
+    allow?: string[];
+    ask?: string[];
+    deny?: string[];
+}
 
 // @public (undocumented)
 export interface TargetVersionCapability {

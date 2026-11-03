@@ -89,7 +89,10 @@ vi.mock('../../utils/registry-resolver.js', () => ({
   resolveRegistryPath: mockResolveRegistryPath,
 }));
 
-vi.mock('../../utils/legacy-factory-hooks.js', () => ({
+vi.mock('../../utils/legacy-factory-hooks.js', async (importOriginal) => ({
+  getFactoryHooksFile: (
+    await importOriginal<typeof import('../../utils/legacy-factory-hooks.js')>()
+  ).getFactoryHooksFile,
   prepareLegacyFactoryMigration: mockPrepareLegacyFactoryMigration,
 }));
 
@@ -923,7 +926,9 @@ command = "echo old # promptscript-generated:owned"
     await diffCommand({ noPager: true });
 
     expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledTimes(1);
-    expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledWith(expect.any(Map), process.cwd());
+    expect(mockPrepareLegacyFactoryMigration).toHaveBeenCalledWith(expect.any(Map), process.cwd(), {
+      hooksFile: 'hooks.json',
+    });
   });
 
   it('should emit a JSON error when the entry file is missing', async () => {

@@ -1,52 +1,50 @@
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Create|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "prs hook pre-edit",
-            "timeout": 5,
-            "statusMessage": "PromptScript: checking generated files..."
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Create|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "prs hook post-edit",
-            "timeout": 15,
-            "statusMessage": "PromptScript: compiling..."
-          }
-        ]
-      },
-      {
-        "matcher": "Create|Edit|Execute",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-status.sh # promptscript-generated:graph-status",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  }
+  "PreToolUse": [
+    {
+      "matcher": "Create|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "prs hook pre-edit",
+          "timeout": 5,
+          "statusMessage": "PromptScript: checking generated files..."
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "Create|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "prs hook post-edit",
+          "timeout": 15,
+          "statusMessage": "PromptScript: compiling..."
+        }
+      ]
+    },
+    {
+      "matcher": "Create|Edit|Execute",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
+          "timeout": 30
+        }
+      ]
+    }
+  ],
+  "SessionStart": [
+    {
+      "matcher": ".*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-status.sh # promptscript-generated:graph-status",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
 }

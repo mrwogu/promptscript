@@ -208,19 +208,17 @@ describe('ExampleGallery — gallery examples compile', () => {
     });
 
     expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toMatchObject({
-      hooks: {
-        PostToolUse: [
-          {
-            hooks: [
-              {
-                command: expect.stringContaining(
-                  'node "$FACTORY_PROJECT_DIR"/.promptscript/scripts/validate.mjs --strict'
-                ),
-              },
-            ],
-          },
-        ],
-      },
+      PostToolUse: [
+        {
+          hooks: [
+            {
+              command: expect.stringContaining(
+                'node "$FACTORY_PROJECT_DIR"/.promptscript/scripts/validate.mjs --strict'
+              ),
+            },
+          ],
+        },
+      ],
     });
     expect(
       JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)

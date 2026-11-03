@@ -1,4 +1,4 @@
-import type { Program, Value } from '@promptscript/core';
+import type { FactoryHooksFile, Program, Value } from '@promptscript/core';
 import { posix } from 'node:path';
 import { isMap, isNode, isScalar, parseDocument } from 'yaml';
 import type { ConventionRenderer } from '../convention-renderer.js';
@@ -9,7 +9,7 @@ import {
   type MarkdownSkillConfig,
   type SectionNameKey,
 } from '../markdown-instruction-formatter.js';
-import type { FormatOptions, FormatterOutput } from '../types.js';
+import type { FormatOptions, FormatterOutput, FormatterWarning } from '../types.js';
 import {
   applyHookTargetOverrides,
   extractHooks,
@@ -22,9 +22,23 @@ import {
   serializeMcpServersToJsonString,
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
+import { pickTargetSettings } from '../settings-helpers.js';
 import { resolveSourceSectionTitle } from '../section-title-resolver.js';
 import { toTargetModel } from '../model-mapping.js';
 import { applyAgentTargeting } from '../agent-targeting.js';
+
+const FACTORY_MANAGED_FILES: Record<FactoryHooksFile, string[]> = {
+  'hooks.json': ['.factory/hooks.json'],
+  'settings.json': ['.factory/hooks.json', '.factory/settings.json'],
+};
+
+function resolveFactoryHooksFile(value: unknown): FactoryHooksFile {
+  if (value === undefined) return 'hooks.json';
+  if (value === 'hooks.json' || value === 'settings.json') return value;
+  throw new Error(
+    `Invalid Factory hooksFile ${JSON.stringify(value)}. Expected 'hooks.json' or 'settings.json'.`
+  );
+}
 
 /**
  * Supported Factory AI format versions.
@@ -323,6 +337,8 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       );
     }
 
+    const hooksFile = resolveFactoryHooksFile(options?.targetConfig?.hooksFile);
+
     const output = super.format(ast, options);
     const hooksBlock = ast.blocks.find((block) => block.name === 'hooks');
     const hooks = hooksBlock ? extractHooks(hooksBlock) : [];
@@ -334,15 +350,18 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
             location: hooksBlock.loc,
           }))
         : [];
+    const warnings = [...hookWarnings, ...this.settingsWarnings(version, options)];
 
     return {
       ...output,
-      ...(hookWarnings.length > 0
-        ? { warnings: [...(output.warnings ?? []), ...hookWarnings] }
-        : {}),
+      ...(warnings.length > 0 ? { warnings: [...(output.warnings ?? []), ...warnings] } : {}),
       managedOutputDirectories: ['.factory/rules'],
-      managedOutputFiles: ['.factory/hooks.json'],
+      managedOutputFiles: FACTORY_MANAGED_FILES[hooksFile],
     };
+  }
+
+  private settingsWarnings(version: string, options?: FormatOptions): FormatterWarning[] {
+    return version === 'simple' ? [] : this.pickFactorySettings(options).warnings;
   }
 
   // ============================================================
@@ -1028,7 +1047,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     this.maybeAddGuardSkillsListing(guardSkills, sections, options);
 
     // Generate MCP config and hook settings
-    additionalFiles.push(...this.generateFactoryConfigFiles(ast));
+    additionalFiles.push(...this.generateFactoryConfigFiles(ast, options));
 
     return {
       path: this.getOutputPath(options),
@@ -1087,7 +1106,7 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     this.maybeAddGuardSkillsListing(guardSkills, sections, options);
 
     // Generate MCP config and hook settings
-    additionalFiles.push(...this.generateFactoryConfigFiles(ast));
+    additionalFiles.push(...this.generateFactoryConfigFiles(ast, options));
 
     return {
       path: this.getOutputPath(options),
@@ -1097,12 +1116,23 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     };
   }
 
+  private pickFactorySettings(options?: FormatOptions): ReturnType<typeof pickTargetSettings> {
+    return pickTargetSettings(
+      options?.targetConfig?.settings,
+      ['model', 'enabledPlugins'],
+      'factory',
+      '.factory/settings.json'
+    );
+  }
+
   /**
    * Generate MCP config and hook settings files for Factory.
    * Returns additional FormatterOutput entries to merge into the output.
    */
-  private generateFactoryConfigFiles(ast: Program): FormatterOutput[] {
+  private generateFactoryConfigFiles(ast: Program, options?: FormatOptions): FormatterOutput[] {
     const files: FormatterOutput[] = [];
+    const settings = this.pickFactorySettings(options).settings;
+    const hooksInSettings = options?.targetConfig?.hooksFile === 'settings.json';
 
     // Generate .factory/mcp.json from @mcpServers block
     const mcpServersBlock = findMcpServersBlock(ast);
@@ -1116,19 +1146,24 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
       }
     }
 
-    // Generate .factory/hooks.json from @hooks block
-    const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
-    if (hooksBlock) {
-      const hooks = extractHooks(hooksBlock);
-      if (hooks.length > 0) {
-        const factoryHooks = generateFactoryHooks(hooks);
-        if (Object.keys(factoryHooks).length > 0) {
-          files.push({
-            path: '.factory/hooks.json',
-            content: JSON.stringify({ hooks: factoryHooks }, null, 2) + '\n',
-          });
-        }
-      }
+    // Factory reads .factory/hooks.json first and falls back to the
+    // settings.json `hooks` key only when hooks.json is absent.
+    const factoryHooks = this.generateHooksFromAst(ast);
+    if (factoryHooks && hooksInSettings) {
+      settings['hooks'] = factoryHooks;
+    } else if (factoryHooks) {
+      files.push({
+        path: '.factory/hooks.json',
+        // hooks.json is keyed directly by event name; only settings.json wraps it in `hooks`.
+        content: JSON.stringify(factoryHooks, null, 2) + '\n',
+      });
+    }
+
+    if (Object.keys(settings).length > 0) {
+      files.push({
+        path: '.factory/settings.json',
+        content: JSON.stringify(settings, null, 2) + '\n',
+      });
     }
 
     // Generate .factory/plugins.json from @plugins block
@@ -1144,6 +1179,15 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     }
 
     return files;
+  }
+
+  private generateHooksFromAst(ast: Program): Record<string, unknown[]> | undefined {
+    const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
+    if (!hooksBlock) return undefined;
+    const hooks = extractHooks(hooksBlock);
+    if (hooks.length === 0) return undefined;
+    const factoryHooks = generateFactoryHooks(hooks);
+    return Object.keys(factoryHooks).length > 0 ? factoryHooks : undefined;
   }
 
   private parseReasoningEffort(value: Value | undefined): FactoryReasoningEffort | undefined {

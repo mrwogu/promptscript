@@ -797,13 +797,15 @@ its default directory. For example, this writes Factory skills under
 
 **Target-Specific Options:**
 
-| Option              | Targets           | Type   | Description                                                                                  |
-| ------------------- | ----------------- | ------ | -------------------------------------------------------------------------------------------- |
-| `maxThreads`        | `codex`           | number | Max parallel agent threads (positive integer, maps to .codex/config.toml)                    |
-| `maxDepth`          | `codex`           | number | Max nesting depth for agent delegation (positive integer)                                    |
-| `agentsFile`        | `codex`           | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md)            |
-| `agentsFrontmatter` | AGENTS.md targets | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from @meta)         |
-| `autoMode`          | `claude`          | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json) |
+| Option              | Targets             | Type   | Description                                                                                                                                                    |
+| ------------------- | ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxThreads`        | `codex`             | number | Max parallel agent threads (positive integer, maps to .codex/config.toml)                                                                                      |
+| `maxDepth`          | `codex`             | number | Max nesting depth for agent delegation (positive integer)                                                                                                      |
+| `agentsFile`        | `codex`             | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md)                                                                              |
+| `agentsFrontmatter` | AGENTS.md targets   | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from @meta)                                                                           |
+| `autoMode`          | `claude`            | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json)                                                                   |
+| `settings`          | `claude`, `factory` | object | Project settings merged into `.claude/settings.json` (`model`, `permissions`, `env`, `enabledPlugins`) or `.factory/settings.json` (`model`, `enabledPlugins`) |
+| `hooksFile`         | `factory`           | string | Where `@hooks` go: `hooks.json` (default, `.factory/hooks.json`) or `settings.json` (`hooks` key of `.factory/settings.json`)                                  |
 
 **Codex Native Output:**
 

@@ -20,6 +20,7 @@ import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invo
 import { compareCodeUnits, isPromptTarget, type OmittedManagedDirectory } from '@promptscript/core';
 import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
 import { isVerifiedPromptBundleOutput } from './prompt-bundle-ownership.js';
+import { isFactoryHooksPath, unwrapFactoryHooks, wrapFactoryHooks } from './factory-hooks-shape.js';
 
 const execFileAsync = promisify(execFile);
 const PROMPTSCRIPT_MARKER_PATTERNS = [
@@ -1067,6 +1068,7 @@ const OWNED_HOOK_OUTPUT_FIELDS: ReadonlyArray<{
   fields: ReadonlySet<string>;
 }> = [
   { suffix: '.factory/hooks.json', fields: new Set(['hooks']) },
+  { suffix: '.factory/settings.json', fields: new Set(['hooks']) },
   { suffix: '.codex/hooks.json', fields: new Set(['hooks']) },
   {
     suffix: '.github/hooks/promptscript.json',
@@ -1098,11 +1100,8 @@ export function isPromptScriptOwnedHookOutput(path: string, content: string): bo
   if (!contract) return false;
 
   try {
-    const parsed: unknown = JSON.parse(content);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return false;
-    }
-    const object = parsed as Record<string, unknown>;
+    const object = parseHookOutputObject(normalizedPath, content);
+    if (!object) return false;
     if (Object.keys(object).some((field) => !contract.fields.has(field))) {
       return false;
     }
@@ -1133,8 +1132,8 @@ export function mergePromptScriptHookOutput(
 ): string | undefined {
   if (!isHookOutputPath(path)) return undefined;
 
-  const existing = parseJsonObject(existingContent);
-  const generated = parseJsonObject(generatedContent);
+  const existing = parseHookOutputObject(path, existingContent);
+  const generated = parseHookOutputObject(path, generatedContent);
   if (!existing || !generated) return undefined;
 
   const existingHooks = getJsonObject(existing['hooks']);
@@ -1143,26 +1142,69 @@ export function mergePromptScriptHookOutput(
   if (!generatedHooks) {
     const generatedFields = Object.keys(generated);
     if (
-      !path.replaceAll('\\', '/').endsWith('.claude/settings.json') ||
-      generatedFields.length !== 1 ||
-      generatedFields[0] !== 'autoMode'
+      !isSettingsOutputPath(path) ||
+      generatedFields.length === 0 ||
+      generatedFields.some((field) => !GENERATED_SETTINGS_KEYS.has(field))
     ) {
       return undefined;
     }
-    return JSON.stringify({ ...existing, ...generated }, null, 2) + '\n';
+    return JSON.stringify(mergeGeneratedSettings(existing, generated), null, 2) + '\n';
+  }
+  if (
+    isSettingsOutputPath(path) &&
+    Object.keys(generated).some((field) => field !== 'hooks' && !GENERATED_SETTINGS_KEYS.has(field))
+  ) {
+    return undefined;
   }
 
   return (
     JSON.stringify(
-      {
-        ...existing,
-        ...generated,
+      toHookOutputShape(path, {
+        ...mergeGeneratedSettings(existing, generated),
         hooks: mergeHookEvents(existingHooks ?? {}, generatedHooks),
-      },
+      }),
       null,
       2
     ) + '\n'
   );
+}
+
+const SETTINGS_OUTPUT_SUFFIXES = ['.claude/settings.json', '.factory/settings.json'];
+// Settings keys the Claude and Factory formatters generate next to `hooks`.
+const GENERATED_SETTINGS_KEYS: ReadonlySet<string> = new Set([
+  'autoMode',
+  'model',
+  'permissions',
+  'env',
+  'enabledPlugins',
+]);
+
+function isSettingsOutputPath(path: string): boolean {
+  const normalized = path.replaceAll('\\', '/');
+  return SETTINGS_OUTPUT_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
+}
+
+/**
+ * Merge generated settings keys into an existing settings object.
+ *
+ * Keys PromptScript does not generate stay as they are. For object values
+ * (`permissions`, `env`, `enabledPlugins`) only the generated sub-keys are
+ * replaced, so a user's `permissions.defaultMode` or own `env` entries survive.
+ * The `hooks` key is left to the hook merge.
+ */
+export function mergeGeneratedSettings(
+  existing: Record<string, unknown>,
+  generated: Record<string, unknown>
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...existing };
+  for (const [key, value] of Object.entries(generated)) {
+    if (key === 'hooks') continue;
+    const existingObject = getJsonObject(existing[key]);
+    const generatedObject = getJsonObject(value);
+    merged[key] =
+      existingObject && generatedObject ? { ...existingObject, ...generatedObject } : value;
+  }
+  return merged;
 }
 
 export interface RemovedOwnedHooks {
@@ -1273,7 +1315,7 @@ export function removePromptScriptOwnedHooks(
   const contract = getHookOutputContract(path.replaceAll('\\', '/'));
   if (!contract) return undefined;
 
-  const parsed = parseJsonObject(content);
+  const parsed = parseHookOutputObject(path, content);
   const hooks = parsed ? getJsonObject(parsed['hooks']) : undefined;
   if (!parsed || !hooks) return undefined;
 
@@ -1296,7 +1338,8 @@ export function removePromptScriptOwnedHooks(
   );
   const empty = Object.keys(remainingHooks).length === 0 && remainingTopLevel.length === 0;
   return {
-    content: JSON.stringify({ ...parsed, hooks: remainingHooks }, null, 2) + '\n',
+    content:
+      JSON.stringify(toHookOutputShape(path, { ...parsed, hooks: remainingHooks }), null, 2) + '\n',
     empty,
   };
 }
@@ -1361,6 +1404,21 @@ function pruneOwnedHookEntries(entries: unknown[]): PrunedHookEntries {
   }
 
   return { entries: remaining, removed };
+}
+
+/**
+ * Parse a hook output file into the `{ hooks: eventMap }` form the merge and
+ * ownership code works on. `.factory/hooks.json` is a bare event map on disk;
+ * the wrapped shape older versions wrote is read as well.
+ */
+function parseHookOutputObject(path: string, content: string): Record<string, unknown> | undefined {
+  const parsed = parseJsonObject(content);
+  return parsed && isFactoryHooksPath(path) ? wrapFactoryHooks(parsed) : parsed;
+}
+
+/** Back to the on-disk shape: a bare event map for `.factory/hooks.json`. */
+function toHookOutputShape(path: string, object: Record<string, unknown>): Record<string, unknown> {
+  return isFactoryHooksPath(path) ? unwrapFactoryHooks(object) : object;
 }
 
 function parseJsonObject(content: string): Record<string, unknown> | undefined {

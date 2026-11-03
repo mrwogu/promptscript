@@ -90,6 +90,35 @@ sidebar:
 - Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
 - The `@local` block content goes to `CLAUDE.local.md` with an import statement added to the main `CLAUDE.md`
 
+## Settings
+
+In `full` mode the target `settings` option writes project settings to
+`.claude/settings.json`, next to the `@hooks` entries:
+
+```yaml
+targets:
+  - claude:
+      version: full
+      settings:
+        model: claude-sonnet-4-5
+        permissions:
+          allow:
+            - 'Bash(npm run test:*)'
+          deny:
+            - 'Read(./.env)'
+        env:
+          NODE_ENV: development
+        enabledPlugins:
+          code-standards@acme-plugins: true
+```
+
+Supported keys are `model`, `permissions` (`allow`, `deny`, `ask`), `env` and
+`enabledPlugins`. PromptScript merges them into an existing
+`.claude/settings.json`. Keys it does not generate stay as they are. For object
+keys only the generated sub-keys are replaced: your `permissions.defaultMode` or
+own `env` variables survive, while a generated `permissions.allow` replaces the
+old `allow` list. A key removed from the config is not removed from the file.
+
 ## Example Output
 
 ```

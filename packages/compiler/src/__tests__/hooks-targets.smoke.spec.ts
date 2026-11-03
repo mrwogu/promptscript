@@ -83,20 +83,18 @@ describe('Hook target smoke tests', () => {
 
     expect(result.success).toBe(true);
     expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toEqual({
-      hooks: {
-        PreToolUse: [
-          {
-            matcher: 'Edit|Write',
-            hooks: [
-              {
-                type: 'command',
-                command: `${environmentRootGuard('factory', 'FACTORY_PROJECT_DIR')}cd "$FACTORY_PROJECT_DIR" && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/validate script.py' --strict # promptscript-generated:validate`,
-                timeout: 30,
-              },
-            ],
-          },
-        ],
-      },
+      PreToolUse: [
+        {
+          matcher: 'Edit|Write',
+          hooks: [
+            {
+              type: 'command',
+              command: `${environmentRootGuard('factory', 'FACTORY_PROJECT_DIR')}cd "$FACTORY_PROJECT_DIR" && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/validate script.py' --strict # promptscript-generated:validate`,
+              timeout: 30,
+            },
+          ],
+        },
+      ],
     });
     expect(JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)).toEqual({
       version: 1,
@@ -177,9 +175,9 @@ describe('Hook target smoke tests', () => {
     expect(result.success).toBe(true);
 
     const factory = JSON.parse(result.outputs.get('.factory/hooks.json')!.content) as {
-      hooks: { PreToolUse: Array<{ matcher: string }> };
+      PreToolUse: Array<{ matcher: string }>;
     };
-    expect(factory.hooks.PreToolUse[0]!.matcher).toBe('Execute');
+    expect(factory.PreToolUse[0]!.matcher).toBe('Execute');
 
     const claude = JSON.parse(result.outputs.get('.claude/settings.json')!.content) as {
       hooks: { PreToolUse: Array<{ matcher: string }> };
@@ -264,19 +262,17 @@ describe('Hook target smoke tests', () => {
 
     expect(result.success).toBe(true);
     expect(JSON.parse(result.outputs.get('.factory/hooks.json')!.content)).toEqual({
-      hooks: {
-        PreToolUse: [
-          {
-            matcher: '.*',
-            hooks: [
-              {
-                type: 'command',
-                command: "node 'factory check.mjs' '--strict mode' # promptscript-generated:check",
-              },
-            ],
-          },
-        ],
-      },
+      PreToolUse: [
+        {
+          matcher: '.*',
+          hooks: [
+            {
+              type: 'command',
+              command: "node 'factory check.mjs' '--strict mode' # promptscript-generated:check",
+            },
+          ],
+        },
+      ],
     });
     expect(JSON.parse(result.outputs.get('.github/hooks/promptscript.json')!.content)).toEqual({
       version: 1,
@@ -343,10 +339,10 @@ describe('Hook target smoke tests', () => {
     });
     const result = await compiler.compile(entryPath);
     const hookFile = JSON.parse(result.outputs.get('.factory/hooks.json')!.content) as {
-      hooks: { SessionStart: Array<{ hooks: Array<{ command: string }> }> };
+      SessionStart: Array<{ hooks: Array<{ command: string }> }>;
     };
 
-    execFileSync('/bin/sh', ['-c', hookFile.hooks.SessionStart[0]!.hooks[0]!.command], {
+    execFileSync('/bin/sh', ['-c', hookFile.SessionStart[0]!.hooks[0]!.command], {
       cwd: nestedDirectory,
       env: { ...process.env, FACTORY_PROJECT_DIR: directory },
     });
@@ -398,14 +394,12 @@ describe('Hook target smoke tests', () => {
     });
     const result = await compiler.compile(entryPath);
     const hookFile = JSON.parse(result.outputs.get('.factory/hooks.json')!.content) as {
-      hooks: {
-        SessionStart: Array<{ hooks: Array<{ command: string }> }>;
-        PreToolUse: Array<{ hooks: Array<{ command: string }> }>;
-      };
+      SessionStart: Array<{ hooks: Array<{ command: string }> }>;
+      PreToolUse: Array<{ hooks: Array<{ command: string }> }>;
     };
     const commands = [
-      hookFile.hooks.SessionStart[0]!.hooks[0]!.command,
-      hookFile.hooks.PreToolUse[0]!.hooks[0]!.command,
+      hookFile.SessionStart[0]!.hooks[0]!.command,
+      hookFile.PreToolUse[0]!.hooks[0]!.command,
     ];
 
     for (const value of [undefined, '']) {

@@ -9,6 +9,7 @@ import {
   getHookCompatibilityWarnings,
 } from '../hook-adapters.js';
 import { appendTargetHookCapabilityWarnings } from '../hook-capability-warnings.js';
+import { pickTargetSettings } from '../settings-helpers.js';
 import { appendAgentCapabilityWarnings } from '../agent-capability-warnings.js';
 import { appendAgentSpawnToolWarnings, applyAgentTargeting } from '../agent-targeting.js';
 import {
@@ -349,26 +350,32 @@ export class ClaudeFormatter extends BaseFormatter {
     // Generate hook settings from @hooks block
     const hooksBlock = ast.blocks.find((b) => b.name === 'hooks');
     const autoMode = options?.targetConfig?.autoMode;
-    if (hooksBlock || autoMode) {
-      const settings: Record<string, unknown> = {};
+    const configured = pickTargetSettings(
+      options?.targetConfig?.settings,
+      ['model', 'permissions', 'env', 'enabledPlugins'],
+      'claude',
+      '.claude/settings.json'
+    );
+    const settings: Record<string, unknown> = {};
 
-      if (hooksBlock) {
-        const hooks = extractHooks(hooksBlock);
-        if (hooks.length > 0) {
-          settings['hooks'] = generateClaudeHooks(hooks);
-        }
+    if (hooksBlock) {
+      const hooks = extractHooks(hooksBlock);
+      if (hooks.length > 0) {
+        settings['hooks'] = generateClaudeHooks(hooks);
       }
+    }
 
-      if (autoMode) {
-        settings['autoMode'] = autoMode;
-      }
+    if (autoMode) {
+      settings['autoMode'] = autoMode;
+    }
 
-      if (Object.keys(settings).length > 0) {
-        additionalFiles.push({
-          path: '.claude/settings.json',
-          content: JSON.stringify(settings, null, 2) + '\n',
-        });
-      }
+    Object.assign(settings, configured.settings);
+
+    if (Object.keys(settings).length > 0) {
+      additionalFiles.push({
+        path: '.claude/settings.json',
+        content: JSON.stringify(settings, null, 2) + '\n',
+      });
     }
 
     // Generate .mcp.json from @mcpServers block
@@ -399,6 +406,7 @@ export class ClaudeFormatter extends BaseFormatter {
       path: this.getOutputPath(options),
       content: sections.join('\n'),
       additionalFiles: additionalFiles.length > 0 ? additionalFiles : undefined,
+      ...(configured.warnings.length > 0 ? { warnings: configured.warnings } : {}),
     };
   }
 

@@ -211,20 +211,18 @@ describe('Agent platform integration', () => {
     expect(factoryAgent).toContain('tools: ["Read", "Grep"]');
     expect(factoryAgent).toContain('mcpServers: ["issue-tracker"]');
     expect(JSON.parse(requireOutput(result, '.factory/hooks.json'))).toMatchObject({
-      hooks: {
-        PostToolUse: [
-          {
-            matcher: 'Edit|Write',
-            hooks: [
-              {
-                type: 'command',
-                command: 'pnpm run typecheck # promptscript-generated:validate-types',
-                timeout: 120,
-              },
-            ],
-          },
-        ],
-      },
+      PostToolUse: [
+        {
+          matcher: 'Edit|Write',
+          hooks: [
+            {
+              type: 'command',
+              command: 'pnpm run typecheck # promptscript-generated:validate-types',
+              timeout: 120,
+            },
+          ],
+        },
+      ],
     });
     expect(JSON.parse(requireOutput(result, '.factory/mcp.json'))).toMatchObject({
       mcpServers: {

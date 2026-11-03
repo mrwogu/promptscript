@@ -76,12 +76,22 @@ describe('hooks/tool-configs/factoryConfig', () => {
     // Act
     const result = factoryConfig.mergeIntoSettings(existing, prsPath);
 
-    // Assert
+    // Assert: hooks.json is the bare event map Factory reads (#752)
     expect(result).toEqual({
-      hooks: {
-        PreToolUse: [factoryConfig.generatePreEditHook(prsPath)],
-        PostToolUse: [factoryConfig.generatePostEditHook(prsPath)],
-      },
+      PreToolUse: [factoryConfig.generatePreEditHook(prsPath)],
+      PostToolUse: [factoryConfig.generatePostEditHook(prsPath)],
+    });
+  });
+
+  it('rewrites an old wrapped hooks.json in the bare shape', () => {
+    const prsPath = '/usr/local/bin/prs';
+    const userHook = { matcher: 'Execute', hooks: [{ type: 'command', command: 'audit' }] };
+
+    const result = factoryConfig.mergeIntoSettings({ hooks: { PreToolUse: [userHook] } }, prsPath);
+
+    expect(result).toEqual({
+      PreToolUse: [userHook, factoryConfig.generatePreEditHook(prsPath)],
+      PostToolUse: [factoryConfig.generatePostEditHook(prsPath)],
     });
   });
 
@@ -99,7 +109,7 @@ describe('hooks/tool-configs/factoryConfig', () => {
     const result = factoryConfig.mergeIntoSettings(existing, prsPath);
 
     // Assert
-    const hooks = (result as { hooks: { PreToolUse: unknown[]; PostToolUse: unknown[] } }).hooks;
+    const hooks = result as { PreToolUse: unknown[]; PostToolUse: unknown[] };
     expect(hooks.PreToolUse).toHaveLength(1);
     expect(hooks.PostToolUse).toHaveLength(1);
   });
@@ -135,7 +145,7 @@ describe('hooks/tool-configs/factoryConfig', () => {
     const result = factoryConfig.removeFromSettings(existing);
 
     // Assert
-    const hooks = (result as { hooks: { PreToolUse: unknown[]; PostToolUse: unknown[] } }).hooks;
+    const hooks = result as { PreToolUse: unknown[]; PostToolUse: unknown[] };
     expect(hooks.PreToolUse).toHaveLength(1);
     expect(hooks.PreToolUse[0]).toEqual(otherHook);
     expect(hooks.PostToolUse).toHaveLength(0);

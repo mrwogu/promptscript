@@ -50,7 +50,9 @@ user-level files. Keep `~/.factory/` outside compiler output.
 
 ### Project hooks
 
-Project hooks use `.factory/hooks.json` with PascalCase event names. Factory
-still reads the `hooks` key from `.factory/settings.json` when `hooks.json` is
-absent, but PromptScript formatter output uses the preferred dedicated file.
-Timeouts use seconds.
+Project hooks use `.factory/hooks.json` with PascalCase event names. The file
+is keyed directly by event name (`{"PreToolUse": [...]}`), with no `hooks`
+wrapper; droid ignores a wrapped file. Factory still reads the `hooks` key from
+`.factory/settings.json` when `hooks.json` is absent; only there the event map
+is wrapped in `hooks`. PromptScript formatter output uses the preferred
+dedicated file unless `hooksFile: settings.json` is set. Timeouts use seconds.

@@ -2622,4 +2622,51 @@ describe('ClaudeFormatter', () => {
       }
     });
   });
+
+  describe('settings', () => {
+    it('should write permissions, model, env and enabledPlugins to settings.json', () => {
+      const result = formatter.format(createMinimalProgram(), {
+        version: 'full',
+        targetConfig: {
+          settings: {
+            model: 'claude-sonnet-4-5',
+            permissions: { allow: ['Bash(npm run test:*)'], deny: ['Read(./.env)'] },
+            env: { NODE_ENV: 'development' },
+            enabledPlugins: { 'code-standards@acme': true },
+          },
+        },
+      });
+
+      const settingsFile = result.additionalFiles?.find((f) => f.path === '.claude/settings.json');
+      expect(JSON.parse(settingsFile!.content)).toEqual({
+        model: 'claude-sonnet-4-5',
+        permissions: { allow: ['Bash(npm run test:*)'], deny: ['Read(./.env)'] },
+        env: { NODE_ENV: 'development' },
+        enabledPlugins: { 'code-standards@acme': true },
+      });
+      expect(result.warnings ?? []).toEqual([]);
+    });
+
+    it('should not write an empty permissions object', () => {
+      const result = formatter.format(createMinimalProgram(), {
+        version: 'full',
+        targetConfig: { settings: { permissions: {} } },
+      });
+
+      expect(
+        result.additionalFiles?.find((f) => f.path === '.claude/settings.json')
+      ).toBeUndefined();
+    });
+
+    it('should not write settings outside the full version', () => {
+      const result = formatter.format(createMinimalProgram(), {
+        version: 'multifile',
+        targetConfig: { settings: { model: 'claude-sonnet-4-5' } },
+      });
+
+      expect(
+        result.additionalFiles?.find((f) => f.path === '.claude/settings.json')
+      ).toBeUndefined();
+    });
+  });
 });

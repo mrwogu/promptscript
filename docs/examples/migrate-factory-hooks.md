@@ -49,24 +49,27 @@ legacy ownership is unambiguous.
 }
 ```
 
-`.factory/hooks.json` receives canonical hooks:
+`.factory/hooks.json` receives canonical hooks. The file is keyed directly by
+event name, without the `hooks` wrapper that `settings.json` uses:
 
 ```json
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "prs hook pre-edit # promptscript-generated:pre-edit"
-          }
-        ]
-      }
-    ]
-  }
+  "PreToolUse": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "prs hook pre-edit # promptscript-generated:pre-edit"
+        }
+      ]
+    }
+  ]
 }
 ```
+
+PromptScript 1.27 and earlier wrapped `hooks.json` in a `hooks` key, which
+droid does not read. The next `prs compile` or `prs hooks install factory`
+rewrites such a file in the bare shape.
 
 ## Safety Rules
 
