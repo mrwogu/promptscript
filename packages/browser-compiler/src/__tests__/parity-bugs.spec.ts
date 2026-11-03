@@ -784,4 +784,94 @@ describe('Skill composition with @use params (issue #290)', () => {
     // Phase name should use alias
     expect(contentValue).toContain('deepscan');
   });
+
+  async function composeFrom(files: Record<string, string>): Promise<{
+    errors: readonly { message: string }[];
+    text: string;
+  }> {
+    const resolver = new BrowserResolver({ fs: new VirtualFileSystem(files) });
+    const result = await resolver.resolve('project.prs');
+    const skillsBlock = result.ast?.blocks.find((b) => b.name === 'skills');
+    let text = '';
+    if (skillsBlock?.content.type === 'ObjectContent') {
+      const ops = skillsBlock.content.properties['ops'] as Record<string, unknown>;
+      text = (ops['content'] as { value?: string } | undefined)?.value ?? '';
+    }
+    return { errors: result.errors, text };
+  }
+
+  it('applies param defaults when @use passes no args', async () => {
+    const { errors, text } = await composeFrom({
+      'project.prs': `@meta { id: "parent" syntax: "1.1.0" }
+@skills {
+  ops: { description: "Ops" content: """Base""" }
+  @use ./phases/triage
+}`,
+      'phases/triage.prs': `@meta {
+  id: "triage"
+  syntax: "1.1.0"
+  params: {
+    severity: string = "all"
+  }
+}
+@skills {
+  triage: { description: "Triage" content: """Classify at {{severity}} level.""" }
+}`,
+    });
+
+    expect(errors).toEqual([]);
+    expect(text).toContain('Classify at all level.');
+    expect(text).not.toContain('{{severity}}');
+  });
+
+  it('reports a missing required param when @use passes no args', async () => {
+    const { errors } = await composeFrom({
+      'project.prs': `@meta { id: "parent" syntax: "1.1.0" }
+@skills {
+  ops: { description: "Ops" content: """Base""" }
+  @use ./phases/scan
+}`,
+      'phases/scan.prs': `@meta {
+  id: "scan"
+  syntax: "1.1.0"
+  params: {
+    scope: string
+  }
+}
+@skills {
+  scan: { description: "Scan" content: """Scan {{scope}} only.""" }
+}`,
+    });
+
+    expect(errors.some((e) => e.message.includes('Failed to bind params for sub-skill'))).toBe(
+      true
+    );
+  });
+
+  it('keeps interpolating params in phase @restrictions (regression guard)', async () => {
+    const { errors, text } = await composeFrom({
+      'project.prs': `@meta { id: "parent" syntax: "1.1.0" }
+@skills {
+  ops: { description: "Ops" content: """Base""" }
+  @use ./phases/triage(severity: "critical")
+}`,
+      'phases/triage.prs': `@meta {
+  id: "triage"
+  syntax: "1.1.0"
+  params: {
+    severity: string = "all"
+  }
+}
+@restrictions {
+  - "Never rank above {{severity}} threshold"
+}
+@skills {
+  triage: { description: "Triage" content: """Classify.""" }
+}`,
+    });
+
+    expect(errors).toEqual([]);
+    expect(text).toContain('Never rank above critical threshold');
+    expect(text).not.toContain('{{severity}}');
+  });
 });
