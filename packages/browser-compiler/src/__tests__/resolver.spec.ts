@@ -3441,7 +3441,7 @@ describe('BrowserResolver', () => {
       }
     });
 
-    it('should filter only the matched @skills block when the import repeats the block', async () => {
+    it('should filter only the matched @skills block when the import repeats the block (PS048 rejects such a file)', async () => {
       const fs = new VirtualFileSystem({
         'project.prs': `@meta { id: "test" syntax: "1.5.0" }
 @use ./shared(includes: ["alpha"])`,

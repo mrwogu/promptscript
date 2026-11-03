@@ -47,6 +47,7 @@ import { unusedPromptDeclaration } from './unused-prompt-declaration.js';
 import { unresolvedTemplateVariable } from './unresolved-template-variable.js';
 import { slotInSystemMessage } from './slot-in-system-message.js';
 import { governanceValues } from './governance-values.js';
+import { duplicateBlocks } from './duplicate-blocks.js';
 
 // Re-export all rules
 export { requiredMetaId, requiredMetaSyntax } from './required-meta.js';
@@ -125,6 +126,7 @@ export { unusedPromptDeclaration } from './unused-prompt-declaration.js';
 export { unresolvedTemplateVariable } from './unresolved-template-variable.js';
 export { slotInSystemMessage } from './slot-in-system-message.js';
 export { governanceValues } from './governance-values.js';
+export { duplicateBlocks } from './duplicate-blocks.js';
 
 /**
  * All validation rules in the order they should be executed.
@@ -213,6 +215,8 @@ export const allRules: ValidationRule[] = [
   slotInSystemMessage,
   // Governance values against the governance config (PS047)
   governanceValues,
+  // Duplicate blocks in one file (PS048)
+  duplicateBlocks,
   // Security rules (PS010, PS011, PS012, PS013, PS014)
   suspiciousUrls,
   authorityInjection,
