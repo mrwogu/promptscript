@@ -79,6 +79,8 @@ interface SectionSpec {
 
 ### Using the Matrix
 
+`@promptscript/formatters` is not published to npm, so this example works inside the PromptScript repository only.
+
 ```typescript
 import {
   PARITY_MATRIX,

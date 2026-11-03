@@ -6,7 +6,7 @@
 
 # Interface: VendorManifestEntry
 
-Defined in: [resolver/src/vendor-manifest.ts:17](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L17)
+Defined in: [resolver/src/vendor-manifest.ts:17](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-manifest.ts#L17)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [resolver/src/vendor-manifest.ts:17](https://github.com/mrwogu/promp
 
 > **commit**: `string`
 
-Defined in: [resolver/src/vendor-manifest.ts:18](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L18)
+Defined in: [resolver/src/vendor-manifest.ts:18](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-manifest.ts#L18)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [resolver/src/vendor-manifest.ts:18](https://github.com/mrwogu/promp
 
 > **integrity**: `string`
 
-Defined in: [resolver/src/vendor-manifest.ts:19](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L19)
+Defined in: [resolver/src/vendor-manifest.ts:19](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-manifest.ts#L19)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [resolver/src/vendor-manifest.ts:19](https://github.com/mrwogu/promp
 
 > **path**: `string`
 
-Defined in: [resolver/src/vendor-manifest.ts:20](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L20)
+Defined in: [resolver/src/vendor-manifest.ts:20](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-manifest.ts#L20)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [resolver/src/vendor-manifest.ts:20](https://github.com/mrwogu/promp
 
 > **version**: `string`
 
-Defined in: [resolver/src/vendor-manifest.ts:21](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L21)
+Defined in: [resolver/src/vendor-manifest.ts:21](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-manifest.ts#L21)

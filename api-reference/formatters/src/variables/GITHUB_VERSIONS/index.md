@@ -8,7 +8,7 @@
 
 > `const` **GITHUB\_VERSIONS**: `object`
 
-Defined in: [formatters/src/formatters/github.ts:27](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/formatters/github.ts#L27)
+Defined in: [formatters/src/formatters/github.ts:28](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/github.ts#L28)
 
 GitHub formatter version information.
 

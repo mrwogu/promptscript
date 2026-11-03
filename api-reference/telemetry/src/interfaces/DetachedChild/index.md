@@ -6,7 +6,7 @@
 
 # Interface: DetachedChild
 
-Defined in: [telemetry/src/reporter.ts:26](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/telemetry/src/reporter.ts#L26)
+Defined in: [telemetry/src/reporter.ts:26](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/telemetry/src/reporter.ts#L26)
 
 ## Methods
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/reporter.ts:26](https://github.com/mrwogu/promptscrip
 
 > **unref**(): `void`
 
-Defined in: [telemetry/src/reporter.ts:27](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/telemetry/src/reporter.ts#L27)
+Defined in: [telemetry/src/reporter.ts:27](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/telemetry/src/reporter.ts#L27)
 
 #### Returns
 

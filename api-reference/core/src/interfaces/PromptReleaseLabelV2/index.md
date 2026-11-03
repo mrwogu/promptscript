@@ -6,7 +6,7 @@
 
 # Interface: PromptReleaseLabelV2
 
-Defined in: [core/src/types/prompt-bundle.ts:283](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompt-bundle.ts#L283)
+Defined in: [core/src/types/prompt-bundle.ts:283](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L283)
 
 Label of one release environment with optional weighted variants, version 2.
 
@@ -16,7 +16,7 @@ Label of one release environment with optional weighted variants, version 2.
 
 > **$schema**: `"https://getpromptscript.dev/schema/prompt-release-label/v2.json"`
 
-Defined in: [core/src/types/prompt-bundle.ts:288](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompt-bundle.ts#L288)
+Defined in: [core/src/types/prompt-bundle.ts:288](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L288)
 
 Schema URL, the version tag of the label.
 
@@ -32,7 +32,7 @@ Schema URL, the version tag of the label.
 
 > **environment**: [`ReleaseEnvironmentName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ReleaseEnvironmentName/index.md)
 
-Defined in: [core/src/types/prompt-bundle.ts:293](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompt-bundle.ts#L293)
+Defined in: [core/src/types/prompt-bundle.ts:293](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L293)
 
 Environment name.
 
@@ -48,6 +48,6 @@ Environment name.
 
 > **prompts**: [`PromptReleaseLabelEntryV2`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseLabelEntryV2/index.md)[]
 
-Defined in: [core/src/types/prompt-bundle.ts:295](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompt-bundle.ts#L295)
+Defined in: [core/src/types/prompt-bundle.ts:295](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L295)
 
 Released prompts sorted by id

@@ -8,7 +8,7 @@
 
 > **maybeSpawnFlush**(`config`, `options?`): `boolean`
 
-Defined in: [telemetry/src/reporter.ts:116](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/telemetry/src/reporter.ts#L116)
+Defined in: [telemetry/src/reporter.ts:116](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/telemetry/src/reporter.ts#L116)
 
 ## Parameters
 

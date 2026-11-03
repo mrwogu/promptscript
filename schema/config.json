@@ -232,6 +232,21 @@
             "$ref": "#/definitions/OutputResourceKind"
           },
           "description": "Compile only selected resource kinds (agents, skills, commands, mcp, hooks, plugins, main). A global install can emit agent and skill directories without unrelated root instruction files."
+        },
+        "markers": {
+          "type": "string",
+          "enum": [
+            "timestamp",
+            "static",
+            "none"
+          ],
+          "description": "How generated files are marked.\n- `timestamp` (default): marker with the generation time. A set   `SOURCE_DATE_EPOCH` replaces the clock.\n- `static`: marker without a time, so the output is reproducible.\n- `none`: no marker. Ownership of generated files comes from the   generated files manifest, which is then always written. Skill resource files never get a marker.",
+          "default": "timestamp"
+        },
+        "manifest": {
+          "type": "boolean",
+          "description": "Write a manifest of generated files (`.promptscript-generated.json`) in the output directory. The next compile removes files that are listed in the old manifest but no longer generated, when they were not edited since. `prs compile --check` also reports them. Always on when `markers` is `none`.",
+          "default": false
         }
       },
       "additionalProperties": false,
@@ -746,6 +761,27 @@
           ],
           "description": "Controls which skills are emitted for this target.\n- `true` or omitted: emit all skills\n- `false`: emit no skills\n- string array: emit only the listed skill names"
         },
+        "includeAgents": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Controls which agents are emitted for this target.\n- `true` or omitted: emit all agents\n- `false`: emit no agents\n- string array: emit only the listed agent names"
+        },
+        "excludeAgents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Agent names never emitted for this target. Applied after `includeAgents`."
+        },
         "skillPath": {
           "type": "string",
           "enum": [
@@ -782,6 +818,15 @@
             "bypassPermissions"
           ],
           "description": "Claude: auto mode setting for project settings.json. Maps to `.claude/settings.json` `autoMode` field. Only valid for Claude target with fixture-confirmed project-local schema."
+        },
+        "settings": {
+          "$ref": "#/definitions/TargetSettingsConfig",
+          "description": "Project settings written to the target settings file. Claude: `.claude/settings.json` (`model`, `permissions`, `env`, `enabledPlugins`). Factory: `.factory/settings.json` (`model`, `enabledPlugins`). Keys are merged into an existing settings file; other user keys are kept."
+        },
+        "hooksFile": {
+          "$ref": "#/definitions/FactoryHooksFile",
+          "description": "Factory: file that receives the generated `@hooks`.\n- `hooks.json`: `.factory/hooks.json` (preferred by Factory, read first)\n- `settings.json`: `hooks` key of `.factory/settings.json` (Factory reads it   only when `.factory/hooks.json` is absent)",
+          "default": "hooks.json"
         }
       },
       "additionalProperties": false,
@@ -813,6 +858,79 @@
         "split"
       ],
       "description": "Factory always-on rules output mode.\n- `monolith`: Keep all rule content in AGENTS.md\n- `split`: Emit rule content under .factory/rules"
+    },
+    "TargetSettingsConfig": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "Default model ID (Claude, Factory)."
+        },
+        "permissions": {
+          "$ref": "#/definitions/TargetSettingsPermissions",
+          "description": "Permission rules (Claude only)."
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables for every session (Claude only)."
+        },
+        "enabledPlugins": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          },
+          "description": "Enabled plugins as `plugin@marketplace` to `true` or `false` (Claude, Factory).",
+          "examples": [
+            {
+              "code-standards@acme-plugins": true
+            }
+          ],
+          "example": {
+            "code-standards@acme-plugins": true
+          }
+        }
+      },
+      "additionalProperties": false,
+      "description": "Settings keys PromptScript writes to the target project settings file."
+    },
+    "TargetSettingsPermissions": {
+      "type": "object",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rules that are allowed without a prompt, e.g. `Bash(npm run test:*)`."
+        },
+        "deny": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rules that are always denied, e.g. `Read(./.env)`."
+        },
+        "ask": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Rules that always ask for confirmation."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Permission rules for Claude Code project settings."
+    },
+    "FactoryHooksFile": {
+      "type": "string",
+      "enum": [
+        "hooks.json",
+        "settings.json"
+      ],
+      "description": "Factory file that receives generated hooks."
     },
     "FormattingConfig": {
       "type": "object",
@@ -848,6 +966,11 @@
         "printWidth": {
           "type": "number",
           "description": "Explicit printWidth setting (shorthand for prettier.printWidth)."
+        },
+        "postFormat": {
+          "type": "boolean",
+          "description": "Run Prettier over generated markdown after compilation and normalize the text for it. Set to `false` to keep the text as written (only the indentation of a text block is removed). Skill resource files are never reformatted.",
+          "default": true
         }
       },
       "additionalProperties": false,

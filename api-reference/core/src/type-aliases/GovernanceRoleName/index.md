@@ -8,7 +8,7 @@
 
 > **GovernanceRoleName** = `string` & `object`
 
-Defined in: [core/src/types/config.ts:230](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/config.ts#L230)
+Defined in: [core/src/types/config.ts:303](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/config.ts#L303)
 
 Name of an approval role: lowercase letters, digits and hyphens, starting with a
 letter. Windows device names are refused, since a role names a directory.

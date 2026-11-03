@@ -8,7 +8,7 @@
 
 > **formatSkillValidationIssues**(`issues`): `string`
 
-Defined in: [resolver/src/skill-validation.ts:322](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/skill-validation.ts#L322)
+Defined in: [resolver/src/skill-validation.ts:322](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/skill-validation.ts#L322)
 
 Format validation issues as a multi-line string suitable for CLI output.
 Each line is prefixed with the severity and code.

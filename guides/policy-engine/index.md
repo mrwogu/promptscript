@@ -642,7 +642,7 @@ validation:
 
 ## Programmatic API
 
-The policy engine is available as a standalone API. This snippet runs against the walkthrough project above - `config` and the resolved AST are both loaded here, so it is executable as-is:
+The policy engine is available as a standalone API. `@promptscript/resolver` and `@promptscript/validator` are not published to npm, so this works inside the PromptScript repository only. To run policies on your own project, use `prs validate`. This snippet runs against the walkthrough project above - `config` and the resolved AST are both loaded here, so it is executable as-is:
 
 ```typescript
 import { readFileSync } from 'node:fs';
@@ -682,7 +682,7 @@ for (const violation of violations) {
 }
 ```
 
-Prompt kinds have their own evaluator. It takes the same context, for the model catalog and `allowedPatterns`. Give it the canonical AST, so each finding points at its entry and not at the `@prompts` block:
+Prompt kinds have their own evaluator (same note: repository only, `prs validate` does this for you). It takes the same context, for the model catalog and `allowedPatterns`. Give it the canonical AST, so each finding points at its entry and not at the `@prompts` block:
 
 ```typescript
 import { evaluatePromptPolicies, promptPolicySubjects } from '@promptscript/validator';

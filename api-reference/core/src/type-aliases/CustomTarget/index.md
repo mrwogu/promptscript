@@ -8,7 +8,7 @@
 
 > **CustomTarget** = `string` & `object`
 
-Defined in: [core/src/types/config.ts:780](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/config.ts#L780)
+Defined in: [core/src/types/config.ts:873](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/config.ts#L873)
 
 Branded type for custom (user-registered) target names.
 Use `customTarget()` to create values of this type.

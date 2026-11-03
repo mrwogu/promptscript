@@ -6,7 +6,7 @@
 
 # Interface: CompileError
 
-Defined in: [browser-compiler/src/compiler.ts:90](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/browser-compiler/src/compiler.ts#L90)
+Defined in: [browser-compiler/src/compiler.ts:94](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/browser-compiler/src/compiler.ts#L94)
 
 Compilation error with additional metadata.
 
@@ -16,7 +16,7 @@ Compilation error with additional metadata.
 
 > **code**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:94](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/browser-compiler/src/compiler.ts#L94)
+Defined in: [browser-compiler/src/compiler.ts:98](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/browser-compiler/src/compiler.ts#L98)
 
 Error code or rule ID
 
@@ -26,7 +26,7 @@ Error code or rule ID
 
 > `optional` **location?**: `object`
 
-Defined in: [browser-compiler/src/compiler.ts:98](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/browser-compiler/src/compiler.ts#L98)
+Defined in: [browser-compiler/src/compiler.ts:102](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/browser-compiler/src/compiler.ts#L102)
 
 Source location
 
@@ -48,7 +48,7 @@ Source location
 
 > **message**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:96](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/browser-compiler/src/compiler.ts#L96)
+Defined in: [browser-compiler/src/compiler.ts:100](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/browser-compiler/src/compiler.ts#L100)
 
 Error message
 
@@ -58,6 +58,6 @@ Error message
 
 > **name**: `string`
 
-Defined in: [browser-compiler/src/compiler.ts:92](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/browser-compiler/src/compiler.ts#L92)
+Defined in: [browser-compiler/src/compiler.ts:96](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/browser-compiler/src/compiler.ts#L96)
 
 Error name/type

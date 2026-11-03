@@ -8,7 +8,7 @@
 
 > **isLegacyFormatter**(`formatter`): `formatter is LegacyFormatter`
 
-Defined in: [formatters/src/formatter-adapter.ts:24](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/formatter-adapter.ts#L24)
+Defined in: [formatters/src/formatter-adapter.ts:25](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatter-adapter.ts#L25)
 
 ## Parameters
 

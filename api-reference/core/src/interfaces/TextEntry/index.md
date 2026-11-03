@@ -6,7 +6,7 @@
 
 # Interface: TextEntry
 
-Defined in: [core/src/types/ast.ts:581](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L581)
+Defined in: [core/src/types/ast.ts:581](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L581)
 
 Canonical free-form text entry.
 
@@ -20,7 +20,7 @@ Canonical free-form text entry.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L499)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` **text**: `string`
 
-Defined in: [core/src/types/ast.ts:583](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L583)
+Defined in: [core/src/types/ast.ts:583](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L583)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [core/src/types/ast.ts:583](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"TextEntry"`
 
-Defined in: [core/src/types/ast.ts:582](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L582)
+Defined in: [core/src/types/ast.ts:582](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L582)
 
 #### Overrides
 

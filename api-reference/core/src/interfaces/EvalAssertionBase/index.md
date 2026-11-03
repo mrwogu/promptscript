@@ -6,7 +6,7 @@
 
 # Interface: EvalAssertionBase
 
-Defined in: [core/src/types/eval.ts:101](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L101)
+Defined in: [core/src/types/eval.ts:101](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L101)
 
 ## Extended by
 
@@ -22,7 +22,7 @@ Defined in: [core/src/types/eval.ts:101](https://github.com/mrwogu/promptscript/
 
 > `optional` **field?**: `string`
 
-Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L109)
+Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L109)
 
 Output property the assertion reads; absent means the whole response text
 
@@ -32,7 +32,7 @@ Output property the assertion reads; absent means the whole response text
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:107](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/eval.ts#L107)
+Defined in: [core/src/types/eval.ts:107](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L107)
 
 Assertion id, unique in the suite.
 

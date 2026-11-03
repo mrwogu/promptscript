@@ -8,7 +8,7 @@
 
 > **getAgentFieldStatus**(`target`, `field`): [`AgentFieldStatus`](https://getpromptscript.dev/api-reference/core/src/type-aliases/AgentFieldStatus/index.md)
 
-Defined in: [core/src/agent-capabilities.ts:131](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/agent-capabilities.ts#L131)
+Defined in: [core/src/agent-capabilities.ts:131](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/agent-capabilities.ts#L131)
 
 Return the capability status of one canonical agent field on a target.
 

@@ -6,7 +6,7 @@
 
 # Interface: MarkdownAgentConfig
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:69](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L69)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:70](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L70)
 
 Configuration for a markdown-based agent file.
 
@@ -16,7 +16,7 @@ Configuration for a markdown-based agent file.
 
 > **content**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:75](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L75)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:76](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L76)
 
 Agent content/instructions
 
@@ -26,7 +26,7 @@ Agent content/instructions
 
 > **description**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:73](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L73)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:74](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L74)
 
 Description
 
@@ -36,6 +36,6 @@ Description
 
 > **name**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:71](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L71)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:72](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L72)
 
 Agent name

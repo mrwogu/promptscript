@@ -8,7 +8,7 @@
 
 > **createGitRegistry**(`options`): [`GitRegistry`](https://getpromptscript.dev/api-reference/resolver/src/classes/GitRegistry/index.md)
 
-Defined in: [resolver/src/git-registry.ts:1264](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/git-registry.ts#L1264)
+Defined in: [resolver/src/git-registry.ts:1264](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/git-registry.ts#L1264)
 
 Create a new GitRegistry instance.
 

@@ -8,7 +8,7 @@
 
 > `const` **EVAL\_CODES**: `object`
 
-Defined in: [eval/src/errors.ts:8](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/eval/src/errors.ts#L8)
+Defined in: [eval/src/errors.ts:8](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/errors.ts#L8)
 
 Codes of eval errors and findings: `PS61xx` datasets, `PS62xx` suites,
 `PS63xx` providers and the run, `PS64xx` cache, `PS65xx` cost, `PS66xx` judge,

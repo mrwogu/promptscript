@@ -8,7 +8,7 @@
 
 > **SupportedLanguage** = `"en"` \| `"pl"` \| `"es"` \| `"de"` \| `"fr"` \| `"pt"` \| `"ru"` \| `"zh"` \| `"it"` \| `"nl"` \| `"ja"` \| `"ko"` \| `"ar"` \| `"tr"` \| `"sv"` \| `"no"` \| `"da"` \| `"fi"` \| `"cs"` \| `"hu"` \| `"uk"` \| `"hi"` \| `"id"` \| `"vi"` \| `"th"` \| `"el"` \| `"ro"` \| `"he"`
 
-Defined in: [validator/src/presets.ts:45](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/validator/src/presets.ts#L45)
+Defined in: [validator/src/presets.ts:45](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/validator/src/presets.ts#L45)
 
 Supported language codes for multilingual prompt injection detection.
 

@@ -68,6 +68,8 @@ availability.
 
 ### Get Features for a Tool
 
+`@promptscript/formatters` is not published to npm, so the code examples on this page work inside the PromptScript repository only.
+
 ```typescript
 import { getToolFeatures } from '@promptscript/formatters';
 

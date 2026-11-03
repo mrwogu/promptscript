@@ -6,7 +6,7 @@
 
 # Interface: PromptComposition
 
-Defined in: [core/src/types/prompts.ts:91](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompts.ts#L91)
+Defined in: [core/src/types/prompts.ts:91](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompts.ts#L91)
 
 The blocks one prompt composed into its system message, and the files they came from.
 
@@ -16,7 +16,7 @@ The blocks one prompt composed into its system message, and the files they came 
 
 > **blocks**: `object`[]
 
-Defined in: [core/src/types/prompts.ts:95](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompts.ts#L95)
+Defined in: [core/src/types/prompts.ts:95](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompts.ts#L95)
 
 Composed blocks in composition order
 
@@ -34,6 +34,6 @@ Composed blocks in composition order
 
 > **prompt**: `string`
 
-Defined in: [core/src/types/prompts.ts:93](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/prompts.ts#L93)
+Defined in: [core/src/types/prompts.ts:93](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompts.ts#L93)
 
 Prompt id, `<@meta.id>/<key>`

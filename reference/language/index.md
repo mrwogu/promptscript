@@ -1156,6 +1156,11 @@ Define specialized AI agents for target platforms with native agent support:
 | `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude, grok only)                         |
 | `background`          | boolean  | No       | Run the agent as a background process (Claude, grok only)                            |
 | `isolation`           | string   | No       | Isolation mode: `worktree` (Claude, grok only)                                       |
+| `targets`             | object   | No       | Per-target field overrides, e.g. `targets: { claude: { tools: [...] } }`             |
+
+See [Per-Target Overrides](https://getpromptscript.dev/features/agents/index.md#per-target-overrides) for
+`targets`, the Factory and Claude Code tool name mapping, and `includeAgents` /
+`excludeAgents`.
 
 Every canonical field has an explicit per-target status in the
 [Field Support Matrix](https://getpromptscript.dev/features/agents/index.md#field-support-matrix). A field a
@@ -2485,8 +2490,15 @@ initial `## Heading` as a compatibility fallback:
 <!-- playground-link-end -->
 
 The formatter emits that heading once and preserves the remaining body. Explicit
-`@header` metadata always wins over this fallback. Syntax `1.4.x` and earlier
-keep the heading as ordinary body text, so existing output remains unchanged.
+`@header` metadata always wins over this fallback: with a keyless `@header` in the
+same block, the initial `## Heading` stays in the body as ordinary text. Syntax
+`1.4.x` and earlier keep the heading as ordinary body text, so existing output
+remains unchanged.
+
+Headings in the `@context` body are shifted below the generated `##` sections.
+All of them move by the same number of levels, so `## A`, `### A.1`, `## B`
+becomes `### A`, `#### A.1`, `### B`. A body that already starts at `###` or
+deeper is kept as written.
 
 ## Hook Target Executable Overrides
 

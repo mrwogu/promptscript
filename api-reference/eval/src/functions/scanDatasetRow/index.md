@@ -8,7 +8,7 @@
 
 > **scanDatasetRow**(`record`, `options`): [`EvalFindingV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalFindingV1/index.md)[]
 
-Defined in: [eval/src/dataset/scan.ts:129](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/eval/src/dataset/scan.ts#L129)
+Defined in: [eval/src/dataset/scan.ts:129](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/dataset/scan.ts#L129)
 
 Scan the string values of one row (`inputs` and `expected`) with the
 validator's security rules (PS005, PS010, PS011, PS012, PS014) and the PII

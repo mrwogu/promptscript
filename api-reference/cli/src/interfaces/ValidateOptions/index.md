@@ -6,7 +6,7 @@
 
 # Interface: ValidateOptions
 
-Defined in: [cli/src/types.ts:100](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L100)
+Defined in: [cli/src/types.ts:105](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L105)
 
 Options for the validate command.
 
@@ -16,7 +16,7 @@ Options for the validate command.
 
 > `optional` **files?**: `string`[]
 
-Defined in: [cli/src/types.ts:102](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L102)
+Defined in: [cli/src/types.ts:107](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L107)
 
 Specific PromptScript files to validate
 
@@ -26,7 +26,7 @@ Specific PromptScript files to validate
 
 > `optional` **fix?**: `boolean`
 
-Defined in: [cli/src/types.ts:108](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L108)
+Defined in: [cli/src/types.ts:113](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L113)
 
 Auto-fix syntax version issues
 
@@ -36,7 +36,7 @@ Auto-fix syntax version issues
 
 > `optional` **format?**: `string`
 
-Defined in: [cli/src/types.ts:106](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L106)
+Defined in: [cli/src/types.ts:111](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L111)
 
 Output format: text or json, anything else is rejected
 
@@ -46,7 +46,7 @@ Output format: text or json, anything else is rejected
 
 > `optional` **ignoreHashes?**: `boolean`
 
-Defined in: [cli/src/types.ts:112](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L112)
+Defined in: [cli/src/types.ts:117](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L117)
 
 Skip reference integrity checks (disables PS031)
 
@@ -56,7 +56,7 @@ Skip reference integrity checks (disables PS031)
 
 > `optional` **skipPolicies?**: `boolean`
 
-Defined in: [cli/src/types.ts:110](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L110)
+Defined in: [cli/src/types.ts:115](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L115)
 
 Skip policy evaluation
 
@@ -66,6 +66,6 @@ Skip policy evaluation
 
 > `optional` **strict?**: `boolean`
 
-Defined in: [cli/src/types.ts:104](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/types.ts#L104)
+Defined in: [cli/src/types.ts:109](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L109)
 
 Treat warnings as errors

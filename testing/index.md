@@ -52,6 +52,8 @@ UPDATE_GOLDEN=true pnpm nx test formatters
 
 ### Key Exports
 
+`@promptscript/formatters` is not published to npm, so these imports work inside the PromptScript repository only.
+
 ```typescript
 import {
   // Parity Matrix

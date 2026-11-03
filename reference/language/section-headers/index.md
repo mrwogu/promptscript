@@ -45,7 +45,8 @@ Only registered owner blocks can set a given section key.
 
 An explicit `@header` wins over compatibility fallback headings. Initial
 `## Heading` prose remains a syntax 1.5 compatibility fallback for registered
-text-only owners.
+text-only owners. When the block also has a keyless `@header`, that heading
+stays in the body as ordinary text.
 
 ## Portability
 

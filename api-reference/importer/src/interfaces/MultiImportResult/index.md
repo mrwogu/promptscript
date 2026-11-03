@@ -6,7 +6,7 @@
 
 # Interface: MultiImportResult
 
-Defined in: [importer/src/multi-importer.ts:14](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L14)
+Defined in: [importer/src/multi-importer.ts:14](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/multi-importer.ts#L14)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/multi-importer.ts:14](https://github.com/mrwogu/prompt
 
 > **deduplicatedCount**: `number`
 
-Defined in: [importer/src/multi-importer.ts:17](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L17)
+Defined in: [importer/src/multi-importer.ts:17](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/multi-importer.ts#L17)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/multi-importer.ts:17](https://github.com/mrwogu/prompt
 
 > **files**: `Map`\<`string`, `string`\>
 
-Defined in: [importer/src/multi-importer.ts:15](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L15)
+Defined in: [importer/src/multi-importer.ts:15](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/multi-importer.ts#L15)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [importer/src/multi-importer.ts:15](https://github.com/mrwogu/prompt
 
 > **overallConfidence**: `number`
 
-Defined in: [importer/src/multi-importer.ts:18](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L18)
+Defined in: [importer/src/multi-importer.ts:18](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/multi-importer.ts#L18)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [importer/src/multi-importer.ts:18](https://github.com/mrwogu/prompt
 
 > **perFileReports**: [`FileReport`](https://getpromptscript.dev/api-reference/importer/src/interfaces/FileReport/index.md)[]
 
-Defined in: [importer/src/multi-importer.ts:16](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L16)
+Defined in: [importer/src/multi-importer.ts:16](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/multi-importer.ts#L16)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [importer/src/multi-importer.ts:16](https://github.com/mrwogu/prompt
 
 > **warnings**: `string`[]
 
-Defined in: [importer/src/multi-importer.ts:19](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/importer/src/multi-importer.ts#L19)
+Defined in: [importer/src/multi-importer.ts:19](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/multi-importer.ts#L19)

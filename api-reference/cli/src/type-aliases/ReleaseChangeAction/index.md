@@ -8,7 +8,7 @@
 
 > **ReleaseChangeAction** = `"created"` \| `"updated"` \| `"unchanged"` \| `"removed"`
 
-Defined in: [cli/src/utils/release-report.ts:24](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/cli/src/utils/release-report.ts#L24)
+Defined in: [cli/src/utils/release-report.ts:24](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/release-report.ts#L24)
 
 What a command did, or would do under `--dry-run`, to one file entry.
 

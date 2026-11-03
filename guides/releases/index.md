@@ -341,7 +341,10 @@ of the base branch to a pull request. There the roles come from the approval pol
 config at `<ref>` (the same rules the `--base` gates use) and the file is the configured output of
 that config. It must not be shadowed by an earlier location, and after the marker line of the
 project it must hold the exact owner line of each role directory, rendered from the governance at
-`<ref>`, and no other line for that path. Other lines of the file at `<ref>` are not compared. It
+`<ref>`, and no other line for that path. A role directory has two lines, with and without the
+trailing `/`. At the base, `.github/CODEOWNERS` with only the plain line is accepted, since files
+generated before the second line existed bind the role on GitHub; every other location needs both
+lines. `HEAD` must match the lines generated now, so it still warns until you regenerate. Other lines of the file at `<ref>` are not compared. It
 gives one warning, with the file as its location, if the file is missing at a commit
 (`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
 (`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs
@@ -352,8 +355,7 @@ is named when some prompt could need it. Nothing is written. Without such a poli
 warning. `--strict` makes this warning, and only it, exit with code 1.
 
 A clean result does not prove that the branch requires code owner review, nor that the owners have
-write access; check both on the Git host. For any location other than `.gitlab/CODEOWNERS` the
-lines are written for GitHub.
+write access; check both on the Git host.
 
 When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
 and no email), status also warns about an approval that counts for a gate whose approver is not

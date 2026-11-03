@@ -8,7 +8,7 @@
 
 > **resolveVendoredRepository**(`vendorDir`, `repoUrl`, `expectedVersion`, `expectedCommit`): `Promise`\<`string` \| `null`\>
 
-Defined in: [resolver/src/vendor-manifest.ts:591](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/vendor-manifest.ts#L591)
+Defined in: [resolver/src/vendor-manifest.ts:591](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-manifest.ts#L591)
 
 ## Parameters
 

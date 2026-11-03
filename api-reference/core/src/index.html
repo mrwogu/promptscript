@@ -319,6 +319,8 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/interfaces/TargetModel/">TargetModel</a></li>
 <li><a href="/api-reference/core/src/interfaces/TargetResourceCapability/">TargetResourceCapability</a></li>
 <li><a href="/api-reference/core/src/interfaces/TargetSectionCapability/">TargetSectionCapability</a></li>
+<li><a href="/api-reference/core/src/interfaces/TargetSettingsConfig/">TargetSettingsConfig</a></li>
+<li><a href="/api-reference/core/src/interfaces/TargetSettingsPermissions/">TargetSettingsPermissions</a></li>
 <li><a href="/api-reference/core/src/interfaces/TargetVersionCapability/">TargetVersionCapability</a></li>
 <li><a href="/api-reference/core/src/interfaces/TemplateContext/">TemplateContext</a></li>
 <li><a href="/api-reference/core/src/interfaces/TemplateExpression/">TemplateExpression</a></li>
@@ -373,6 +375,7 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/type-aliases/EvalProviderKind/">EvalProviderKind</a></li>
 <li><a href="/api-reference/core/src/type-aliases/EvalThresholdName/">EvalThresholdName</a></li>
 <li><a href="/api-reference/core/src/type-aliases/EvalVerdict/">EvalVerdict</a></li>
+<li><a href="/api-reference/core/src/type-aliases/FactoryHooksFile/">FactoryHooksFile</a></li>
 <li><a href="/api-reference/core/src/type-aliases/FactoryRulesMode/">FactoryRulesMode</a></li>
 <li><a href="/api-reference/core/src/type-aliases/GithubVersion/">GithubVersion</a></li>
 <li><a href="/api-reference/core/src/type-aliases/GovernanceOwner/">GovernanceOwner</a></li>
@@ -387,6 +390,7 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/type-aliases/LegacyContentType/">LegacyContentType</a></li>
 <li><a href="/api-reference/core/src/type-aliases/LegacyProgram/">LegacyProgram</a></li>
 <li><a href="/api-reference/core/src/type-aliases/ManifestTarget/">ManifestTarget</a></li>
+<li><a href="/api-reference/core/src/type-aliases/MarkerMode/">MarkerMode</a></li>
 <li><a href="/api-reference/core/src/type-aliases/ModelResolution/">ModelResolution</a></li>
 <li><a href="/api-reference/core/src/type-aliases/ModelStatus/">ModelStatus</a></li>
 <li><a href="/api-reference/core/src/type-aliases/OutputPlanArtifactRole/">OutputPlanArtifactRole</a></li>
@@ -394,6 +398,8 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/type-aliases/OutputResourceKind/">OutputResourceKind</a></li>
 <li><a href="/api-reference/core/src/type-aliases/OverrideReplacement/">OverrideReplacement</a></li>
 <li><a href="/api-reference/core/src/type-aliases/ParamType/">ParamType</a></li>
+<li><a href="/api-reference/core/src/type-aliases/PathTokenName/">PathTokenName</a></li>
+<li><a href="/api-reference/core/src/type-aliases/PathTokenValues/">PathTokenValues</a></li>
 <li><a href="/api-reference/core/src/type-aliases/PolicyDefinition/">PolicyDefinition</a></li>
 <li><a href="/api-reference/core/src/type-aliases/PolicyKind/">PolicyKind</a></li>
 <li><a href="/api-reference/core/src/type-aliases/PolicySeverity/">PolicySeverity</a></li>
@@ -452,6 +458,7 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/variables/MODEL_TARGET_SCHEMES/">MODEL_TARGET_SCHEMES</a></li>
 <li><a href="/api-reference/core/src/variables/noopLogger/">noopLogger</a></li>
 <li><a href="/api-reference/core/src/variables/OUTPUT_RESOURCE_KINDS/">OUTPUT_RESOURCE_KINDS</a></li>
+<li><a href="/api-reference/core/src/variables/PATH_TOKEN_NAMES/">PATH_TOKEN_NAMES</a></li>
 <li><a href="/api-reference/core/src/variables/PORTABLE_HOOK_INTERPRETERS/">PORTABLE_HOOK_INTERPRETERS</a></li>
 <li><a href="/api-reference/core/src/variables/PROMPT_BUNDLE_INDEX_SCHEMA_URL/">PROMPT_BUNDLE_INDEX_SCHEMA_URL</a></li>
 <li><a href="/api-reference/core/src/variables/PROMPT_BUNDLE_SCHEMA_URL/">PROMPT_BUNDLE_SCHEMA_URL</a></li>
@@ -535,6 +542,7 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/functions/isInModelSet/">isInModelSet</a></li>
 <li><a href="/api-reference/core/src/functions/isKnownSyntaxVersion/">isKnownSyntaxVersion</a></li>
 <li><a href="/api-reference/core/src/functions/isKnownTarget/">isKnownTarget</a></li>
+<li><a href="/api-reference/core/src/functions/isPathTokenName/">isPathTokenName</a></li>
 <li><a href="/api-reference/core/src/functions/isPromptId/">isPromptId</a></li>
 <li><a href="/api-reference/core/src/functions/isPromptTarget/">isPromptTarget</a></li>
 <li><a href="/api-reference/core/src/functions/isReservedWord/">isReservedWord</a></li>
@@ -552,6 +560,7 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/functions/parseApprovalRecord/">parseApprovalRecord</a></li>
 <li><a href="/api-reference/core/src/functions/readMetaGovernance/">readMetaGovernance</a></li>
 <li><a href="/api-reference/core/src/functions/reconcileBlockBody/">reconcileBlockBody</a></li>
+<li><a href="/api-reference/core/src/functions/replacePathTokens/">replacePathTokens</a></li>
 <li><a href="/api-reference/core/src/functions/resolveModelSet/">resolveModelSet</a></li>
 <li><a href="/api-reference/core/src/functions/resolveTargetVersion/">resolveTargetVersion</a></li>
 <li><a href="/api-reference/core/src/functions/serializeApprovalRecord/">serializeApprovalRecord</a></li>
@@ -559,4 +568,4 @@ used across the entire PromptScript ecosystem. It includes:</p>
 <li><a href="/api-reference/core/src/functions/toLegacyProgram/">toLegacyProgram</a></li>
 <li><a href="/api-reference/core/src/functions/validateGovernanceFields/">validateGovernanceFields</a></li>
 <li><a href="/api-reference/core/src/functions/valueNodeToValue/">valueNodeToValue</a></li>
-</ul></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.paSBRdLM.js"></script><footer class="sl-flex astro-saadddsc"><div class="meta sl-flex astro-saadddsc"></div><div class="pagination-links print:hidden astro-tymgqbsy" dir="ltr"></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>
+</ul></div><script type="module" src="/_astro/MarkdownContent.astro_astro_type_script_index_0_lang.BaGEmUff.js"></script><footer class="sl-flex astro-saadddsc"><div class="meta sl-flex astro-saadddsc"></div><div class="pagination-links print:hidden astro-tymgqbsy" dir="ltr"></div></footer><div class="ps-footer astro-jo6i4kqk"><p class="ps-footer__love astro-jo6i4kqk">Loved by a growing community of developers and AI enthusiasts around the world.</p><p class="astro-jo6i4kqk">Created by <a href="https://github.com/mrwogu" rel="author" class="astro-jo6i4kqk">Wojciech Guziak</a> - Released under the <a href="https://github.com/mrwogu/promptscript/blob/main/LICENSE" class="astro-jo6i4kqk">MIT License</a></p><p class="ps-footer__links astro-jo6i4kqk"><a href="https://github.com/mrwogu/promptscript" class="astro-jo6i4kqk">GitHub</a><a href="https://www.linkedin.com/in/wojciechguziak/" rel="author" class="astro-jo6i4kqk">LinkedIn</a><a href="https://www.npmjs.com/org/promptscript" class="astro-jo6i4kqk">npm</a><a href="https://github.com/mrwogu/promptscript/releases" class="astro-jo6i4kqk">Changelog</a><a href="/playground/" class="astro-jo6i4kqk">Playground</a></p></div></div></div></main></div></div></div></div></body></html>

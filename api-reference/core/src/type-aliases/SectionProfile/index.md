@@ -8,6 +8,6 @@
 
 > **SectionProfile** = `"coding"` \| `"general"`
 
-Defined in: [core/src/section-registry.ts:208](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/section-registry.ts#L208)
+Defined in: [core/src/section-registry.ts:208](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/section-registry.ts#L208)
 
 Which set of sections a target renders.

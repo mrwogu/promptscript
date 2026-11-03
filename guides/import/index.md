@@ -78,6 +78,8 @@ The `--validate` flag parses the generated `.prs` output with the PromptScript p
 
 ## Programmatic Usage
 
+`@promptscript/importer` is not published to npm, so this example works inside the PromptScript repository only. Outside of it, use the `prs import` command.
+
 ```typescript
 import { importFile } from '@promptscript/importer';
 

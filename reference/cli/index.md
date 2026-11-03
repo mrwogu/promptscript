@@ -342,6 +342,7 @@ prs compile [options]
 | `-o, --output <dir>`         | Override output directory                               |
 | `--resources <items>`        | Compile only selected resources (see below)             |
 | `--dry-run`                  | Preview changes without writing                         |
+| `--check`                    | Write nothing, exit 1 when generated files are outdated |
 | `--no-migrate-factory-hooks` | Warn instead of migrating legacy Factory settings hooks |
 | `--registry <path>`          | Override the configured registry path                   |
 | `-c, --config <path>`        | Path to config file                                     |
@@ -397,6 +398,20 @@ writing generated output. `--dry-run` reports the planned canonical and legacy
 file changes without writing. `--no-migrate-factory-hooks` keeps the legacy
 file unchanged and reports `PS4002` instead. Unknown events, malformed entries,
 and mixed ownership abort migration without a partial write.
+
+`--check` plans the compile like `--dry-run`, writes nothing and exits with
+code 1 when anything is out of date: a generated file that would be created or
+changed, an obsolete file that managed cleanup would remove, or, with
+`output.manifest`, a stale file from the manifest or the manifest itself. It
+is meant for CI:
+
+```bash
+prs compile --check
+```
+
+With the default `timestamp` markers a file that differs only in its marker
+counts as up to date. With `output.markers: static` or `none` the check
+compares bytes.
 
 `--resources <items>` compiles only the named resource kinds: `agents`,
 `skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Multiple kinds are

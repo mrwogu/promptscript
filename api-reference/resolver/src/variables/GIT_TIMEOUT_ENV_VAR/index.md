@@ -8,7 +8,7 @@
 
 > `const` **GIT\_TIMEOUT\_ENV\_VAR**: `"PROMPTSCRIPT_GIT_TIMEOUT"` = `'PROMPTSCRIPT_GIT_TIMEOUT'`
 
-Defined in: [resolver/src/git-registry.ts:36](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/resolver/src/git-registry.ts#L36)
+Defined in: [resolver/src/git-registry.ts:36](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/git-registry.ts#L36)
 
 Environment variable that overrides the default Git operation timeout.
 Useful when a registry clone needs more than the default 60 seconds

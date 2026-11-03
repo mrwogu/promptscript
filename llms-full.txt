@@ -2142,6 +2142,8 @@ The `--validate` flag parses the generated `.prs` output with the PromptScript p
 
 ## Programmatic Usage
 
+`@promptscript/importer` is not published to npm, so this example works inside the PromptScript repository only. Outside of it, use the `prs import` command.
+
 ```typescript
 import { importFile } from '@promptscript/importer';
 
@@ -4411,9 +4413,87 @@ that contains `agent: "reviewer"` or a handoff entry targeting `"reviewer"` poin
 | `mcpServers`          | No       | Grants access to named top-level `@mcpServers`        |
 | `sandboxMode`         | No       | Selects target-native sandbox policy                  |
 | `nicknameCandidates`  | No       | Provides target-native display names                  |
+| `targets`             | No       | Overrides fields for one target, see below            |
 
 Validators check supported enum values and forbidden fields before formatters generate output.
 Target-specific fields are emitted only where the native agent format supports them.
+
+## Per-Target Overrides
+
+`targets.<target>` sets agent fields for one target only. The fields in it
+replace the shared fields of the same name for that target. Other targets
+keep the shared fields:
+
+```promptscript
+@agents {
+  builder: {
+    description: "Build features end to end"
+    tools: ["Read", "Grep", "Glob", "Create", "Edit", "Execute"]
+    model: "gpt-5.3-codex"
+    targets: {
+      claude: {
+        tools: ["Read", "Grep", "Glob", "Write", "Edit", "Bash"]
+        model: "sonnet"
+      }
+    }
+    content: "Implement the change and run the tests."
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH34NTlNeQKteACM3aClqMMrg4Kk4RmoINCwINhSQACE6qBkwGGw3agNOGSx5GbyWhWZmKDgw5AiAJXHvEDpwkABxKbQIg4ijqGZq88OAYSnsGDuIgFFxE1eQN8IYRjcHAiAF04sESMwpFB+upugBaACsFAAzHCWFJCIsWiJqOphOsKmCWowoBg3FImkSlnNVgTNiAdhJvicYGd9ocrjdvgB1TpA9nvT5Yb4DDBwHAgqktCFQ-pyVisYRYpaFKrBVVLFjsMr9ACS0RgWiwChwdkYOAwrDxYk8vGoHhNdg4cFMFCxqvyIHywIYZWojnwRFI5BgVFo+xAADcYLReqx8KkvUA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Any agent field can be overridden, for example `tools`, `disallowedTools`,
+`model` or `content`. The key is the target name from `promptscript.yaml`.
+PS033 reports an unknown target name and a `targets` value that is not an
+object of fields.
+
+### Tool Names Between Factory and Claude Code
+
+Factory droids and Claude Code subagents name some tools differently. When
+`tools` or `disallowedTools` hold a name of the other tool, the Claude and
+Grok targets write the Claude Code name and the Factory target writes the
+Factory name. Duplicates made this way are dropped.
+
+| Factory      | Claude Code |
+| ------------ | ----------- |
+| `Create`     | `Write`     |
+| `Execute`    | `Bash`      |
+| `FetchUrl`   | `WebFetch`  |
+| `ApplyPatch` | `Edit`      |
+| `LS`         | `Glob`      |
+
+For the Factory target, `Write`, `Bash` and `WebFetch` map back, and Claude
+Code `MultiEdit` becomes `Edit`. `ApplyPatch` and `LS` have no own Claude Code
+tool, so they map only one way. Names that are the same in both tools (`Read`,
+`Grep`, `Glob`, `Edit`, `WebSearch`, `TodoWrite`, `Task`) and MCP tool names
+stay as written. Other targets get `tools` as before.
+
+A Claude Code subagent can not start other subagents. When a Claude or Grok
+agent lists `Task` or `Agent` in `tools`, compilation reports `PS4003`. Set
+`targets.claude.tools` without it, or leave the agent out for that target.
+
+### Leaving Agents Out of a Target
+
+`includeAgents` and `excludeAgents` in the target config choose which agents a
+target gets, the same way `includeSkills` does for skills:
+
+```yaml
+targets:
+  - factory:
+      version: full
+  - claude:
+      version: full
+      excludeAgents: [orchestrator]
+```
+
+`includeAgents: false` emits no agents and a list emits only the listed ones.
+`excludeAgents` is applied after `includeAgents`. Both accept the source name
+(`team.reviewer`) or the native name (`team-reviewer`).
 
 ## Field Support Matrix
 
@@ -4595,6 +4675,40 @@ Codex also emits agent TOML files in `multifile` mode. Compiling a version
 that cannot emit agents reports `PS4003` for the whole block instead of
 dropping it silently.
 
+## Agents and Commands as Markdown Files
+
+Agents can also live as markdown files in `.promptscript/agents/*.md`, and
+commands in `.promptscript/commands/*.md`. The frontmatter is read with the
+same YAML parser as `SKILL.md`, so folded descriptions and lists work:
+
+```markdown
+---
+name: reviewer
+description: >-
+  Reviews one module against its spec.
+  Produces: a findings list.
+tools:
+  - Read
+  - Grep
+model: inherit
+---
+
+Review the module.
+```
+
+- `tools` (and `disallowedTools`) is a YAML list or a comma separated string
+  such as `Read, Grep, Bash(git add:*, git commit:*)`. A single name without
+  commas, like `read-only`, stays a string. Any other value, for example a
+  mapping or a number in the list, fails the build instead of giving the
+  agent all tools.
+- A value with `: ` inside must be quoted to be valid YAML. Old files that
+  are not valid YAML still load one `key: value` per line, with a warning.
+  When such a file also has a block list or a folded value, the build fails
+  with the YAML error.
+- Command frontmatter is not copied into the command body. `description` and
+  `argument-hint` reach Claude Code and Factory commands, and `allowed-tools`
+  and `model` reach Claude Code commands.
+
 ## Global Installs
 
 `output.baseDir` (or `prs compile --output`) can point at a global root such
@@ -4713,6 +4827,12 @@ Review selected code and use bundled references when evaluating risk.
 PromptScript preserves the directory structure when producing native skill files. Script invocation
 and executable file modes remain platform and operating-system specific.
 
+A skill can be declared in `@skills` and also have a `SKILL.md` in `.promptscript/skills/`. The
+declaration can sit in the entry file or in an imported fragment, the two are merged. When both
+give a `description`, the `.prs` one is used, also in the generated frontmatter, and a warning
+names both files. Skills in `.promptscript/skills/` that no file declares are added once, by the
+entry file.
+
 ## Skill Capabilities
 
 | Capability                       | Purpose                            |
@@ -4762,6 +4882,45 @@ Target formatters then emit native paths such as:
 
 Gemini full mode emits interoperable `.agents/skills/<name>/skill.md` files alongside native
 commands under `.gemini/commands/`.
+
+## Path Tokens
+
+Skill text often points at the skill's own files. A fixed path like
+`.factory/skills/lint/check.py` is wrong once the same skill compiles for
+Claude Code. Write a path token instead and every target writes its own path:
+
+| Token               | Claude Code example   | Factory example        |
+| ------------------- | --------------------- | ---------------------- |
+| `{{prs.dotDir}}`    | `.claude`             | `.factory`             |
+| `{{prs.skillsDir}}` | `.claude/skills`      | `.factory/skills`      |
+| `{{prs.skillDir}}`  | `.claude/skills/lint` | `.factory/skills/lint` |
+
+```promptscript
+@skills {
+  lint: {
+    description: "Lint changed files"
+    content: """
+      Run `python {{prs.skillDir}}/check.py` on the changed files.
+      For formatting use the script in {{prs.skillsDir}}/format.
+    """
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAq14oCHYw6uDgqThGagg0LAg2FJAAGXqsHRwMVnVpFX04POadNg4G8JBYlZq5gCUPXgADNEdcI2BgGjgKMoqAEQhqfPyAekYcGEZSqkcdwxtnkbGJmUgsDOcTmADFmNQVBCSNhuuNeG44HZbLJ2p1hvVeMdTudylBKtdbg8wNDsBQQctVnFCgUQPkALoMThYaiOfBEUjkGBUWggBgANxgtB6rHwqTpQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Tokens work in every generated file, so agents and commands can use
+`{{prs.dotDir}}` and `{{prs.skillsDir}}` too. `{{prs.skillsDir}}` follows
+`skillBaseDir` when it is set. `{{prs.skillDir}}` has a value only in the files
+of a skill directory; anywhere else, and for a target without such a
+directory, the token stays as written and compilation reports a `PS4002`
+warning. Only these exact tokens are replaced, other `{{...}}` text such as
+Mermaid hexagons `{{"label"}}` is not touched. Write `\{{prs.dotDir}}` to keep
+the token itself in the output.
 
 ## Filter Skills Per Target
 
@@ -6471,7 +6630,10 @@ of the base branch to a pull request. There the roles come from the approval pol
 config at `<ref>` (the same rules the `--base` gates use) and the file is the configured output of
 that config. It must not be shadowed by an earlier location, and after the marker line of the
 project it must hold the exact owner line of each role directory, rendered from the governance at
-`<ref>`, and no other line for that path. Other lines of the file at `<ref>` are not compared. It
+`<ref>`, and no other line for that path. A role directory has two lines, with and without the
+trailing `/`. At the base, `.github/CODEOWNERS` with only the plain line is accepted, since files
+generated before the second line existed bind the role on GitHub; every other location needs both
+lines. `HEAD` must match the lines generated now, so it still warns until you regenerate. Other lines of the file at `<ref>` are not compared. It
 gives one warning, with the file as its location, if the file is missing at a commit
 (`is missing at <ref>`), out of date at `HEAD`, does not bind the roles at `<ref>`
 (`does not bind <roles> at <ref>`), is shadowed there by a file at an earlier location, if prs
@@ -6482,8 +6644,7 @@ is named when some prompt could need it. Nothing is written. Without such a poli
 warning. `--strict` makes this warning, and only it, exit with code 1.
 
 A clean result does not prove that the branch requires code owner review, nor that the owners have
-write access; check both on the Git host. For any location other than `.gitlab/CODEOWNERS` the
-lines are written for GitHub.
+write access; check both on the Git host.
 
 When every owner of a role in `governance.roles` is a user handle like `@jane` (no `@org/team`
 and no email), status also warns about an approval that counts for a gate whose approver is not
@@ -13005,6 +13166,10 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 | `.claude/commands/*.md`                   | `@shortcuts` block |
 | `.github/skills/*/SKILL.md`               | `@skills` block    |
 
+Agent and command frontmatter is parsed as YAML, the same way as in
+`.promptscript/agents/` and `.promptscript/commands/`. See
+[Agents and Commands as Markdown Files](https://getpromptscript.dev/features/agents/index.md#agents-and-commands-as-markdown-files).
+
 ### Example: Importing an Open-Source Skill Library
 
 ```promptscript
@@ -14759,7 +14924,7 @@ validation:
 
 ## Programmatic API
 
-The policy engine is available as a standalone API. This snippet runs against the walkthrough project above - `config` and the resolved AST are both loaded here, so it is executable as-is:
+The policy engine is available as a standalone API. `@promptscript/resolver` and `@promptscript/validator` are not published to npm, so this works inside the PromptScript repository only. To run policies on your own project, use `prs validate`. This snippet runs against the walkthrough project above - `config` and the resolved AST are both loaded here, so it is executable as-is:
 
 ```typescript
 import { readFileSync } from 'node:fs';
@@ -14799,7 +14964,7 @@ for (const violation of violations) {
 }
 ```
 
-Prompt kinds have their own evaluator. It takes the same context, for the model catalog and `allowedPatterns`. Give it the canonical AST, so each finding points at its entry and not at the `@prompts` block:
+Prompt kinds have their own evaluator (same note: repository only, `prs validate` does this for you). It takes the same context, for the model catalog and `allowedPatterns`. Give it the canonical AST, so each finding points at its entry and not at the `@prompts` block:
 
 ```typescript
 import { evaluatePromptPolicies, promptPolicySubjects } from '@promptscript/validator';
@@ -14892,11 +15057,17 @@ $ prs governance codeowners
 # promptscript-generated: prs governance codeowners | project: . | do not edit below
 /.promptscript/project.prs @acme/payments @acme/support
 /.github/workflows @acme/prompt-platform
+/.github/workflows/ @acme/prompt-platform
 /.promptscript/approvals @acme/prompt-platform
+/.promptscript/approvals/ @acme/prompt-platform
 /.promptscript/approvals/legal @acme/legal
+/.promptscript/approvals/legal/ @acme/legal
 /.promptscript/approvals/security @acme/appsec
+/.promptscript/approvals/security/ @acme/appsec
 /.promptscript/releases @acme/prompt-platform
+/.promptscript/releases/ @acme/prompt-platform
 /.promptscript/vendor @acme/prompt-platform
+/.promptscript/vendor/ @acme/prompt-platform
 /.promptscriptrc.yaml @acme/prompt-platform
 /.promptscriptrc.yml @acme/prompt-platform
 /promptscript.lock @acme/prompt-platform
@@ -14911,6 +15082,8 @@ $ prs governance codeowners
 Commit the file. A second run changes nothing.
 
 ## The lines
+
+Every directory line is written twice, as `/.promptscript/approvals/legal` and `/.promptscript/approvals/legal/`, in every output location. The directory lines are the approvals root, each role directory, the releases and vendor directories and every `protect` path. GitLab reads a pattern without a glob or a trailing slash as one exact file, and it reads the root and `docs/` files too, so the second line is what covers the records under the directory. GitHub matches the `/` form the same way, so one output works for both. A file generated before this change shows as out of date once: run the command again and commit the result.
 
 Paths start at the repository root, so a project in a subdirectory gets lines like `/services/support/.promptscript/approvals`. The lines come in this order, sorted inside each group:
 
@@ -14939,7 +15112,7 @@ Only the project the command runs in gets lines. Other projects in the same repo
 
 ### GitLab
 
-For `.gitlab/CODEOWNERS` the section starts with a `[PromptScript]` section header right after the marker. GitLab reads a pattern without a glob or a trailing slash as one exact file, so every directory line is written twice, as `/.promptscript/approvals/legal` and `/.promptscript/approvals/legal/`, and so is every `protect` path. GitLab applies every section, so a line you wrote above the marker that matches a prompt file applies next to the generated one: its owners are asked to review too.
+For `.gitlab/CODEOWNERS` the section starts with a `[PromptScript]` section header right after the marker. GitLab applies every section, so a line you wrote above the marker that matches a prompt file applies next to the generated one: its owners are asked to review too.
 
 ## Rules for the file
 
@@ -14949,6 +15122,7 @@ For `.gitlab/CODEOWNERS` the section starts with a `[PromptScript]` section head
 - A file with a NUL byte is refused with `PS5106` too: GitLab reads it as binary and ignores all of it.
 - In `.gitlab/CODEOWNERS` a `[PromptScript]` section above the marker is refused with `PS5106` too, in any case and with or without `^`. GitLab merges sections of the same name, so its lines, an exception like `!/.promptscript/approvals/**` included, would change the generated ones.
 - On GitHub, when a line you wrote above the marker matches a `.prs` file that a generated line covers, the command warns: your line no longer applies to that file. A pattern with more than three wildcards (`*` or `?`) gets no such warning: checking it against long file names would take too long.
+- In a root, `docs/` or `.github/` CODEOWNERS a GitLab section header above the marker (`[Docs]`, `^[Docs]`, `[Docs][2]`, with or without default owners) is refused with `PS5106` too. GitLab would read the generated lines as part of that section, so approvals could become optional or need another count, and GitHub flags a section header as invalid. Use `.gitlab/CODEOWNERS` as the output, which gets its own `[PromptScript]` section. `prs release status` reports the same file as one it cannot manage. A `[...]` line below the marker is replaced with the generated lines as before.
 - A host reads only one CODEOWNERS file. GitHub looks in `.github/`, the root, then `docs/`. GitLab looks in the root, `docs/`, then `.gitlab/`. When a file exists at a location read before the output, the command warns.
 - A file that differs only in CRLF line ends, as a checkout with `core.autocrlf` writes it, counts as current.
 - Every owner must be a Git host identity. A bad value in `governance` is `PS5101`. A bad owner or reviewer on a prompt is `PS5107` and lists every bad value.
@@ -15464,6 +15638,8 @@ All other patterns keep scanning.
 Findings on synthesized skill nodes point at the file the content was inlined from (the `SKILL.md` path or the scanned directory), never at a virtual `<synthesized>` location. The PS012 heuristic message includes the first 20 characters of the encoded run so a sequence reads as a sequence, not as a payload.
 
 ### Using Security Presets
+
+`@promptscript/validator` is not published to npm, so the code examples in this section work inside the PromptScript repository only. In your own project, configure the `validation` section in `promptscript.yaml` and run `prs validate`.
 
 ```typescript
 import { createValidator, SECURITY_STRICT } from '@promptscript/validator';
@@ -17991,10 +18167,41 @@ project-root/
 - `CLAUDE.md` is gitignored by many project templates - you may need to `git add -f CLAUDE.md`
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
+- A local SKILL.md keeps its own frontmatter, except `params`: parameters are filled in at compile time, so the generated skill does not carry them (Factory drops them too)
+- Skill and agent bodies are normalized for Prettier (aligned tables, a blank line between a paragraph and a list), without changing their meaning: table cells, code spans, list nesting and tight lists stay as written
 - Agent files support: `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, `isolation`. Fields other targets own (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, `handoffs`) are reported with `PS4003` and omitted
 - Agent and skill `model` values keep floating aliases (`opus`, `sonnet`, `haiku`, `fable`) and `inherit` as written; pinned Claude releases become API ids such as `claude-sonnet-4-5-20250929`, and models from other providers are omitted with `PS4004` (see [Model Catalog](https://getpromptscript.dev/reference/models/index.md#target-model-names))
 - Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
 - The `@local` block content goes to `CLAUDE.local.md` with an import statement added to the main `CLAUDE.md`
+
+## Settings
+
+In `full` mode the target `settings` option writes project settings to
+`.claude/settings.json`, next to the `@hooks` entries:
+
+```yaml
+targets:
+  - claude:
+      version: full
+      settings:
+        model: claude-sonnet-4-5
+        permissions:
+          allow:
+            - 'Bash(npm run test:*)'
+          deny:
+            - 'Read(./.env)'
+        env:
+          NODE_ENV: development
+        enabledPlugins:
+          code-standards@acme-plugins: true
+```
+
+Supported keys are `model`, `permissions` (`allow`, `deny`, `ask`), `env` and
+`enabledPlugins`. PromptScript merges them into an existing
+`.claude/settings.json`. Keys it does not generate stay as they are. For object
+keys only the generated sub-keys are replaced: your `permissions.defaultMode` or
+own `env` variables survive, while a generated `permissions.allow` replaces the
+old `allow` list. A key removed from the config is not removed from the file.
 
 ## Example Output
 
@@ -18204,10 +18411,10 @@ project-root/
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
 - Droid `model` and `specModel` values become API ids such as `claude-sonnet-4-5-20250929` or `gpt-5.3-codex`; `inherit` is written as is (see [Model Catalog](https://getpromptscript.dev/reference/models/index.md#target-model-names))
-- `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
+- `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes. The file is keyed directly by event name (`{"PreToolUse": [...]}`); only `settings.json` wraps the map in `hooks`. A wrapped `hooks.json` from PromptScript 1.27 or earlier is read and rewritten in the bare shape
 - `pre-terminal-command` maps to `PreToolUse` with the deterministic `Execute` matcher unless `targets.factory.matcher` overrides it
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
-- `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks
+- `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks. `hooksFile: settings.json` writes `@hooks` there instead (see [Hooks File](#hooks-file))
 - When `@hooks` is removed or no longer emits, the CLI removes a fully PromptScript-owned `.factory/hooks.json`; directories emptied by cleanup (`.factory/rules` and its subdirectories) are pruned as well
 - Three output modes: `simple`, `multifile`, `full`
 - Always-on rules default to the byte-compatible `monolith` mode
@@ -18223,6 +18430,58 @@ ownership are ambiguous. `--dry-run` previews the migration, while
 `--no-migrate-factory-hooks` leaves the fallback unchanged and reports
 `PS4002`. `prs hooks install factory` remains available for explicit migration
 and hook installation.
+
+A legacy handler is written only once. When `@hooks` already generates the same
+command for the same event and matcher, the migration drops the hand-written
+copy instead of moving it next to the generated one, so Factory does not run
+the hook twice. Running the migration again gives the same result.
+
+## Hooks File
+
+Factory reads project hooks from `.factory/hooks.json`. Only when that file is
+absent does it read the `hooks` key of `.factory/settings.json`. Factory does
+not merge the two files. See the
+[Factory hooks reference](https://docs.factory.ai/reference/hooks-reference).
+
+`hooksFile` picks where PromptScript writes `@hooks`:
+
+```yaml
+targets:
+  - factory:
+      version: multifile
+      hooksFile: settings.json # default: hooks.json
+```
+
+| Value                  | Generated file                          | Notes                                                            |
+| ---------------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| `hooks.json` (default) | `.factory/hooks.json`                   | Legacy `settings.json` hooks are migrated into it                |
+| `settings.json`        | `hooks` key of `.factory/settings.json` | No legacy migration; other settings keys and user hooks are kept |
+
+With `settings.json`, a PromptScript-owned `.factory/hooks.json` is removed by
+cleanup. If a `.factory/hooks.json` with your own hooks is still there,
+`prs compile` reports `PS4002`, because Factory would ignore the hooks in
+`settings.json`.
+
+## Settings
+
+`settings` writes Factory project settings to `.factory/settings.json` in
+`multifile` and `full` modes:
+
+```yaml
+targets:
+  - factory:
+      version: multifile
+      settings:
+        model: claude-sonnet-4-5
+        enabledPlugins:
+          code-standards@acme-plugins: true
+```
+
+Supported keys are `model` and `enabledPlugins`. Other `settings` keys
+(`permissions`, `env`) are Claude only; Factory reports `PS4002` and skips
+them. PromptScript merges the keys into an existing `.factory/settings.json`:
+keys it does not generate stay, and for `enabledPlugins` only the listed
+plugins are set. A key removed from the config is not removed from the file.
 
 ## Split Rules
 
@@ -24161,6 +24420,11 @@ Define specialized AI agents for target platforms with native agent support:
 | `memory`              | string   | No       | Memory scope: `user`, `project`, `local` (Claude, grok only)                         |
 | `background`          | boolean  | No       | Run the agent as a background process (Claude, grok only)                            |
 | `isolation`           | string   | No       | Isolation mode: `worktree` (Claude, grok only)                                       |
+| `targets`             | object   | No       | Per-target field overrides, e.g. `targets: { claude: { tools: [...] } }`             |
+
+See [Per-Target Overrides](https://getpromptscript.dev/features/agents/index.md#per-target-overrides) for
+`targets`, the Factory and Claude Code tool name mapping, and `includeAgents` /
+`excludeAgents`.
 
 Every canonical field has an explicit per-target status in the
 [Field Support Matrix](https://getpromptscript.dev/features/agents/index.md#field-support-matrix). A field a
@@ -25490,8 +25754,15 @@ initial `## Heading` as a compatibility fallback:
 <!-- playground-link-end -->
 
 The formatter emits that heading once and preserves the remaining body. Explicit
-`@header` metadata always wins over this fallback. Syntax `1.4.x` and earlier
-keep the heading as ordinary body text, so existing output remains unchanged.
+`@header` metadata always wins over this fallback: with a keyless `@header` in the
+same block, the initial `## Heading` stays in the body as ordinary text. Syntax
+`1.4.x` and earlier keep the heading as ordinary body text, so existing output
+remains unchanged.
+
+Headings in the `@context` body are shifted below the generated `##` sections.
+All of them move by the same number of levels, so `## A`, `### A.1`, `## B`
+becomes `### A`, `#### A.1`, `### B`. A body that already starts at `###` or
+deeper is kept as written.
 
 ## Hook Target Executable Overrides
 
@@ -26123,7 +26394,8 @@ Only registered owner blocks can set a given section key.
 
 An explicit `@header` wins over compatibility fallback headings. Initial
 `## Heading` prose remains a syntax 1.5 compatibility fallback for registered
-text-only owners.
+text-only owners. When the block also has a keyless `@header`, that heading
+stays in the body as ordinary text.
 
 ## Portability
 
@@ -26924,6 +27196,7 @@ prs compile [options]
 | `-o, --output <dir>`         | Override output directory                               |
 | `--resources <items>`        | Compile only selected resources (see below)             |
 | `--dry-run`                  | Preview changes without writing                         |
+| `--check`                    | Write nothing, exit 1 when generated files are outdated |
 | `--no-migrate-factory-hooks` | Warn instead of migrating legacy Factory settings hooks |
 | `--registry <path>`          | Override the configured registry path                   |
 | `-c, --config <path>`        | Path to config file                                     |
@@ -26979,6 +27252,20 @@ writing generated output. `--dry-run` reports the planned canonical and legacy
 file changes without writing. `--no-migrate-factory-hooks` keeps the legacy
 file unchanged and reports `PS4002` instead. Unknown events, malformed entries,
 and mixed ownership abort migration without a partial write.
+
+`--check` plans the compile like `--dry-run`, writes nothing and exits with
+code 1 when anything is out of date: a generated file that would be created or
+changed, an obsolete file that managed cleanup would remove, or, with
+`output.manifest`, a stale file from the manifest or the manifest itself. It
+is meant for CI:
+
+```bash
+prs compile --check
+```
+
+With the default `timestamp` markers a file that differs only in its marker
+counts as up to date. With `output.markers: static` or `none` the check
+compares bytes.
 
 `--resources <items>` compiles only the named resource kinds: `agents`,
 `skills`, `commands`, `mcp`, `hooks`, `plugins`, and `main`. Multiple kinds are
@@ -29451,6 +29738,12 @@ output:
   # Overwrite existing files
   overwrite: true
 
+  # Generated file marker: timestamp (default), static or none
+  markers: timestamp
+
+  # Write .promptscript-generated.json and remove stale generated files
+  manifest: false
+
 # =========================
 # Formatting Configuration
 # =========================
@@ -29465,6 +29758,9 @@ formatting:
   # proseWrap: always    # 'always' | 'never' | 'preserve'
   # tabWidth: 4          # Number of spaces per indent
   # printWidth: 100      # Max line width for prose wrapping
+
+  # Run Prettier over generated markdown (default true)
+  # postFormat: false
 
 # =============================
 # Universal Directory & Skills
@@ -30002,6 +30298,8 @@ error.
 | `rulesMode`     | `monolith` or `split`   | `monolith`      | Factory always-on rule layout                          |
 | `skillBaseDir`  | string                  | target-specific | Custom base directory for generated skill files        |
 | `includeSkills` | boolean or string array | `true`          | Emit all skills, no skills, or only listed skill names |
+| `includeAgents` | boolean or string array | `true`          | Emit all agents, no agents, or only listed agent names |
+| `excludeAgents` | string array            | `[]`            | Agent names never emitted, after `includeAgents`       |
 
 :::caution[Output paths stay inside the output directory]
 A target `output` that resolves outside the output directory (`../`, or an
@@ -30061,13 +30359,15 @@ its default directory. For example, this writes Factory skills under
 
 **Target-Specific Options:**
 
-| Option              | Targets           | Type   | Description                                                                                  |
-| ------------------- | ----------------- | ------ | -------------------------------------------------------------------------------------------- |
-| `maxThreads`        | `codex`           | number | Max parallel agent threads (positive integer, maps to .codex/config.toml)                    |
-| `maxDepth`          | `codex`           | number | Max nesting depth for agent delegation (positive integer)                                    |
-| `agentsFile`        | `codex`           | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md)            |
-| `agentsFrontmatter` | AGENTS.md targets | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from @meta)         |
-| `autoMode`          | `claude`          | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json) |
+| Option              | Targets             | Type   | Description                                                                                                                                                    |
+| ------------------- | ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxThreads`        | `codex`             | number | Max parallel agent threads (positive integer, maps to .codex/config.toml)                                                                                      |
+| `maxDepth`          | `codex`             | number | Max nesting depth for agent delegation (positive integer)                                                                                                      |
+| `agentsFile`        | `codex`             | string | Override agents file name (default: AGENTS.md, scoped builds: AGENTS.override.md)                                                                              |
+| `agentsFrontmatter` | AGENTS.md targets   | string | `experimental` - emit AGENTS.md v1.1 YAML frontmatter (description, tags from @meta)                                                                           |
+| `autoMode`          | `claude`            | string | Claude auto mode: `acceptEdits`, `plan`, `bypassPermissions` (maps to .claude/settings.json)                                                                   |
+| `settings`          | `claude`, `factory` | object | Project settings merged into `.claude/settings.json` (`model`, `permissions`, `env`, `enabledPlugins`) or `.factory/settings.json` (`model`, `enabledPlugins`) |
+| `hooksFile`         | `factory`           | string | Where `@hooks` go: `hooks.json` (default, `.factory/hooks.json`) or `settings.json` (`hooks` key of `.factory/settings.json`)                                  |
 
 **Codex Native Output:**
 
@@ -30400,20 +30700,50 @@ output:
   resources:
     - agents
     - skills
+  markers: static
+  manifest: true
 ```
 
-| Field       | Type     | Default | Description                                                                                                                           |
-| ----------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `baseDir`   | string   | `.`     | Base directory for generated output                                                                                                   |
-| `header`    | string   | -       | Header added to Markdown after PromptScript metadata and frontmatter                                                                  |
-| `overwrite` | boolean  | `false` | Overwrite conflicting user files without prompting, like `--force`                                                                    |
-| `resources` | string[] | -       | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
+| Field       | Type     | Default     | Description                                                                                                                           |
+| ----------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseDir`   | string   | `.`         | Base directory for generated output                                                                                                   |
+| `header`    | string   | -           | Header added to Markdown after PromptScript metadata and frontmatter                                                                  |
+| `overwrite` | boolean  | `false`     | Overwrite conflicting user files without prompting, like `--force`                                                                    |
+| `resources` | string[] | -           | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
+| `markers`   | string   | `timestamp` | Generated file marker: `timestamp`, `static` or `none`                                                                                |
+| `manifest`  | boolean  | `false`     | Write `.promptscript-generated.json` in the output directory and remove stale generated files                                         |
 
 `resources` selects what a compile emits. A selection without `main` omits
 root instruction files, so `baseDir: '${HOME}'` with `resources: [agents,
 skills]` installs only generated agent and skill directories into the global
 root. Protected personal files such as `~/.factory/AGENTS.md` are never
 written, and resource-only runs skip managed cleanup.
+
+`markers` sets the comment that marks a generated Markdown file:
+
+- `timestamp` (default) writes the generation time, for example
+  `<!-- PromptScript 2026-11-03T10:00:00.000Z | source: ... -->`. When the
+  `SOURCE_DATE_EPOCH` environment variable holds a number of seconds, that time
+  is used instead of the clock.
+- `static` writes `static` instead of the time, so two compiles of the same
+  sources give byte-identical files.
+- `none` writes no marker. PromptScript then knows its files from the manifest,
+  so `none` turns `manifest` on. `header` needs a marker, so it is not added.
+
+With `static` or `none`, a file whose content differs only in the marker is
+rewritten, so switching from `timestamp` replaces the old timestamps once.
+Skill resource files (everything next to a generated `SKILL.md`, like
+templates, references and scripts) never get a marker.
+
+`manifest: true` writes `.promptscript-generated.json` in the output directory.
+It lists every generated file with its SHA-256 hash, target and build profile.
+On the next compile, files that are in the manifest but no longer generated,
+for example the files of a removed skill or agent, are deleted, and directories
+left empty go too. A stale file that was edited after it was generated is kept
+with a warning. `--target` and `--build` runs only touch entries of their own
+target and build. Commit the manifest when CI runs `prs compile --check`, so
+the check also finds stale files. Hook files that PromptScript merges with your
+own entries are not listed; managed cleanup handles them.
 
 ### formatting
 
@@ -30450,6 +30780,7 @@ When `prettier: true`, PromptScript searches for Prettier configuration files in
 | `proseWrap`  | `'always'` \| `'never'` \| `'preserve'` | `'preserve'` | How to wrap prose in markdown        |
 | `tabWidth`   | number                                  | `2`          | Number of spaces per indentation     |
 | `printWidth` | number                                  | `80`         | Maximum line width for wrapping      |
+| `postFormat` | boolean                                 | `true`       | Run Prettier over generated markdown |
 
 **ProseWrap Options:**
 
@@ -30481,6 +30812,22 @@ formatting:
   proseWrap: always
   printWidth: 100
 ```
+
+**Example: Keep Generated Bodies As Written**
+
+```yaml
+formatting:
+  postFormat: false
+```
+
+By default every generated Markdown file goes through Prettier after
+compilation, and the formatters normalize the text for it first (for example a
+blank line goes in before a list, and `*` in a path like `services/*` is
+escaped). With `postFormat: false` neither happens, so skill, agent, command and
+`@context` text stay as you wrote them in every file, `CLAUDE.md` and
+`AGENTS.md` included. Only the indentation of a text block is removed. Skill
+resource files such as templates, references and scripts are never reformatted,
+with or without this option.
 
 ### universalDir
 
@@ -32072,24 +32419,27 @@ legacy ownership is unambiguous.
 }
 ```
 
-`.factory/hooks.json` receives canonical hooks:
+`.factory/hooks.json` receives canonical hooks. The file is keyed directly by
+event name, without the `hooks` wrapper that `settings.json` uses:
 
 ```json
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "prs hook pre-edit # promptscript-generated:pre-edit"
-          }
-        ]
-      }
-    ]
-  }
+  "PreToolUse": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "prs hook pre-edit # promptscript-generated:pre-edit"
+        }
+      ]
+    }
+  ]
 }
 ```
+
+PromptScript 1.27 and earlier wrapped `hooks.json` in a `hooks` key, which
+droid does not read. The next `prs compile` or `prs hooks install factory`
+rewrites such a file in the bare shape.
 
 ## Safety Rules
 
@@ -36171,6 +36521,8 @@ UPDATE_GOLDEN=true pnpm nx test formatters
 
 ### Key Exports
 
+`@promptscript/formatters` is not published to npm, so these imports work inside the PromptScript repository only.
+
 ```typescript
 import {
   // Parity Matrix
@@ -36278,6 +36630,8 @@ interface SectionSpec {
 ```
 
 ### Using the Matrix
+
+`@promptscript/formatters` is not published to npm, so this example works inside the PromptScript repository only.
 
 ```typescript
 import {
@@ -36607,6 +36961,8 @@ availability.
 ## Using the Matrix
 
 ### Get Features for a Tool
+
+`@promptscript/formatters` is not published to npm, so the code examples on this page work inside the PromptScript repository only.
 
 ```typescript
 import { getToolFeatures } from '@promptscript/formatters';

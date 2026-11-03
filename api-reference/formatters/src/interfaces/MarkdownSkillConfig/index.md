@@ -6,7 +6,7 @@
 
 # Interface: MarkdownSkillConfig
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:37](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L37)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:38](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L38)
 
 Configuration for a markdown-based skill file.
 
@@ -16,7 +16,7 @@ Configuration for a markdown-based skill file.
 
 > `optional` **argumentHint?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:43](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L43)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:44](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L44)
 
 Optional argument hint
 
@@ -26,7 +26,7 @@ Optional argument hint
 
 > **content**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:45](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L45)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:46](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L46)
 
 Skill content/instructions
 
@@ -36,7 +36,7 @@ Skill content/instructions
 
 > **description**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:41](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L41)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:42](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L42)
 
 Description
 
@@ -46,7 +46,7 @@ Description
 
 > `optional` **examples?**: `object`[]
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:58](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L58)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:59](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L59)
 
 Pre-extracted examples from the skill's nested examples property
 
@@ -72,7 +72,7 @@ Pre-extracted examples from the skill's nested examples property
 
 > `optional` **license?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:56](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L56)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:57](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L57)
 
 License identifier from SKILL.md frontmatter
 
@@ -82,7 +82,7 @@ License identifier from SKILL.md frontmatter
 
 > **name**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:39](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L39)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:40](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L40)
 
 Skill name
 
@@ -92,7 +92,7 @@ Skill name
 
 > `optional` **outputDir?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:63](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L63)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:64](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L64)
 
 Relative output directory underneath the target's skill folder.
 Overrides the default `<dotDir>/skills/<name>` layout when provided.
@@ -103,7 +103,7 @@ Overrides the default `<dotDir>/skills/<name>` layout when provided.
 
 > `optional` **rawFrontmatter?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:54](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L54)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:55](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L55)
 
 Raw frontmatter from source SKILL.md for pass-through
 
@@ -113,7 +113,7 @@ Raw frontmatter from source SKILL.md for pass-through
 
 > `optional` **resources?**: `object`[]
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:47](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/formatters/src/markdown-instruction-formatter.ts#L47)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:48](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L48)
 
 Resource files to copy alongside the skill file
 

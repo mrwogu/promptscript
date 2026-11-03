@@ -6,7 +6,7 @@
 
 # Interface: ObjectValueNode
 
-Defined in: [core/src/types/ast.ts:562](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L562)
+Defined in: [core/src/types/ast.ts:562](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L562)
 
 Canonical object value.
 
@@ -20,7 +20,7 @@ Canonical object value.
 
 > `readonly` **fields**: readonly [`ObjectFieldNode`](https://getpromptscript.dev/api-reference/core/src/interfaces/ObjectFieldNode/index.md)[]
 
-Defined in: [core/src/types/ast.ts:564](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L564)
+Defined in: [core/src/types/ast.ts:564](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L564)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:564](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L499)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -64,7 +64,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"ObjectValueNode"`
 
-Defined in: [core/src/types/ast.ts:563](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/core/src/types/ast.ts#L563)
+Defined in: [core/src/types/ast.ts:563](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L563)
 
 #### Overrides
 

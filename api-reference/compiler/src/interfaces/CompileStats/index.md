@@ -6,7 +6,7 @@
 
 # Interface: CompileStats
 
-Defined in: [compiler/src/types.ts:225](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/compiler/src/types.ts#L225)
+Defined in: [compiler/src/types.ts:243](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L243)
 
 Statistics about the compilation process.
 
@@ -16,7 +16,7 @@ Statistics about the compilation process.
 
 > **formatTime**: `number`
 
-Defined in: [compiler/src/types.ts:231](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/compiler/src/types.ts#L231)
+Defined in: [compiler/src/types.ts:249](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L249)
 
 Time spent formatting (ms)
 
@@ -26,7 +26,7 @@ Time spent formatting (ms)
 
 > **resolveTime**: `number`
 
-Defined in: [compiler/src/types.ts:227](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/compiler/src/types.ts#L227)
+Defined in: [compiler/src/types.ts:245](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L245)
 
 Time spent resolving (ms)
 
@@ -36,7 +36,7 @@ Time spent resolving (ms)
 
 > **totalTime**: `number`
 
-Defined in: [compiler/src/types.ts:233](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/compiler/src/types.ts#L233)
+Defined in: [compiler/src/types.ts:251](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L251)
 
 Total compilation time (ms)
 
@@ -46,6 +46,6 @@ Total compilation time (ms)
 
 > **validateTime**: `number`
 
-Defined in: [compiler/src/types.ts:229](https://github.com/mrwogu/promptscript/blob/1b71bccda9a0dc10cb2e852cd08b5bb17ff09055/packages/compiler/src/types.ts#L229)
+Defined in: [compiler/src/types.ts:247](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L247)
 
 Time spent validating (ms)
