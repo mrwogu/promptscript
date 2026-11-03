@@ -200,7 +200,7 @@ A declared skill with no `SKILL.md` and no `content` in the declaration is repor
 
 ### Skills of an inherited project
 
-When a project inherits another local project, for example `@inherit ../tool/.promptscript/project`, the skills, commands and agents of that project come from its own `.promptscript/` directory, like when it compiles alone. Skill resources and `.promptscript/shared/` files come along. A skill of the inheriting project with the same name still wins.
+When a project inherits another local project, for example `@inherit ../tool/.promptscript/project`, the skills, commands and agents of that project come from its own `.promptscript/` directory, like when it compiles alone. Skill resources and `.promptscript/shared/` files come along. A skill of the inheriting project with the same name still wins. A registry skill with the same name does not replace the inherited one.
 
 This works only for a file that sits directly in a `.promptscript/` directory of another project inside the project root, also through a symlinked directory. Files from the registry, the Git cache or `vendor/` are not affected.
 

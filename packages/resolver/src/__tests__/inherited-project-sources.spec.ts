@@ -84,12 +84,14 @@ function skill(blocks: Block[], name: string): Record<string, Value> {
   return properties(blocks, 'skills')[name] as Record<string, Value>;
 }
 
-function resolverFor(workspace: string): Resolver {
+function resolverFor(workspace: string, skills?: { universalDir: string }): Resolver {
   return new Resolver({
     registryPath: join(workspace, 'registry'),
     localPath: join(workspace, '.promptscript'),
     projectRoot: workspace,
+    vendorDir: join(workspace, 'vendor'),
     cache: false,
+    ...(skills ? { skills } : {}),
   });
 }
 
@@ -141,6 +143,7 @@ describe('native sources of an inherited project', () => {
   it.each([
     ['the registry', 'registry/team', '../registry/team/.promptscript/project'],
     ['the Git cache', '.cache/team', '../.cache/team/.promptscript/project'],
+    ['the vendor dir', 'vendor/team', '../vendor/team/.promptscript/project'],
     [
       'the own .promptscript dir',
       '.promptscript/vendor/team',
@@ -181,6 +184,33 @@ describe('native sources of an inherited project', () => {
 
     expect(result.errors).toEqual([]);
     expect(Object.keys(properties(result.ast!.blocks, 'shortcuts'))).not.toContain('/team-only');
+  });
+
+  it('keeps the inherited skill over a registry skill with the same name', async () => {
+    const { workspace } = await createLayout(false);
+    await put(
+      join(workspace, 'registry/@skills/check-code/SKILL.md'),
+      skillMd('check-code', 'Registry check.')
+    );
+
+    const result = await resolverFor(workspace).resolve(
+      join(workspace, '.promptscript/project.prs')
+    );
+
+    expect(result.errors).toEqual([]);
+    const content = skill(result.ast!.blocks, 'check-code')['content'] as TextContent;
+    expect(content.value).toContain('Tool check.');
+  });
+
+  it('tracks the universal dir of the inherited project as a dependency', async () => {
+    const { workspace, tool } = await createLayout(false);
+
+    const result = await resolverFor(workspace, { universalDir: '.agents' }).resolve(
+      join(workspace, '.promptscript/project.prs')
+    );
+
+    expect(result.errors).toEqual([]);
+    expect(result.dependencies).toContain(join(tool, '.agents', 'skills'));
   });
 
   it('keeps the workspace sources for a @use of the same file', async () => {

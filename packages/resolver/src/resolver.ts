@@ -811,10 +811,11 @@ export class Resolver {
     dependencies.add(resolve(this.loader.getRegistryPath(), '@skills'));
     dependencies.add(resolve(this.loader.getProjectRoot(), '.promptscript', 'scripts'));
     if (discoveryOptions.universalDir) {
+      const universalBase = inheritedLocalPath
+        ? dirname(inheritedLocalPath)
+        : this.loader.getProjectRoot();
       for (const directory of ['skills', 'commands', 'agents'] as const) {
-        dependencies.add(
-          resolve(this.loader.getProjectRoot(), discoveryOptions.universalDir, directory)
-        );
+        dependencies.add(resolve(universalBase, discoveryOptions.universalDir, directory));
       }
     }
 
@@ -1174,7 +1175,8 @@ export class Resolver {
    * `@inherit` target `absPath` is that project's file (for example
    * `@inherit ../tool/.promptscript/project`). `@use` keeps the current
    * project's sources.
-   * Files of this project, the registry and the Git cache return undefined.
+   * Files of this project, the registry, the vendor dir and the Git cache
+   * return undefined.
    */
   private inheritedLocalPath(absPath: string): string | undefined {
     const directory = dirname(absPath);
@@ -1183,9 +1185,12 @@ export class Resolver {
       const rel = relative(root, absPath);
       return !rel.startsWith('..') && !isAbsolute(rel);
     };
-    if (isInside(this.loader.getLocalPath()) || isInside(this.loader.getRegistryPath())) {
-      return undefined;
-    }
+    const excludedRoots = [
+      this.loader.getLocalPath(),
+      this.loader.getRegistryPath(),
+      ...(this.options.vendorDir ? [this.options.vendorDir] : []),
+    ];
+    if (excludedRoots.some(isInside)) return undefined;
     if (absPath.split(sep).includes('.cache')) return undefined;
     return directory;
   }
