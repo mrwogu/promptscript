@@ -109,10 +109,11 @@ function protectGlobAsterisks(content: string): string {
       const marker = /^\s*(`{3,}|~{3,})/.exec(line)?.[1];
       if (marker) {
         if (fence === undefined) fence = marker;
-        else if (marker[0] === fence[0] && marker.length >= fence.length) fence = undefined;
+        else if (marker.startsWith(fence.charAt(0)) && marker.length >= fence.length)
+          fence = undefined;
         return line;
       }
-      return fence === undefined ? line.replace(/\/\*/g, `/${GLOB_STAR}`) : line;
+      return fence === undefined ? line.replaceAll('/*', `/${GLOB_STAR}`) : line;
     })
     .join('\n');
 }
