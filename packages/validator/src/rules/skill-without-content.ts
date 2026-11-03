@@ -22,7 +22,7 @@ export const skillWithoutContent: ValidationRule = {
   defaultSeverity: 'warning',
   validate: (ctx) => {
     const skillsBlock = ctx.ast.blocks.find((block) => block.name === 'skills');
-    if (!skillsBlock || skillsBlock.content.type !== 'ObjectContent') return;
+    if (skillsBlock?.content.type !== 'ObjectContent') return;
 
     for (const [name, skill] of Object.entries(skillsBlock.content.properties)) {
       if (name.startsWith('__')) continue;
