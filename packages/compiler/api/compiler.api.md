@@ -10,6 +10,7 @@ import type { CanonicalProgram } from '@promptscript/core';
 import { createOutputPlan } from '@promptscript/core';
 import type { FactoryRulesMode } from '@promptscript/core';
 import type { Logger } from '@promptscript/core';
+import type { MarkerMode } from '@promptscript/core';
 import { ModelsConfig } from '@promptscript/core';
 import { normalizeOutputCollisionKey } from '@promptscript/core';
 import { normalizeOutputPath } from '@promptscript/core';
@@ -104,11 +105,13 @@ export interface CompilerOptions {
     })[];
     ignoreHashes?: boolean;
     logger?: Logger;
+    markers?: MarkerMode;
     models?: ModelsConfig;
     prettier?: PrettierMarkdownOptions;
     resolver: ResolverOptions;
     skillContent?: string;
     validator?: ValidatorConfig;
+    verbatimMarkdown?: boolean;
 }
 
 // @public

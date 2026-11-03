@@ -520,7 +520,7 @@ describe('compile command - createCliLogger warn path', () => {
 
     expect(mockCleanupManagedOutputs).toHaveBeenCalledWith(expect.any(Map), {
       outputRoot: '/mock/project',
-      dryRun: undefined,
+      dryRun: false,
     });
     expect(mockMuted).toHaveBeenCalledWith(`Removed obsolete generated file: ${obsoleteFile}`);
   });

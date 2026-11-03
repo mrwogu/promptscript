@@ -22,6 +22,11 @@ packages/*/api/*.api.md
 # PromptScript generated files - managed by prs compile
 CHANGELOG.md
 
+# Skill resource files are copied byte for byte by prs compile, so they keep
+# the formatting of the remote skill they come from.
+/.*/skills/skill-creator/agents/
+/.*/skills/skill-creator/references/
+
 # Compiler-owned JSON that carries no generation marker. Reformatting it makes
 # the next `prs compile` treat the file as user-authored and refuse to overwrite.
 /.mcp.json

@@ -232,6 +232,21 @@
             "$ref": "#/definitions/OutputResourceKind"
           },
           "description": "Compile only selected resource kinds (agents, skills, commands, mcp, hooks, plugins, main). A global install can emit agent and skill directories without unrelated root instruction files."
+        },
+        "markers": {
+          "type": "string",
+          "enum": [
+            "timestamp",
+            "static",
+            "none"
+          ],
+          "description": "How generated files are marked.\n- `timestamp` (default): marker with the generation time. A set   `SOURCE_DATE_EPOCH` replaces the clock.\n- `static`: marker without a time, so the output is reproducible.\n- `none`: no marker. Ownership of generated files comes from the   generated files manifest, which is then always written. Skill resource files never get a marker.",
+          "default": "timestamp"
+        },
+        "manifest": {
+          "type": "boolean",
+          "description": "Write a manifest of generated files (`.promptscript-generated.json`) in the output directory. The next compile removes files that are listed in the old manifest but no longer generated, when they were not edited since. `prs compile --check` also reports them. Always on when `markers` is `none`.",
+          "default": false
         }
       },
       "additionalProperties": false,
@@ -951,6 +966,11 @@
         "printWidth": {
           "type": "number",
           "description": "Explicit printWidth setting (shorthand for prettier.printWidth)."
+        },
+        "postFormat": {
+          "type": "boolean",
+          "description": "Run Prettier over generated markdown after compilation and normalize skill, agent and command bodies for it. Set to `false` to keep bodies as written. Skill resource files are never reformatted.",
+          "default": true
         }
       },
       "additionalProperties": false,

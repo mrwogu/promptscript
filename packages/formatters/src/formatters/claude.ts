@@ -326,7 +326,7 @@ export class ClaudeFormatter extends BaseFormatter {
     // Generate agent files
     const agents = this.extractAgents(ast, options);
     for (const agent of agents) {
-      additionalFiles.push(this.generateAgentFile(agent));
+      additionalFiles.push(this.generateAgentFile(agent, options));
     }
 
     // Generate workflow files
@@ -750,9 +750,7 @@ export class ClaudeFormatter extends BaseFormatter {
     if (config.content) {
       // First dedent (using lines 2+ for indent calculation since line 1 may be trimmed)
       // Then normalize for Prettier compatibility
-      const dedentedContent = this.dedent(config.content);
-      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
-      lines.push(normalizedContent);
+      lines.push(this.formatBody(config.content, options));
     }
 
     const skillDirPath = this.resolveSkillDir(
@@ -989,11 +987,29 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   /**
+   * Dedent a skill or agent body and normalize it for Prettier, unless
+   * `verbatimMarkdown` keeps it as written.
+   */
+  private formatBody(content: string, options?: FormatOptions): string {
+    const dedentedContent = this.dedent(content);
+    return options?.verbatimMarkdown
+      ? dedentedContent
+      : this.normalizeMarkdownForPrettier(dedentedContent);
+  }
+
+  /** Push `key: ['a', 'b']` when the list has values. */
+  private pushQuotedList(lines: string[], key: string, values: string[] | undefined): void {
+    if (!values || values.length === 0) return;
+    const quoted = values.map((value) => `'${value}'`).join(', ');
+    lines.push(`${key}: [${quoted}]`);
+  }
+
+  /**
    * Generate a .claude/agents/<name>.md file.
    *
    * @see https://code.claude.com/docs/en/sub-agents
    */
-  private generateAgentFile(config: ClaudeAgentConfig): FormatterOutput {
+  private generateAgentFile(config: ClaudeAgentConfig, options?: FormatOptions): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter
@@ -1003,15 +1019,8 @@ export class ClaudeFormatter extends BaseFormatter {
       `description: ${this.yamlString(config.description)}`
     );
 
-    if (config.tools && config.tools.length > 0) {
-      const arr = config.tools.map((t) => `'${t}'`).join(', ');
-      lines.push(`tools: [${arr}]`);
-    }
-
-    if (config.disallowedTools && config.disallowedTools.length > 0) {
-      const arr = config.disallowedTools.map((t) => `'${t}'`).join(', ');
-      lines.push(`disallowedTools: [${arr}]`);
-    }
+    this.pushQuotedList(lines, 'tools', config.tools);
+    this.pushQuotedList(lines, 'disallowedTools', config.disallowedTools);
 
     if (config.model) {
       lines.push(`model: ${this.yamlString(config.model)}`);
@@ -1036,10 +1045,7 @@ export class ClaudeFormatter extends BaseFormatter {
       lines.push(`memory: ${config.memory}`);
     }
 
-    if (config.mcpServers && config.mcpServers.length > 0) {
-      const arr = config.mcpServers.map((s) => `'${s}'`).join(', ');
-      lines.push(`mcpServers: [${arr}]`);
-    }
+    this.pushQuotedList(lines, 'mcpServers', config.mcpServers);
 
     if (config.background === true) {
       lines.push('background: true');
@@ -1054,9 +1060,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (config.content) {
       // Dedent content and normalize for Prettier compatibility
-      const dedentedContent = this.dedent(config.content);
-      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
-      lines.push(normalizedContent);
+      lines.push(this.formatBody(config.content, options));
     }
 
     return {

@@ -51,6 +51,27 @@ describe('postFormatWithPrettier', () => {
     expect(outputs.get('a')!.content).toBe('FMT:# Title\n');
   });
 
+  it('keeps skill resource files as they are', async () => {
+    const { logger } = makeLogger();
+    const outputs = new Map<string, FormatterOutput>([
+      [
+        '.claude/skills/a/SKILL.md',
+        {
+          path: '.claude/skills/a/SKILL.md',
+          content: '# Skill\n',
+          additionalFiles: [{ path: '.claude/skills/a/templates/t.md', content: '|a|b|\n' }],
+        },
+      ],
+    ]);
+
+    await postFormatWithPrettier(outputs, '/proj', logger);
+
+    const skill = outputs.get('.claude/skills/a/SKILL.md')!;
+    expect(skill.content).toBe('FMT:# Skill\n');
+    expect(skill.additionalFiles![0]!.content).toBe('|a|b|\n');
+    expect(mockFormat).toHaveBeenCalledTimes(1);
+  });
+
   it('skips non-markdown outputs', async () => {
     const original = 'function   foo(){return 1}';
     const { logger } = makeLogger();

@@ -1375,6 +1375,29 @@ describe('ClaudeFormatter', () => {
         expect(result.warnings?.some((w) => w.code === 'PS4004')).toBeFalsy();
       });
 
+      it('should keep agent and skill bodies as written with verbatimMarkdown', () => {
+        const body = 'Review the code.\n- first\n- second';
+        const agents = createAgentsProgram({
+          reviewer: { description: 'Reviews code', content: body },
+        });
+        const skills = createSkillsProgram({
+          notes: { description: 'Notes', content: body },
+        });
+
+        const verbatimAgent = formatter
+          .format(agents, { version: 'full', verbatimMarkdown: true })
+          .additionalFiles?.find((file) => file.path === '.claude/agents/reviewer.md');
+        const verbatimSkill = formatter
+          .format(skills, { version: 'full', verbatimMarkdown: true })
+          .additionalFiles?.find((file) => file.path === '.claude/skills/notes/SKILL.md');
+        const { agentFile } = formatAgentFile(agents, 'reviewer');
+
+        // The normalization puts a blank line between text and a list.
+        expect(verbatimAgent?.content).toContain('Review the code.\n- first');
+        expect(verbatimSkill?.content).toContain('Review the code.\n- first');
+        expect(agentFile?.content).toContain('Review the code.\n\n- first');
+      });
+
       it('should omit models from other providers with a PS4004 warning', () => {
         const ast = createAgentsProgram({
           'gpt-agent': {

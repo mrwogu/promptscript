@@ -1,6 +1,6 @@
 import { basename, resolve, isAbsolute, relative } from 'node:path';
 import { homedir } from 'node:os';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync, lstatSync } from 'node:fs';
 import chokidar from 'chokidar';
 import { minimatch } from 'minimatch';
@@ -12,7 +12,7 @@ import type {
   TargetConfig,
   Lockfile,
 } from '@promptscript/core';
-import { ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
+import { collectSkillResourcePaths, ErrorCode, isValidLockfile, PSError } from '@promptscript/core';
 
 import type { CompileResult, FormatterOutput } from '@promptscript/compiler';
 import { loadEffectiveConfig } from '../config/loader.js';
@@ -39,8 +39,19 @@ import {
   mergePromptScriptHookOutput,
   removeHookOutputIfUnchanged,
   removePromptScriptOwnedCodexHooks,
+  removeStaleGeneratedFiles,
   rewriteHookOutputIfUnchanged,
 } from '../utils/managed-output-cleanup.js';
+import {
+  buildGeneratedManifest,
+  findStaleManifestFiles,
+  GENERATED_MANIFEST_FILE,
+  isOwnedByManifest,
+  readGeneratedManifest,
+  renderGeneratedManifest,
+  type GeneratedManifest,
+  type ManifestScope,
+} from '../utils/generated-manifest.js';
 import {
   detectLegacyFactorySettingsHooks,
   getFactoryHooksFile,
@@ -317,6 +328,119 @@ function printErrors(errors: CompileResult['errors']): void {
   }
 }
 
+interface ManifestSyncOptions {
+  previous: GeneratedManifest | undefined;
+  outputs: Map<string, FormatterOutput>;
+  /** Absolute paths the user chose not to overwrite */
+  skipped: ReadonlySet<string>;
+  outputRoot: string;
+  scope: ManifestScope;
+  dryRun: boolean;
+}
+
+/**
+ * Remove generated files the manifest lists but this run no longer produces,
+ * then write the new manifest. In dry-run mode nothing changes and the result
+ * lists what would.
+ */
+async function syncGeneratedManifest(
+  options: ManifestSyncOptions
+): Promise<{ drift: string[]; incomplete: boolean }> {
+  const { previous, outputs, skipped, outputRoot, scope, dryRun } = options;
+  const drift: string[] = [];
+  const stale = await findStaleManifestFiles(previous, new Set(outputs.keys()), outputRoot, scope);
+  const removal = await removeStaleGeneratedFiles(
+    stale.unchanged.map((path) => ({ path, sha256: previous?.files[path]?.sha256 ?? '' })),
+    { outputRoot, dryRun }
+  );
+  for (const removedPath of removal.removed) {
+    drift.push(removedPath);
+    if (dryRun) {
+      ConsoleOutput.dryRun(`Would remove stale generated file: ${removedPath}`);
+    } else {
+      ConsoleOutput.muted(`Removed stale generated file: ${removedPath}`);
+    }
+  }
+  for (const removedDirectory of removal.removedDirectories) {
+    ConsoleOutput.muted(`Removed empty directory: ${removedDirectory}`);
+  }
+  for (const path of stale.edited) {
+    const absolutePath = resolve(outputRoot, path);
+    drift.push(absolutePath);
+    ConsoleOutput.warning(
+      `Kept stale generated file ${absolutePath}: it was edited after it was generated. Delete it by hand if it is not needed.`
+    );
+  }
+  if (removal.unresolvedSelfInvocation) {
+    ConsoleOutput.warn(
+      'Stale generated files were kept: this runtime cannot safely re-execute the CLI.'
+    );
+  }
+
+  // Stale files that are still there stay listed, so the next run sees them again.
+  const removedPaths = new Set(removal.removed);
+  const kept = [
+    ...stale.edited,
+    ...stale.unchanged.filter((path) => !removedPaths.has(resolve(outputRoot, path))),
+  ];
+  // A file the user chose to keep is theirs, so it never goes into the manifest.
+  const files = await buildGeneratedManifest(
+    previous,
+    [...outputs.values()].filter((output) => !skipped.has(resolve(outputRoot, output.path))),
+    outputRoot,
+    scope,
+    kept
+  );
+  const manifestPath = resolve(outputRoot, GENERATED_MANIFEST_FILE);
+  const content = renderGeneratedManifest(files);
+  const existing = await readFileOrUndefined(manifestPath);
+  if (existing !== content) {
+    if (dryRun) {
+      drift.push(manifestPath);
+      ConsoleOutput.dryRun(`Would write: ${manifestPath}`);
+    } else if (lstatSync(manifestPath, { throwIfNoEntry: false })?.isSymbolicLink()) {
+      ConsoleOutput.warning(`Skipped ${manifestPath}: it is a symbolic link.`);
+    } else {
+      await writeFile(manifestPath, content, 'utf-8');
+      ConsoleOutput.success(manifestPath);
+    }
+  }
+  return { drift, incomplete: removal.unresolvedSelfInvocation === true };
+}
+
+/**
+ * Skill files whose current content on disk belongs to PromptScript: marked,
+ * listed unchanged in the manifest, or already equal to the planned content.
+ */
+async function findOwnedSkillFiles(
+  skillFiles: ReadonlySet<string>,
+  outputs: Map<string, FormatterOutput>,
+  outputRoot: string | undefined,
+  manifest: GeneratedManifest | undefined
+): Promise<Set<string>> {
+  const owned = await Promise.all(
+    [...skillFiles].map(async (skillFile) => {
+      const path = outputRoot ? resolve(outputRoot, skillFile) : resolve(skillFile);
+      const content = await readFileOrUndefined(path);
+      if (content === undefined) return undefined;
+      const isOwned =
+        content === outputs.get(skillFile)?.content ||
+        isPromptScriptOwnedOutput(skillFile, content) ||
+        isOwnedByManifest(manifest, skillFile, content);
+      return isOwned ? skillFile : undefined;
+    })
+  );
+  return new Set(owned.filter((file): file is string => file !== undefined));
+}
+
+/** What decides whether an existing file may be overwritten. */
+interface WriteOwnership {
+  /** Compare byte for byte instead of ignoring marker lines */
+  exactCompare?: boolean;
+  /** Generated files manifest from the previous run */
+  manifest?: GeneratedManifest;
+}
+
 /**
  * Write output files to disk or show dry-run preview.
  * Handles overwrite protection for user files.
@@ -325,7 +449,8 @@ async function writeOutputs(
   outputs: Map<string, FormatterOutput>,
   options: CompileOptions,
   _config: PromptScriptConfig,
-  services: CliServices
+  services: CliServices,
+  ownership: WriteOwnership = {}
 ): Promise<WriteResult> {
   const result: WriteResult = { written: [], created: [], skipped: [], unchanged: [] };
   let overwriteAll = false;
@@ -334,6 +459,34 @@ async function writeOutputs(
   // `outputs` is produced from the finalized plan, so it already carries every
   // planned path and its write settings.
   const plannedOutputs = [...outputs.values()];
+  const skillResources = collectSkillResourcePaths(outputs.keys());
+  // A timestamp marker changes on every run, so such files are compared
+  // without markers. Static and missing markers are compared byte for byte,
+  // so switching the marker mode rewrites the old markers.
+  const sameContent = (existing: string, desired: string): boolean =>
+    ownership.exactCompare
+      ? existing === desired
+      : stripMarkers(existing) === stripMarkers(desired);
+
+  // Resource files carry no marker, so they belong to PromptScript when the
+  // skill file next to them does.
+  const ownedSkillFiles = await findOwnedSkillFiles(
+    new Set(skillResources.values()),
+    outputs,
+    options.output,
+    ownership.manifest
+  );
+
+  /**
+   * Whether an existing file belongs to PromptScript: it has a marker, the
+   * manifest lists it unchanged, or it is a resource of an owned skill.
+   */
+  const isOwned = (path: string, existing: string): boolean => {
+    if (isPromptScriptOwnedOutput(path, existing)) return true;
+    if (isOwnedByManifest(ownership.manifest, path, existing)) return true;
+    const skillFile = skillResources.get(path);
+    return skillFile !== undefined && ownedSkillFiles.has(skillFile);
+  };
 
   // Pre-flight: a target `output` comes from the config file, so a checked-in
   // path may point anywhere the user can write. Reject the whole run before
@@ -381,8 +534,7 @@ async function writeOutputs(
       if (!existsSync(outputPath)) continue;
       const existingContent = await readFileOrUndefined(outputPath);
       const contentMatches =
-        existingContent !== undefined &&
-        stripMarkers(existingContent) === stripMarkers(output.content);
+        existingContent !== undefined && sameContent(existingContent, output.content);
       if (contentMatches) continue;
       const existingHookOutputOwned =
         existingContent !== undefined &&
@@ -403,8 +555,7 @@ async function writeOutputs(
           : (mergePromptScriptHookOutput(output.path, existingContent, output.content) ??
             migratedCodexContent);
       if (mergedHookContent !== undefined || existingHookOutputOwned) continue;
-      if (existingContent !== undefined && isPromptScriptOwnedOutput(output.path, existingContent))
-        continue;
+      if (existingContent !== undefined && isOwned(output.path, existingContent)) continue;
       preflightConflicts.push(outputPath);
     }
     if (preflightConflicts.length > 0) {
@@ -489,8 +640,7 @@ async function writeOutputs(
     // generation marker. Rewriting such a file would change nothing but the
     // marker timestamp, so it is skipped in every mode, including --force.
     const contentMatches =
-      existingContent !== undefined &&
-      stripMarkers(existingContent) === stripMarkers(desiredContent);
+      existingContent !== undefined && sameContent(existingContent, desiredContent);
 
     if (options.dryRun) {
       // In dry-run mode, show what would happen
@@ -502,7 +652,7 @@ async function writeOutputs(
         result.unchanged.push(outputPath);
       } else if (
         existingContent !== undefined &&
-        (mergedHookContent !== undefined || isPromptScriptOwnedOutput(output.path, existingContent))
+        (mergedHookContent !== undefined || isOwned(output.path, existingContent))
       ) {
         ConsoleOutput.dryRun(`Would overwrite: ${outputPath}`);
         result.written.push(outputPath);
@@ -554,7 +704,7 @@ async function writeOutputs(
     }
 
     // File exists - check if it was generated by PromptScript
-    if (existingContent !== undefined && isPromptScriptOwnedOutput(output.path, existingContent)) {
+    if (existingContent !== undefined && isOwned(output.path, existingContent)) {
       // Content changed - write with new marker
       if (await safeOverwrite(output, outputPath, existingContent, desiredContent)) {
         ConsoleOutput.success(outputPath);
@@ -909,6 +1059,8 @@ async function compileCommandWithResult(
       logger,
       skillContent,
       ignoreHashes: options.ignoreHashes,
+      markers: config.output?.markers,
+      verbatimMarkdown: config.formatting?.postFormat === false,
     });
 
     const entry = buildProfile?.entry ?? config.input?.entry;
@@ -948,10 +1100,13 @@ async function compileCommandWithResult(
         `Configured output directory "${configuredOutput}" is outside the project root ${projectRoot}`
       );
     }
+    const check = options.check === true;
     const effectiveOptions = {
       ...options,
       output: resolveOutputBase(projectRoot, configuredOutput),
       force: options.force ?? config.output?.overwrite,
+      // --check plans everything like a dry run and writes nothing.
+      dryRun: options.dryRun === true || check,
     };
     // A home output root without a resource selection writes root
     // instruction files into the user's home; say so before it happens.
@@ -980,6 +1135,7 @@ async function compileCommandWithResult(
       projectRoot,
       logger,
       additionalOutputPaths: legacyMigration ? ['.factory/hooks.json'] : [],
+      postFormat: config.formatting?.postFormat,
     });
     let effectiveOutputs = finalized.outputs;
     if (legacyMigration?.settingsFolded) {
@@ -1021,7 +1177,20 @@ async function compileCommandWithResult(
         );
       }
     }
-    const writeResult = await writeOutputs(effectiveOutputs, effectiveOptions, config, services);
+    const markerMode = config.output?.markers ?? 'timestamp';
+    // A resource-only compile plans a part of the outputs, so it never reads
+    // or writes the manifest, like managed cleanup below.
+    const useManifest =
+      resourceKinds.size === 0 && (config.output?.manifest === true || markerMode === 'none');
+    const previousManifest = useManifest
+      ? await readGeneratedManifest(effectiveOptions.output)
+      : undefined;
+    const writeResult = await writeOutputs(effectiveOutputs, effectiveOptions, config, services, {
+      exactCompare: markerMode !== 'timestamp',
+      ...(previousManifest ? { manifest: previousManifest } : {}),
+    });
+    // Everything --check finds out of date: files to write, files to remove.
+    const drift: string[] = [...writeResult.written];
     if (legacyMigration) {
       if (writeResult.skipped.includes(legacyMigration.hooksPath)) {
         throw new Error(
@@ -1031,7 +1200,7 @@ async function compileCommandWithResult(
       await finishLegacyFactoryMigration(
         legacyMigration,
         effectiveOptions.output,
-        options.dryRun,
+        effectiveOptions.dryRun,
         writeResult.created.includes(legacyMigration.hooksPath)
       );
     }
@@ -1041,7 +1210,7 @@ async function compileCommandWithResult(
     if (resourceKinds.size > 0) {
       // Managed cleanup compares the disk against the full plan; a filtered
       // plan would classify unselected files as obsolete and delete them.
-      if (options.dryRun) {
+      if (effectiveOptions.dryRun) {
         ConsoleOutput.dryRun('Would skip managed cleanup for resource-only compile');
       } else {
         ConsoleOutput.muted('Skipped managed cleanup for resource-only compile');
@@ -1050,25 +1219,26 @@ async function compileCommandWithResult(
       const plannedOutputMap = new Map(finalized.outputs);
       const cleanupResult = await cleanupManagedOutputs(plannedOutputMap, {
         outputRoot: effectiveOptions.output,
-        dryRun: options.dryRun,
+        dryRun: effectiveOptions.dryRun,
         omittedDirectories: result.outputPlan?.omittedManagedDirectories,
       });
+      drift.push(...cleanupResult.removed, ...(cleanupResult.rewritten ?? []));
       for (const removedPath of cleanupResult.removed) {
-        if (options.dryRun) {
+        if (effectiveOptions.dryRun) {
           ConsoleOutput.dryRun(`Would remove obsolete generated file: ${removedPath}`);
         } else {
           ConsoleOutput.muted(`Removed obsolete generated file: ${removedPath}`);
         }
       }
       for (const removedDirectory of cleanupResult.removedDirectories) {
-        if (options.dryRun) {
+        if (effectiveOptions.dryRun) {
           ConsoleOutput.dryRun(`Would remove empty managed directory: ${removedDirectory}`);
         } else {
           ConsoleOutput.muted(`Removed empty managed directory: ${removedDirectory}`);
         }
       }
       for (const rewrittenPath of cleanupResult.rewritten ?? []) {
-        if (options.dryRun) {
+        if (effectiveOptions.dryRun) {
           ConsoleOutput.dryRun(`Would rewrite mixed managed hook file: ${rewrittenPath}`);
         } else {
           ConsoleOutput.muted(`Rewrote mixed managed hook file: ${rewrittenPath}`);
@@ -1081,11 +1251,42 @@ async function compileCommandWithResult(
         ConsoleOutput.warn(
           'Remove obsolete generated files (PromptScript marker header) under the output directory manually, or reinstall the CLI.'
         );
-        if (!options.dryRun) {
+        if (!effectiveOptions.dryRun) {
           process.exitCode = 1;
           cleanupIncomplete = true;
         }
       }
+    }
+    if (useManifest) {
+      const manifestResult = await syncGeneratedManifest({
+        previous: previousManifest,
+        outputs: finalized.outputs,
+        skipped: new Set(writeResult.skipped),
+        outputRoot: effectiveOptions.output,
+        scope: {
+          ...(options.build !== undefined ? { build: options.build } : {}),
+          ...(selectedTarget !== undefined ? { targets: new Set([selectedTarget]) } : {}),
+        },
+        dryRun: effectiveOptions.dryRun,
+      });
+      drift.push(...manifestResult.drift);
+      if (manifestResult.incomplete) {
+        process.exitCode = 1;
+        cleanupIncomplete = true;
+      }
+    }
+    if (check) {
+      spinner.stop();
+      const outdated = new Set(drift);
+      if (outdated.size > 0) {
+        ConsoleOutput.error(
+          `${outdated.size} generated file(s) out of date. Run prs compile to update them.`
+        );
+        process.exitCode = 1;
+        return false;
+      }
+      ConsoleOutput.success('Generated files are up to date');
+      return true;
     }
     // Report the outcome only after every output and cleanup step completed,
     // so a write-phase or cleanup failure never follows a success line.

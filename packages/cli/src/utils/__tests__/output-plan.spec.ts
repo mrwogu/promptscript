@@ -53,6 +53,19 @@ describe('finalizeOutputPlan', () => {
     expect(signatures[1]).toEqual(signatures[2]);
   });
 
+  it('skips the Prettier post-format when postFormat is false', async () => {
+    const finalized = await finalizeOutputPlan(createResult(), {
+      projectRoot: '/project',
+      logger: noopLogger,
+      postFormat: false,
+    });
+
+    expect(finalized.outputs.get('.github/instructions.md')?.content).toBe(
+      '<!-- PromptScript generated -->\nraw'
+    );
+    expect(finalized.warnings).toEqual([]);
+  });
+
   it('excludes output added after the compiler plan unless explicitly approved', async () => {
     const result = createResult();
     result.outputs.set('unplanned.md', {

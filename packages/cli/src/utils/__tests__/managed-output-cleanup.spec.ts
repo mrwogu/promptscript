@@ -15,8 +15,10 @@ import {
   removePromptScriptOwnedHooks,
   removeHookOutputIfUnchanged,
   removeIfUnchanged,
+  removeStaleGeneratedFiles,
   rewriteHookOutputIfUnchanged,
 } from '../managed-output-cleanup.js';
+import { createHash } from 'node:crypto';
 
 const GENERATED_MARKER =
   '<!-- PromptScript 2026-07-15T00:00:00.000Z | source: project.prs | target: factory - do not edit -->';
@@ -1425,6 +1427,67 @@ command = "echo owned # promptscript-generated:owned"
       });
 
       expect(result.removed).toEqual([]);
+    });
+  });
+
+  describe('removeStaleGeneratedFiles', () => {
+    const sha256 = (content: string): string => createHash('sha256').update(content).digest('hex');
+
+    it('removes unchanged files and the directories they leave empty', async () => {
+      const project = await createTemporaryDirectory('promptscript-stale-');
+      const skill = join(project, '.claude', 'skills', 'old');
+      await mkdir(join(skill, 'scripts'), { recursive: true });
+      await writeFile(join(skill, 'SKILL.md'), 'skill');
+      await writeFile(join(skill, 'scripts', 'run.sh'), 'run');
+      await writeFile(join(project, '.claude', 'keep.md'), 'keep');
+
+      const result = await removeStaleGeneratedFiles(
+        [
+          { path: '.claude/skills/old/SKILL.md', sha256: sha256('skill') },
+          { path: '.claude/skills/old/scripts/run.sh', sha256: sha256('run') },
+        ],
+        { outputRoot: project }
+      );
+
+      expect(result.removed).toEqual([join(skill, 'SKILL.md'), join(skill, 'scripts', 'run.sh')]);
+      expect(result.removedDirectories).toEqual(
+        expect.arrayContaining([skill, join(skill, 'scripts'), join(project, '.claude', 'skills')])
+      );
+      expect(await readFile(join(project, '.claude', 'keep.md'), 'utf-8')).toBe('keep');
+    });
+
+    it('keeps edited files, symlinks and paths outside the output root', async () => {
+      const project = await createTemporaryDirectory('promptscript-stale-');
+      await writeFile(join(project, 'edited.md'), 'edited');
+      await writeFile(join(project, 'target.md'), 'linked');
+      await symlink(join(project, 'target.md'), join(project, 'link.md'));
+
+      const result = await removeStaleGeneratedFiles(
+        [
+          { path: 'edited.md', sha256: sha256('generated') },
+          { path: 'link.md', sha256: sha256('linked') },
+          { path: '../outside.md', sha256: sha256('x') },
+          { path: 'missing.md', sha256: sha256('x') },
+        ],
+        { outputRoot: project }
+      );
+
+      expect(result.removed).toEqual([]);
+      expect(await readFile(join(project, 'edited.md'), 'utf-8')).toBe('edited');
+      expect((await lstat(join(project, 'link.md'))).isSymbolicLink()).toBe(true);
+    });
+
+    it('only reports in dry-run mode', async () => {
+      const project = await createTemporaryDirectory('promptscript-stale-');
+      await writeFile(join(project, 'old.md'), 'old');
+
+      const result = await removeStaleGeneratedFiles([{ path: 'old.md', sha256: sha256('old') }], {
+        outputRoot: project,
+        dryRun: true,
+      });
+
+      expect(result.removed).toEqual([join(project, 'old.md')]);
+      expect(await readFile(join(project, 'old.md'), 'utf-8')).toBe('old');
     });
   });
 

@@ -78,6 +78,11 @@ export interface CompileOptions {
   resources?: string[];
   /** Preview changes without writing files */
   dryRun?: boolean;
+  /**
+   * Write nothing and exit 1 when generated files are out of date: files to
+   * write or change, and stale generated files to remove.
+   */
+  check?: boolean;
   /** Migrate unambiguous legacy Factory settings hooks during compilation */
   migrateFactoryHooks?: boolean;
   /** Registry path or URL (overrides config) */

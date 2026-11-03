@@ -338,6 +338,86 @@ export function runManagedOutputWorkerProtocol(opArgs: string[], stdinContent?: 
   }
 }
 
+/** Operation that keeps one worker running for many guarded operations. */
+export const WORKER_SERVE_OPERATION = 'serve';
+
+/** One request of a serving worker, sent as one JSON line on stdin. */
+interface ServeRequest {
+  id: number;
+  /** Absolute directory the operation is pinned to, like the spawn cwd */
+  directory: string;
+  op: string;
+  args: string[];
+  /** File content, base64 */
+  content?: string;
+}
+
+function isServeRequest(value: unknown): value is ServeRequest {
+  if (typeof value !== 'object' || value === null) return false;
+  const request = value as Record<string, unknown>;
+  return (
+    typeof request['id'] === 'number' &&
+    typeof request['directory'] === 'string' &&
+    typeof request['op'] === 'string' &&
+    Array.isArray(request['args']) &&
+    request['args'].every((arg) => typeof arg === 'string') &&
+    (request['content'] === undefined || typeof request['content'] === 'string')
+  );
+}
+
+/**
+ * Run one request of a serving worker and return its JSON response line.
+ *
+ * The worker changes its cwd to the requested directory and then runs the
+ * same operation a spawned worker runs, so the operation still checks the
+ * device and inode of `.` before it touches anything. Only spawning a
+ * process per operation is gone.
+ */
+export function handleServeRequest(line: string): string {
+  let request: unknown;
+  try {
+    request = JSON.parse(line);
+  } catch {
+    return `${JSON.stringify({ id: -1, error: true })}\n`;
+  }
+  if (!isServeRequest(request)) {
+    return `${JSON.stringify({ id: -1, error: true })}\n`;
+  }
+  try {
+    process.chdir(request.directory);
+    const status = performManagedOutputOperation(
+      request.op,
+      request.args,
+      Buffer.from(request.content ?? '', 'base64')
+    );
+    return `${JSON.stringify({ id: request.id, status })}\n`;
+  } catch {
+    return `${JSON.stringify({ id: request.id, error: true })}\n`;
+  }
+}
+
+/**
+ * Answer JSON line requests from `input` until it closes. A spawned worker
+ * passes its stdin and stdout.
+ */
+export function serveRequests(
+  input: NodeJS.ReadableStream,
+  output: { write(chunk: string): unknown }
+): void {
+  let buffer = '';
+  input.setEncoding('utf-8');
+  input.on('data', (chunk: string) => {
+    buffer += chunk;
+    let newline = buffer.indexOf('\n');
+    while (newline !== -1) {
+      const line = buffer.slice(0, newline);
+      buffer = buffer.slice(newline + 1);
+      if (line.length > 0) output.write(handleServeRequest(line));
+      newline = buffer.indexOf('\n');
+    }
+  });
+}
+
 let dispatchedAsWorker = false;
 
 // Entry dispatch: runs when this process was spawned as a worker - either
@@ -349,7 +429,12 @@ let dispatchedAsWorker = false;
 // the dispatch so the CLI runner does not also parse the worker arguments.
 if (process.argv[2] === MANAGED_OUTPUT_WORKER_COMMAND) {
   dispatchedAsWorker = true;
-  process.exitCode = runManagedOutputWorkerProtocol(process.argv.slice(3));
+  if (process.argv[3] === WORKER_SERVE_OPERATION) {
+    /* v8 ignore next -- runs only in a spawned worker; serveRequests is tested in-process */
+    serveRequests(process.stdin, process.stdout);
+  } else {
+    process.exitCode = runManagedOutputWorkerProtocol(process.argv.slice(3));
+  }
 }
 
 /**

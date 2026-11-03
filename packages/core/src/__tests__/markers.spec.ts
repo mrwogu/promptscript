@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  collectSkillResourcePaths,
   isGeneratedByPromptScript,
+  markerStamp,
   stripFrontmatterMarkerLines,
   stripLeadingHtmlMarker,
   stripPromptScriptMarkers,
@@ -93,5 +95,59 @@ describe('stripLeadingHtmlMarker', () => {
     const body = `# Demo\n\nGenerated files start with ${HTML_MARKER}`;
 
     expect(stripLeadingHtmlMarker(body)).toBe(body);
+  });
+});
+
+describe('markerStamp', () => {
+  it('writes the word static in static mode', () => {
+    expect(markerStamp('static', '1700000000')).toBe('static');
+  });
+
+  it('uses SOURCE_DATE_EPOCH seconds in timestamp mode', () => {
+    expect(markerStamp('timestamp', ' 1700000000 ')).toBe('2023-11-14T22:13:20.000Z');
+  });
+
+  it('falls back to the clock for a missing or invalid epoch', () => {
+    expect(markerStamp('timestamp')).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(markerStamp('timestamp', '-5')).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('keeps a static marker detectable and strippable', () => {
+    const marker = `<!-- PromptScript ${markerStamp('static')} | source: a.prs | target: claude - do not edit -->`;
+    expect(isGeneratedByPromptScript(`${marker}\n# Title\n`)).toBe(true);
+    expect(stripPromptScriptMarkers(`${marker}\n\nBody\n`)).toBe('Body\n');
+  });
+});
+
+describe('collectSkillResourcePaths', () => {
+  it('maps files in a skill directory to their skill file', () => {
+    const resources = collectSkillResourcePaths([
+      'CLAUDE.md',
+      '.claude/skills/a/SKILL.md',
+      '.claude/skills/a/templates/report.md',
+      '.claude/skills/a/scripts/run.sh',
+      '.claude/skills/ab/SKILL.md',
+      '.claude/agents/reviewer.md',
+    ]);
+    expect([...resources.entries()]).toEqual([
+      ['.claude/skills/a/templates/report.md', '.claude/skills/a/SKILL.md'],
+      ['.claude/skills/a/scripts/run.sh', '.claude/skills/a/SKILL.md'],
+    ]);
+  });
+
+  it('gives a nested skill its own files', () => {
+    const resources = collectSkillResourcePaths([
+      'skills/outer/SKILL.md',
+      'skills/outer/inner/skill.md',
+      'skills/outer/inner/data.txt',
+      'skills/outer/data.txt',
+    ]);
+    expect(resources.get('skills/outer/inner/data.txt')).toBe('skills/outer/inner/skill.md');
+    expect(resources.get('skills/outer/data.txt')).toBe('skills/outer/SKILL.md');
+    expect(resources.has('skills/outer/inner/skill.md')).toBe(false);
+  });
+
+  it('ignores a skill file at the output root', () => {
+    expect(collectSkillResourcePaths(['SKILL.md', 'README.md']).size).toBe(0);
   });
 });

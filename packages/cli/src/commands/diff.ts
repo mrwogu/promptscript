@@ -296,6 +296,7 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
       projectRoot,
       logger,
       additionalOutputPaths: hasFactoryTarget ? ['.factory/hooks.json'] : [],
+      postFormat: config.formatting?.postFormat,
     });
 
     if (isJsonFormat) {

@@ -75,6 +75,12 @@ export interface FormatOptions {
   models?: ModelsConfig;
 
   /**
+   * Keep skill, agent and command bodies as written. Formatters skip their
+   * Prettier-style markdown normalization for these files.
+   */
+  verbatimMarkdown?: boolean;
+
+  /**
    * Provenance of the resolved program. Only the prompt targets read it, and the compilers pass
    * it only to them, after rewriting every file so no machine path remains.
    */

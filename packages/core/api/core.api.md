@@ -515,6 +515,9 @@ export function collectProvenanceEvents(body: BlockBody | undefined, targetPath:
 export function collectProvenanceValueEvents(node: ValueNode, targetPath: string, source: SourceLocation): ProvenanceEvent[];
 
 // @internal
+export function collectSkillResourcePaths(paths: Iterable<string>): Map<string, string>;
+
+// @internal
 export function compareCodeUnits(a: string, b: string): number;
 
 // @internal
@@ -1317,6 +1320,7 @@ export function formatProfileEntry(candidate: ModelDriftCandidate, pricesChecked
 
 // @public
 export interface FormattingConfig {
+    postFormat?: boolean;
     prettier?: boolean | string | PrettierMarkdownOptions;
     printWidth?: PrettierMarkdownOptions['printWidth'];
     proseWrap?: PrettierMarkdownOptions['proseWrap'];
@@ -3046,6 +3050,12 @@ export function mapModelToTarget(reference: string, target: string, catalog?: Mo
 export const MARKDOWN_CONVENTION: OutputConvention;
 
 // @public
+export type MarkerMode = 'timestamp' | 'static' | 'none';
+
+// @internal
+export function markerStamp(mode: MarkerMode, sourceDateEpoch?: string): string;
+
+// @public
 export const MAX_APPROVER_LENGTH = 101;
 
 // @public
@@ -3929,6 +3939,8 @@ export interface PromptScriptConfig {
         header?: string;
         overwrite?: boolean;
         resources?: OutputResourceKind[];
+        markers?: 'timestamp' | 'static' | 'none';
+        manifest?: boolean;
     };
     policies?: PolicyDefinition[];
     registries?: RegistriesConfig;

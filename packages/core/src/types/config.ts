@@ -42,6 +42,14 @@ export interface FormattingConfig {
    * Explicit printWidth setting (shorthand for prettier.printWidth).
    */
   printWidth?: PrettierMarkdownOptions['printWidth'];
+
+  /**
+   * Run Prettier over generated markdown after compilation and normalize
+   * skill, agent and command bodies for it. Set to `false` to keep bodies as
+   * written. Skill resource files are never reformatted.
+   * @default true
+   */
+  postFormat?: boolean;
 }
 
 /**
@@ -577,6 +585,26 @@ export interface PromptScriptConfig {
      * directories without unrelated root instruction files.
      */
     resources?: OutputResourceKind[];
+    /**
+     * How generated files are marked.
+     * - `timestamp` (default): marker with the generation time. A set
+     *   `SOURCE_DATE_EPOCH` replaces the clock.
+     * - `static`: marker without a time, so the output is reproducible.
+     * - `none`: no marker. Ownership of generated files comes from the
+     *   generated files manifest, which is then always written.
+     * Skill resource files never get a marker.
+     * @default 'timestamp'
+     */
+    markers?: 'timestamp' | 'static' | 'none';
+    /**
+     * Write a manifest of generated files (`.promptscript-generated.json`) in
+     * the output directory. The next compile removes files that are listed in
+     * the old manifest but no longer generated, when they were not edited
+     * since. `prs compile --check` also reports them. Always on when
+     * `markers` is `none`.
+     * @default false
+     */
+    manifest?: boolean;
   };
 
   /**

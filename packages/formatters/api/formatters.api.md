@@ -942,6 +942,7 @@ export interface FormatOptions {
     prettier?: PrettierMarkdownOptions;
     provenance?: ProvenanceTrace;
     targetConfig?: TargetConfig;
+    verbatimMarkdown?: boolean;
     version?: string;
 }
 
