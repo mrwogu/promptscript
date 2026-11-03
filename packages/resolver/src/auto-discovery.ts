@@ -69,6 +69,7 @@ async function buildDiscoveredSkill(
     skillProps['content'] = makeTextContent(parsed.content, skillMdPath);
   }
   addParsedSkillMetadata(skillProps, parsed);
+  skillProps['__baseSource'] = skillMdPath;
 
   const collected = await collectSkillResources(skillMdPath, parsed, logger);
   if (collected.errors.length > 0) {
