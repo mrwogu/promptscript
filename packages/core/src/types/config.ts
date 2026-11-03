@@ -123,6 +123,19 @@ export interface TargetConfig {
   includeSkills?: boolean | string[];
 
   /**
+   * Controls which agents are emitted for this target.
+   * - `true` or omitted: emit all agents
+   * - `false`: emit no agents
+   * - string array: emit only the listed agent names
+   */
+  includeAgents?: boolean | string[];
+
+  /**
+   * Agent names never emitted for this target. Applied after `includeAgents`.
+   */
+  excludeAgents?: string[];
+
+  /**
    * Gemini skill path selection.
    * - `agents`: use `.agents/skills/` (interoperable, fixture-confirmed default)
    * - `gemini`: use `.gemini/skills/` (legacy)

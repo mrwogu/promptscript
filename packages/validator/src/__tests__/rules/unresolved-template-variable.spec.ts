@@ -66,6 +66,22 @@ describe('PS045: unresolved-template-variable', () => {
     }
   );
 
+  it.each(['{{prs.dotDir}}', '{{prs.skillsDir}}', '{{prs.skillDir}}'])(
+    'leaves the target path token %s alone',
+    (token) => {
+      expect(run(identity(`Run ${token}/x/script.py`))).toEqual([]);
+    }
+  );
+
+  it('still reports an unknown prs token', () => {
+    const messages = run(identity('See {{prs.rootDir}}'));
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.message).toBe(
+      '{{prs.rootDir}} is not a template variable outside prompt text and is printed literally'
+    );
+  });
+
   it('reports every occurrence at its own line and column', () => {
     const messages = run(identity('{{one}}\nsecond {{two}}'));
 

@@ -746,6 +746,27 @@
           ],
           "description": "Controls which skills are emitted for this target.\n- `true` or omitted: emit all skills\n- `false`: emit no skills\n- string array: emit only the listed skill names"
         },
+        "includeAgents": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Controls which agents are emitted for this target.\n- `true` or omitted: emit all agents\n- `false`: emit no agents\n- string array: emit only the listed agent names"
+        },
+        "excludeAgents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Agent names never emitted for this target. Applied after `includeAgents`."
+        },
         "skillPath": {
           "type": "string",
           "enum": [

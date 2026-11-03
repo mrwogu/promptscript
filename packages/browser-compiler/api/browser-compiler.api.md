@@ -179,6 +179,8 @@ export interface ResolvedAST {
 export interface TargetConfig {
     convention?: string;
     enabled?: boolean;
+    excludeAgents?: string[];
+    includeAgents?: boolean | string[];
     includeSkills?: boolean | string[];
     output?: string;
     rulesMode?: FactoryRulesMode;

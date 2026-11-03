@@ -130,6 +130,45 @@ Target formatters then emit native paths such as:
 Gemini full mode emits interoperable `.agents/skills/<name>/skill.md` files alongside native
 commands under `.gemini/commands/`.
 
+## Path Tokens
+
+Skill text often points at the skill's own files. A fixed path like
+`.factory/skills/lint/check.py` is wrong once the same skill compiles for
+Claude Code. Write a path token instead and every target writes its own path:
+
+| Token               | Claude Code example   | Factory example        |
+| ------------------- | --------------------- | ---------------------- |
+| `{{prs.dotDir}}`    | `.claude`             | `.factory`             |
+| `{{prs.skillsDir}}` | `.claude/skills`      | `.factory/skills`      |
+| `{{prs.skillDir}}`  | `.claude/skills/lint` | `.factory/skills/lint` |
+
+```promptscript
+@skills {
+  lint: {
+    description: "Lint changed files"
+    content: """
+      Run `python {{prs.skillDir}}/check.py` on the changed files.
+      For formatting use the script in {{prs.skillsDir}}/format.
+    """
+  }
+}
+```
+
+<!-- playground-link-start -->
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fH344AGtoKGVAq14oCHYw6uDgqThGagg0LAg2FJAAGXqsHRwMVnVpFX04POadNg4G8JBYlZq5gCUPXgADNEdcI2BgGjgKMoqAEQhqfPyAekYcGEZSqkcdwxtnkbGJmUgsDOcTmADFmNQVBCSNhuuNeG44HZbLJ2p1hvVeMdTudylBKtdbg8wNDsBQQctVnFCgUQPkALoMThYaiOfBEUjkGBUWggBgANxgtB6rHwqTpQA" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
+</a>
+<!-- playground-link-end -->
+
+Tokens work in every generated file, so agents and commands can use
+`{{prs.dotDir}}` and `{{prs.skillsDir}}` too. `{{prs.skillsDir}}` follows
+`skillBaseDir` when it is set. `{{prs.skillDir}}` has a value only in the files
+of a skill directory; anywhere else, and for a target without such a
+directory, the token stays as written and compilation reports a `PS4002`
+warning. Only these exact tokens are replaced, other `{{...}}` text such as
+Mermaid hexagons `{{"label"}}` is not touched. Write `\{{prs.dotDir}}` to keep
+the token itself in the output.
+
 ## Filter Skills Per Target
 
 ```yaml

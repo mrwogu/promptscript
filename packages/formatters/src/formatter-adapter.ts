@@ -5,6 +5,7 @@ import {
   toLegacyProgram,
   type ProgramInput,
 } from '@promptscript/core';
+import { resolveOutputPathTokens } from './path-tokens.js';
 import { appendResourceCapabilityWarnings } from './resource-capability-warnings.js';
 import type {
   CanonicalFormatter,
@@ -26,14 +27,15 @@ export function isLegacyFormatter(formatter: Formatter): formatter is LegacyForm
 }
 
 /**
- * Format a program and report authored resource blocks the target drops.
+ * Format a program, resolve `{{prs.*}}` path tokens for the target, and
+ * report authored resource blocks the target drops.
  */
 export function formatProgram(
   formatter: Formatter,
   ast: ProgramInput,
   options?: FormatOptions
 ): FormatterOutput {
-  const output = runFormatter(formatter, ast, options);
+  const output = resolveOutputPathTokens(runFormatter(formatter, ast, options), formatter, options);
   const program = isCanonicalProgram(ast) ? toLegacyProgram(ast) : ast;
   return appendResourceCapabilityWarnings(output, program, formatter.name, options?.version);
 }

@@ -943,6 +943,16 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Dot directory of the target, by default the parent of a `<dir>/skills`
+   * skill base path, or null when there is none.
+   */
+  getDotDir(): string | null {
+    const skillBasePath = this.getSkillBasePath();
+    if (!skillBasePath?.endsWith('/skills')) return null;
+    return skillBasePath.slice(0, -'/skills'.length);
+  }
+
+  /**
    * How this formatter handles skill references.
    * - 'directory': emit as separate files in references/ subdirectory
    * - 'inline': append as sections in the main output file

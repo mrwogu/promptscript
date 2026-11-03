@@ -199,8 +199,10 @@ export { OutputPlanPathError }
 export interface TargetConfig {
     convention?: string;
     enabled?: boolean;
+    excludeAgents?: string[];
     guardsAsSkills?: boolean;
     guardsSkillsListing?: boolean;
+    includeAgents?: boolean | string[];
     includeSkills?: boolean | string[];
     output?: string;
     rulesMode?: FactoryRulesMode;

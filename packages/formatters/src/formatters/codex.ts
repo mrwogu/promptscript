@@ -19,6 +19,7 @@ import {
   type McpServerDefinition,
 } from '../mcp-helpers.js';
 import { findPluginsBlock, extractPlugins, serializePluginsToJson } from '../plugin-helpers.js';
+import { applyAgentTargeting } from '../agent-targeting.js';
 
 /**
  * Supported Codex output format versions.
@@ -374,10 +375,16 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
     };
   }
 
+  /** Codex keeps its own files in `.codex`; skills live in `.agents/skills`. */
+  override getDotDir(): string | null {
+    return '.codex';
+  }
+
   /**
    * Override format to inject additional agent fields from the AST.
    */
-  override format(ast: Program, options?: FormatOptions): FormatterOutput {
+  override format(input: Program, options?: FormatOptions): FormatterOutput {
+    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     const version = this.resolveVersion(options?.version);
 
     // For simple mode, just emit AGENTS.md
