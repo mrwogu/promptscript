@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Block, Program, SourceLocation, TargetConfig, Value } from '@promptscript/core';
 import {
+  AntigravityFormatter,
   ClaudeFormatter,
   CodexFormatter,
   CursorFormatter,
@@ -111,6 +112,26 @@ describe('path tokens', () => {
       )
     ).toContain('Settings are in .cursor.');
     expect(new CodexFormatter().getDotDir()).toBe('.codex');
+    expect(new AntigravityFormatter().getDotDir()).toBe('.agent');
+  });
+
+  it('keeps tokens of a plain formatter without skill or dot directory', () => {
+    const plain = {
+      name: 'plain',
+      outputPath: 'OUT.md',
+      description: 'Plain',
+      defaultConvention: 'markdown',
+      format: (): FormatterOutput => ({ path: 'OUT.md', content: 'In {{prs.dotDir}}.' }),
+    } as unknown as Formatter;
+    const output = formatProgram(plain, makeProgram());
+
+    expect(output.content).toBe('In {{prs.dotDir}}.');
+    expect(output.warnings).toContainEqual(
+      expect.objectContaining({
+        code: 'PS4002',
+        suggestion: 'Target "plain" has no such directory. Remove the token for this target.',
+      })
+    );
   });
 
   it('warns and keeps skillDir outside a skill directory', () => {
