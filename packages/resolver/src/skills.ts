@@ -1,6 +1,6 @@
 import { readFile, readdir, access, lstat, realpath } from 'node:fs/promises';
 import { basename, resolve, dirname, relative, isAbsolute, sep } from 'node:path';
-import { isAlias, isCollection, isNode, isPair, isSeq, parseDocument } from 'yaml';
+import { isAlias, isCollection, isMap, isNode, isPair, isScalar, isSeq, parseDocument } from 'yaml';
 import {
   isGeneratedByPromptScript,
   ResolveError,
@@ -1817,6 +1817,13 @@ export interface NativeSkillOptions {
   projectRoot?: string;
   /** Logger for reporting skipped files and resolution decisions. */
   logger?: Logger;
+  /**
+   * Add skills found in the skills directories that the file does not
+   * declare. Defaults to true. The resolver turns it off for imported files,
+   * so each found skill is added once, by the entry file, and two fragments
+   * with `@skills` do not both carry it.
+   */
+  discoverUndeclared?: boolean;
 }
 
 /**
@@ -1936,6 +1943,60 @@ async function discoverSkillDirs(basePath: string): Promise<Map<string, string>>
 }
 
 /**
+ * The .prs description wins over the SKILL.md one. Formatters copy the raw
+ * SKILL.md frontmatter, so the description in it is replaced too, and a
+ * warning names both files when the two texts differ.
+ */
+function rawFrontmatterWithPrsDescription(
+  rawFrontmatter: string,
+  nativeDescription: string | undefined,
+  skill: Record<string, Value>,
+  skillName: string,
+  skillMdPath: string,
+  logger: Logger
+): string {
+  const prsDescription = skill['description'];
+  if (typeof prsDescription !== 'string' || prsDescription.trim() === '') return rawFrontmatter;
+  if (nativeDescription === undefined || nativeDescription.trim() === prsDescription.trim()) {
+    return rawFrontmatter;
+  }
+
+  const updated = replaceFrontmatterDescription(rawFrontmatter, prsDescription);
+  // The entry file resolves imported skills again; warn once per change.
+  if (skill['__rawFrontmatter'] !== updated) {
+    const prsFile =
+      typeof skill['__baseSource'] === 'string' ? skill['__baseSource'] : 'the .prs file';
+    logger.warn(
+      `Skill '${skillName}': description in ${prsFile} differs from ${skillMdPath}. ` +
+        'Using the .prs description.'
+    );
+  }
+  return updated;
+}
+
+/**
+ * Replace the top-level `description` value of raw YAML frontmatter, keeping
+ * the rest of the text as it is.
+ */
+function replaceFrontmatterDescription(rawFrontmatter: string, description: string): string {
+  // The raw text was already parsed as a valid SKILL.md frontmatter mapping.
+  const document = parseDocument(rawFrontmatter);
+  const items = isMap(document.contents) ? document.contents.items : [];
+  const value = items.find((item) => isScalar(item.key) && item.key.value === 'description')?.value;
+  if (!isNode(value) || !value.range) return rawFrontmatter;
+
+  const [start, end] = value.range;
+  const original = rawFrontmatter.slice(start, end);
+  const trailing = original.endsWith('\n') ? '\n' : '';
+  return (
+    rawFrontmatter.slice(0, start) +
+    JSON.stringify(description) +
+    trailing +
+    rawFrontmatter.slice(end)
+  );
+}
+
+/**
  * Resolve native SKILL.md files for skills defined in the AST.
  *
  * For each skill in the @skills block, checks if a corresponding SKILL.md
@@ -1997,7 +2058,7 @@ export async function resolveNativeSkills(
       const discovered = await discoverSkillDirs(dir);
       for (const [skillName, skillDir] of discovered) {
         // Only add if not already declared in @skills block
-        if (!Object.hasOwn(updatedProperties, skillName)) {
+        if (options?.discoverUndeclared !== false && !Object.hasOwn(updatedProperties, skillName)) {
           logger.verbose(`Auto-discovered skill: ${skillName} (from ${skillDir})`);
           updatedProperties[skillName] = {};
           hasUpdates = true;
@@ -2130,7 +2191,14 @@ export async function resolveNativeSkills(
         }
 
         if (parsed.rawFrontmatter !== undefined) {
-          updatedSkill['__rawFrontmatter'] = parsed.rawFrontmatter;
+          updatedSkill['__rawFrontmatter'] = rawFrontmatterWithPrsDescription(
+            parsed.rawFrontmatter,
+            parsed.description,
+            skillObj,
+            skillName,
+            skillMdPath,
+            logger
+          );
         }
 
         // Set license from SKILL.md frontmatter if present

@@ -1,4 +1,5 @@
 import type { Block, BlockContent, ClaudeVersion, Program, Value } from '@promptscript/core';
+import { splitToolList } from '@promptscript/core';
 import { BaseFormatter } from '../base-formatter.js';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import type { FormatOptions, FormatterOutput } from '../types.js';
@@ -931,10 +932,7 @@ export class ClaudeFormatter extends BaseFormatter {
    */
   private parseStringArray(value: Value | undefined): string[] | undefined {
     if (typeof value === 'string') {
-      const arr = value
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+      const arr = splitToolList(value);
       return arr.length > 0 ? arr : undefined;
     }
     if (!value || !Array.isArray(value)) return undefined;

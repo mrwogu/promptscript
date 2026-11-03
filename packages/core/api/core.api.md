@@ -4434,6 +4434,9 @@ export interface SourceRange {
 }
 
 // @internal
+export function splitToolList(value: string): string[];
+
+// @internal
 export function stripFrontmatterMarkerLines(frontmatter: string): string;
 
 // @internal
