@@ -315,31 +315,45 @@ function isLikelyTechnicalContent(match: string): boolean {
 
 /**
  * camelCase or PascalCase identifier: letters only, at least two words.
+ * A word can be a single uppercase letter, like the `A` in `updateAUser`.
  */
-const IDENTIFIER_PATTERN = /^[A-Za-z][a-z]+(?:[A-Z][a-z]+)+$/;
+const IDENTIFIER_PATTERN = /^[A-Za-z][a-z]*(?:[A-Z][a-z]*)+$/;
 
 /**
- * Characters that can be part of a Base64 run.
+ * Longest letter run checked as an identifier. Longer runs are not code
+ * names, and the cap keeps the scan linear on huge letter-only runs.
  */
-const BASE64_RUN_CHAR = /[A-Za-z0-9+/=]/;
+const MAX_IDENTIFIER_LENGTH = 200;
+
+const LETTER = /[A-Za-z]/;
+const BASE64_NON_LETTER = /[0-9+/=]/;
 
 /**
- * Check if a candidate Base64 match is part of a long code identifier,
+ * Check if a Base64 match at `index` is part of a long code identifier,
  * like `updatePaymentVariantSelectListItems`.
  *
  * The whole run around the match is checked, because the Base64 pattern
  * can cut an identifier in the middle of a word. Real Base64 almost always
  * has digits, `+`, `/` or `=`, and random letters rarely split into words
  * that each have a vowel.
+ *
+ * Only for the generic long-Base64 warning. A run that looks like an
+ * identifier can still decode to a payload, so the decode check ignores it.
  */
-function isLikelyIdentifier(text: string, match: string): boolean {
-  const index = text.indexOf(match);
-  if (index === -1) return false;
-
+function isLikelyIdentifier(text: string, index: number, length: number): boolean {
   let start = index;
-  while (start > 0 && BASE64_RUN_CHAR.test(text.charAt(start - 1))) start--;
-  let end = index + match.length;
-  while (end < text.length && BASE64_RUN_CHAR.test(text.charAt(end))) end++;
+  while (start > 0 && LETTER.test(text.charAt(start - 1))) {
+    start--;
+    if (index + length - start > MAX_IDENTIFIER_LENGTH) return false;
+  }
+  if (start > 0 && BASE64_NON_LETTER.test(text.charAt(start - 1))) return false;
+
+  let end = index + length;
+  while (end < text.length && LETTER.test(text.charAt(end))) {
+    end++;
+    if (end - start > MAX_IDENTIFIER_LENGTH) return false;
+  }
+  if (end < text.length && BASE64_NON_LETTER.test(text.charAt(end))) return false;
 
   const run = text.substring(start, end);
   if (!IDENTIFIER_PATTERN.test(run)) return false;
@@ -400,7 +414,6 @@ function isLikelyLegitimateBase64(text: string, match: string): boolean {
   if (precedingText.includes('data:text/')) return true;
 
   if (isLikelyTechnicalContent(match)) return true;
-  if (isLikelyIdentifier(text, match)) return true;
   if (isLikelyBioSequence(text, match)) return true;
 
   return false;
@@ -682,9 +695,12 @@ export const obfuscatedContent: ValidationRule = {
           return;
         }
 
-        const longBase64Match = (text.match(BASE64_PATTERN) || []).find(
-          (m) => m.length >= MIN_ENCODED_LENGTH * 2 && !isLikelyLegitimateBase64(text, m)
-        );
+        const longBase64Match = [...text.matchAll(BASE64_PATTERN)].find(
+          (m) =>
+            m[0].length >= MIN_ENCODED_LENGTH * 2 &&
+            !isLikelyLegitimateBase64(text, m[0]) &&
+            !isLikelyIdentifier(text, m.index, m[0].length)
+        )?.[0];
 
         if (longBase64Match && encodedMatches.length === 0) {
           const snippet =

@@ -1926,6 +1926,7 @@ describe('obfuscated-content rule (PS012)', () => {
     it.each([
       ['a long camelCase method', 'Call updatePaymentVariantSelectListItems() here.'],
       ['a long PascalCase class', 'See ExtCustomersAccountConfiguration for details.'],
+      ['an identifier with a one-letter word', 'Call updateAUserAccountConfigurationSettings.'],
       [
         'a PascalCase class longer than 64 chars',
         'Extend ExtCustomersAccountConfigurationUpdatePaymentVariantSelectListItemsHandler.',
@@ -1953,6 +1954,37 @@ describe('obfuscated-content rule (PS012)', () => {
       obfuscatedContent.validate(ctx);
 
       expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
+    });
+
+    it('should check each run at its own position', () => {
+      // Both runs share the first 32 characters, the second one ends with a digit.
+      const text =
+        'Call updatePaymentVariantSelectListItems and updatePaymentVariantSelectListIt1.';
+      const { ctx, messages } = createRuleContext(
+        createTestProgram({
+          blocks: [createTextBlock('@knowledge', text)],
+        })
+      );
+
+      obfuscatedContent.validate(ctx);
+
+      expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
+    });
+
+    it('should still decode identifier-shaped Base64 and report the payload', () => {
+      // Letters only and camel-shaped, but decodes to "bJailbreak  bbbbbbbbbbbb".
+      const run = 'YkphaWxicmVhayAgYmJiYmJiYmJiYmJi';
+      const { ctx, messages } = createRuleContext(
+        createTestProgram({
+          blocks: [createTextBlock('@skills', `Encoded: ${run}`)],
+        })
+      );
+
+      obfuscatedContent.validate(ctx);
+
+      expect(
+        messages.some((m) => m.message.includes('Base64') && m.message.includes('Decoded'))
+      ).toBe(true);
     });
 
     it('should still flag camel-shaped runs with words that have no vowels', () => {
