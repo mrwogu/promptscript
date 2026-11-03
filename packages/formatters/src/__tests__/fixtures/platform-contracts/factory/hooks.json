@@ -1,17 +1,15 @@
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Execute",
-        "commandRegex": "^git ",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/local/bin/audit-git-command.sh",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
-  }
+  "PreToolUse": [
+    {
+      "matcher": "Execute",
+      "commandRegex": "^git ",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "/usr/local/bin/audit-git-command.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ]
 }

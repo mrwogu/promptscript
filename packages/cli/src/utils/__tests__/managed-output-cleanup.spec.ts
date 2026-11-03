@@ -458,6 +458,60 @@ describe('cleanupManagedOutputs', () => {
     expect(JSON.parse(merged!)).toEqual({ model: 'claude-sonnet-4-5', hooks: { Stop: [] } });
   });
 
+  describe('Factory hooks.json shape (#752)', () => {
+    const owned = {
+      matcher: '.*',
+      hooks: [{ type: 'command', command: 'lint # promptscript-generated:lint' }],
+    };
+    const user = { matcher: 'Execute', hooks: [{ type: 'command', command: 'audit.sh' }] };
+
+    it('should treat bare and old wrapped owned files as PromptScript output', () => {
+      expect(
+        isPromptScriptOwnedHookOutput(
+          '.factory/hooks.json',
+          JSON.stringify({ PreToolUse: [owned] })
+        )
+      ).toBe(true);
+      expect(
+        isPromptScriptOwnedHookOutput(
+          '.factory/hooks.json',
+          JSON.stringify({ hooks: { PreToolUse: [owned] } })
+        )
+      ).toBe(true);
+      expect(
+        isPromptScriptOwnedHookOutput(
+          '.factory/hooks.json',
+          JSON.stringify({ PreToolUse: [owned, user] })
+        )
+      ).toBe(false);
+    });
+
+    it('should merge into a bare or wrapped file and write the bare shape', () => {
+      const generated = JSON.stringify({ PreToolUse: [owned] });
+      for (const existing of [{ PreToolUse: [user] }, { hooks: { PreToolUse: [user] } }]) {
+        const merged = mergePromptScriptHookOutput(
+          '.factory/hooks.json',
+          JSON.stringify(existing),
+          generated
+        );
+        expect(JSON.parse(merged!)).toEqual({ PreToolUse: [user, owned] });
+      }
+    });
+
+    it('should prune owned hooks and keep the bare shape', () => {
+      const pruned = removePromptScriptOwnedHooks(
+        '.factory/hooks.json',
+        JSON.stringify({ hooks: { PreToolUse: [user, owned] } })
+      );
+
+      expect(pruned?.empty).toBe(false);
+      expect(JSON.parse(pruned!.content)).toEqual({ PreToolUse: [user] });
+      expect(
+        removePromptScriptOwnedHooks('.factory/hooks.json', JSON.stringify({ Stop: [owned] }))
+      ).toMatchObject({ empty: true });
+    });
+  });
+
   it('should reject malformed hook output contracts', () => {
     expect(isHookOutputPath('.github/hooks/promptscript.json')).toBe(true);
     expect(isHookOutputPath('.codex/config.toml')).toBe(true);

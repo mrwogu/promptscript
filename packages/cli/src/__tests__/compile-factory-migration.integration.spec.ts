@@ -93,16 +93,18 @@ describe('compile Factory hook migration', () => {
       permissions: { allow: ['Read'] },
     });
     const firstCanonical = await readFile(join(directory, '.factory', 'hooks.json'), 'utf-8');
+    // hooks.json is the bare event map Factory reads (#752)
     const parsed = JSON.parse(firstCanonical) as {
-      hooks: { PreToolUse: Array<{ hooks: Array<{ command: string }> }> };
+      PreToolUse: Array<{ hooks: Array<{ command: string }> }>;
     };
+    expect(parsed).not.toHaveProperty('hooks');
     expect(
-      parsed.hooks.PreToolUse.flatMap((entry) => entry.hooks).filter(
+      parsed.PreToolUse.flatMap((entry) => entry.hooks).filter(
         (handler) => handler.command === 'audit'
       )
     ).toHaveLength(1);
     expect(
-      parsed.hooks.PreToolUse.flatMap((entry) => entry.hooks).filter((handler) =>
+      parsed.PreToolUse.flatMap((entry) => entry.hooks).filter((handler) =>
         handler.command.endsWith('# promptscript-generated:check')
       )
     ).toHaveLength(1);
@@ -113,7 +115,7 @@ describe('compile Factory hook migration', () => {
       await readFile(join(directory, '.factory', 'hooks.json'), 'utf-8')
     ) as typeof parsed;
     expect(
-      secondCanonical.hooks.PreToolUse.flatMap((entry) => entry.hooks).filter(
+      secondCanonical.PreToolUse.flatMap((entry) => entry.hooks).filter(
         (handler) => handler.command === 'audit'
       )
     ).toHaveLength(1);

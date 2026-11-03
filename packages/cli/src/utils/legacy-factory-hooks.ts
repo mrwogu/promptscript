@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { isPromptScriptHookCommand } from '../hooks/tool-configs/claude.js';
 import { mergeGeneratedSettings } from './managed-output-cleanup.js';
+import { unwrapFactoryHooks, wrapFactoryHooks } from './factory-hooks-shape.js';
 import type { FormatterOutput } from '@promptscript/compiler';
 import type { FactoryHooksFile, TargetConfig } from '@promptscript/core';
 
@@ -349,7 +350,9 @@ export async function planLegacyFactoryHooksMigration(
   const canonical =
     generatedCanonicalContent === undefined
       ? {}
-      : parseJsonObject(generatedCanonicalContent, 'generated .factory/hooks.json');
+      : wrapFactoryHooks(
+          parseJsonObject(generatedCanonicalContent, 'generated .factory/hooks.json')
+        );
   const migration = migrateLegacyFactoryHooks(legacy, canonical, {
     preserveInstalledHooks: true,
     rejectMixedOwnership: true,
@@ -358,7 +361,8 @@ export async function planLegacyFactoryHooksMigration(
     settingsPath,
     hooksPath,
     expectedSettingsContent,
-    migration,
+    // The plan carries hooks.json in its on-disk shape, a bare event map.
+    migration: { ...migration, canonical: unwrapFactoryHooks(migration.canonical) },
   };
 }
 

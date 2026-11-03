@@ -20,6 +20,7 @@ import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invo
 import { compareCodeUnits, isPromptTarget, type OmittedManagedDirectory } from '@promptscript/core';
 import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
 import { isVerifiedPromptBundleOutput } from './prompt-bundle-ownership.js';
+import { isFactoryHooksPath, unwrapFactoryHooks, wrapFactoryHooks } from './factory-hooks-shape.js';
 
 const execFileAsync = promisify(execFile);
 const PROMPTSCRIPT_MARKER_PATTERNS = [
@@ -1099,11 +1100,8 @@ export function isPromptScriptOwnedHookOutput(path: string, content: string): bo
   if (!contract) return false;
 
   try {
-    const parsed: unknown = JSON.parse(content);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return false;
-    }
-    const object = parsed as Record<string, unknown>;
+    const object = parseHookOutputObject(normalizedPath, content);
+    if (!object) return false;
     if (Object.keys(object).some((field) => !contract.fields.has(field))) {
       return false;
     }
@@ -1134,8 +1132,8 @@ export function mergePromptScriptHookOutput(
 ): string | undefined {
   if (!isHookOutputPath(path)) return undefined;
 
-  const existing = parseJsonObject(existingContent);
-  const generated = parseJsonObject(generatedContent);
+  const existing = parseHookOutputObject(path, existingContent);
+  const generated = parseHookOutputObject(path, generatedContent);
   if (!existing || !generated) return undefined;
 
   const existingHooks = getJsonObject(existing['hooks']);
@@ -1161,10 +1159,10 @@ export function mergePromptScriptHookOutput(
 
   return (
     JSON.stringify(
-      {
+      toHookOutputShape(path, {
         ...mergeGeneratedSettings(existing, generated),
         hooks: mergeHookEvents(existingHooks ?? {}, generatedHooks),
-      },
+      }),
       null,
       2
     ) + '\n'
@@ -1317,7 +1315,7 @@ export function removePromptScriptOwnedHooks(
   const contract = getHookOutputContract(path.replaceAll('\\', '/'));
   if (!contract) return undefined;
 
-  const parsed = parseJsonObject(content);
+  const parsed = parseHookOutputObject(path, content);
   const hooks = parsed ? getJsonObject(parsed['hooks']) : undefined;
   if (!parsed || !hooks) return undefined;
 
@@ -1340,7 +1338,8 @@ export function removePromptScriptOwnedHooks(
   );
   const empty = Object.keys(remainingHooks).length === 0 && remainingTopLevel.length === 0;
   return {
-    content: JSON.stringify({ ...parsed, hooks: remainingHooks }, null, 2) + '\n',
+    content:
+      JSON.stringify(toHookOutputShape(path, { ...parsed, hooks: remainingHooks }), null, 2) + '\n',
     empty,
   };
 }
@@ -1405,6 +1404,21 @@ function pruneOwnedHookEntries(entries: unknown[]): PrunedHookEntries {
   }
 
   return { entries: remaining, removed };
+}
+
+/**
+ * Parse a hook output file into the `{ hooks: eventMap }` form the merge and
+ * ownership code works on. `.factory/hooks.json` is a bare event map on disk;
+ * the wrapped shape older versions wrote is read as well.
+ */
+function parseHookOutputObject(path: string, content: string): Record<string, unknown> | undefined {
+  const parsed = parseJsonObject(content);
+  return parsed && isFactoryHooksPath(path) ? wrapFactoryHooks(parsed) : parsed;
+}
+
+/** Back to the on-disk shape: a bare event map for `.factory/hooks.json`. */
+function toHookOutputShape(path: string, object: Record<string, unknown>): Record<string, unknown> {
+  return isFactoryHooksPath(path) ? unwrapFactoryHooks(object) : object;
 }
 
 function parseJsonObject(content: string): Record<string, unknown> | undefined {

@@ -87,7 +87,7 @@ sidebar:
 - Skills go to `.factory/skills/<name>/SKILL.md`
 - Agents are called "droids" - output to `.factory/droids/<name>.md`
 - Droid `model` and `specModel` values become API ids such as `claude-sonnet-4-5-20250929` or `gpt-5.3-codex`; `inherit` is written as is (see [Model Catalog](../models.md#target-model-names))
-- `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes
+- `@hooks` uses `.factory/hooks.json` with PascalCase event names in `multifile` and `full` modes. The file is keyed directly by event name (`{"PreToolUse": [...]}`); only `settings.json` wraps the map in `hooks`. A wrapped `hooks.json` from PromptScript 1.27 or earlier is read and rewritten in the bare shape
 - `pre-terminal-command` maps to `PreToolUse` with the deterministic `Execute` matcher unless `targets.factory.matcher` overrides it
 - Hook `matcher` values match Factory tool names (for example `Execute`, `Read`, `Edit|Write`); other targets use different tool-name vocabularies, so a matcher that works here may match nothing elsewhere
 - `.factory/settings.json` remains a Factory fallback; `prs hooks install factory` migrates its unambiguous hooks. `hooksFile: settings.json` writes `@hooks` there instead (see [Hooks File](#hooks-file))

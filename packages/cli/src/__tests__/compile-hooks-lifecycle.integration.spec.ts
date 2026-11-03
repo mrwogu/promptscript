@@ -249,14 +249,17 @@ describe('compile cross-target hook lifecycle', () => {
     });
     const factoryPath = join(fixture.directory, '.factory', 'hooks.json');
     const firstFactory = await readFile(factoryPath, 'utf8');
-    const parsedFactory = JSON.parse(firstFactory) as {
-      hooks: Record<string, Array<{ matcher?: string; hooks: Array<{ command: string }> }>>;
-    };
-    const portableFactoryEntry = parsedFactory.hooks['PreToolUse']!.find((entry) =>
+    // hooks.json is the bare event map Factory reads (#752)
+    const parsedFactory = JSON.parse(firstFactory) as Record<
+      string,
+      Array<{ matcher?: string; hooks: Array<{ command: string }> }>
+    >;
+    expect(parsedFactory).not.toHaveProperty('hooks');
+    const portableFactoryEntry = parsedFactory['PreToolUse']!.find((entry) =>
       entry.hooks.some((hook) => hook.command.endsWith('# promptscript-generated:portable-check'))
     );
     expect(portableFactoryEntry?.matcher).toBe('Execute');
-    expect(parsedFactory.hooks).not.toHaveProperty('SubagentStart');
+    expect(parsedFactory).not.toHaveProperty('SubagentStart');
     expect(firstFactory).toContain('audit-user-action');
     expect(firstFactory).toContain('factory check.py');
     expect(firstFactory).toContain('terminal-policy.mjs');

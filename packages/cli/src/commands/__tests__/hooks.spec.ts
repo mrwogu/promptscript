@@ -272,10 +272,12 @@ describe('hooksCommand', () => {
 
       await hooksCommand('install', 'factory', {});
 
-      const canonical = JSON.parse(files.get(`${process.cwd()}/.factory/hooks.json`)!) as {
-        hooks: Record<string, unknown[]>;
-      };
-      expect(canonical.hooks['PreToolUse']).toHaveLength(2);
+      const canonical = JSON.parse(files.get(`${process.cwd()}/.factory/hooks.json`)!) as Record<
+        string,
+        unknown[]
+      >;
+      expect(canonical['PreToolUse']).toHaveLength(2);
+      expect(canonical).not.toHaveProperty('hooks');
       expect(JSON.parse(files.get(legacyPath)!)).toEqual({
         permissions: { allow: ['Bash'] },
       });

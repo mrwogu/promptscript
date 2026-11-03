@@ -1,5 +1,6 @@
 import type { ToolHookConfig } from './types.js';
 import { isPrsHookEntry, removePromptScriptHooks } from './claude.js';
+import { unwrapFactoryHooks, wrapFactoryHooks } from '../../utils/factory-hooks-shape.js';
 
 function getHooksSection(existing: Record<string, unknown>): Record<string, unknown> {
   const hooks = existing['hooks'];
@@ -48,8 +49,11 @@ export const factoryConfig: ToolHookConfig = {
     };
   },
 
+  // hooks.json is a bare event map. Files written by older versions wrap it in
+  // `hooks`; both are read, the bare shape is written.
   mergeIntoSettings(existing: Record<string, unknown>, prsPath: string): Record<string, unknown> {
-    const hooksSection = getHooksSection(existing);
+    const wrapped = wrapFactoryHooks(existing);
+    const hooksSection = getHooksSection(wrapped);
     const preToolUse = getHookArray(hooksSection, 'PreToolUse');
     const postToolUse = getHookArray(hooksSection, 'PostToolUse');
 
@@ -61,23 +65,24 @@ export const factoryConfig: ToolHookConfig = {
       ? postToolUse
       : [...postToolUse, this.generatePostEditHook(prsPath)];
 
-    return {
-      ...existing,
+    return unwrapFactoryHooks({
+      ...wrapped,
       hooks: {
         ...hooksSection,
         PreToolUse: newPreToolUse,
         PostToolUse: newPostToolUse,
       },
-    };
+    });
   },
 
   removeFromSettings(existing: Record<string, unknown>): Record<string, unknown> {
-    const hooksSection = getHooksSection(existing);
+    const wrapped = wrapFactoryHooks(existing);
+    const hooksSection = getHooksSection(wrapped);
     const preToolUse = getHookArray(hooksSection, 'PreToolUse');
     const postToolUse = getHookArray(hooksSection, 'PostToolUse');
 
-    return {
-      ...existing,
+    return unwrapFactoryHooks({
+      ...wrapped,
       hooks: {
         ...hooksSection,
         PreToolUse: preToolUse.flatMap((entry) => {
@@ -89,6 +94,6 @@ export const factoryConfig: ToolHookConfig = {
           return cleaned === undefined ? [] : [cleaned];
         }),
       },
-    };
+    });
   },
 };

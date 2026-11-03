@@ -1154,7 +1154,8 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     } else if (factoryHooks) {
       files.push({
         path: '.factory/hooks.json',
-        content: JSON.stringify({ hooks: factoryHooks }, null, 2) + '\n',
+        // hooks.json is keyed directly by event name; only settings.json wraps it in `hooks`.
+        content: JSON.stringify(factoryHooks, null, 2) + '\n',
       });
     }
 

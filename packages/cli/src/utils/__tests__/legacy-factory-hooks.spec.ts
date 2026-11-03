@@ -520,7 +520,8 @@ describe('planLegacyFactoryHooksMigration', () => {
         ambiguous: [],
         legacy: { permissions: { allow: ['Read'] } },
       });
-      const hooks = plan?.migration.canonical['hooks'] as Record<string, unknown[]>;
+      // The plan holds hooks.json in its on-disk shape, the bare event map.
+      const hooks = plan?.migration.canonical as Record<string, unknown[]>;
       expect(hooks['PreToolUse']).toHaveLength(2);
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -615,7 +616,7 @@ describe('prepareLegacyFactoryMigration', () => {
       expect(plan?.migration.duplicates).toBe(1);
       expect(plan?.migration.legacy).toEqual({ model: 'user-model' });
       expect(JSON.parse(outputs.get('.factory/hooks.json')!.content)).toEqual(
-        JSON.parse(generatedHooks)
+        JSON.parse(generatedHooks).hooks
       );
     });
   });

@@ -7,6 +7,7 @@ import { ALL_TOOL_CONFIGS, getToolConfig } from '../hooks/tool-configs/index.js'
 import type { ToolHookConfig } from '../hooks/tool-configs/index.js';
 import { isPromptScriptHookCommand } from '../hooks/tool-configs/claude.js';
 import { migrateLegacyFactoryHooks } from '../utils/legacy-factory-hooks.js';
+import { unwrapFactoryHooks, wrapFactoryHooks } from '../utils/factory-hooks-shape.js';
 
 /**
  * Options for the hooks command.
@@ -85,7 +86,7 @@ async function migrateFactorySettings(cwd: string): Promise<void> {
 
   if (!Object.prototype.hasOwnProperty.call(legacy, 'hooks')) return;
 
-  const canonical = await readSettingsFile(canonicalPath);
+  const canonical = wrapFactoryHooks(await readSettingsFile(canonicalPath));
   const migration = migrateLegacyFactoryHooks(legacy, canonical);
   if (migration.ambiguous.length > 0) {
     throw new Error(
@@ -95,7 +96,7 @@ async function migrateFactorySettings(cwd: string): Promise<void> {
   }
   if (!migration.changed) return;
 
-  await writeSettingsFile(canonicalPath, migration.canonical);
+  await writeSettingsFile(canonicalPath, unwrapFactoryHooks(migration.canonical));
   await writeSettingsFile(legacyPath, migration.legacy);
   ConsoleOutput.success(
     `factory: migrated ${migration.migrated} legacy hook(s) to .factory/hooks.json`

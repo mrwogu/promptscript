@@ -821,10 +821,8 @@ describe('compile command - createCliLogger warn path', () => {
     const canonicalWrite = mockWriteFile.mock.calls.find(([path]) =>
       String(path).endsWith('.factory/hooks.json')
     );
-    const canonical = JSON.parse(String(canonicalWrite?.[1])) as {
-      hooks: { PreToolUse: unknown[] };
-    };
-    expect(canonical.hooks.PreToolUse).toHaveLength(2);
+    const canonical = JSON.parse(String(canonicalWrite?.[1])) as { PreToolUse: unknown[] };
+    expect(canonical.PreToolUse).toHaveLength(2);
     expect(mockRewriteHookOutputIfUnchanged).toHaveBeenCalledWith(
       '/mock/project/.factory/settings.json',
       '/mock/project',
@@ -889,7 +887,7 @@ describe('compile command - createCliLogger warn path', () => {
     const canonicalWrite = mockWriteFile.mock.calls.find(([path]) =>
       String(path).endsWith('.factory/hooks.json')
     );
-    expect(JSON.parse(String(canonicalWrite?.[1]))).toEqual(generatedHooks);
+    expect(JSON.parse(String(canonicalWrite?.[1]))).toEqual(generatedHooks.hooks);
     expect(
       mockWriteFile.mock.calls.some(([path]) => String(path).endsWith('.factory/settings.json'))
     ).toBe(false);
@@ -1058,7 +1056,7 @@ describe('compile command - createCliLogger warn path', () => {
     const entry = {
       hooks: [{ type: 'command', command: 'audit' }],
     };
-    const canonicalContent = JSON.stringify({ hooks: { PreToolUse: [entry] } }, null, 2) + '\n';
+    const canonicalContent = JSON.stringify({ PreToolUse: [entry] }, null, 2) + '\n';
     let hooksReads = 0;
     mockReadFile.mockImplementation(async (path: string) => {
       if (String(path).endsWith('.factory/hooks.json')) {

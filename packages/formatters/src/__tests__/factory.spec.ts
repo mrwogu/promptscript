@@ -3721,7 +3721,8 @@ license: MIT
         enabledPlugins: { 'standards@acme': true },
       });
       const hooks = result.additionalFiles?.find((f) => f.path === '.factory/hooks.json');
-      expect(JSON.parse(hooks!.content)).toEqual({ hooks: generatedHooks });
+      // #752: hooks.json is the bare event map, settings.json keeps the `hooks` key
+      expect(JSON.parse(hooks!.content)).toEqual(generatedHooks);
       expect(result.managedOutputFiles).toEqual(['.factory/hooks.json']);
     });
 
@@ -3795,19 +3796,17 @@ license: MIT
         const hooksFile = result.additionalFiles?.find((f) => f.path === '.factory/hooks.json');
         expect(hooksFile).toBeDefined();
         expect(JSON.parse(hooksFile!.content)).toEqual({
-          hooks: {
-            PreToolUse: [
-              {
-                matcher: '.*',
-                hooks: [
-                  {
-                    type: 'command',
-                    command: 'echo hello # promptscript-generated:my-hook',
-                  },
-                ],
-              },
-            ],
-          },
+          PreToolUse: [
+            {
+              matcher: '.*',
+              hooks: [
+                {
+                  type: 'command',
+                  command: 'echo hello # promptscript-generated:my-hook',
+                },
+              ],
+            },
+          ],
         });
       }
     );
