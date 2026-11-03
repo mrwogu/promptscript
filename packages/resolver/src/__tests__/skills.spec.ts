@@ -1408,6 +1408,36 @@ Generated skill content.
     });
   });
 
+  describe('repeated @skills blocks', () => {
+    it('should update only the first @skills block and keep the second as written', async () => {
+      const skillDir = join(registryPath, '@skills', 'test-skill');
+      await mkdir(skillDir, { recursive: true });
+      await writeFile(
+        join(skillDir, 'SKILL.md'),
+        '---\nname: test-skill\ndescription: Test\n---\n\nNative content.\n'
+      );
+      const first = createSkillsBlock({ 'test-skill': {} });
+      const second: Block = {
+        ...createSkillsBlock({ other: { description: 'Other skill' } }),
+        loc: { file: 'test.prs', line: 9, column: 1, offset: 80 },
+      };
+
+      const result = await resolveNativeSkills(
+        createProgram([first, second]),
+        registryPath,
+        join(testDir, 'test.prs')
+      );
+
+      expect(result.blocks).toHaveLength(2);
+      expect(result.blocks[0]).not.toBe(first);
+      expect(result.blocks[1]).toBe(second);
+      expect(result.blocks[1]!.loc.line).toBe(9);
+      expect(Object.keys((result.blocks[1]!.content as ObjectContent).properties)).toEqual([
+        'other',
+      ]);
+    });
+  });
+
   describe('preserves other blocks', () => {
     it('should not modify non-skills blocks', async () => {
       const skillDir = join(registryPath, '@skills', 'test-skill');
@@ -1961,6 +1991,31 @@ describe('resolveNativeCommands', () => {
     const ast = createProgram([]);
     const result = await resolveNativeCommands(ast, join(localPath, 'test.prs'), localPath);
     expect(result).toBe(ast);
+  });
+
+  it('should update only the first @shortcuts block when blocks repeat', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const commandsDir = join(localPath, 'commands');
+    await mkdir(commandsDir, { recursive: true });
+    await writeFile(join(commandsDir, 'deploy.md'), 'Deploy the application.');
+    const first = createShortcutsBlock({ '/first': 'First' });
+    const second: Block = {
+      ...createShortcutsBlock({ '/second': 'Second' }),
+      loc: { file: 'test.prs', line: 7, column: 1, offset: 60 },
+    };
+
+    const result = await resolveNativeCommands(
+      createProgram([first, second]),
+      join(localPath, 'test.prs'),
+      localPath
+    );
+
+    expect(result.blocks).toHaveLength(2);
+    expect(Object.keys((result.blocks[0]!.content as ObjectContent).properties)).toContain(
+      '/deploy'
+    );
+    expect(result.blocks[1]).toBe(second);
+    expect(result.blocks[1]!.loc.line).toBe(7);
   });
 
   it('should discover command files from .promptscript/commands/', async () => {

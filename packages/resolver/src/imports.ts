@@ -200,6 +200,6 @@ export function filterSkillsBlock(program: Program, options: SkillFilterOptions)
 
   return {
     ...program,
-    blocks: program.blocks.map((b) => (b.name === 'skills' ? newSkillsBlock : b)),
+    blocks: program.blocks.map((b) => (b === skillsBlock ? newSkillsBlock : b)),
   };
 }

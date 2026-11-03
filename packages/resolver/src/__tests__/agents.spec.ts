@@ -3,7 +3,7 @@ import { mkdtemp, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { resolveNativeAgents } from '../skills.js';
-import type { Program, ObjectContent, TextContent } from '@promptscript/core';
+import type { Block, Program, ObjectContent, TextContent } from '@promptscript/core';
 
 function emptyAst(sourceFile: string): Program {
   return {
@@ -38,6 +38,50 @@ describe('resolveNativeAgents', () => {
     const ast = emptyAst(join(localPath, 'project.prs'));
     const result = await resolveNativeAgents(ast, ast.loc.file, localPath);
     expect(result).toBe(ast);
+  });
+
+  it('should update only the first @agents block when blocks repeat', async () => {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    await writeFile(
+      join(agentsDir, 'planner.md'),
+      `---
+name: planner
+description: Expert planning specialist
+---
+
+You are an expert planning specialist.`
+    );
+    const sourceFile = join(localPath, 'project.prs');
+    const first: Block = {
+      type: 'Block',
+      name: 'agents',
+      content: {
+        type: 'ObjectContent',
+        properties: { reviewer: { description: 'Reviewer' } },
+        loc: { file: sourceFile, line: 2, column: 1, offset: 10 },
+      },
+      loc: { file: sourceFile, line: 2, column: 1, offset: 10 },
+    };
+    const second: Block = {
+      ...first,
+      content: {
+        type: 'ObjectContent',
+        properties: { writer: { description: 'Writer' } },
+        loc: { file: sourceFile, line: 8, column: 1, offset: 90 },
+      },
+      loc: { file: sourceFile, line: 8, column: 1, offset: 90 },
+    };
+    const ast = { ...emptyAst(sourceFile), blocks: [first, second] };
+
+    const result = await resolveNativeAgents(ast, sourceFile, localPath);
+
+    expect(result.blocks).toHaveLength(2);
+    expect(Object.keys((result.blocks[0]!.content as ObjectContent).properties)).toContain(
+      'planner'
+    );
+    expect(result.blocks[1]).toBe(second);
+    expect(result.blocks[1]!.loc.line).toBe(8);
   });
 
   it('should discover agents from local .promptscript/agents/ directory', async () => {

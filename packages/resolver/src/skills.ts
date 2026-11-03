@@ -2318,7 +2318,7 @@ export async function resolveNativeSkills(
 
   // Replace or add skills block in AST
   const updatedBlocks = skillsBlock
-    ? ast.blocks.map((b) => (b.name === 'skills' ? updatedSkillsBlock : b))
+    ? ast.blocks.map((b) => (b === skillsBlock ? updatedSkillsBlock : b))
     : [...ast.blocks, updatedSkillsBlock];
 
   return {
@@ -2491,7 +2491,7 @@ export async function resolveNativeCommands(
   };
 
   const updatedBlocks = shortcutsBlock
-    ? ast.blocks.map((b) => (b.name === 'shortcuts' ? updatedBlock : b))
+    ? ast.blocks.map((b) => (b === shortcutsBlock ? updatedBlock : b))
     : [...ast.blocks, updatedBlock];
 
   return {
@@ -2801,7 +2801,7 @@ export async function resolveNativeAgents(
   };
 
   const updatedBlocks = agentsBlock
-    ? ast.blocks.map((b) => (b.name === 'agents' ? updatedBlock : b))
+    ? ast.blocks.map((b) => (b === agentsBlock ? updatedBlock : b))
     : [...ast.blocks, updatedBlock];
 
   return {
