@@ -1,5 +1,5 @@
 import type { BlockEntry, PresentationEntry } from './types/index.js';
-import { getPrimarySectionForBlock } from './section-registry.js';
+import { getPrimarySectionForBlock, getSectionContract } from './section-registry.js';
 import { compareVersions, isValidVersion } from './utils/version.js';
 
 /** @internal Heading merge helper, not part of the API. */
@@ -86,6 +86,8 @@ export function selectPresentationEntries(
 
 /**
  * Promote an initial text heading for opted-in blocks in syntax 1.5.0+.
+ * Blocks with an explicit `@header` for their primary section keep the
+ * heading in their text.
  *
  * @internal Used by the parser for heading merge.
  */
@@ -107,6 +109,17 @@ export function normalizeLegacyHeadingEntries(
   ) {
     return entries;
   }
+
+  // An explicit `@header` for the same section wins over the heading, so the
+  // heading stays in the text instead of being dropped.
+  const hasExplicitHeader = entries.some(
+    (entry) =>
+      entry.type === 'PresentationEntry' &&
+      entry.source === 'explicit' &&
+      (entry.sectionId === undefined ||
+        (getSectionContract(entry.sectionId)?.id ?? entry.sectionId) === section.id)
+  );
+  if (hasExplicitHeader) return entries;
 
   const textIndex = entries.findIndex((entry) => entry.type === 'TextEntry');
   const textEntry = entries[textIndex];
