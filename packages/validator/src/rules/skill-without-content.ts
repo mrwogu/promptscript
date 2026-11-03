@@ -30,9 +30,9 @@ export const skillWithoutContent: ValidationRule = {
       if (hasText((skill as Record<string, Value>)['content'])) continue;
 
       ctx.report({
-        message: `Skill "${name}" has no content: no SKILL.md was found for it and the declaration has no content, so targets get an empty skill.`,
+        message: `Skill "${name}" has no content: no SKILL.md with a body was found for it and the declaration has no content, so targets get an empty skill.`,
         location: skillsBlock.loc,
-        suggestion: `Add skills/${name}/SKILL.md in the .promptscript directory of the project that declares the skill, or set content in the declaration.`,
+        suggestion: `Add skills/${name}/SKILL.md in the .promptscript directory of the project that declares the skill (if it exists, add a body to it), or set content in the declaration.`,
       });
     }
   },

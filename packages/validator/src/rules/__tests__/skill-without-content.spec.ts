@@ -39,7 +39,9 @@ describe('PS049: skill-without-content', () => {
 
     expect(messages).toHaveLength(1);
     expect(messages[0]!.message).toContain('Skill "foo" has no content');
+    expect(messages[0]!.message).toContain('no SKILL.md with a body');
     expect(messages[0]!.suggestion).toContain('skills/foo/SKILL.md');
+    expect(messages[0]!.suggestion).toContain('add a body to it');
   });
 
   it.each([
