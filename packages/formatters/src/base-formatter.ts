@@ -535,7 +535,7 @@ export abstract class BaseFormatter implements Formatter {
       // Escape markdown special characters in path-like content, outside code spans
       processedLine = this.mapOutsideCodeSpans(processedLine, (part) =>
         // __name__ -> \_\_name\_\_ (prevents bold)
-        part.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_')
+        part.replace(/__([^_]+)__/g, String.raw`\_\_$1\_\_`)
       );
       // Escape * in glob patterns (like packages/* or .cursor/rules/*.md) outside backticks
       processedLine = this.escapeGlobAsteriskOutsideBackticks(processedLine);
@@ -566,10 +566,9 @@ export abstract class BaseFormatter implements Formatter {
         continue;
       }
 
-      if (!isIndented && /^#{1,6}(\s|$)/.test(trimmedStart)) {
-        inList = false;
-      } else if (!isListItem && !isIndented && prevIsBlank) {
-        // A paragraph at column 0 after a blank line ends the list
+      // A heading, or a paragraph at column 0 after a blank line, ends the list
+      const isHeading = /^#{1,6}(\s|$)/.test(trimmedStart);
+      if (!isIndented && (isHeading || (!isListItem && prevIsBlank))) {
         inList = false;
       }
 
@@ -640,7 +639,7 @@ export abstract class BaseFormatter implements Formatter {
    */
   private escapeGlobAsteriskOutsideBackticks(line: string): string {
     // Escape * when preceded by / (glob patterns like packages/* or .cursor/rules/*.md)
-    return this.mapOutsideCodeSpans(line, (part) => part.replace(/\/\*/g, '/\\*'));
+    return this.mapOutsideCodeSpans(line, (part) => part.replaceAll('/*', String.raw`/\*`));
   }
 
   /**
@@ -718,9 +717,7 @@ export abstract class BaseFormatter implements Formatter {
     const colCount = rows[0]?.length ?? 0;
     const delimiter = rows[1];
     const isDelimiterRow =
-      delimiter !== undefined &&
-      delimiter.length === colCount &&
-      delimiter.every((cell) => /^:?-+:?$/.test(cell));
+      delimiter?.length === colCount && delimiter.every((cell) => /^:?-+:?$/.test(cell));
     if (!isDelimiterRow || rows.some((row) => row.length !== colCount)) {
       return tableLines;
     }
@@ -787,7 +784,7 @@ export abstract class BaseFormatter implements Formatter {
     const headingPattern = /^(\s*)(#{1,6}) /;
     let minLevel = Infinity;
     this.mapHeadingsOutsideCodeFences(text, (line) => {
-      const match = line.match(headingPattern);
+      const match = headingPattern.exec(line);
       if (match?.[2]) minLevel = Math.min(minLevel, match[2].length);
       return line;
     });
@@ -1218,8 +1215,9 @@ export abstract class BaseFormatter implements Formatter {
       if (skipping && !isTopLevel) continue;
       skipping = false;
       if (isTopLevel) {
-        const key = /^(['"]?)([^'":#]+)\1\s*:/.exec(line)?.[2]?.trim();
-        if (key !== undefined && keys.has(key)) {
+        const separator = line.indexOf(':');
+        const key = separator > 0 ? this.unquoteYamlKey(line.slice(0, separator).trim()) : '';
+        if (keys.has(key)) {
           skipping = true;
           continue;
         }
@@ -1227,6 +1225,14 @@ export abstract class BaseFormatter implements Formatter {
       kept.push(line);
     }
     return kept.join('\n');
+  }
+
+  private unquoteYamlKey(key: string): string {
+    const quote = key[0];
+    if ((quote === "'" || quote === '"') && key.length > 1 && key.endsWith(quote)) {
+      return key.slice(1, -1);
+    }
+    return key;
   }
 
   /**

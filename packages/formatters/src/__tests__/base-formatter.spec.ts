@@ -872,11 +872,6 @@ describe('BaseFormatter', () => {
       expect(result).toBe('| A   | B   |\n| --- | :-: |\n| --  | -   |');
     });
 
-    it('should keep pipe rows that are not a table as written', () => {
-      const content = '| just | text |\n| more | text |';
-      expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe(content);
-    });
-
     it('should keep an indented table inside its list item', () => {
       const content = '1. Step one:\n   | Col | Val |\n   | --- | --- |\n   | a | b |\n2. Step two';
       const result = formatter.testNormalizeMarkdownForPrettier(content);
@@ -885,13 +880,14 @@ describe('BaseFormatter', () => {
       );
     });
 
-    it('should keep a tight list with continuation lines tight', () => {
-      const content = '- item one\n  continuation line\n- item two\n  - nested:\n  - nested two';
-      expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe(content);
-    });
-
-    it('should keep an indented code block inside its list item', () => {
-      const content = '- item\n  ```sh\n  ls\n  ```\n- next';
+    it.each([
+      ['pipe rows that are not a table', '| just | text |\n| more | text |'],
+      [
+        'a tight list with continuation lines',
+        '- item one\n  continuation line\n- item two\n  - nested:\n  - nested two',
+      ],
+      ['an indented code block inside its list item', '- item\n  ```sh\n  ls\n  ```\n- next'],
+    ])('should keep %s as written', (_name, content) => {
       expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe(content);
     });
 
