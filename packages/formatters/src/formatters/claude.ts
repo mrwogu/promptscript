@@ -997,6 +997,12 @@ export class ClaudeFormatter extends BaseFormatter {
       : this.normalizeMarkdownForPrettier(dedentedContent);
   }
 
+  /** Push `key: ['a', 'b']` when the list has values. */
+  private pushQuotedList(lines: string[], key: string, values: string[] | undefined): void {
+    if (!values || values.length === 0) return;
+    lines.push(`${key}: [${values.map((value) => `'${value}'`).join(', ')}]`);
+  }
+
   /**
    * Generate a .claude/agents/<name>.md file.
    *
@@ -1012,15 +1018,8 @@ export class ClaudeFormatter extends BaseFormatter {
       `description: ${this.yamlString(config.description)}`
     );
 
-    if (config.tools && config.tools.length > 0) {
-      const arr = config.tools.map((t) => `'${t}'`).join(', ');
-      lines.push(`tools: [${arr}]`);
-    }
-
-    if (config.disallowedTools && config.disallowedTools.length > 0) {
-      const arr = config.disallowedTools.map((t) => `'${t}'`).join(', ');
-      lines.push(`disallowedTools: [${arr}]`);
-    }
+    this.pushQuotedList(lines, 'tools', config.tools);
+    this.pushQuotedList(lines, 'disallowedTools', config.disallowedTools);
 
     if (config.model) {
       lines.push(`model: ${this.yamlString(config.model)}`);
@@ -1045,10 +1044,7 @@ export class ClaudeFormatter extends BaseFormatter {
       lines.push(`memory: ${config.memory}`);
     }
 
-    if (config.mcpServers && config.mcpServers.length > 0) {
-      const arr = config.mcpServers.map((s) => `'${s}'`).join(', ');
-      lines.push(`mcpServers: [${arr}]`);
-    }
+    this.pushQuotedList(lines, 'mcpServers', config.mcpServers);
 
     if (config.background === true) {
       lines.push('background: true');
