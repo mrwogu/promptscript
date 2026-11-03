@@ -70,7 +70,8 @@ not require a registry entry.
 
 ## Compile-ready Canonical Example
 
-This single source covers every project-authorable built-in block.
+This single source covers every project-authorable built-in block except the
+`@commands` alias, which needs its own file (see [Block Aliases](#block-aliases)).
 Documentation validation parses, validates, and compiles it for Claude,
 GitHub, and Cursor.
 
@@ -121,9 +122,6 @@ GitHub, and Cursor.
       Run the complete test suite and report failures.
     """
   }
-}
-
-@commands {
   "/typecheck": {
     description: "Check types"
     content: """
@@ -208,10 +206,19 @@ GitHub, and Cursor.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMMrNhEYYoAWgBGUZowDW6uDgxp48sRLgBPdhkKz5ARgoBWCgAZzrAL5ix3aU4sCCwrYQs5EHMo8UEATWYAV0EMahgUwVU0sESoQQAVK1MAZUZqCDQsQRIMCFs6mGoKCOivX1Z-FnYiKtFYmmYAKxhGLAcQYuNTQQAlGDBGzkYYLwlqRPYIPnGAOWYpGApBuEEAJncAai8WqNuI-JwIE4Hh0cEDkjY4LGpseEzFMpVHkAArUZhkLClcqVQTaXR6OH7CDwZqxVoxdr+b6KKSpKQnPoSFgHWTIeQAVTg6W+5TehRKZQqWHkdEiVPSrFIMCkgiIaGY1CwcHkAF0IhxvnUAOZkynUwQANRC8BZIDZ8gAYswoDoAO6CACC1F+rGlMDZhtGlrg1KFYrEWNY3DStJUwS+4Vi6kiOxgADdGnzCAKFdSyvwRTEJD75H7A9RBHA9BVBGkAI6JCBpXn+tTSbAQNhtPzOvRKPWwKTmr0SDERADEDdm80WrGWpYkAGkYDA0IJzaxGn9eXVaYlRkXWCd89Kh7y9SEcIIwRDKtDmUmktRlmi63dMaXuEZBVhGIlhbXIgB6NL+lF6+TjOb3mAGknpTP50KrG+StWyESEjvPATKVFOz4bII-5RhExJsBw7DjK0sTAbMUG4OkLBkLAHDQaqSZZnhuJpn2p6CGAtRQIkrp7sB9axO0TrcNhNSsASV7yNeoSmIwOAjHoT5XhIBxwGBHqsOMADC-H6NBRRmNGwFdIhYyRChaESDMGH8QUCkbrC2FoNAQaLrgSRVDAJAhMEZoUSZcB0fuGmCExR7Sok+KEhE0o6JocByiAABUQXXkFFDCqykQhWFEVwIQDo+EemC-CQ3mxG6oxDrasimuaAAUziuAAlIIAC8ggAMwRBZaAXgA-LInCJCQ+XyBwhBqhqIDHMWIClRV7U9CWHTOsm0BQOlawBg+gFwSBYkwhJz4zW+mT7Fhxhmop80qUEyF3KhwEAJLTrxVQsCaIxYNlcBsjBbIkeGNEhFYTnqYdEhuaN3A6MCnEHhEHLQbpf1qCBgY6GgfDsEaILHXRDHMRgg6XkBd4Po0c1HaJ4kQZEL4PicH6ZFt5qwUdWDMDqAWCOSIBzBgUhRfIADiaRoIlaF7UhH2-mhhNrXxijmryJMkRz5EYJObAYNo6SQOxMqOfNDFfY6R56oKehgPqU2kbAGDUtjaG40t+PyGCfapOkQhpIb1L8+t3S82rmnaeIeZQAWEkpOxhEkDU5QAF7pPbMBG5tIuoqrgOMRrP04NTej617PswOoPHwCbwEBvtkQ0BnVM6uoiSO0p8GB7igVoKw0MsyA6wdOqkRZ3xAlc65Cf+CQjBoMUjQJvrYMaMXk05xIPyKHAApCuM3xSEWTusdXdPyEoBwNxQ3HU5N1692ghiD40FAkMcnfff45CJNKY5Xl+3uhBPC142w4wAIqeY-YRjxTaHjbqWm9MMZvk7hIJOzAU6BTTniDgmcFJRnFEdA+A9qBD0CiPTOu9EEREvs6IgpByD-HRpwbkz8zbMgtiAYGQhC6MCeJybkTs6h1TUvILo3xBCEHKoIHQTMOS0HysVJ2tULzjA4VUMujQTgVT4VIARcAhG-iYiAbwooGBBGoFYfABCcKHBoPQEAQ8pz4EcKooAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMMrNhEYYoAWgBGUZowDW6uDgxp48sRLgBPdhkKz5ARgoBWCgAZzrAL5ix3aU4sCCwrYQs5EHMo8UEATWYAV0EMahgUwVU0sESoQQAVK1MAZUZqCDQsQRIMCFs6mGoKCOivX1Z-FnYiKtFYmmYAKxhGLAcQYuNTQQAlGDBGzkYYLwlqRPYIPnGAOWYpGApBuEEAJncAai8WqNuI-JwIE4Hh0cEDkjY4LGpseEzFMpVHkAArUZhkLClcqVQTaXR6OH7CDwZqxVoxdr+b6KKSpKQnPoSFgHWTIeQAVTg6W+5TehRKZQqWHkdEiVPSrFIMCkgiIaGY1CwcHkAF0IhxvnUAOZkynUwQANRC8BZIDZ8gAYswoDoAO6CACC1F+rGlMDZhtGlrg1KFYrEWNY3DStJUwS+4Vi6kiOxgADdGnzCAKFdSyvwRTEJD75H7A9RBHA9BVBGkAI6JCBpXn+tTSbAQNhtPzOvRKPWwKTmr0SDERADEDdm80WrGWpYkAGkYDA0IJzaxGn9eXVaYlRkXWCd89Kh7y9SEcIIwRDKtDmUmktRlmi63dMaXuEZBVhGIlhbXIgB6NL+lF6+TjOb3mAGknpTP50KrG+StWyESEjvPATKVFOz4bII-5RhExJsBw7DjK0sTAbMUG4OkLBkLAHDQaqSZZnhuJpn2p6CGAtRQIkrp7sB9axO0+7XqEpiMDgIx6E+V4SAccBgR6rDjAAwhx+jQUUZjRsBXSIWMkQoWhEgzBhHEFJJG6wthaDQEGi64EkVQwCQITBGaFG6XAdH7opgjtE63DSok+KEhE0o6JocByiAABUPnXj5FDCqykR+QFQVwIQDo+EemC-CQrmxG6oxDrasimuaAAUziuAAlIIAC8ggAMwRIZaAXgA-LInCJCQmXyBwhBqhqIDHMWID5UVjU9CWHTOsm0BQIlawBg+gFwSB-EwoJz5jW+mT7FhxhmlJk2yUEyF3KhwEAJLTmxVQsCaIxYKlcBsjBbIkeGNEhFY1kKdtEj2UeOjAleDESBy0Fqe9aggYGOhoHw7BGiCu10QxDkYIOl5AXeD6NBNO18QJEGRC+D4nB+mQreasE7VgzA6l5gjkiAcwYFIIXyAA4mkaDRWhG1IU9v5oVjC3sYo5q8rjJGM+RGCTmwGDaOkkCsFIMpWZNX12Y6R56oKehgPqI2kbAGDUijaFozNGPyGCfapOkQhpNr1Ic4t3RswrnNQXmUAFoJKTS4RJA1OUABe6SWzAOvLbzqLyweESvf13A4CTeia87rswOorHwHrwEBptkQ0EnxM6uoiTW9J8Fe7i3loKwIO0yA6wdOqkQp+xnHM4rMVRyQjBoMUjQJpr-0aLnw1pxIPyKHAApCuM3wy8wNvYTU0veUoBxVxQLEk8N17t2ghjd40FAkMczeR-45CJNKY5Xl+LuhEPU3o2w4wAIrOdfYQD4TaGDbqZMU4jb7NxIGOzA47eQTniDgydJJRnFDtLeXdqA928n3ZO69oERyVlHIgpByD-ARpwbkt8DbMiNiAH6Qhs6MCeJybkNs6gVXkvILo3xBCEEKoIHQ1MOS0EyrlG25ULzjCYVUAujQThFQ4VILhcAeG-nsiAbwooGBBGoFYfAWCcKHBoPQEAPcpz4EcPIoAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+## Block Aliases
+
+`@commands` is an alias for `@shortcuts`. A file may declare a block name only
+once: a second block with the same name in one file is a PS048 error. Before
+syntax `1.5.0`, `@shortcuts` and `@commands` in one file are merged into a
+single block, so mixing them is accepted. From `1.5.0`, both resolve to the
+`shortcuts` block, and PS048 reports the later one as
+`@shortcuts (alias @commands)`.
 
 ## Shortcut Entry Shapes
 

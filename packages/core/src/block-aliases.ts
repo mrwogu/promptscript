@@ -45,8 +45,9 @@ function precedes(
 /**
  * Normalize aliases and merge alias/canonical collisions in source order.
  *
- * Repeated canonical blocks remain distinct for compatibility. A collision is
- * merged only when at least one declaration used an alias.
+ * Repeated canonical blocks remain distinct here; the validator rejects them
+ * with PS048. A collision is merged only when at least one declaration used an
+ * alias.
  *
  * @internal Used by the resolver for block alias normalization.
  */
