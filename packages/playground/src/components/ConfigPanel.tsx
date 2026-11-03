@@ -1,196 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import type { KnownTarget } from '@promptscript/core';
+import { TARGET_DEFINITIONS, resolveTargetVersion, type KnownTarget } from '@promptscript/core';
 import { usePlaygroundStore, type ConventionType } from '../store';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { TARGET_LABELS } from '../utils/target-labels';
 
-const TARGET_INFO: Record<
-  KnownTarget,
-  { versions: string[]; supportsXml: boolean; hint?: string }
-> = {
-  github: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: true,
-  },
-  claude: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: true,
-  },
-  cursor: {
-    versions: ['standard', 'legacy'],
-    supportsXml: false, // Cursor only supports markdown
-  },
-  antigravity: {
-    versions: ['simple', 'frontmatter'],
-    supportsXml: true,
-  },
-  factory: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  opencode: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: true,
-  },
-  gemini: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: true,
-  },
-  windsurf: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  cline: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  roo: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  codex: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  continue: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  augment: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  goose: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  kilo: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  amp: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  trae: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  junie: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  kiro: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  cortex: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  crush: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  'command-code': {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  kode: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  mcpjam: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  'mistral-vibe': {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  mux: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  openhands: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  pi: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  qoder: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  'qwen-code': {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  zencoder: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  neovate: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  pochi: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  adal: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  iflow: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  openclaw: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  codebuddy: {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  // AGENTS.md-only targets
-  aider: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  'amazon-q': {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  warp: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  zed: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  jules: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  devin: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  grok: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  kimi: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  mimo: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  'deep-agents': {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  forgecode: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  hermes: { versions: ['simple', 'multifile', 'full'], supportsXml: false },
-  'gitlab-duo': {
-    versions: ['simple', 'multifile', 'full'],
-    supportsXml: false,
-  },
-  // Prompt targets, off by default
-  bundle: {
-    versions: ['v1'],
-    supportsXml: false,
-    hint: 'Portable JSON prompt bundle with a content hash',
-  },
-  'prompt-text': {
-    versions: ['v1'],
-    supportsXml: false,
-    hint: 'Markdown system prompt previews',
-  },
+const XML_TARGETS = new Set<KnownTarget>(['github', 'claude', 'antigravity', 'opencode', 'gemini']);
+
+const TARGET_HINTS: Partial<Record<KnownTarget, string>> = {
+  bundle: 'Portable JSON prompt bundle with a content hash',
+  'prompt-text': 'Markdown system prompt previews',
 };
+
+const ALL_TARGETS = Object.keys(TARGET_DEFINITIONS) as KnownTarget[];
 
 const POPULAR_TARGETS = new Set<KnownTarget>([
   'github',
@@ -235,13 +56,9 @@ export function ConfigPanel() {
 
   if (!showConfig) return null;
 
-  const allTargets = Object.entries(TARGET_INFO) as [
-    KnownTarget,
-    (typeof TARGET_INFO)[KnownTarget],
-  ][];
   const visibleTargets = showAll
-    ? allTargets
-    : allTargets.filter(([target]) => POPULAR_TARGETS.has(target));
+    ? ALL_TARGETS
+    : ALL_TARGETS.filter((target) => POPULAR_TARGETS.has(target));
 
   return (
     <div
@@ -362,20 +179,25 @@ export function ConfigPanel() {
                       : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  All ({allTargets.length})
+                  All ({ALL_TARGETS.length})
                 </button>
               </div>
             </div>
             <div className="space-y-3">
-              {visibleTargets.map(([target, info]) => {
+              {visibleTargets.map((target) => {
+                const definition = TARGET_DEFINITIONS[target];
+                const supportsXml = XML_TARGETS.has(target);
                 const settings = config.targets[target] ?? {
                   enabled: false,
-                  version: info.versions[0],
+                  version: resolveTargetVersion(definition, undefined),
                 };
                 return (
                   <div key={target} className="flex items-center gap-3">
                     {/* Enable checkbox */}
-                    <label className="flex items-center gap-2 min-w-[140px]" title={info.hint}>
+                    <label
+                      className="flex items-center gap-2 min-w-[140px]"
+                      title={TARGET_HINTS[target]}
+                    >
                       <input
                         type="checkbox"
                         checked={settings.enabled}
@@ -387,14 +209,14 @@ export function ConfigPanel() {
 
                     {/* Version select */}
                     <select
-                      value={settings.version ?? info.versions[0]}
+                      value={resolveTargetVersion(definition, settings.version)}
                       onChange={(e) => setTargetVersion(target, e.target.value)}
                       disabled={!settings.enabled}
                       className="flex-1 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
                     >
-                      {info.versions.map((v) => (
-                        <option key={v} value={v}>
-                          {v}
+                      {Object.entries(definition.versions).map(([name, version]) => (
+                        <option key={name} value={name} title={version.description}>
+                          {name}
                         </option>
                       ))}
                     </select>
@@ -410,11 +232,9 @@ export function ConfigPanel() {
                             : (e.target.value as ConventionType)
                         )
                       }
-                      disabled={!settings.enabled || !info.supportsXml}
+                      disabled={!settings.enabled || !supportsXml}
                       title={
-                        !info.supportsXml
-                          ? `${TARGET_LABELS[target]} only supports markdown`
-                          : undefined
+                        !supportsXml ? `${TARGET_LABELS[target]} only supports markdown` : undefined
                       }
                       className="w-24 px-2 py-1 text-sm bg-gray-700 border border-gray-600 rounded text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-indigo-500"
                     >
@@ -422,7 +242,7 @@ export function ConfigPanel() {
                         <option
                           key={opt.value}
                           value={opt.value}
-                          disabled={opt.value === 'xml' && !info.supportsXml}
+                          disabled={opt.value === 'xml' && !supportsXml}
                         >
                           {opt.label}
                         </option>
