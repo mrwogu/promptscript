@@ -80,6 +80,12 @@ Review selected code and use bundled references when evaluating risk.
 PromptScript preserves the directory structure when producing native skill files. Script invocation
 and executable file modes remain platform and operating-system specific.
 
+A skill can be declared in `@skills` and also have a `SKILL.md` in `.promptscript/skills/`. The
+declaration can sit in the entry file or in an imported fragment, the two are merged. When both
+give a `description`, the `.prs` one is used, also in the generated frontmatter, and a warning
+names both files. Skills in `.promptscript/skills/` that no file declares are added once, by the
+entry file.
+
 ## Skill Capabilities
 
 | Capability                       | Purpose                            |

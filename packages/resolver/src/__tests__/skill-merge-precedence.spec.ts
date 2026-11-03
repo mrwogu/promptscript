@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { ObjectContent } from '@promptscript/core';
+import type { Logger, ObjectContent } from '@promptscript/core';
 import { Resolver } from '../resolver.js';
 
 const META = (id: string): string => `@meta { id: "${id}" syntax: "1.6.0" }\n`;
@@ -10,6 +10,16 @@ const META = (id: string): string => `@meta { id: "${id}" syntax: "1.6.0" }\n`;
 describe('skills declared in .prs and found in .promptscript/skills', () => {
   let root: string;
   let local: string;
+  let warnings: string[];
+
+  const logger: Logger = {
+    verbose: () => undefined,
+    debug: () => undefined,
+    warn: (message: string) => {
+      warnings.push(message);
+    },
+  };
+
   async function writeSkill(name: string, frontmatter: string): Promise<void> {
     await mkdir(join(local, 'skills', name), { recursive: true });
     await writeFile(
@@ -24,7 +34,7 @@ describe('skills declared in .prs and found in .promptscript/skills', () => {
     for (const [file, content] of Object.entries(files)) {
       await writeFile(join(local, file), content);
     }
-    const resolver = new Resolver({ registryPath: root, localPath: local, cache: false });
+    const resolver = new Resolver({ registryPath: root, localPath: local, cache: false, logger });
     const result = await resolver.resolve(join(local, 'project.prs'));
     const block = result.ast?.blocks.find((b) => b.name === 'skills');
     return {
@@ -39,6 +49,7 @@ describe('skills declared in .prs and found in .promptscript/skills', () => {
   beforeEach(async () => {
     root = await mkdtemp(join(tmpdir(), 'prs-skill-merge-'));
     local = join(root, '.promptscript');
+    warnings = [];
     await writeSkill('x', 'name: x\ndescription: X from md');
     await writeSkill('y', 'name: y\ndescription: Y from md');
   });
@@ -69,5 +80,38 @@ describe('skills declared in .prs and found in .promptscript/skills', () => {
 
     expect(errors).toEqual([]);
     expect(skills['y']?.['description']).toBe('Y from md');
+  });
+
+  it('should use the .prs description in the raw frontmatter and warn once', async () => {
+    await writeSkill('x', 'name: x\ndescription: >-\n  X from md,\n  folded.\nlicense: MIT');
+    const { skills } = await resolveProject({
+      'a.prs': `${META('a')}@skills {\n  x: { description: "X from prs" }\n}\n`,
+      'project.prs': `${META('project')}@use ./a\n`,
+    });
+
+    expect(skills['x']?.['description']).toBe('X from prs');
+    expect(skills['x']?.['__rawFrontmatter']).toBe(
+      'name: x\ndescription: "X from prs"\nlicense: MIT'
+    );
+    expect(warnings.filter((w) => w.includes("Skill 'x'"))).toHaveLength(1);
+    expect(warnings[0]).toContain('Using the .prs description');
+  });
+
+  it('should not warn when both descriptions are the same', async () => {
+    const { skills } = await resolveProject({
+      'project.prs': `${META('project')}@skills {\n  x: { description: "X from md" }\n}\n`,
+    });
+
+    expect(skills['x']?.['__rawFrontmatter']).toBe('name: x\ndescription: X from md');
+    expect(warnings).toEqual([]);
+  });
+
+  it('should keep the SKILL.md description when .prs has none', async () => {
+    const { skills } = await resolveProject({
+      'project.prs': `${META('project')}@skills {\n  x: { content: """Inline""" }\n}\n`,
+    });
+
+    expect(skills['x']?.['description']).toBe('X from md');
+    expect(warnings).toEqual([]);
   });
 });

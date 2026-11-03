@@ -1,6 +1,6 @@
 import { readFile, readdir, access, lstat, realpath } from 'node:fs/promises';
 import { basename, resolve, dirname, relative, isAbsolute, sep } from 'node:path';
-import { isAlias, isCollection, isNode, isPair, isSeq, parseDocument } from 'yaml';
+import { isAlias, isCollection, isMap, isNode, isPair, isScalar, isSeq, parseDocument } from 'yaml';
 import {
   isGeneratedByPromptScript,
   ResolveError,
@@ -1943,6 +1943,60 @@ async function discoverSkillDirs(basePath: string): Promise<Map<string, string>>
 }
 
 /**
+ * The .prs description wins over the SKILL.md one. Formatters copy the raw
+ * SKILL.md frontmatter, so the description in it is replaced too, and a
+ * warning names both files when the two texts differ.
+ */
+function rawFrontmatterWithPrsDescription(
+  rawFrontmatter: string,
+  nativeDescription: string | undefined,
+  skill: Record<string, Value>,
+  skillName: string,
+  skillMdPath: string,
+  logger: Logger
+): string {
+  const prsDescription = skill['description'];
+  if (typeof prsDescription !== 'string' || prsDescription.trim() === '') return rawFrontmatter;
+  if (nativeDescription === undefined || nativeDescription.trim() === prsDescription.trim()) {
+    return rawFrontmatter;
+  }
+
+  const updated = replaceFrontmatterDescription(rawFrontmatter, prsDescription);
+  // The entry file resolves imported skills again; warn once per change.
+  if (skill['__rawFrontmatter'] !== updated) {
+    const prsFile =
+      typeof skill['__baseSource'] === 'string' ? skill['__baseSource'] : 'the .prs file';
+    logger.warn(
+      `Skill '${skillName}': description in ${prsFile} differs from ${skillMdPath}. ` +
+        'Using the .prs description.'
+    );
+  }
+  return updated;
+}
+
+/**
+ * Replace the top-level `description` value of raw YAML frontmatter, keeping
+ * the rest of the text as it is.
+ */
+function replaceFrontmatterDescription(rawFrontmatter: string, description: string): string {
+  // The raw text was already parsed as a valid SKILL.md frontmatter mapping.
+  const document = parseDocument(rawFrontmatter);
+  const items = isMap(document.contents) ? document.contents.items : [];
+  const value = items.find((item) => isScalar(item.key) && item.key.value === 'description')?.value;
+  if (!isNode(value) || !value.range) return rawFrontmatter;
+
+  const [start, end] = value.range;
+  const original = rawFrontmatter.slice(start, end);
+  const trailing = original.endsWith('\n') ? '\n' : '';
+  return (
+    rawFrontmatter.slice(0, start) +
+    JSON.stringify(description) +
+    trailing +
+    rawFrontmatter.slice(end)
+  );
+}
+
+/**
  * Resolve native SKILL.md files for skills defined in the AST.
  *
  * For each skill in the @skills block, checks if a corresponding SKILL.md
@@ -2137,7 +2191,14 @@ export async function resolveNativeSkills(
         }
 
         if (parsed.rawFrontmatter !== undefined) {
-          updatedSkill['__rawFrontmatter'] = parsed.rawFrontmatter;
+          updatedSkill['__rawFrontmatter'] = rawFrontmatterWithPrsDescription(
+            parsed.rawFrontmatter,
+            parsed.description,
+            skillObj,
+            skillName,
+            skillMdPath,
+            logger
+          );
         }
 
         // Set license from SKILL.md frontmatter if present
