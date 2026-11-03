@@ -16,12 +16,12 @@ import { Compiler } from '../compiler.js';
 
 const directories: string[] = [];
 
-function environmentRootGuard(target: string, variable: string): string {
-  return `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' 'PromptScript ${target} hook requires non-empty ${variable}.' >&2; exit 1; fi; `;
+function environmentRootGuard(target: string, variable: string, exitCode = 1): string {
+  return `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' 'PromptScript ${target} hook requires non-empty ${variable}.' >&2; exit ${exitCode}; fi; `;
 }
 
-function gitRootGuard(target: string): string {
-  const failure = `printf '%s\\n' 'PromptScript ${target} hook requires a Git worktree project root.' >&2; exit 1`;
+function gitRootGuard(target: string, exitCode = 1): string {
+  const failure = `printf '%s\\n' 'PromptScript ${target} hook requires a Git worktree project root.' >&2; exit ${exitCode}`;
   return `PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { ${failure}; }; case "$PROMPTSCRIPT_PROJECT_ROOT" in *[![:space:]]*) ;; *) ${failure} ;; esac; `;
 }
 
@@ -89,7 +89,7 @@ describe('Hook target smoke tests', () => {
           hooks: [
             {
               type: 'command',
-              command: `${environmentRootGuard('factory', 'FACTORY_PROJECT_DIR')}cd "$FACTORY_PROJECT_DIR" && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/validate script.py' --strict # promptscript-generated:validate`,
+              command: `${environmentRootGuard('factory', 'FACTORY_PROJECT_DIR', 2)}cd "$FACTORY_PROJECT_DIR" && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/validate script.py' --strict # promptscript-generated:validate`,
               timeout: 30,
             },
           ],
@@ -397,9 +397,10 @@ describe('Hook target smoke tests', () => {
       SessionStart: Array<{ hooks: Array<{ command: string }> }>;
       PreToolUse: Array<{ hooks: Array<{ command: string }> }>;
     };
-    const commands = [
-      hookFile.SessionStart[0]!.hooks[0]!.command,
-      hookFile.PreToolUse[0]!.hooks[0]!.command,
+    // A pre-tool-use guard exits 2, so the host blocks the tool call.
+    const commands: Array<[string, number]> = [
+      [hookFile.SessionStart[0]!.hooks[0]!.command, 1],
+      [hookFile.PreToolUse[0]!.hooks[0]!.command, 2],
     ];
 
     for (const value of [undefined, '']) {
@@ -407,14 +408,14 @@ describe('Hook target smoke tests', () => {
       if (value === undefined) delete env['FACTORY_PROJECT_DIR'];
       else env['FACTORY_PROJECT_DIR'] = value;
 
-      for (const command of commands) {
+      for (const [command, status] of commands) {
         const execution = spawnSync('/bin/sh', ['-c', command], {
           cwd: nestedDirectory,
           env,
           encoding: 'utf8',
         });
 
-        expect(execution.status).toBe(1);
+        expect(execution.status).toBe(status);
         expect(execution.stderr).toContain(
           'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.'
         );
@@ -519,17 +520,17 @@ describe('Hook target smoke tests', () => {
         preToolUse: Array<{ command: string }>;
       };
     };
-    const commands = [
-      hookFile.hooks.sessionStart[0]!.command,
-      hookFile.hooks.preToolUse[0]!.command,
+    const commands: Array<[string, number]> = [
+      [hookFile.hooks.sessionStart[0]!.command, 1],
+      [hookFile.hooks.preToolUse[0]!.command, 2],
     ];
 
-    for (const command of commands) {
+    for (const [command, status] of commands) {
       const missing = spawnSync('/bin/sh', ['-c', command], {
         cwd: directory,
         encoding: 'utf8',
       });
-      expect(missing.status).toBe(1);
+      expect(missing.status).toBe(status);
       expect(missing.stderr).toContain(
         'PromptScript cursor hook requires a Git worktree project root.'
       );
@@ -539,7 +540,7 @@ describe('Hook target smoke tests', () => {
     const fakeGit = join(fakeBin, 'git');
     writeFileSync(fakeGit, "#!/bin/sh\nprintf '   \\n'\n");
     chmodSync(fakeGit, 0o755);
-    const blank = spawnSync('/bin/sh', ['-c', commands[0]!], {
+    const blank = spawnSync('/bin/sh', ['-c', commands[0]![0]], {
       cwd: directory,
       env: { ...process.env, PATH: `${fakeBin}:${process.env['PATH'] ?? ''}` },
       encoding: 'utf8',

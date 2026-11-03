@@ -427,7 +427,7 @@ describe('hook-adapters', () => {
       const hook = (entry['hooks'] as Record<string, unknown>[])[0]!;
 
       expect(hook['command']).toBe(
-        "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 1; fi; cd \"${CLAUDE_PROJECT_DIR}\"/'tools/hook scripts' && python3 .promptscript/scripts/check.py # promptscript-generated:test"
+        "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 2; fi; cd \"${CLAUDE_PROJECT_DIR}\"/'tools/hook scripts' && python3 .promptscript/scripts/check.py # promptscript-generated:test"
       );
     });
   });
@@ -731,7 +731,7 @@ describe('hook-adapters', () => {
               {
                 type: 'command',
                 command:
-                  "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\"/'tools/hook scripts' && python3 .promptscript/scripts/check.py # promptscript-generated:rooted",
+                  "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 2; fi; cd \"$FACTORY_PROJECT_DIR\"/'tools/hook scripts' && python3 .promptscript/scripts/check.py # promptscript-generated:rooted",
               },
             ],
           },
@@ -1096,10 +1096,10 @@ describe('hook-adapters', () => {
   });
 
   describe('portable repository-local scripts', () => {
-    const environmentGuard = (target: string, variable: string): string =>
-      `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' 'PromptScript ${target} hook requires non-empty ${variable}.' >&2; exit 1; fi; `;
-    const gitRootGuard = (target: string): string => {
-      const failure = `printf '%s\\n' 'PromptScript ${target} hook requires a Git worktree project root.' >&2; exit 1`;
+    const environmentGuard = (target: string, variable: string, exitCode = 1): string =>
+      `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' 'PromptScript ${target} hook requires non-empty ${variable}.' >&2; exit ${exitCode}; fi; `;
+    const gitRootGuard = (target: string, exitCode = 1): string => {
+      const failure = `printf '%s\\n' 'PromptScript ${target} hook requires a Git worktree project root.' >&2; exit ${exitCode}`;
       return `PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { ${failure}; }; case "$PROMPTSCRIPT_PROJECT_ROOT" in *[![:space:]]*) ;; *) ${failure} ;; esac; `;
     };
     const hooks = extractHooks(
@@ -1364,21 +1364,21 @@ describe('hook-adapters', () => {
         hooks: Array<{ command: string }>;
       }>;
       expect(claudeEntry[0]!.hooks[0]!.command).toBe(
-        `${environmentGuard('claude', 'CLAUDE_PROJECT_DIR')}cd "\${CLAUDE_PROJECT_DIR}"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
+        `${environmentGuard('claude', 'CLAUDE_PROJECT_DIR', 2)}cd "\${CLAUDE_PROJECT_DIR}"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
       );
 
       const cursor = generateCursorHooks(rooted) as {
         hooks: { preToolUse: Array<{ command: string }> };
       };
       expect(cursor.hooks.preToolUse[0]!.command).toBe(
-        `${gitRootGuard('cursor')}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
+        `${gitRootGuard('cursor', 2)}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
       );
 
       const codex = generateCodexHookConfig(rooted)['PreToolUse']![0] as {
         hooks: Array<{ command: string; commandWindows: string }>;
       };
       expect(codex.hooks[0]!.command).toBe(
-        `${gitRootGuard('codex')}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
+        `${gitRootGuard('codex', 2)}cd "$PROMPTSCRIPT_PROJECT_ROOT"/'tools/hook scripts' && node 'check file.mjs' # promptscript-generated:rooted`
       );
       expect(codex.hooks[0]!.commandWindows).toContain(
         '$promptscriptProjectRoot = git rev-parse --show-toplevel 2>$null; if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($promptscriptProjectRoot))'
@@ -1387,7 +1387,65 @@ describe('hook-adapters', () => {
         "Set-Location -LiteralPath (Join-Path $promptscriptProjectRoot 'tools/hook scripts') -ErrorAction Stop; & 'node' 'check file.mjs'"
       );
       expect(codex.hooks[0]!.commandWindows).toMatch(
-        /exit 1.*Set-Location.*& 'node'.*# promptscript-generated:rooted$/
+        /exit 2 \}; Set-Location.*& 'node'.*# promptscript-generated:rooted$/
+      );
+    });
+
+    it('fails closed with exit 2 only for pre-tool events', () => {
+      const rooted = (event: HookDefinition['event']): HookDefinition[] => [
+        { id: 'rooted', event, command: ['node', 'check.mjs'], cwd: 'project' },
+      ];
+      const claudeCommand = (event: HookDefinition['event'], nativeEvent: string): string => {
+        const entry = generateClaudeHooks(rooted(event))[nativeEvent] as Array<{
+          hooks: Array<{ command: string }>;
+        }>;
+        return entry[0]!.hooks[0]!.command;
+      };
+
+      expect(claudeCommand('pre-terminal-command', 'PreToolUse')).toContain(
+        environmentGuard('claude', 'CLAUDE_PROJECT_DIR', 2)
+      );
+      expect(claudeCommand('stop', 'Stop')).toContain(
+        environmentGuard('claude', 'CLAUDE_PROJECT_DIR')
+      );
+      expect(claudeCommand('session-start', 'SessionStart')).toContain(
+        environmentGuard('claude', 'CLAUDE_PROJECT_DIR')
+      );
+
+      const gemini = generateGeminiHooks(rooted('pre-tool-use'))['BeforeTool']![0] as {
+        hooks: Array<{ command: string }>;
+      };
+      expect(gemini.hooks[0]!.command).toContain(
+        environmentGuard('gemini', 'GEMINI_PROJECT_DIR', 2)
+      );
+      const grok = generateGrokHooks(rooted('pre-tool-use'))['PreToolUse']![0] as {
+        hooks: Array<{ command: string }>;
+      };
+      expect(grok.hooks[0]!.command).toContain(environmentGuard('grok', 'GROK_WORKSPACE_ROOT', 2));
+    });
+
+    it('uses the event after target overrides to pick the guard exit code', () => {
+      const hooks: HookDefinition[] = [
+        {
+          id: 'rooted',
+          event: 'post-tool-use',
+          command: ['node', 'check.mjs'],
+          cwd: 'project',
+          targets: { factory: { event: 'pre-tool-use' } },
+        },
+      ];
+
+      const factory = generateFactoryHooks(hooks)['PreToolUse']![0] as {
+        hooks: Array<{ command: string }>;
+      };
+      expect(factory.hooks[0]!.command).toContain(
+        environmentGuard('factory', 'FACTORY_PROJECT_DIR', 2)
+      );
+      const claude = generateClaudeHooks(hooks)['PostToolUse'] as Array<{
+        hooks: Array<{ command: string }>;
+      }>;
+      expect(claude[0]!.hooks[0]!.command).toContain(
+        environmentGuard('claude', 'CLAUDE_PROJECT_DIR')
       );
     });
 

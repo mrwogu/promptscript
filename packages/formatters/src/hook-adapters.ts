@@ -136,25 +136,37 @@ function projectRootExpression(target: EnvironmentRootTarget): string {
   return `"$${projectRootVariable(target)}"`;
 }
 
-function serializeRequiredEnvRootGuard(target: EnvironmentRootTarget): string {
-  const variable = projectRootVariable(target);
-  const message = quotePosixArgument(`PromptScript ${target} hook requires non-empty ${variable}.`);
-  return `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' ${message} >&2; exit 1; fi; `;
+/**
+ * Exit code of a root guard when the project root is missing.
+ *
+ * On pre-tool events exit 2 blocks the tool call for every target with a
+ * root guard, and any other code lets the call run. So a gate hook must fail
+ * closed there. Other events keep exit 1: there exit 2 either does nothing
+ * more, or it blocks stopping (Stop), which would only keep the agent looping.
+ */
+function rootGuardExitCode(hook: HookDefinition): 1 | 2 {
+  return hook.event === 'pre-tool-use' || hook.event === 'pre-terminal-command' ? 2 : 1;
 }
 
-function serializeGitRootGuard(target: GitRootTarget): string {
+function serializeRequiredEnvRootGuard(target: EnvironmentRootTarget, exitCode: 1 | 2): string {
+  const variable = projectRootVariable(target);
+  const message = quotePosixArgument(`PromptScript ${target} hook requires non-empty ${variable}.`);
+  return `if [ -z "\${${variable}:-}" ]; then printf '%s\\n' ${message} >&2; exit ${exitCode}; fi; `;
+}
+
+function serializeGitRootGuard(target: GitRootTarget, exitCode: 1 | 2): string {
   const message = quotePosixArgument(
     `PromptScript ${target} hook requires a Git worktree project root.`
   );
-  const failure = `printf '%s\\n' ${message} >&2; exit 1`;
+  const failure = String.raw`printf '%s\n' ${message} >&2; exit ${exitCode}`;
   return `PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { ${failure}; }; case "$PROMPTSCRIPT_PROJECT_ROOT" in *[![:space:]]*) ;; *) ${failure} ;; esac; `;
 }
 
-function serializePowerShellGitRootGuard(target: 'codex'): string {
+function serializePowerShellGitRootGuard(target: 'codex', exitCode: 1 | 2): string {
   const message = quotePowerShellArgument(
     `PromptScript ${target} hook requires a Git worktree project root.`
   );
-  return `$promptscriptProjectRoot = git rev-parse --show-toplevel 2>$null; if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($promptscriptProjectRoot)) { [Console]::Error.WriteLine(${message}); exit 1 }; `;
+  return `$promptscriptProjectRoot = git rev-parse --show-toplevel 2>$null; if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($promptscriptProjectRoot)) { [Console]::Error.WriteLine(${message}); exit ${exitCode} }; `;
 }
 
 const HOST_CWD_STRATEGIES = {
@@ -186,7 +198,7 @@ function serializeProjectScriptCommand(
 ): string {
   const prefix =
     hook.script || hook.cwd
-      ? `${serializeRequiredEnvRootGuard(target)}${projectCwdPrefix(hook, target)}`
+      ? `${serializeRequiredEnvRootGuard(target, rootGuardExitCode(hook))}${projectCwdPrefix(hook, target)}`
       : '';
   if (!hook.script) {
     return serializeOwnedCommand(hook, quotePosixArgument, prefix);
@@ -208,7 +220,7 @@ function serializeGitRootScriptCommand(hook: HookDefinition, target: GitRootTarg
   }
 
   const root = '"$PROMPTSCRIPT_PROJECT_ROOT"';
-  const guard = serializeGitRootGuard(target);
+  const guard = serializeGitRootGuard(target, rootGuardExitCode(hook));
   const cwd =
     hook.cwd === undefined
       ? ''
@@ -238,7 +250,7 @@ function serializePowerShellScriptCommand(hook: HookDefinition, target: 'codex')
     return serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
   }
 
-  const guard = serializePowerShellGitRootGuard(target);
+  const guard = serializePowerShellGitRootGuard(target, rootGuardExitCode(hook));
   const cwd =
     hook.cwd === undefined
       ? ''
