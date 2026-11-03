@@ -1,0 +1,16 @@
+@meta {
+  id: "needs-scope"
+  syntax: "1.1.0"
+  params: {
+    scope: string
+  }
+}
+
+@skills {
+  needs-scope: {
+    description: "Scoped scan"
+    content: """
+      Scan {{scope}} only.
+    """
+  }
+}

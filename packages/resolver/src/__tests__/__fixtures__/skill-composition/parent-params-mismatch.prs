@@ -1,0 +1,14 @@
+@meta {
+  id: "ops-mismatch"
+  syntax: "1.1.0"
+}
+
+@skills {
+  ops: {
+    description: "Production triage"
+    content: """
+      Follow the phases below in order.
+    """
+  }
+  @use ./phases/triage-params(severity: 5)
+}

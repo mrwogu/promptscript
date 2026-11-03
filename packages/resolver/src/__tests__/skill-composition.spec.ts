@@ -431,6 +431,99 @@ describe('skill composition resolver', () => {
   });
 });
 
+describe('inline @use params', () => {
+  const resolver = new Resolver({
+    registryPath: resolve(FIXTURES_DIR, 'registry'),
+    localPath: FIXTURES_DIR,
+    cache: false,
+  });
+
+  async function composedText(file: string): Promise<string> {
+    const result = await resolver.resolve(resolve(FIXTURES_DIR, file));
+    expect(result.errors).toHaveLength(0);
+    const skillsBlock = result.ast!.blocks.find((b) => b.name === 'skills');
+    const ops = (skillsBlock!.content as ObjectContent).properties['ops'] as Record<
+      string,
+      unknown
+    >;
+    return (ops['content'] as TextContent).value;
+  }
+
+  it('interpolates explicit args into the phase content, restrictions and knowledge', async () => {
+    const text = await composedText('parent-params-explicit.prs');
+
+    expect(text).toContain('Only include findings at or above critical level.');
+    expect(text).toContain('Never classify severity higher than critical threshold');
+    expect(text).toContain('Reports cover critical findings.');
+    expect(text).not.toContain('{{severity}}');
+  });
+
+  it('applies param defaults when no args are passed', async () => {
+    const text = await composedText('parent-params-default.prs');
+
+    expect(text).toContain('Only include findings at or above all level.');
+    expect(text).toContain('Never classify severity higher than all threshold');
+    expect(text).not.toContain('{{severity}}');
+  });
+
+  it('interpolates params for an aliased phase', async () => {
+    const text = await composedText('parent-params-alias.prs');
+
+    expect(text).toContain('## Phase 1: deep');
+    expect(text).toContain('Only include findings at or above critical level.');
+    expect(text).not.toContain('{{severity}}');
+  });
+
+  it.each([
+    ['parent-params-unknown.prs', './phases/triage-params', /timeout/],
+    ['parent-params-mismatch.prs', './phases/triage-params', /severity/],
+    ['parent-params-missing.prs', './phases/needs-scope', /scope/],
+  ])('reports a bind error for %s', async (file, raw, detail) => {
+    const result = await resolver.resolve(resolve(FIXTURES_DIR, file));
+
+    const messages = result.errors.map((e) => e.message);
+    expect(messages.some((m) => m.includes(`Failed to bind params for sub-skill '${raw}'`))).toBe(
+      true
+    );
+    expect(messages.some((m) => detail.test(m))).toBe(true);
+  });
+
+  it('attaches the @use location to the bind error', async () => {
+    const useLoc = { file: 'parent.prs', line: 12, column: 3, offset: 100 };
+    const ast = makeSkillsProgram('ops');
+    const block = ast.blocks[0]!.content as ObjectContent;
+    block.inlineUses![0] = {
+      ...block.inlineUses![0]!,
+      loc: useLoc,
+      params: [
+        {
+          type: 'ParamArgument',
+          name: 'nope',
+          value: 'x',
+          loc: LOC,
+        },
+      ],
+    };
+
+    const error = await resolveSkillComposition(ast, {
+      currentFile: '/project/parent.prs',
+      resolvePath: () => '/project/sub.prs',
+      resolveFile: async () => makeSubSkillProgram('sub'),
+    }).catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(ResolveError);
+    expect((error as ResolveError).location).toEqual(useLoc);
+    expect((error as ResolveError).message).toContain('Failed to bind params for sub-skill');
+  });
+
+  it('leaves phases without params untouched when no args are passed', async () => {
+    const text = await composedText('parent.prs');
+
+    expect(text).toContain('Classify all findings by severity.');
+    expect(text).toContain('Run all health checks in parallel.');
+  });
+});
+
 // ── Helpers ────────────────────────────────────────────────────────
 
 const LOC = { file: '<test>', line: 1, column: 1, offset: 0 };

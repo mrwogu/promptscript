@@ -1,0 +1,26 @@
+@meta {
+  id: "triage-params"
+  syntax: "1.1.0"
+  params: {
+    severity: string = "all"
+  }
+}
+
+@knowledge {
+  """
+  Reports cover {{severity}} findings.
+  """
+}
+
+@restrictions {
+  - "Never classify severity higher than {{severity}} threshold"
+}
+
+@skills {
+  triage: {
+    description: "Classify findings"
+    content: """
+      Only include findings at or above {{severity}} level.
+    """
+  }
+}
