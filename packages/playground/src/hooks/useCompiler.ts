@@ -67,9 +67,13 @@ function dedupe<T extends LocatedMessage>(items: T[], idOf: (item: T) => string)
 }
 
 // Same order as the planner in core.
+function comparePathStrings(left: string, right: string): number {
+  if (left < right) return -1;
+  return Number(left > right);
+}
+
 function comparePaths(left: OutputPlanFile, right: OutputPlanFile): number {
-  if (left.path < right.path) return -1;
-  return Number(left.path > right.path);
+  return comparePathStrings(left.path, right.path);
 }
 
 function mergePlans(plans: (OutputPlan | undefined)[]): OutputPlan | undefined {
@@ -86,8 +90,12 @@ function mergePlans(plans: (OutputPlan | undefined)[]): OutputPlan | undefined {
   }
   const files = [...selected.values()].sort(comparePaths);
 
-  const directories = [...new Set(present.flatMap((plan) => plan.managedPaths.directories))].sort();
-  const managedFiles = [...new Set(present.flatMap((plan) => plan.managedPaths.files))].sort();
+  const directories = [...new Set(present.flatMap((plan) => plan.managedPaths.directories))].sort(
+    comparePathStrings
+  );
+  const managedFiles = [...new Set(present.flatMap((plan) => plan.managedPaths.files))].sort(
+    comparePathStrings
+  );
   const withOmitted = present.filter((plan) => plan.omittedManagedDirectories !== undefined);
 
   return {
