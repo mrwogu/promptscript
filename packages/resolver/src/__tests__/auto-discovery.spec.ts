@@ -697,50 +697,25 @@ describe('discoverNativeContent __baseSource', () => {
     return skills.properties[key] as Record<string, unknown>;
   }
 
-  it('should stamp __baseSource with the SKILL.md path of a subdirectory skill', async () => {
+  it.each([
+    ['a subdirectory SKILL.md', 'my-skill/SKILL.md', 'my-skill'],
+    ['a <dirname>.md file when SKILL.md is absent', 'my-skill/my-skill.md', 'my-skill'],
+    ['a root-level SKILL.md', 'SKILL.md', 'root-skill'],
+    [
+      'a skill under the skills/ wrapper directory',
+      'skills/wrapped-skill/SKILL.md',
+      'wrapped-skill',
+    ],
+  ])('should stamp __baseSource for %s', async (_layout, relativePath, key) => {
     const { mkdir, writeFile } = await import('fs/promises');
     await withTmpDir(async (tmpDir) => {
-      await mkdir(resolve(tmpDir, 'my-skill'));
-      await writeFile(resolve(tmpDir, 'my-skill', 'SKILL.md'), SKILL_MD);
+      const skillFile = resolve(tmpDir, relativePath);
+      await mkdir(dirname(skillFile), { recursive: true });
+      await writeFile(skillFile, SKILL_MD);
 
-      const skill = await discoverSkill(tmpDir, 'my-skill');
+      const skill = await discoverSkill(tmpDir, key);
 
-      expect(skill['__baseSource']).toBe(resolve(tmpDir, 'my-skill', 'SKILL.md'));
-    });
-  });
-
-  it('should stamp __baseSource with the <dirname>.md path when SKILL.md is absent', async () => {
-    const { mkdir, writeFile } = await import('fs/promises');
-    await withTmpDir(async (tmpDir) => {
-      await mkdir(resolve(tmpDir, 'my-skill'));
-      await writeFile(resolve(tmpDir, 'my-skill', 'my-skill.md'), SKILL_MD);
-
-      const skill = await discoverSkill(tmpDir, 'my-skill');
-
-      expect(skill['__baseSource']).toBe(resolve(tmpDir, 'my-skill', 'my-skill.md'));
-    });
-  });
-
-  it('should stamp __baseSource on a root-level SKILL.md skill', async () => {
-    const { writeFile } = await import('fs/promises');
-    await withTmpDir(async (tmpDir) => {
-      await writeFile(resolve(tmpDir, 'SKILL.md'), SKILL_MD);
-
-      const skill = await discoverSkill(tmpDir, 'root-skill');
-
-      expect(skill['__baseSource']).toBe(resolve(tmpDir, 'SKILL.md'));
-    });
-  });
-
-  it('should stamp __baseSource on a skill under the skills/ wrapper directory', async () => {
-    const { mkdir, writeFile } = await import('fs/promises');
-    await withTmpDir(async (tmpDir) => {
-      await mkdir(resolve(tmpDir, 'skills', 'wrapped-skill'), { recursive: true });
-      await writeFile(resolve(tmpDir, 'skills', 'wrapped-skill', 'SKILL.md'), SKILL_MD);
-
-      const skill = await discoverSkill(tmpDir, 'wrapped-skill');
-
-      expect(skill['__baseSource']).toBe(resolve(tmpDir, 'skills', 'wrapped-skill', 'SKILL.md'));
+      expect(skill['__baseSource']).toBe(skillFile);
     });
   });
 });

@@ -449,29 +449,26 @@ describe('inline @use params', () => {
     return (ops['content'] as TextContent).value;
   }
 
+  function expectSeverity(text: string, level: string): void {
+    expect(text).toContain(`Only include findings at or above ${level} level.`);
+    expect(text).toContain(`Never classify severity higher than ${level} threshold`);
+    expect(text).not.toContain('{{severity}}');
+  }
+
   it('interpolates explicit args into the phase content, restrictions and knowledge', async () => {
     const text = await composedText('parent-params-explicit.prs');
 
-    expect(text).toContain('Only include findings at or above critical level.');
-    expect(text).toContain('Never classify severity higher than critical threshold');
+    expectSeverity(text, 'critical');
     expect(text).toContain('Reports cover critical findings.');
-    expect(text).not.toContain('{{severity}}');
   });
 
-  it('applies param defaults when no args are passed', async () => {
-    const text = await composedText('parent-params-default.prs');
+  it.each([
+    ['applies param defaults when no args are passed', 'parent-params-default.prs', 'all'],
+    ['interpolates params for an aliased phase', 'parent-params-alias.prs', 'critical'],
+  ])('%s', async (_name, file, level) => {
+    const text = await composedText(file);
 
-    expect(text).toContain('Only include findings at or above all level.');
-    expect(text).toContain('Never classify severity higher than all threshold');
-    expect(text).not.toContain('{{severity}}');
-  });
-
-  it('interpolates params for an aliased phase', async () => {
-    const text = await composedText('parent-params-alias.prs');
-
-    expect(text).toContain('## Phase 1: deep');
-    expect(text).toContain('Only include findings at or above critical level.');
-    expect(text).not.toContain('{{severity}}');
+    expectSeverity(text, level);
   });
 
   it.each([
