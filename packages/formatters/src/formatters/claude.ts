@@ -750,12 +750,7 @@ export class ClaudeFormatter extends BaseFormatter {
     if (config.content) {
       // First dedent (using lines 2+ for indent calculation since line 1 may be trimmed)
       // Then normalize for Prettier compatibility
-      const dedentedContent = this.dedent(config.content);
-      lines.push(
-        options?.verbatimMarkdown
-          ? dedentedContent
-          : this.normalizeMarkdownForPrettier(dedentedContent)
-      );
+      lines.push(this.formatBody(config.content, options));
     }
 
     const skillDirPath = this.resolveSkillDir(
@@ -992,6 +987,17 @@ export class ClaudeFormatter extends BaseFormatter {
   }
 
   /**
+   * Dedent a skill or agent body and normalize it for Prettier, unless
+   * `verbatimMarkdown` keeps it as written.
+   */
+  private formatBody(content: string, options?: FormatOptions): string {
+    const dedentedContent = this.dedent(content);
+    return options?.verbatimMarkdown
+      ? dedentedContent
+      : this.normalizeMarkdownForPrettier(dedentedContent);
+  }
+
+  /**
    * Generate a .claude/agents/<name>.md file.
    *
    * @see https://code.claude.com/docs/en/sub-agents
@@ -1057,12 +1063,7 @@ export class ClaudeFormatter extends BaseFormatter {
 
     if (config.content) {
       // Dedent content and normalize for Prettier compatibility
-      const dedentedContent = this.dedent(config.content);
-      lines.push(
-        options?.verbatimMarkdown
-          ? dedentedContent
-          : this.normalizeMarkdownForPrettier(dedentedContent)
-      );
+      lines.push(this.formatBody(config.content, options));
     }
 
     return {

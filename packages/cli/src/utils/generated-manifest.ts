@@ -112,8 +112,7 @@ export function isOwnedByManifest(
   path: string,
   content: string
 ): boolean {
-  const entry = manifest?.files[path];
-  return entry !== undefined && entry.sha256 === hashContent(content);
+  return manifest?.files[path]?.sha256 === hashContent(content);
 }
 
 /** Stale files of a previous run, split by whether they were edited since. */
@@ -141,19 +140,18 @@ export async function findStaleManifestFiles(
 ): Promise<StaleManifestFiles> {
   const stale: StaleManifestFiles = { unchanged: [], edited: [] };
   if (!manifest) return stale;
-  for (const path of Object.keys(manifest.files).sort(compareCodeUnits)) {
-    const entry = manifest.files[path]!;
-    if (plannedPaths.has(path) || !isInScope(entry, scope)) continue;
-    const absolutePath = resolve(outputRoot, path);
-    const stat = await lstat(absolutePath).catch(() => undefined);
-    if (!stat?.isFile()) continue;
-    const content = await readFile(absolutePath);
-    if (hashContent(content) === entry.sha256) {
-      stale.unchanged.push(path);
-    } else {
-      stale.edited.push(path);
-    }
-  }
+  const candidates = Object.entries(manifest.files)
+    .filter(([path, entry]) => !plannedPaths.has(path) && isInScope(entry, scope))
+    .sort(([a], [b]) => compareCodeUnits(a, b));
+  const hashes = await Promise.all(
+    candidates.map(([path]) => hashFileOnDisk(resolve(outputRoot, path)))
+  );
+  candidates.forEach(([path, entry], index) => {
+    const hash = hashes[index];
+    if (hash === undefined) return;
+    if (hash === entry.sha256) stale.unchanged.push(path);
+    else stale.edited.push(path);
+  });
   return stale;
 }
 
@@ -180,18 +178,29 @@ export async function buildGeneratedManifest(
   for (const [path, entry] of Object.entries(previous?.files ?? {})) {
     if (!isInScope(entry, scope) || kept.has(path)) files[path] = entry;
   }
-  for (const output of generated) {
-    if (!isManifestTracked(output) || output.path === GENERATED_MANIFEST_FILE) continue;
-    const absolutePath = resolve(outputRoot, output.path);
-    const stat = await lstat(absolutePath).catch(() => undefined);
-    if (!stat?.isFile()) continue;
+  const tracked = generated.filter(
+    (output) => isManifestTracked(output) && output.path !== GENERATED_MANIFEST_FILE
+  );
+  const hashes = await Promise.all(
+    tracked.map((output) => hashFileOnDisk(resolve(outputRoot, output.path)))
+  );
+  tracked.forEach((output, index) => {
+    const sha256 = hashes[index];
+    if (sha256 === undefined) return;
     files[output.path] = {
-      sha256: hashContent(await readFile(absolutePath)),
+      sha256,
       ...(output.target !== undefined ? { target: output.target } : {}),
       ...(scope.build !== undefined ? { build: scope.build } : {}),
     };
-  }
+  });
   return files;
+}
+
+/** Hash of a regular file, or undefined when there is none. */
+async function hashFileOnDisk(path: string): Promise<string | undefined> {
+  const stat = await lstat(path).catch(() => undefined);
+  if (!stat?.isFile()) return undefined;
+  return hashContent(await readFile(path));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

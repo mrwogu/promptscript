@@ -539,70 +539,85 @@ export async function removeStaleGeneratedFiles(
   options: { outputRoot: string; dryRun?: boolean }
 ): Promise<ManagedOutputCleanupResult> {
   const outputRoot = resolve(options.outputRoot);
-  const removed: string[] = [];
-  const removedDirectories: string[] = [];
+  const dryRun = options.dryRun === true;
   let unresolvedWorker = false;
   const onUnresolvedWorker = (): void => {
     unresolvedWorker = true;
   };
 
-  for (const file of files) {
-    const absolutePath = containedDirectory(file.path, outputRoot);
-    if (absolutePath === undefined || absolutePath === outputRoot) continue;
-    const fileStat = await safeLstat(absolutePath);
-    if (!fileStat?.isFile() || fileStat.isSymbolicLink()) continue;
-    const content = await readFile(absolutePath);
-    if (createHash('sha256').update(content).digest('hex') !== file.sha256) continue;
-    if (options.dryRun) {
-      removed.push(absolutePath);
-      continue;
-    }
-
-    const guards = await openAncestorDirectories(outputRoot, absolutePath);
-    if (!guards) continue;
-    try {
-      if (!(await directoryGuardsMatch(guards))) continue;
-      const directory = dirname(absolutePath);
-      const directoryStat = await safeLstat(directory);
-      if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) continue;
-      if (
-        await guardedUnlink(
-          directory,
-          basename(absolutePath),
-          directoryStat,
-          fileStat,
-          content.toString('utf-8'),
-          onUnresolvedWorker
-        )
-      ) {
-        removed.push(absolutePath);
-      }
-    } finally {
-      await closeDirectoryGuards(guards);
-    }
-  }
-
-  if (!options.dryRun) {
-    const parents = new Set<string>();
-    for (const file of removed) {
-      let directory = dirname(file);
-      while (directory !== outputRoot && isWithin(outputRoot, directory)) {
-        parents.add(directory);
-        directory = dirname(directory);
-      }
-    }
-    const tracker: PruneTracker = { removed, removedDirectories, managedDirectories: parents };
-    for (const directory of [...parents].sort((a, b) => b.length - a.length)) {
-      if (removedDirectories.includes(directory)) continue;
-      await pruneEmptyDirectory(directory, outputRoot, false, tracker);
-    }
-  }
+  const results = await Promise.all(
+    files.map((file) => removeStaleFile(file, outputRoot, dryRun, onUnresolvedWorker))
+  );
+  const removed = results.filter((path): path is string => path !== undefined);
+  const removedDirectories = dryRun ? [] : await pruneParentsOf(removed, outputRoot);
 
   return {
     removed,
     removedDirectories,
     ...(unresolvedWorker ? { unresolvedSelfInvocation: true } : {}),
   };
+}
+
+/** Remove one stale file when its hash still matches. Returns its path when removed. */
+async function removeStaleFile(
+  file: { path: string; sha256: string },
+  outputRoot: string,
+  dryRun: boolean,
+  onUnresolvedWorker: () => void
+): Promise<string | undefined> {
+  const absolutePath = containedDirectory(file.path, outputRoot);
+  if (absolutePath === undefined || absolutePath === outputRoot) return undefined;
+  const fileStat = await safeLstat(absolutePath);
+  if (!fileStat?.isFile() || fileStat.isSymbolicLink()) return undefined;
+  const content = await readFile(absolutePath);
+  if (createHash('sha256').update(content).digest('hex') !== file.sha256) return undefined;
+  if (dryRun) return absolutePath;
+
+  const guards = await openAncestorDirectories(outputRoot, absolutePath);
+  if (!guards) return undefined;
+  try {
+    if (!(await directoryGuardsMatch(guards))) return undefined;
+    const directory = dirname(absolutePath);
+    const directoryStat = await safeLstat(directory);
+    if (!directoryStat?.isDirectory() || directoryStat.isSymbolicLink()) return undefined;
+    const unlinked = await guardedUnlink(
+      directory,
+      basename(absolutePath),
+      directoryStat,
+      fileStat,
+      content.toString('utf-8'),
+      onUnresolvedWorker
+    );
+    return unlinked ? absolutePath : undefined;
+  } finally {
+    await closeDirectoryGuards(guards);
+  }
+}
+
+/**
+ * Remove directories that removed files left empty, up to the output root.
+ * Each top directory is pruned once; the prune walks into its children.
+ */
+async function pruneParentsOf(removed: readonly string[], outputRoot: string): Promise<string[]> {
+  const parents = new Set<string>();
+  for (const file of removed) {
+    let directory = dirname(file);
+    while (directory !== outputRoot && isWithin(outputRoot, directory)) {
+      parents.add(directory);
+      directory = dirname(directory);
+    }
+  }
+  const removedDirectories: string[] = [];
+  const tracker: PruneTracker = {
+    removed: [...removed],
+    removedDirectories,
+    managedDirectories: parents,
+  };
+  const tops = [...parents].filter((directory) => !parents.has(dirname(directory)));
+  await Promise.all(
+    tops.map((directory) => pruneEmptyDirectory(directory, outputRoot, false, tracker))
+  );
+  return removedDirectories;
 }
 
 export async function rewriteHookOutputIfUnchanged(
