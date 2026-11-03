@@ -111,8 +111,24 @@ export async function loadConfigFileWith(
   read: ConfigFileReader,
   files: string[] = []
 ): Promise<PromptScriptConfig> {
-  const config: unknown = await loadConfigFile(configFile, [], read, undefined, files);
+  const config: unknown = dropDisabledBuilds(
+    await loadConfigFile(configFile, [], read, undefined, files)
+  );
   return config as PromptScriptConfig;
+}
+
+/**
+ * Remove build profiles set to `enabled: false`. Runs once on the merged
+ * chain, so a later file can still turn a profile on again.
+ */
+function dropDisabledBuilds(config: Record<string, unknown>): Record<string, unknown> {
+  const builds = config['builds'];
+  if (!isPlainObject(builds)) return config;
+  const kept = Object.entries(builds).filter(
+    ([, profile]) => !(isPlainObject(profile) && profile['enabled'] === false)
+  );
+  if (kept.length === Object.keys(builds).length) return config;
+  return { ...config, builds: Object.fromEntries(kept) };
 }
 
 /**

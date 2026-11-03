@@ -255,6 +255,12 @@ export interface BuildProfileConfig {
   output?: string;
   /** Target list for this build profile */
   targets?: TargetEntry[];
+  /**
+   * Set to `false` to drop the profile, for example one inherited through
+   * `extends`. A dropped profile is removed when the config is loaded.
+   * @default true
+   */
+  enabled?: boolean;
 }
 
 /**

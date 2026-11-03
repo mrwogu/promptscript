@@ -1996,6 +1996,14 @@ function replaceFrontmatterDescription(rawFrontmatter: string, description: stri
   );
 }
 
+/** The SKILL.md a skill's content was already read from, if any. */
+function nativeSkillFile(skill: Record<string, Value>): string | null {
+  const content = skill['content'];
+  if (typeof content !== 'object' || content === null || Array.isArray(content)) return null;
+  const loc = (content as { loc?: { file?: unknown } }).loc;
+  return typeof loc?.file === 'string' && basename(loc.file) === 'SKILL.md' ? loc.file : null;
+}
+
 /**
  * Resolve native SKILL.md files for skills defined in the AST.
  *
@@ -2124,7 +2132,10 @@ export async function resolveNativeSkills(
           if (localCandidate && (await fileExists(localCandidate))) return localCandidate;
           if (universalCandidate && (await fileExists(universalCandidate)))
             return universalCandidate;
-          return registryCandidate;
+          // A skill already read from a SKILL.md (for example by an inherited
+          // project) is read again from that file, so this project's arguments
+          // and shared files apply. The registry does not outrank it.
+          return nativeSkillFile(skillObj) ?? registryCandidate;
         })();
 
     if (skillMdPath && (await fileExists(skillMdPath))) {

@@ -948,6 +948,18 @@ Output paths are validated against project root - path traversal (`..`) is rejec
 | `entry`   | string        | `input.entry`    | Entry file to compile for this profile  |
 | `output`  | string        | `output.baseDir` | Base output directory for this profile  |
 | `targets` | TargetEntry[] | `targets`        | Target list to compile for this profile |
+| `enabled` | boolean       | `true`           | `false` drops the profile               |
+
+A config that extends another one can drop a build it does not want with `enabled: false`.
+The profile is removed after the whole `extends` chain is merged, so `--all-builds` skips it and
+`--build` does not know it. A later file in the chain can set `enabled: true` again.
+
+```yaml
+extends: ../tool/promptscript.yaml
+builds:
+  system-messages:
+    enabled: false
+```
 
 CLI flags still take precedence: `--target`/`--format` override the profile's
 target list, and `--output` overrides the profile's `output`.
@@ -1462,6 +1474,7 @@ How the merge works:
 
 - The `extends` path is relative to the file that declares it. A base file can extend another file. A circular chain is an error.
 - Objects merge deeply and the extending file wins. Arrays such as `targets` are replaced, not joined, so the example above compiles only `github`.
+- A build profile of the base can be dropped with `enabled: false`, see [builds](#builds).
 - A `__proto__`, `constructor` or `prototype` key in an object that both files set is a config error (`PS3002`) that names the key. The merge reads and writes own keys only, so no value goes through a prototype.
 - `policies` is joined: the base policies come first and the extending file's policies are appended. A base policy cannot be removed or redefined, so a policy with the same `name` as a base policy is a config error, and so is a `policies` value that is not a list, such as `policies: null` (a bare `policies:` key is accepted only when the base has no policies). Setting `validation.rules.policy-compliance` to `off` still turns PS030 off, including from an extending file.
 - `governance.admins` and each owner list under `governance.roles` are joined the same way: base owners come first, the extending file's new owners are appended and duplicates are dropped. The extending file can add roles and owners, but cannot remove one. `governance.codeowners.protect` is joined the same way, so a protected path set in a base file stays protected. A value of the wrong type for `governance`, `governance.admins`, `governance.roles`, one role, `governance.codeowners` or `governance.codeowners.protect` is a config error, and so is `null` when the base sets entries there (a bare key is accepted only when the base has none). A `__proto__` key under `governance`, `governance.roles` or `governance.codeowners` is refused. Other keys under `governance` merge like the rest of the file.

@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
-import { lstat, readdir, readFile } from 'node:fs/promises';
-import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { lstat, readdir, readFile, realpath } from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -395,6 +395,8 @@ type PreflightRegistryImport =
 
 /** Cache key prefix for a file resolved as the entry, not as an import. */
 const ENTRY_CACHE_PREFIX = '\0entry:';
+// An @inherit target can read the native sources of its own project, see inheritedLocalPath.
+const INHERIT_CACHE_PREFIX = '\0inherit:';
 
 interface ParsedFile {
   readonly ast: Program;
@@ -575,7 +577,8 @@ export class Resolver {
   private async resolveWithContext(
     entryPath: string,
     context: ResolutionContext,
-    compositionContext?: CompositionResolutionContext
+    compositionContext?: CompositionResolutionContext,
+    viaInherit = false
   ): Promise<ResolvedAST> {
     const absPath = this.loader.toAbsolutePath(entryPath);
 
@@ -587,7 +590,12 @@ export class Resolver {
 
     // The entry file also adds skills found on disk, so it has its own cache entry.
     const isEntry = context.resolving.size === 0;
-    const cacheKey = isEntry ? `${ENTRY_CACHE_PREFIX}${absPath}` : absPath;
+    let cacheKey = absPath;
+    if (isEntry) {
+      cacheKey = `${ENTRY_CACHE_PREFIX}${absPath}`;
+    } else if (viaInherit) {
+      cacheKey = `${INHERIT_CACHE_PREFIX}${absPath}`;
+    }
 
     // Check cache
     if (!compositionContext && this.cacheEnabled && this.cache.has(cacheKey)) {
@@ -599,7 +607,13 @@ export class Resolver {
     this.logger.verbose(`Parsing ${absPath}`);
 
     try {
-      const result = await this.doResolve(absPath, context, compositionContext, isEntry);
+      const result = await this.doResolve(
+        absPath,
+        context,
+        compositionContext,
+        isEntry,
+        viaInherit
+      );
 
       if (!compositionContext && this.cacheEnabled) {
         this.logger.debug(`Cache store: ${absPath}`);
@@ -619,7 +633,8 @@ export class Resolver {
     absPath: string,
     context: ResolutionContext,
     compositionContext?: CompositionResolutionContext,
-    isEntry = true
+    isEntry = true,
+    viaInherit = false
   ): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const dependencies = new Set<string>([absPath]);
@@ -753,7 +768,14 @@ export class Resolver {
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
     // Preserve the parent fallback for custom local paths.
-    const configuredProjectRoot = this.options.skills?.projectRoot ?? this.options.projectRoot;
+    // An inherited project reads its native skills, commands and agents from
+    // its own .promptscript directory, like it does when it compiles alone.
+    // Only for @inherit: a @use of the same file keeps this project's sources.
+    const inheritedLocalPath = viaInherit ? this.inheritedLocalPath(absPath) : undefined;
+    const localDiscoveryPath = inheritedLocalPath ?? this.loader.getLocalPath();
+    const configuredProjectRoot = inheritedLocalPath
+      ? dirname(inheritedLocalPath)
+      : (this.options.skills?.projectRoot ?? this.options.projectRoot);
     const projectRoot =
       configuredProjectRoot ??
       (basename(this.loader.getLocalPath()) === '.promptscript'
@@ -764,35 +786,43 @@ export class Resolver {
       ...(projectRoot ? { projectRoot } : {}),
       logger: this.logger,
     };
-    const skillDiscoveryOptions = isEntry
-      ? discoveryOptions
-      : { ...discoveryOptions, discoverUndeclared: false };
+    const skillDiscoveryOptions =
+      isEntry || inheritedLocalPath
+        ? discoveryOptions
+        : { ...discoveryOptions, discoverUndeclared: false };
 
     ast = await resolveNativeSkills(
       ast,
       this.loader.getRegistryPath(),
       absPath,
-      this.loader.getLocalPath(),
+      localDiscoveryPath,
       skillDiscoveryOptions
     );
 
     // Auto-discover command files from local and universal directories
-    ast = await resolveNativeCommands(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
+    ast = await resolveNativeCommands(ast, absPath, localDiscoveryPath, discoveryOptions);
 
     // Auto-discover agent files from local and universal directories
-    ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
+    ast = await resolveNativeAgents(ast, absPath, localDiscoveryPath, discoveryOptions);
 
-    const localDiscoveryPath = this.loader.getLocalPath();
     for (const directory of ['skills', 'commands', 'agents', 'shared'] as const) {
       dependencies.add(resolve(localDiscoveryPath, directory));
     }
     dependencies.add(resolve(this.loader.getRegistryPath(), '@skills'));
     dependencies.add(resolve(this.loader.getProjectRoot(), '.promptscript', 'scripts'));
     if (discoveryOptions.universalDir) {
-      for (const directory of ['skills', 'commands', 'agents'] as const) {
-        dependencies.add(
-          resolve(this.loader.getProjectRoot(), discoveryOptions.universalDir, directory)
-        );
+      const universalBase = inheritedLocalPath
+        ? dirname(inheritedLocalPath)
+        : this.loader.getProjectRoot();
+      // Discovery reads the real directory, so track a symlinked one under both paths.
+      const universalBases = new Set([
+        universalBase,
+        await realpath(universalBase).catch(() => universalBase),
+      ]);
+      for (const base of universalBases) {
+        for (const directory of ['skills', 'commands', 'agents'] as const) {
+          dependencies.add(resolve(base, discoveryOptions.universalDir, directory));
+        }
       }
     }
 
@@ -1147,6 +1177,31 @@ export class Resolver {
   /**
    * Count nodes in AST for debug output.
    */
+  /**
+   * The `.promptscript` directory of another local project when the
+   * `@inherit` target `absPath` is that project's file (for example
+   * `@inherit ../tool/.promptscript/project`). `@use` keeps the current
+   * project's sources.
+   * Files of this project, the registry, the vendor dir and the Git cache
+   * return undefined.
+   */
+  private inheritedLocalPath(absPath: string): string | undefined {
+    const directory = dirname(absPath);
+    if (basename(directory) !== '.promptscript') return undefined;
+    const isInside = (root: string): boolean => {
+      const rel = relative(root, absPath);
+      return !rel.startsWith('..') && !isAbsolute(rel);
+    };
+    const excludedRoots = [
+      this.loader.getLocalPath(),
+      this.loader.getRegistryPath(),
+      ...(this.options.vendorDir ? [this.options.vendorDir] : []),
+    ];
+    if (excludedRoots.some(isInside)) return undefined;
+    if (absPath.split(sep).includes('.cache')) return undefined;
+    return directory;
+  }
+
   private countNodes(ast: Program): number {
     let count = 1; // Program node itself
     if (ast.meta) count++;
@@ -1359,7 +1414,7 @@ export class Resolver {
       if (parentPath.startsWith(REGISTRY_MARKER_PREFIX)) {
         parent = await this.resolveRegistryImport(parentPath, errors, context);
       } else {
-        parent = await this.resolveWithContext(parentPath, context);
+        parent = await this.resolveWithContext(parentPath, context, undefined, true);
       }
       sources.push(...parent.sources);
       addDependencyPaths(dependencies, parent.dependencies ?? []);

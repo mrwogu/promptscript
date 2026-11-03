@@ -60,6 +60,7 @@ This is an internal package bundled into `@promptscript/cli`. It is not publishe
 | PS046 | slot-in-system-message       | warning  | Runtime slots belong in the user message, not the system message                        |
 | PS047 | governance-values            | warning  | Prompt owners, reviewers and data classes must match the governance config              |
 | PS048 | duplicate-blocks             | error    | A block name may appear only once per file                                              |
+| PS049 | skill-without-content        | warning  | Declared skills must have a SKILL.md or content                                         |
 
 The table is taken from `src/rules/index.ts`. PS005, PS010, PS011, PS012 and PS014 also scan the text of `@prompts` entries.
 
