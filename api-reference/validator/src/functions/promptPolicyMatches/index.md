@@ -8,7 +8,7 @@
 
 > **promptPolicyMatches**(`match`, `subject`, `risk`): `boolean`
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:215](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/validator/src/policy/prompt-evaluator.ts#L215)
+Defined in: [validator/src/policy/prompt-evaluator.ts:215](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/validator/src/policy/prompt-evaluator.ts#L215)
 
 Whether a policy's `match` selects a prompt at the given policy risk.
 

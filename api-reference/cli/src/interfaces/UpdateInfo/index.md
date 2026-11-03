@@ -6,7 +6,7 @@
 
 # Interface: UpdateInfo
 
-Defined in: [cli/src/utils/version-check.ts:25](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/version-check.ts#L25)
+Defined in: [cli/src/utils/version-check.ts:25](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/version-check.ts#L25)
 
 Result of a version check.
 
@@ -16,7 +16,7 @@ Result of a version check.
 
 > **currentVersion**: `string`
 
-Defined in: [cli/src/utils/version-check.ts:26](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/version-check.ts#L26)
+Defined in: [cli/src/utils/version-check.ts:26](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/version-check.ts#L26)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [cli/src/utils/version-check.ts:26](https://github.com/mrwogu/prompt
 
 > **latestVersion**: `string`
 
-Defined in: [cli/src/utils/version-check.ts:27](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/version-check.ts#L27)
+Defined in: [cli/src/utils/version-check.ts:27](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/version-check.ts#L27)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [cli/src/utils/version-check.ts:27](https://github.com/mrwogu/prompt
 
 > **updateAvailable**: `boolean`
 
-Defined in: [cli/src/utils/version-check.ts:28](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/version-check.ts#L28)
+Defined in: [cli/src/utils/version-check.ts:28](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/version-check.ts#L28)

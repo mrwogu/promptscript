@@ -6,7 +6,7 @@
 
 # Interface: FieldEntry
 
-Defined in: [core/src/types/ast.ts:589](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L589)
+Defined in: [core/src/types/ast.ts:589](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L589)
 
 Canonical key-value entry.
 
@@ -20,7 +20,7 @@ Canonical key-value entry.
 
 > `readonly` `optional` **defaultValue?**: [`ValueNode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ValueNode/index.md)
 
-Defined in: [core/src/types/ast.ts:594](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L594)
+Defined in: [core/src/types/ast.ts:594](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L594)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:594](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L499)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -64,7 +64,7 @@ Byte offset from start of file
 
 > `readonly` **name**: `string`
 
-Defined in: [core/src/types/ast.ts:591](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L591)
+Defined in: [core/src/types/ast.ts:591](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L591)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [core/src/types/ast.ts:591](https://github.com/mrwogu/promptscript/b
 
 > `readonly` `optional` **optional?**: `boolean`
 
-Defined in: [core/src/types/ast.ts:593](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L593)
+Defined in: [core/src/types/ast.ts:593](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L593)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [core/src/types/ast.ts:593](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"FieldEntry"`
 
-Defined in: [core/src/types/ast.ts:590](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L590)
+Defined in: [core/src/types/ast.ts:590](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L590)
 
 #### Overrides
 
@@ -92,4 +92,4 @@ Defined in: [core/src/types/ast.ts:590](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **value**: [`ValueNode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ValueNode/index.md)
 
-Defined in: [core/src/types/ast.ts:592](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L592)
+Defined in: [core/src/types/ast.ts:592](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L592)

@@ -8,7 +8,7 @@
 
 > **scrubPii**(`text`): `object`
 
-Defined in: [eval/src/dataset/pii.ts:254](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/dataset/pii.ts#L254)
+Defined in: [eval/src/dataset/pii.ts:254](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/dataset/pii.ts#L254)
 
 Replace the personal data [detectPii](https://getpromptscript.dev/api-reference/eval/src/functions/detectPii/index.md) finds in one value with `[email]`,
 `[card]` or `[iban]`. It uses the same detectors, so it finds what the

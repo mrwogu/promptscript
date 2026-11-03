@@ -8,7 +8,7 @@
 
 > **createMockProvider**(`script`): [`MockProvider`](https://getpromptscript.dev/api-reference/eval/src/type-aliases/MockProvider/index.md)
 
-Defined in: [eval/src/provider.ts:100](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/provider.ts#L100)
+Defined in: [eval/src/provider.ts:100](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/provider.ts#L100)
 
 Create a provider for tests that answers from a table keyed by case id or
 from a function, with scripted usage and latency, and records every call.

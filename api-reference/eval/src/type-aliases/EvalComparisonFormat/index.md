@@ -8,6 +8,6 @@
 
 > **EvalComparisonFormat** = `"text"` \| `"json"` \| `"markdown"`
 
-Defined in: [eval/src/format.ts:18](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/format.ts#L18)
+Defined in: [eval/src/format.ts:18](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/format.ts#L18)
 
 Output formats of a comparison.

@@ -6,7 +6,7 @@
 
 # Interface: EvalReportV1
 
-Defined in: [core/src/types/eval.ts:821](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L821)
+Defined in: [core/src/types/eval.ts:821](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L821)
 
 Report of one eval run, version 1. Deterministic: no timestamps, no
 wall-clock durations, no absolute paths, arrays sorted by suite name,
@@ -18,7 +18,7 @@ model order and case id.
 
 > **$schema**: `"https://getpromptscript.dev/schema/eval-report/v1.json"`
 
-Defined in: [core/src/types/eval.ts:826](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L826)
+Defined in: [core/src/types/eval.ts:826](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L826)
 
 Schema URL, the version tag of the report.
 
@@ -34,7 +34,7 @@ Schema URL, the version tag of the report.
 
 > `optional` **budget?**: [`EvalBudgetV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalBudgetV1/index.md)
 
-Defined in: [core/src/types/eval.ts:846](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L846)
+Defined in: [core/src/types/eval.ts:846](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L846)
 
 Budget of the run, when one applied
 
@@ -44,7 +44,7 @@ Budget of the run, when one applied
 
 > **cache**: [`EvalReportCacheV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportCacheV1/index.md)
 
-Defined in: [core/src/types/eval.ts:837](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L837)
+Defined in: [core/src/types/eval.ts:837](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L837)
 
 Cache summary
 
@@ -54,7 +54,7 @@ Cache summary
 
 > `optional` **comparison?**: [`EvalComparisonV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalComparisonV1/index.md)
 
-Defined in: [core/src/types/eval.ts:850](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L850)
+Defined in: [core/src/types/eval.ts:850](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L850)
 
 Comparison against a baseline report
 
@@ -64,7 +64,7 @@ Comparison against a baseline report
 
 > `optional` **costUsd?**: `number`
 
-Defined in: [core/src/types/eval.ts:844](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L844)
+Defined in: [core/src/types/eval.ts:844](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L844)
 
 Cost of the run in USD, when every model used has a price.
 
@@ -78,7 +78,7 @@ Cost of the run in USD, when every model used has a price.
 
 > **errors**: [`EvalReportErrorV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportErrorV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:852](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L852)
+Defined in: [core/src/types/eval.ts:852](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L852)
 
 Errors not tied to one case
 
@@ -88,7 +88,7 @@ Errors not tied to one case
 
 > **outcome**: [`EvalOutcome`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalOutcome/index.md)
 
-Defined in: [core/src/types/eval.ts:833](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L833)
+Defined in: [core/src/types/eval.ts:833](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L833)
 
 Outcome of the run
 
@@ -98,7 +98,7 @@ Outcome of the run
 
 > **passed**: `boolean`
 
-Defined in: [core/src/types/eval.ts:835](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L835)
+Defined in: [core/src/types/eval.ts:835](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L835)
 
 Whether every suite passed and nothing else went wrong
 
@@ -108,7 +108,7 @@ Whether every suite passed and nothing else went wrong
 
 > **suites**: [`EvalSuiteResultV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalSuiteResultV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:848](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L848)
+Defined in: [core/src/types/eval.ts:848](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L848)
 
 Suite results sorted by name
 
@@ -118,7 +118,7 @@ Suite results sorted by name
 
 > **usage**: [`EvalUsageV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalUsageV1/index.md)
 
-Defined in: [core/src/types/eval.ts:839](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L839)
+Defined in: [core/src/types/eval.ts:839](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L839)
 
 Calls and tokens of the run
 
@@ -128,7 +128,7 @@ Calls and tokens of the run
 
 > `optional` **version?**: `1`
 
-Defined in: [core/src/types/eval.ts:831](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L831)
+Defined in: [core/src/types/eval.ts:831](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L831)
 
 Format version, always 1 in reports this CLI writes. Older reports lack
 it; read a missing value as 1.

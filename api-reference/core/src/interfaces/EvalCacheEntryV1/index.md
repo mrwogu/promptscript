@@ -6,7 +6,7 @@
 
 # Interface: EvalCacheEntryV1
 
-Defined in: [core/src/types/eval.ts:383](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L383)
+Defined in: [core/src/types/eval.ts:383](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L383)
 
 One recorded model call of the eval cache, version 1. The file name is
 the key, and the key is the SHA-256 of the canonical JSON of `request`.
@@ -17,7 +17,7 @@ the key, and the key is the SHA-256 of the canonical JSON of `request`.
 
 > **$schema**: `"https://getpromptscript.dev/schema/eval-cache-entry/v1.json"`
 
-Defined in: [core/src/types/eval.ts:388](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L388)
+Defined in: [core/src/types/eval.ts:388](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L388)
 
 Schema URL, the version tag of the entry.
 
@@ -33,7 +33,7 @@ Schema URL, the version tag of the entry.
 
 > **key**: `string`
 
-Defined in: [core/src/types/eval.ts:390](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L390)
+Defined in: [core/src/types/eval.ts:390](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L390)
 
 Cache key
 
@@ -43,7 +43,7 @@ Cache key
 
 > **request**: [`EvalCacheRequestV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalCacheRequestV1/index.md)
 
-Defined in: [core/src/types/eval.ts:392](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L392)
+Defined in: [core/src/types/eval.ts:392](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L392)
 
 The request the entry answers
 
@@ -53,6 +53,6 @@ The request the entry answers
 
 > **response**: [`EvalCacheResponseV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalCacheResponseV1/index.md)
 
-Defined in: [core/src/types/eval.ts:394](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L394)
+Defined in: [core/src/types/eval.ts:394](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L394)
 
 The recorded response

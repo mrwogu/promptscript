@@ -6,7 +6,7 @@
 
 # Interface: EvalReportCacheV1
 
-Defined in: [core/src/types/eval.ts:445](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L445)
+Defined in: [core/src/types/eval.ts:445](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L445)
 
 Cache summary of a run.
 
@@ -20,7 +20,7 @@ Cache summary of a run.
 
 > **digest**: `string`
 
-Defined in: [core/src/types/eval.ts:456](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L456)
+Defined in: [core/src/types/eval.ts:456](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L456)
 
 Digest of the consumed cache entries. Take the unique keys of every
 case's `cacheKeys`, sorted ascending; for each key the lowercase hex
@@ -38,7 +38,7 @@ string.
 
 > **live**: `number`
 
-Defined in: [core/src/types/eval.ts:441](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L441)
+Defined in: [core/src/types/eval.ts:441](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L441)
 
 Calls made to a provider.
 
@@ -60,7 +60,7 @@ integer
 
 > **mode**: [`EvalCacheMode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalCacheMode/index.md)
 
-Defined in: [core/src/types/eval.ts:447](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L447)
+Defined in: [core/src/types/eval.ts:447](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L447)
 
 Cache mode of the run
 
@@ -70,7 +70,7 @@ Cache mode of the run
 
 > **replayed**: `number`
 
-Defined in: [core/src/types/eval.ts:435](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L435)
+Defined in: [core/src/types/eval.ts:435](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L435)
 
 Calls answered from the cache.
 

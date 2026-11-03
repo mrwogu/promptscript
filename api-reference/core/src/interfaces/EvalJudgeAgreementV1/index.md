@@ -6,7 +6,7 @@
 
 # Interface: EvalJudgeAgreementV1
 
-Defined in: [core/src/types/eval.ts:586](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L586)
+Defined in: [core/src/types/eval.ts:586](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L586)
 
 Agreement between a judge assertion and the human labels.
 
@@ -16,7 +16,7 @@ Agreement between a judge assertion and the human labels.
 
 > **agreed**: `number`
 
-Defined in: [core/src/types/eval.ts:600](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L600)
+Defined in: [core/src/types/eval.ts:600](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L600)
 
 Labelled cases where the judge agreed with the label.
 
@@ -34,7 +34,7 @@ integer
 
 > **assertion**: `string`
 
-Defined in: [core/src/types/eval.ts:588](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L588)
+Defined in: [core/src/types/eval.ts:588](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L588)
 
 Judge assertion id
 
@@ -44,7 +44,7 @@ Judge assertion id
 
 > **labelled**: `number`
 
-Defined in: [core/src/types/eval.ts:594](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L594)
+Defined in: [core/src/types/eval.ts:594](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L594)
 
 Cases with a human label.
 

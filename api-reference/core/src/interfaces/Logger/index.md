@@ -6,7 +6,7 @@
 
 # Interface: Logger
 
-Defined in: [core/src/logger.ts:19](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/logger.ts#L19)
+Defined in: [core/src/logger.ts:19](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/logger.ts#L19)
 
 Logger interface for verbose/debug output during compilation.
 
@@ -32,7 +32,7 @@ const compiler = new Compiler({ logger });
 
 > **debug**(`message`): `void`
 
-Defined in: [core/src/logger.ts:30](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/logger.ts#L30)
+Defined in: [core/src/logger.ts:30](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/logger.ts#L30)
 
 Log debug message.
 Shown only with --debug flag.
@@ -53,7 +53,7 @@ Shown only with --debug flag.
 
 > **verbose**(`message`): `void`
 
-Defined in: [core/src/logger.ts:24](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/logger.ts#L24)
+Defined in: [core/src/logger.ts:24](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/logger.ts#L24)
 
 Log verbose message.
 Shown with --verbose and --debug flags.
@@ -74,7 +74,7 @@ Shown with --verbose and --debug flags.
 
 > **warn**(`message`): `void`
 
-Defined in: [core/src/logger.ts:35](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/logger.ts#L35)
+Defined in: [core/src/logger.ts:35](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/logger.ts#L35)
 
 Log warning message. Always shown regardless of verbosity flags.
 

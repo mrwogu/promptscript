@@ -6,7 +6,7 @@
 
 # Class: TelemetrySession
 
-Defined in: [telemetry/src/reporter.ts:50](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/telemetry/src/reporter.ts#L50)
+Defined in: [telemetry/src/reporter.ts:50](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/reporter.ts#L50)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/reporter.ts:50](https://github.com/mrwogu/promptscrip
 
 > **new TelemetrySession**(`options`): `TelemetrySession`
 
-Defined in: [telemetry/src/reporter.ts:60](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/telemetry/src/reporter.ts#L60)
+Defined in: [telemetry/src/reporter.ts:60](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/reporter.ts#L60)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [telemetry/src/reporter.ts:60](https://github.com/mrwogu/promptscrip
 
 > **finish**(`outcome`): `void`
 
-Defined in: [telemetry/src/reporter.ts:72](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/telemetry/src/reporter.ts#L72)
+Defined in: [telemetry/src/reporter.ts:72](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/reporter.ts#L72)
 
 #### Parameters
 

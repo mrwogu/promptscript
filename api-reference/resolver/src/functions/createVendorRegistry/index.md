@@ -8,7 +8,7 @@
 
 > **createVendorRegistry**(`vendorDir`): [`VendorRegistry`](https://getpromptscript.dev/api-reference/resolver/src/classes/VendorRegistry/index.md)
 
-Defined in: [resolver/src/vendor-registry.ts:89](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/vendor-registry.ts#L89)
+Defined in: [resolver/src/vendor-registry.ts:89](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/vendor-registry.ts#L89)
 
 Create a VendorRegistry backed by the given directory.
 

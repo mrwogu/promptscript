@@ -6,7 +6,7 @@
 
 # Class: CursorFormatter
 
-Defined in: [formatters/src/formatters/cursor.ts:145](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L145)
+Defined in: [formatters/src/formatters/cursor.ts:145](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L145)
 
 Formatter for Cursor rules and commands.
 
@@ -78,7 +78,7 @@ targets:
 
 > `readonly` **defaultConvention**: `"markdown"` = `'markdown'`
 
-Defined in: [formatters/src/formatters/cursor.ts:149](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L149)
+Defined in: [formatters/src/formatters/cursor.ts:149](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L149)
 
 Default convention for this formatter
 
@@ -92,7 +92,7 @@ Default convention for this formatter
 
 > `readonly` **description**: `"Cursor rules (MDC with frontmatter)"` = `'Cursor rules (MDC with frontmatter)'`
 
-Defined in: [formatters/src/formatters/cursor.ts:148](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L148)
+Defined in: [formatters/src/formatters/cursor.ts:148](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L148)
 
 Human-readable description
 
@@ -106,7 +106,7 @@ Human-readable description
 
 > `readonly` **name**: `"cursor"` = `'cursor'`
 
-Defined in: [formatters/src/formatters/cursor.ts:146](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L146)
+Defined in: [formatters/src/formatters/cursor.ts:146](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L146)
 
 Unique formatter identifier
 
@@ -120,7 +120,7 @@ Unique formatter identifier
 
 > `readonly` **outputPath**: `".cursor/rules/project.mdc"` = `CURSOR_VERSIONS.modern.outputPath`
 
-Defined in: [formatters/src/formatters/cursor.ts:147](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L147)
+Defined in: [formatters/src/formatters/cursor.ts:147](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L147)
 
 Default output file path
 
@@ -134,7 +134,7 @@ Default output file path
 
 > `protected` `readonly` **standardsExtractor**: `StandardsExtractor`
 
-Defined in: [formatters/src/base-formatter.ts:62](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L62)
+Defined in: [formatters/src/base-formatter.ts:62](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L62)
 
 Shared standards extractor for consistent extraction across all formatters.
 
@@ -148,7 +148,7 @@ Shared standards extractor for consistent extraction across all formatters.
 
 > `protected` `readonly` `static` **CONTEXT\_RENDERED\_KEYS**: `ReadonlySet`\<`string`\>
 
-Defined in: [formatters/src/base-formatter.ts:288](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L288)
+Defined in: [formatters/src/base-formatter.ts:288](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L288)
 
 `@context` keys that already have a dedicated rendering path. Anything
 outside this set is generic and must be surfaced by the context section.
@@ -163,7 +163,7 @@ outside this set is generic and must be surfaced by the context section.
 
 > `protected` **appendGenericStandardItems**(`items`, `props`, `knownKeys`): `void`
 
-Defined in: [formatters/src/base-formatter.ts:407](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L407)
+Defined in: [formatters/src/base-formatter.ts:407](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L407)
 
 Append generic `Label: value` items for standards keys not handled by
 the known-key rendering in a section method. Keeps custom
@@ -201,7 +201,7 @@ Skips null/undefined/false; renders bare labels for true.
 
 > `protected` **contextArchitectureProperty**(`ast`): `string` \| `null`
 
-Defined in: [formatters/src/base-formatter.ts:308](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L308)
+Defined in: [formatters/src/base-formatter.ts:308](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L308)
 
 Read the `architecture` property of `@context`. Used as a fallback for
 sources that declare architecture as a property rather than as an
@@ -227,7 +227,7 @@ sources that declare architecture as a property rather than as an
 
 > `protected` **contextPropertyItems**(`ast`, `alsoRenderedKeys?`): `string`[]
 
-Defined in: [formatters/src/base-formatter.ts:321](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L321)
+Defined in: [formatters/src/base-formatter.ts:321](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L321)
 
 Render `@context` properties that no dedicated section consumes as
 `Label: value` items, so structured context is never silently dropped.
@@ -256,7 +256,7 @@ readonly `string`[] = `[]`
 
 > `protected` **contextTextConsumedByProject**(`ast`): `boolean`
 
-Defined in: [formatters/src/base-formatter.ts:274](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L274)
+Defined in: [formatters/src/base-formatter.ts:274](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L274)
 
 Whether the `@context` block's text is consumed by the project/intro
 fallback. Must mirror the project() and intro() consumption conditions
@@ -283,7 +283,7 @@ exactly, otherwise the context section would either duplicate the text
 
 > `protected` **createRenderer**(`options?`): [`ConventionRenderer`](https://getpromptscript.dev/api-reference/formatters/src/classes/ConventionRenderer/index.md)
 
-Defined in: [formatters/src/base-formatter.ts:68](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L68)
+Defined in: [formatters/src/base-formatter.ts:68](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L68)
 
 Create a convention renderer for this formatter.
 Uses the provided convention from options or falls back to the default.
@@ -308,7 +308,7 @@ Uses the provided convention from options or falls back to the default.
 
 > `protected` **dedent**(`text`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:863](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L863)
+Defined in: [formatters/src/base-formatter.ts:863](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L863)
 
 Remove common leading whitespace from all lines (dedent).
 Handles the case where trim() was already called, causing the first line
@@ -335,7 +335,7 @@ Calculates minimum indent from lines 2+ only.
 
 > `protected` **documentationItem**(`value`, `defaultText`): `string` \| `null`
 
-Defined in: [formatters/src/base-formatter.ts:392](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L392)
+Defined in: [formatters/src/base-formatter.ts:392](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L392)
 
 Resolve a documentation-standard entry that accepts either a boolean flag
 or author-supplied prose. A string value is authoritative and replaces the
@@ -365,7 +365,7 @@ target's default phrasing, so authored text is never silently discarded.
 
 > `protected` **extractContextTechStackItems**(`props`): `string`[]
 
-Defined in: [formatters/src/base-formatter.ts:354](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L354)
+Defined in: [formatters/src/base-formatter.ts:354](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L354)
 
 Collect `@context` tech-stack entries from every supported shape:
 an explicit `techStack` list plus the `languages`/`runtime`/`monorepo`
@@ -391,7 +391,7 @@ properties.
 
 > `protected` **extractExamples**(`ast`): `object`[]
 
-Defined in: [formatters/src/base-formatter.ts:1036](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1036)
+Defined in: [formatters/src/base-formatter.ts:1036](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1036)
 
 Extract examples from the
 
@@ -420,7 +420,7 @@ Returns an array of example definitions with name, input, output, and optional d
 
 > `protected` **extractSectionWithCodeBlock**(`text`, `header`): `string` \| `null`
 
-Defined in: [formatters/src/base-formatter.ts:441](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L441)
+Defined in: [formatters/src/base-formatter.ts:441](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L441)
 
 Safe extraction of a section that contains a header + content + code block + content
 Avoids ReDoS by using string search instead of backtracking regex.
@@ -450,7 +450,7 @@ Matches pattern: Header ... ``` ... ```
 
 > `protected` **extractSkillExamples**(`skillProps`): `object`[]
 
-Defined in: [formatters/src/base-formatter.ts:1049](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1049)
+Defined in: [formatters/src/base-formatter.ts:1049](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1049)
 
 Extract examples from a skill's nested examples property.
 Returns the same shape as extractExamples.
@@ -475,7 +475,7 @@ Returns the same shape as extractExamples.
 
 > `protected` **extractSkills**(`ast`, `options?`): `SkillFileConfig`[]
 
-Defined in: [formatters/src/base-formatter.ts:1297](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1297)
+Defined in: [formatters/src/base-formatter.ts:1297](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1297)
 
 Extract skills from the
 
@@ -508,7 +508,7 @@ excluded by the target's skill filter.
 
 > `protected` **extractText**(`content`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:104](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L104)
+Defined in: [formatters/src/base-formatter.ts:104](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L104)
 
 Extract text from block content.
 
@@ -532,7 +532,7 @@ Extract text from block content.
 
 > `protected` **findBlock**(`ast`, `name`): [`Block`](https://getpromptscript.dev/api-reference/core/src/interfaces/Block/index.md) \| `undefined`
 
-Defined in: [formatters/src/base-formatter.ts:97](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L97)
+Defined in: [formatters/src/base-formatter.ts:97](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L97)
 
 Find a block by name, ignoring internal blocks (starting with __).
 
@@ -560,7 +560,7 @@ Find a block by name, ignoring internal blocks (starting with __).
 
 > **format**(`input`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/formatters/cursor.ts:174](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L174)
+Defined in: [formatters/src/formatters/cursor.ts:174](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L174)
 
 Transform AST to target format
 
@@ -588,7 +588,7 @@ Transform AST to target format
 
 > `protected` **formatArray**(`arr`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:155](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L155)
+Defined in: [formatters/src/base-formatter.ts:155](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L155)
 
 Format an array as comma-separated string.
 
@@ -612,7 +612,7 @@ Format an array as comma-separated string.
 
 > **formatCanonical**(`ast`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)
 
-Defined in: [formatters/src/base-formatter.ts:41](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L41)
+Defined in: [formatters/src/base-formatter.ts:41](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L41)
 
 Canonical entry point for legacy implementations.
 
@@ -643,7 +643,7 @@ directly. Until then, keep the compatibility projection isolated here.
 
 > `protected` **formatStandardsList**(`items`): `string`[]
 
-Defined in: [formatters/src/base-formatter.ts:147](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L147)
+Defined in: [formatters/src/base-formatter.ts:147](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L147)
 
 Format standards list from array of values (pass-through).
 Returns array of strings for rendering as bullet list.
@@ -668,7 +668,7 @@ Returns array of strings for rendering as bullet list.
 
 > `protected` **generateSkillFile**(`config`, `options?`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md) \| `null`
 
-Defined in: [formatters/src/base-formatter.ts:1337](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1337)
+Defined in: [formatters/src/base-formatter.ts:1337](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1337)
 
 Render a skill file at the target's skill base path.
 Returns null when the target declares no skill support.
@@ -697,7 +697,7 @@ Returns null when the target declares no skill support.
 
 > `protected` **getArrayElements**(`content`): [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)[]
 
-Defined in: [formatters/src/base-formatter.ts:179](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L179)
+Defined in: [formatters/src/base-formatter.ts:179](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L179)
 
 Extract array elements from block content.
 
@@ -721,7 +721,7 @@ Extract array elements from block content.
 
 > `protected` **getBlockArrayElements**(`block`): [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)[]
 
-Defined in: [formatters/src/base-formatter.ts:202](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L202)
+Defined in: [formatters/src/base-formatter.ts:202](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L202)
 
 #### Parameters
 
@@ -743,7 +743,7 @@ Defined in: [formatters/src/base-formatter.ts:202](https://github.com/mrwogu/pro
 
 > **getDotDir**(): `string` \| `null`
 
-Defined in: [formatters/src/formatters/cursor.ts:162](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L162)
+Defined in: [formatters/src/formatters/cursor.ts:162](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L162)
 
 Dot directory of the target, by default the parent of a `<dir>/skills`
 skill base path, or null when there is none.
@@ -762,7 +762,7 @@ skill base path, or null when there is none.
 
 > `protected` **getMetaField**(`ast`, `key`): `string` \| `undefined`
 
-Defined in: [formatters/src/base-formatter.ts:169](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L169)
+Defined in: [formatters/src/base-formatter.ts:169](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L169)
 
 Get meta field value as string.
 
@@ -790,7 +790,7 @@ Get meta field value as string.
 
 > `protected` **getNativeAgentName**(`ast`, `name`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1183](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1183)
+Defined in: [formatters/src/base-formatter.ts:1183](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1183)
 
 Return the deterministic native identifier for one agent.
 
@@ -818,7 +818,7 @@ Return the deterministic native identifier for one agent.
 
 > `protected` **getNativeAgentNameMap**(`ast`): `ReadonlyMap`\<`string`, `string`\>
 
-Defined in: [formatters/src/base-formatter.ts:1173](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1173)
+Defined in: [formatters/src/base-formatter.ts:1173](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1173)
 
 Map all agent names consistently for a target's native files.
 
@@ -842,7 +842,7 @@ Map all agent names consistently for a target's native files.
 
 > `protected` **getOutputPath**(`options?`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:90](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L90)
+Defined in: [formatters/src/base-formatter.ts:90](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L90)
 
 Get the output path, respecting options override.
 
@@ -866,7 +866,7 @@ Get the output path, respecting options override.
 
 > `protected` **getPrettierOptions**(`options?`): `Required`\<[`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)\>
 
-Defined in: [formatters/src/base-formatter.ts:80](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L80)
+Defined in: [formatters/src/base-formatter.ts:80](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L80)
 
 Get resolved Prettier options, merging provided options with defaults.
 
@@ -890,7 +890,7 @@ Get resolved Prettier options, merging provided options with defaults.
 
 > `protected` **getProp**(`content`, `key`): [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md) \| `undefined`
 
-Defined in: [formatters/src/base-formatter.ts:118](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L118)
+Defined in: [formatters/src/base-formatter.ts:118](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L118)
 
 Get a specific property from block content.
 
@@ -918,7 +918,7 @@ Get a specific property from block content.
 
 > `protected` **getProps**(`content`): `Record`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [formatters/src/base-formatter.ts:132](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L132)
+Defined in: [formatters/src/base-formatter.ts:132](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L132)
 
 Get all properties from block content.
 
@@ -942,7 +942,7 @@ Get all properties from block content.
 
 > **getSkillBasePath**(): `string` \| `null`
 
-Defined in: [formatters/src/formatters/cursor.ts:166](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L166)
+Defined in: [formatters/src/formatters/cursor.ts:166](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L166)
 
 Base path for skills, or null if formatter has no skill support.
 
@@ -960,7 +960,7 @@ Base path for skills, or null if formatter has no skill support.
 
 > **getSkillFileName**(): `string` \| `null`
 
-Defined in: [formatters/src/formatters/cursor.ts:170](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L170)
+Defined in: [formatters/src/formatters/cursor.ts:170](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L170)
 
 Skill file name, or null if formatter has no skill support.
 
@@ -978,7 +978,7 @@ Skill file name, or null if formatter has no skill support.
 
 > `protected` **humanizeLabel**(`value`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:427](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L427)
+Defined in: [formatters/src/base-formatter.ts:427](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L427)
 
 Convert a camelCase/kebab-case key into a human-readable label.
 
@@ -1002,7 +1002,7 @@ Convert a camelCase/kebab-case key into a human-readable label.
 
 > `protected` **isSafeAgentName**(`name`): `boolean`
 
-Defined in: [formatters/src/base-formatter.ts:1166](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1166)
+Defined in: [formatters/src/base-formatter.ts:1166](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1166)
 
 Check if an agent name is safe for use in file paths.
 
@@ -1026,7 +1026,7 @@ Check if an agent name is safe for use in file paths.
 
 > `protected` **isSafeName**(`name`): `boolean`
 
-Defined in: [formatters/src/base-formatter.ts:1146](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1146)
+Defined in: [formatters/src/base-formatter.ts:1146](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1146)
 
 Check if a name is safe for use in file paths.
 Rejects path traversal sequences and path separators.
@@ -1051,7 +1051,7 @@ Rejects path traversal sequences and path separators.
 
 > `protected` **isSafeSkillName**(`name`): `boolean`
 
-Defined in: [formatters/src/base-formatter.ts:1159](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1159)
+Defined in: [formatters/src/base-formatter.ts:1159](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1159)
 
 Check if a skill name is safe for use in file paths.
 
@@ -1075,7 +1075,7 @@ Check if a skill name is safe for use in file paths.
 
 > `protected` **mergeRequiredSkillFrontmatter**(`rawFrontmatter`, `name`, `description`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1265](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1265)
+Defined in: [formatters/src/base-formatter.ts:1265](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1265)
 
 Preserve raw skill frontmatter while supplying mandatory skill fields.
 
@@ -1107,7 +1107,7 @@ Preserve raw skill frontmatter while supplying mandatory skill fields.
 
 > `protected` **normalizeMarkdownForPrettier**(`content`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:501](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L501)
+Defined in: [formatters/src/base-formatter.ts:501](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L501)
 
 Normalize markdown content to match Prettier formatting.
 - Strips common leading indentation from lines
@@ -1143,7 +1143,7 @@ indentation is removed and the text stays as written.
 
 > `protected` **normalizeOutputDir**(`dir`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:896](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L896)
+Defined in: [formatters/src/base-formatter.ts:896](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L896)
 
 Normalize a user-provided output directory (from `@use ... into "<path>"`
 or `skillTargets` config) to a safe forward-slash relative path. Rejects
@@ -1170,7 +1170,7 @@ dot-directory without escaping it.
 
 > `protected` **normalizeResourcePath**(`relativePath`): `string` \| `null`
 
-Defined in: [formatters/src/base-formatter.ts:963](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L963)
+Defined in: [formatters/src/base-formatter.ts:963](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L963)
 
 Normalize a resource path to a safe, portable relative path.
 
@@ -1194,7 +1194,7 @@ Normalize a resource path to a safe, portable relative path.
 
 > `protected` **referenceProvenance**(`sourcePath`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1138](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1138)
+Defined in: [formatters/src/base-formatter.ts:1138](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1138)
 
 Generate a provenance comment for a reference file.
 
@@ -1218,7 +1218,7 @@ Generate a provenance comment for a reference file.
 
 > **referencesMode**(): `"none"` \| `"directory"` \| `"inline"`
 
-Defined in: [formatters/src/formatters/cursor.ts:158](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L158)
+Defined in: [formatters/src/formatters/cursor.ts:158](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L158)
 
 How this formatter handles skill references.
 - 'directory': emit as separate files in references/ subdirectory
@@ -1239,7 +1239,7 @@ How this formatter handles skill references.
 
 > `protected` **removeRawFrontmatterKeys**(`rawFrontmatter`, `keys`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1233](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1233)
+Defined in: [formatters/src/base-formatter.ts:1233](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1233)
 
 Remove top-level keys (with their nested lines) from raw SKILL.md
 frontmatter. Used for PromptScript-only keys such as `params`, which are
@@ -1269,7 +1269,7 @@ resolved at compile time and mean nothing to the target tool.
 
 > `protected` **renderCodeFence**(`content`, `lang?`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1409](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1409)
+Defined in: [formatters/src/base-formatter.ts:1409](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1409)
 
 Render content inside a code fence, using a longer fence if the content
 itself contains triple backticks (prevents code fence injection).
@@ -1298,7 +1298,7 @@ itself contains triple backticks (prevents code fence injection).
 
 > `protected` **renderExamplesSection**(`ast`, `renderer`, `sectionName?`): `string` \| `null`
 
-Defined in: [formatters/src/base-formatter.ts:1065](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1065)
+Defined in: [formatters/src/base-formatter.ts:1065](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1065)
 
 Render an examples section from the
 
@@ -1337,7 +1337,7 @@ Shared rendering logic used by Claude, GitHub, and MarkdownInstructionFormatter.
 
 > `protected` **resolveSkillDir**(`defaultSkillBasePath`, `skillName`, `outputDir?`, `options?`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:926](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L926)
+Defined in: [formatters/src/base-formatter.ts:926](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L926)
 
 Resolve the directory for a generated skill, respecting per-target skill
 base overrides while preserving existing `@use ... into` behavior.
@@ -1374,7 +1374,7 @@ base overrides while preserving existing `@use ... into` behavior.
 
 > `protected` **sanitizeResourceFiles**(`resources`, `targetDir`): [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)[]
 
-Defined in: [formatters/src/base-formatter.ts:982](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L982)
+Defined in: [formatters/src/base-formatter.ts:982](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L982)
 
 Filter resource files to only include safe canonical paths.
 
@@ -1402,7 +1402,7 @@ Filter resource files to only include safe canonical paths.
 
 > `protected` **shiftContextHeadings**(`text`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:846](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L846)
+Defined in: [formatters/src/base-formatter.ts:846](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L846)
 
 Shift
 
@@ -1433,7 +1433,7 @@ kept as is.
 
 > `protected` **shiftHeadingsToMinLevel**(`text`, `targetLevel`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:807](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L807)
+Defined in: [formatters/src/base-formatter.ts:807](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L807)
 
 Shift all ATX headings by the same amount so the shallowest heading lands
 at targetLevel. Levels clamp to h1-h6 and fenced code blocks are ignored.
@@ -1462,7 +1462,7 @@ at targetLevel. Levels clamp to h1-h6 and fenced code blocks are ignored.
 
 > `protected` **shortcutSummary**(`value`, `fallback?`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:249](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L249)
+Defined in: [formatters/src/base-formatter.ts:249](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L249)
 
 Extract a stable one-line summary from any supported shortcut value.
 
@@ -1490,7 +1490,7 @@ Extract a stable one-line summary from any supported shortcut value.
 
 > `protected` **shouldIncludeSkill**(`name`, `options?`): `boolean`
 
-Defined in: [formatters/src/base-formatter.ts:915](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L915)
+Defined in: [formatters/src/base-formatter.ts:915](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L915)
 
 Return true when the target configuration allows emitting the given skill.
 
@@ -1518,7 +1518,7 @@ Return true when the target configuration allows emitting the given skill.
 
 > `protected` **startFormat**(`options?`): `void`
 
-Defined in: [formatters/src/base-formatter.ts:55](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L55)
+Defined in: [formatters/src/base-formatter.ts:55](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L55)
 
 Call first in `format`, so markdown helpers know whether to keep the text
 as written. The state is reset on every call.
@@ -1543,7 +1543,7 @@ as written. The state is reset on every call.
 
 > `protected` **stripAllIndent**(`content`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:673](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L673)
+Defined in: [formatters/src/base-formatter.ts:673](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L673)
 
 Strip all leading indentation from markdown content.
 Used for AGENTS.md where content from multiple sources has inconsistent indentation.
@@ -1571,7 +1571,7 @@ With `verbatimMarkdown` only the common indentation is removed.
 
 > **transformInjectedSkillContent**(`content`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1131](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1131)
+Defined in: [formatters/src/base-formatter.ts:1131](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1131)
 
 Default pass-through for injected skill content. Formatters whose target
 tools restrict skill frontmatter (e.g. Factory AI) override this hook to
@@ -1597,7 +1597,7 @@ filter unsupported fields before the compiler writes the file.
 
 > `protected` **truncate**(`str`, `max`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:162](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L162)
+Defined in: [formatters/src/base-formatter.ts:162](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L162)
 
 Truncate string to max length with ellipsis.
 
@@ -1625,7 +1625,7 @@ Truncate string to max length with ellipsis.
 
 > `protected` **valueToString**(`value`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:229](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L229)
+Defined in: [formatters/src/base-formatter.ts:229](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L229)
 
 Convert value to string representation.
 
@@ -1649,7 +1649,7 @@ Convert value to string representation.
 
 > `protected` **yamlQuoted**(`value`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:299](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L299)
+Defined in: [formatters/src/base-formatter.ts:299](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L299)
 
 Escape a value for use inside a double-quoted YAML scalar.
 
@@ -1673,7 +1673,7 @@ Escape a value for use inside a double-quoted YAML scalar.
 
 > `protected` **yamlString**(`value`): `string`
 
-Defined in: [formatters/src/base-formatter.ts:1202](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/base-formatter.ts#L1202)
+Defined in: [formatters/src/base-formatter.ts:1202](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/base-formatter.ts#L1202)
 
 Serialize a string as a YAML scalar, quoting only when required.
 
@@ -1697,7 +1697,7 @@ Serialize a string as a YAML scalar, quoting only when required.
 
 > `static` **getSupportedVersions**(): `object`
 
-Defined in: [formatters/src/formatters/cursor.ts:154](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/formatters/cursor.ts#L154)
+Defined in: [formatters/src/formatters/cursor.ts:154](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/cursor.ts#L154)
 
 Get supported versions for this formatter.
 

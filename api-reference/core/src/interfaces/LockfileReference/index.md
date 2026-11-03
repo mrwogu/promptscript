@@ -6,7 +6,7 @@
 
 # Interface: LockfileReference
 
-Defined in: [core/src/types/lockfile.ts:25](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/lockfile.ts#L25)
+Defined in: [core/src/types/lockfile.ts:25](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/lockfile.ts#L25)
 
 A locked reference file from a registry.
 Key format in lockfile: `<repoUrl>\0<relativePath>\0<version>`
@@ -17,7 +17,7 @@ Key format in lockfile: `<repoUrl>\0<relativePath>\0<version>`
 
 > **hash**: `string`
 
-Defined in: [core/src/types/lockfile.ts:27](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/lockfile.ts#L27)
+Defined in: [core/src/types/lockfile.ts:27](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/lockfile.ts#L27)
 
 Content integrity hash in SRI format: "sha256-<hex>"
 
@@ -27,6 +27,6 @@ Content integrity hash in SRI format: "sha256-<hex>"
 
 > **lockedAt**: `string`
 
-Defined in: [core/src/types/lockfile.ts:29](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/lockfile.ts#L29)
+Defined in: [core/src/types/lockfile.ts:29](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/lockfile.ts#L29)
 
 ISO timestamp of when prs lock recorded this hash

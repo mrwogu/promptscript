@@ -6,7 +6,7 @@
 
 # Interface: ReleaseHistoryCommit
 
-Defined in: [cli/src/utils/release-report.ts:92](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/release-report.ts#L92)
+Defined in: [cli/src/utils/release-report.ts:92](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L92)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:92](https://github.com/mrwogu/promp
 
 > **commit**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:93](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/release-report.ts#L93)
+Defined in: [cli/src/utils/release-report.ts:93](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L93)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:93](https://github.com/mrwogu/promp
 
 > **date**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:95](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/release-report.ts#L95)
+Defined in: [cli/src/utils/release-report.ts:95](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L95)
 
 Author date, ISO 8601
 
@@ -32,4 +32,4 @@ Author date, ISO 8601
 
 > **subject**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:96](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/release-report.ts#L96)
+Defined in: [cli/src/utils/release-report.ts:96](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L96)

@@ -8,7 +8,7 @@
 
 > **EvalProvider** = (`request`, `context`) => `Promise`\<[`EvalResponse`](https://getpromptscript.dev/api-reference/eval/src/type-aliases/EvalResponse/index.md)\>
 
-Defined in: [eval/src/provider.ts:46](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/provider.ts#L46)
+Defined in: [eval/src/provider.ts:46](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/provider.ts#L46)
 
 Makes one model call. Throws `EvalProviderError` when the call fails;
 retries, cache and budget belong to the caller.

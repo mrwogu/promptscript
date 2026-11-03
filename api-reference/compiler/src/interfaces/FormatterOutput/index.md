@@ -6,7 +6,7 @@
 
 # Interface: FormatterOutput
 
-Defined in: [compiler/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L24)
+Defined in: [compiler/src/types.ts:24](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L24)
 
 Output from a formatter.
 
@@ -20,7 +20,7 @@ Output from a formatter.
 
 > `optional` **additionalFiles?**: `FormatterOutput`[]
 
-Defined in: [compiler/src/types.ts:39](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L39)
+Defined in: [compiler/src/types.ts:39](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L39)
 
 Additional files to generate (e.g., .cursor/commands/, .github/prompts/)
 
@@ -34,7 +34,7 @@ Additional files to generate (e.g., .cursor/commands/, .github/prompts/)
 
 > `optional` **composition?**: [`PromptComposition`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptComposition/index.md)[]
 
-Defined in: [compiler/src/types.ts:41](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L41)
+Defined in: [compiler/src/types.ts:41](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L41)
 
 Blocks composed into prompts, for the prompt targets. Not part of any written file.
 
@@ -44,7 +44,7 @@ Blocks composed into prompts, for the prompt targets. Not part of any written fi
 
 > **content**: `string`
 
-Defined in: [core/src/output-plan.ts:14](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-plan.ts#L14)
+Defined in: [core/src/output-plan.ts:14](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L14)
 
 File contents.
 
@@ -58,7 +58,7 @@ File contents.
 
 > `optional` **managedOutputDirectories?**: `string`[]
 
-Defined in: [core/src/output-plan.ts:22](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-plan.ts#L22)
+Defined in: [core/src/output-plan.ts:22](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L22)
 
 Relative directories managed by this artifact.
 
@@ -72,7 +72,7 @@ Relative directories managed by this artifact.
 
 > `optional` **managedOutputFiles?**: `string`[]
 
-Defined in: [core/src/output-plan.ts:24](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-plan.ts#L24)
+Defined in: [core/src/output-plan.ts:24](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L24)
 
 Relative files managed by this artifact.
 
@@ -86,7 +86,7 @@ Relative files managed by this artifact.
 
 > `optional` **merge?**: [`StructuredMergePlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/StructuredMergePlan/index.md)
 
-Defined in: [core/src/output-plan.ts:18](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-plan.ts#L18)
+Defined in: [core/src/output-plan.ts:18](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L18)
 
 Optional structured merge instructions.
 
@@ -100,7 +100,7 @@ Optional structured merge instructions.
 
 > `optional` **mode?**: `number`
 
-Defined in: [core/src/output-plan.ts:16](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-plan.ts#L16)
+Defined in: [core/src/output-plan.ts:16](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L16)
 
 Optional Unix file mode.
 
@@ -114,7 +114,7 @@ Optional Unix file mode.
 
 > `optional` **omit?**: `boolean`
 
-Defined in: [core/src/output-plan.ts:29](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-plan.ts#L29)
+Defined in: [core/src/output-plan.ts:29](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L29)
 
 Plan nothing for this artifact. A formatter sets it when it has no file to write,
 for example a prompt target in a program without prompts.
@@ -129,7 +129,7 @@ for example a prompt target in a program without prompts.
 
 > **path**: `string`
 
-Defined in: [compiler/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L26)
+Defined in: [compiler/src/types.ts:26](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L26)
 
 Output file path
 
@@ -143,7 +143,7 @@ Output file path
 
 > `optional` **source?**: `string`
 
-Defined in: [compiler/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L30)
+Defined in: [compiler/src/types.ts:30](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L30)
 
 Source entry used to produce this output.
 
@@ -153,7 +153,7 @@ Source entry used to produce this output.
 
 > `optional` **target?**: `string`
 
-Defined in: [compiler/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L28)
+Defined in: [compiler/src/types.ts:28](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L28)
 
 Target formatter that produced this output.
 
@@ -163,7 +163,7 @@ Target formatter that produced this output.
 
 > `optional` **warnings?**: `object`[]
 
-Defined in: [compiler/src/types.ts:32](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/compiler/src/types.ts#L32)
+Defined in: [compiler/src/types.ts:32](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/types.ts#L32)
 
 Target compatibility warnings produced during formatting
 

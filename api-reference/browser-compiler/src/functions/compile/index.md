@@ -8,7 +8,7 @@
 
 > **compile**(`files`, `entryPath`, `options?`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [browser-compiler/src/index.ts:155](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/browser-compiler/src/index.ts#L155)
+Defined in: [browser-compiler/src/index.ts:155](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/browser-compiler/src/index.ts#L155)
 
 Compile PromptScript files in the browser.
 

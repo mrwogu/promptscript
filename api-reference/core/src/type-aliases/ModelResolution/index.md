@@ -8,7 +8,7 @@
 
 > **ModelResolution** = \{ `kind`: `"inherit"`; \} \| \{ `alias`: `string`; `kind`: `"floating"`; `profile`: [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md); \} \| \{ `kind`: `"profile"`; `profile`: [`ModelProfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfile/index.md); \}
 
-Defined in: [core/src/model-catalog.ts:45](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/model-catalog.ts#L45)
+Defined in: [core/src/model-catalog.ts:45](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/model-catalog.ts#L45)
 
 Catalog match for a model reference.
 - `inherit`: keep the model selected in the tool

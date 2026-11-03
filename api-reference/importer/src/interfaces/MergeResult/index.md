@@ -6,7 +6,7 @@
 
 # Interface: MergeResult
 
-Defined in: [importer/src/merger.ts:15](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L15)
+Defined in: [importer/src/merger.ts:15](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L15)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/merger.ts:15](https://github.com/mrwogu/promptscript/b
 
 > **deduplicatedCount**: `number`
 
-Defined in: [importer/src/merger.ts:17](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L17)
+Defined in: [importer/src/merger.ts:17](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L17)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/merger.ts:17](https://github.com/mrwogu/promptscript/b
 
 > **merged**: `Map`\<`string`, [`MergedBlock`](https://getpromptscript.dev/api-reference/importer/src/interfaces/MergedBlock/index.md)\>
 
-Defined in: [importer/src/merger.ts:16](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L16)
+Defined in: [importer/src/merger.ts:16](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L16)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [importer/src/merger.ts:16](https://github.com/mrwogu/promptscript/b
 
 > **overallConfidence**: `number`
 
-Defined in: [importer/src/merger.ts:18](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L18)
+Defined in: [importer/src/merger.ts:18](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L18)

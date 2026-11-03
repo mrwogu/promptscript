@@ -6,7 +6,7 @@
 
 # Interface: EvalThresholds
 
-Defined in: [core/src/types/eval.ts:211](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L211)
+Defined in: [core/src/types/eval.ts:211](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L211)
 
 Limits a run must meet for the suite to pass.
 
@@ -16,7 +16,7 @@ Limits a run must meet for the suite to pass.
 
 > `optional` **latencyMs?**: [`EvalLatencyThresholds`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalLatencyThresholds/index.md)
 
-Defined in: [core/src/types/eval.ts:229](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L229)
+Defined in: [core/src/types/eval.ts:229](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L229)
 
 Latency limits
 
@@ -26,7 +26,7 @@ Latency limits
 
 > `optional` **maxCostPerCaseUsd?**: `number`
 
-Defined in: [core/src/types/eval.ts:227](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L227)
+Defined in: [core/src/types/eval.ts:227](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L227)
 
 Cost limit of one case in USD.
 
@@ -40,7 +40,7 @@ Cost limit of one case in USD.
 
 > `optional` **maxCostUsd?**: `number`
 
-Defined in: [core/src/types/eval.ts:222](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L222)
+Defined in: [core/src/types/eval.ts:222](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L222)
 
 Cost limit of the whole suite run in USD.
 
@@ -54,7 +54,7 @@ Cost limit of the whole suite run in USD.
 
 > `optional` **passRate?**: `number`
 
-Defined in: [core/src/types/eval.ts:217](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L217)
+Defined in: [core/src/types/eval.ts:217](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L217)
 
 Minimum share of passed cases per model entry, 0 to 1; default 1.
 

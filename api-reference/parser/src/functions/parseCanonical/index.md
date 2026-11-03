@@ -8,7 +8,7 @@
 
 > **parseCanonical**(`source`, `options?`): [`CanonicalParseResult`](https://getpromptscript.dev/api-reference/parser/src/interfaces/CanonicalParseResult/index.md)
 
-Defined in: [parser/src/parse.ts:91](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/parser/src/parse.ts#L91)
+Defined in: [parser/src/parse.ts:91](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/parser/src/parse.ts#L91)
 
 Parse PromptScript source code into the immutable canonical AST.
 

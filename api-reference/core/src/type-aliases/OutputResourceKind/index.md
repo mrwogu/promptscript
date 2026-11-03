@@ -8,7 +8,7 @@
 
 > **OutputResourceKind** = `"main"` \| `"skills"` \| `"agents"` \| `"commands"` \| `"hooks"` \| `"mcp"` \| `"plugins"`
 
-Defined in: [core/src/output-resources.ts:20](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/output-resources.ts#L20)
+Defined in: [core/src/output-resources.ts:20](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-resources.ts#L20)
 
 Resource kinds a compile run can select.
 

@@ -8,7 +8,7 @@
 
 > **reconcileBlockBody**(`body`, `content`): [`BlockBody`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockBody/index.md)
 
-Defined in: [core/src/canonical-ast.ts:703](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/canonical-ast.ts#L703)
+Defined in: [core/src/canonical-ast.ts:703](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/canonical-ast.ts#L703)
 
 ## Parameters
 

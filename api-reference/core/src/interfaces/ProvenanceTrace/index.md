@@ -6,7 +6,7 @@
 
 # Interface: ProvenanceTrace
 
-Defined in: [core/src/types/provenance.ts:62](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/provenance.ts#L62)
+Defined in: [core/src/types/provenance.ts:62](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/provenance.ts#L62)
 
 Public provenance model returned with a resolved program.
 
@@ -16,7 +16,7 @@ Public provenance model returned with a resolved program.
 
 > `readonly` **entries**: readonly [`ProvenanceEntry`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceEntry/index.md)[]
 
-Defined in: [core/src/types/provenance.ts:67](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/provenance.ts#L67)
+Defined in: [core/src/types/provenance.ts:67](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/provenance.ts#L67)
 
 Stable, path-ordered provenance entries.
 
@@ -26,7 +26,7 @@ Stable, path-ordered provenance entries.
 
 > `readonly` **entry**: `string`
 
-Defined in: [core/src/types/provenance.ts:65](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/provenance.ts#L65)
+Defined in: [core/src/types/provenance.ts:65](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/provenance.ts#L65)
 
 Entry file used to produce the resolved program.
 
@@ -36,4 +36,4 @@ Entry file used to produce the resolved program.
 
 > `readonly` **version**: `1`
 
-Defined in: [core/src/types/provenance.ts:63](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/provenance.ts#L63)
+Defined in: [core/src/types/provenance.ts:63](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/provenance.ts#L63)

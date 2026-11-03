@@ -6,7 +6,7 @@
 
 # Interface: FormatterClass
 
-Defined in: [formatters/src/types.ts:220](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/types.ts#L220)
+Defined in: [formatters/src/types.ts:220](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/types.ts#L220)
 
 Static interface for formatter classes.
 
@@ -31,7 +31,7 @@ FormatterRegistry.register('missing', MissingFormatter);
 
 > **new FormatterClass**(): [`Formatter`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/Formatter/index.md)
 
-Defined in: [formatters/src/types.ts:222](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/types.ts#L222)
+Defined in: [formatters/src/types.ts:222](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/types.ts#L222)
 
 Create a new formatter instance
 
@@ -45,7 +45,7 @@ Create a new formatter instance
 
 > **getSupportedVersions**(): [`FormatterVersionMap`](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/FormatterVersionMap/index.md)
 
-Defined in: [formatters/src/types.ts:224](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/types.ts#L224)
+Defined in: [formatters/src/types.ts:224](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/types.ts#L224)
 
 Return version configuration for this formatter
 

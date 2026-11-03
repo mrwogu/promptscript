@@ -8,7 +8,7 @@
 
 > **createProviderFactory**(`options`): [`EvalProviderLookup`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalProviderLookup/index.md)
 
-Defined in: [eval/src/provider-setup.ts:159](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/provider-setup.ts#L159)
+Defined in: [eval/src/provider-setup.ts:159](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/provider-setup.ts#L159)
 
 Build the provider lookup of a run from the `eval` config, the environment
 and the host flags. `anthropic` and `openai` have built-in URLs and key

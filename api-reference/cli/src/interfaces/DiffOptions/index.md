@@ -6,7 +6,7 @@
 
 # Interface: DiffOptions
 
-Defined in: [cli/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L151)
+Defined in: [cli/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L151)
 
 Options for the diff command.
 
@@ -16,7 +16,7 @@ Options for the diff command.
 
 > `optional` **all?**: `boolean`
 
-Defined in: [cli/src/types.ts:159](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L159)
+Defined in: [cli/src/types.ts:159](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L159)
 
 Show diff for all targets at once
 
@@ -26,7 +26,7 @@ Show diff for all targets at once
 
 > `optional` **build?**: `string`
 
-Defined in: [cli/src/types.ts:153](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L153)
+Defined in: [cli/src/types.ts:153](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L153)
 
 Named build profile from config.builds
 
@@ -36,7 +36,7 @@ Named build profile from config.builds
 
 > `optional` **color?**: `boolean`
 
-Defined in: [cli/src/types.ts:167](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L167)
+Defined in: [cli/src/types.ts:167](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L167)
 
 Force colored output
 
@@ -46,7 +46,7 @@ Force colored output
 
 > `optional` **format?**: `"text"` \| `"json"`
 
-Defined in: [cli/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L157)
+Defined in: [cli/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L157)
 
 Output format
 
@@ -56,7 +56,7 @@ Output format
 
 > `optional` **full?**: `boolean`
 
-Defined in: [cli/src/types.ts:161](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L161)
+Defined in: [cli/src/types.ts:161](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L161)
 
 Show full diff without truncation
 
@@ -66,7 +66,7 @@ Show full diff without truncation
 
 > `optional` **includeContent?**: `boolean`
 
-Defined in: [cli/src/types.ts:163](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L163)
+Defined in: [cli/src/types.ts:163](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L163)
 
 Include canonical output content in JSON reports
 
@@ -76,7 +76,7 @@ Include canonical output content in JSON reports
 
 > `optional` **noPager?**: `boolean`
 
-Defined in: [cli/src/types.ts:165](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L165)
+Defined in: [cli/src/types.ts:165](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L165)
 
 Disable pager (like git --no-pager)
 
@@ -86,6 +86,6 @@ Disable pager (like git --no-pager)
 
 > `optional` **target?**: `string`
 
-Defined in: [cli/src/types.ts:155](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/types.ts#L155)
+Defined in: [cli/src/types.ts:155](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/types.ts#L155)
 
 Specific target to diff

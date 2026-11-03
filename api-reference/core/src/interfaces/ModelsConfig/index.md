@@ -6,7 +6,7 @@
 
 # Interface: ModelsConfig
 
-Defined in: [core/src/types/models.ts:125](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/models.ts#L125)
+Defined in: [core/src/types/models.ts:125](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/models.ts#L125)
 
 Model catalog configuration (`models` in promptscript.yaml).
 
@@ -16,7 +16,7 @@ Model catalog configuration (`models` in promptscript.yaml).
 
 > `optional` **profiles?**: `Record`\<`string`, [`ModelProfileInput`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelProfileInput/index.md)\>
 
-Defined in: [core/src/types/models.ts:137](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/models.ts#L137)
+Defined in: [core/src/types/models.ts:137](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/models.ts#L137)
 
 Custom model profiles, or overrides of built-in profiles, keyed by profile id.
 
@@ -26,7 +26,7 @@ Custom model profiles, or overrides of built-in profiles, keyed by profile id.
 
 > `optional` **supported?**: `string`[]
 
-Defined in: [core/src/types/models.ts:132](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/models.ts#L132)
+Defined in: [core/src/types/models.ts:132](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/models.ts#L132)
 
 Model set the instructions are written and tested for.
 Entries are profile ids, aliases, or provider model identifiers.

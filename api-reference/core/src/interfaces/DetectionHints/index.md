@@ -6,7 +6,7 @@
 
 # Interface: DetectionHints
 
-Defined in: [core/src/types/manifest.ts:29](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L29)
+Defined in: [core/src/types/manifest.ts:29](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L29)
 
 Detection hints for auto-suggesting configurations.
 
@@ -16,7 +16,7 @@ Detection hints for auto-suggesting configurations.
 
 > `optional` **always?**: `boolean`
 
-Defined in: [core/src/types/manifest.ts:31](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L31)
+Defined in: [core/src/types/manifest.ts:31](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L31)
 
 Always suggest this configuration
 
@@ -26,7 +26,7 @@ Always suggest this configuration
 
 > `optional` **dependencies?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:35](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L35)
+Defined in: [core/src/types/manifest.ts:35](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L35)
 
 Suggest if these dependencies are present (package.json, etc.)
 
@@ -36,7 +36,7 @@ Suggest if these dependencies are present (package.json, etc.)
 
 > `optional` **files?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:33](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L33)
+Defined in: [core/src/types/manifest.ts:33](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L33)
 
 Suggest if these files exist in the project
 
@@ -46,7 +46,7 @@ Suggest if these files exist in the project
 
 > `optional` **frameworks?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:39](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L39)
+Defined in: [core/src/types/manifest.ts:39](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L39)
 
 Suggest if these frameworks are detected
 
@@ -56,6 +56,6 @@ Suggest if these frameworks are detected
 
 > `optional` **languages?**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:37](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L37)
+Defined in: [core/src/types/manifest.ts:37](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L37)
 
 Suggest if these languages are detected

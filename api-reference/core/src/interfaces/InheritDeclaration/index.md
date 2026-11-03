@@ -6,7 +6,7 @@
 
 # Interface: InheritDeclaration
 
-Defined in: [core/src/types/ast.ts:194](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L194)
+Defined in: [core/src/types/ast.ts:194](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L194)
 
 Inheritance declaration.
 
@@ -28,7 +28,7 @@ Inheritance declaration.
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -42,7 +42,7 @@ Source location
 
 > `optional` **params?**: [`ParamArgument`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamArgument/index.md)[]
 
-Defined in: [core/src/types/ast.ts:199](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L199)
+Defined in: [core/src/types/ast.ts:199](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L199)
 
 Template parameters (for parameterized inheritance)
 
@@ -52,7 +52,7 @@ Template parameters (for parameterized inheritance)
 
 > **path**: [`PathReference`](https://getpromptscript.dev/api-reference/core/src/interfaces/PathReference/index.md)
 
-Defined in: [core/src/types/ast.ts:197](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L197)
+Defined in: [core/src/types/ast.ts:197](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L197)
 
 Path to parent file
 
@@ -62,7 +62,7 @@ Path to parent file
 
 > `readonly` **type**: `"InheritDeclaration"`
 
-Defined in: [core/src/types/ast.ts:195](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L195)
+Defined in: [core/src/types/ast.ts:195](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L195)
 
 Node type discriminator
 

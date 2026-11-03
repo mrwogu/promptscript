@@ -6,7 +6,7 @@
 
 # Interface: ProjectContext
 
-Defined in: [core/src/types/manifest.ts:209](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L209)
+Defined in: [core/src/types/manifest.ts:209](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L209)
 
 Project context used for suggestion matching.
 
@@ -16,7 +16,7 @@ Project context used for suggestion matching.
 
 > **dependencies**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:213](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L213)
+Defined in: [core/src/types/manifest.ts:213](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L213)
 
 Dependencies from package.json, etc.
 
@@ -26,7 +26,7 @@ Dependencies from package.json, etc.
 
 > **files**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:211](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L211)
+Defined in: [core/src/types/manifest.ts:211](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L211)
 
 Files that exist in the project root
 
@@ -36,7 +36,7 @@ Files that exist in the project root
 
 > **frameworks**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:217](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L217)
+Defined in: [core/src/types/manifest.ts:217](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L217)
 
 Detected frameworks
 
@@ -46,6 +46,6 @@ Detected frameworks
 
 > **languages**: `string`[]
 
-Defined in: [core/src/types/manifest.ts:215](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/manifest.ts#L215)
+Defined in: [core/src/types/manifest.ts:215](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L215)
 
 Detected programming languages

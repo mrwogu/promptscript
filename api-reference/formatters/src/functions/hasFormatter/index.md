@@ -8,7 +8,7 @@
 
 > **hasFormatter**(`name`): `boolean`
 
-Defined in: [formatters/src/standalone.ts:160](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/standalone.ts#L160)
+Defined in: [formatters/src/standalone.ts:160](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/standalone.ts#L160)
 
 Check if a formatter is registered.
 

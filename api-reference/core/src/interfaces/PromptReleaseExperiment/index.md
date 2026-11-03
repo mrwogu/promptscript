@@ -6,7 +6,7 @@
 
 # Interface: PromptReleaseExperiment
 
-Defined in: [core/src/types/prompt-bundle.ts:255](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L255)
+Defined in: [core/src/types/prompt-bundle.ts:255](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/prompt-bundle.ts#L255)
 
 Weighted arms an entry of a v2 label splits its traffic over.
 
@@ -16,7 +16,7 @@ Weighted arms an entry of a v2 label splits its traffic over.
 
 > **arms**: \[[`PromptReleaseControlArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseControlArm/index.md), [`PromptReleaseVariantArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseVariantArm/index.md)\] \| \[[`PromptReleaseControlArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseControlArm/index.md), [`PromptReleaseVariantArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseVariantArm/index.md), [`PromptReleaseVariantArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseVariantArm/index.md)\] \| \[[`PromptReleaseControlArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseControlArm/index.md), [`PromptReleaseVariantArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseVariantArm/index.md), [`PromptReleaseVariantArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseVariantArm/index.md), [`PromptReleaseVariantArm`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptReleaseVariantArm/index.md)\]
 
-Defined in: [core/src/types/prompt-bundle.ts:265](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L265)
+Defined in: [core/src/types/prompt-bundle.ts:265](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/prompt-bundle.ts#L265)
 
 The control arm first, then 1 to 3 variants. Weights are integers and sum to 10000;
 arm names and hashes are unique. Readers check what the schema cannot.
@@ -27,7 +27,7 @@ arm names and hashes are unique. Readers check what the schema cannot.
 
 > **name**: `string`
 
-Defined in: [core/src/types/prompt-bundle.ts:260](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/prompt-bundle.ts#L260)
+Defined in: [core/src/types/prompt-bundle.ts:260](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/prompt-bundle.ts#L260)
 
 Experiment name.
 

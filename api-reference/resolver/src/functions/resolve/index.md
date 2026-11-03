@@ -8,7 +8,7 @@
 
 > **resolve**(`entryPath`, `options`): `Promise`\<[`ResolvedAST`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/ResolvedAST/index.md)\>
 
-Defined in: [resolver/src/index.ts:234](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/resolver/src/index.ts#L234)
+Defined in: [resolver/src/index.ts:234](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/index.ts#L234)
 
 Resolve a PromptScript file with a standalone function.
 

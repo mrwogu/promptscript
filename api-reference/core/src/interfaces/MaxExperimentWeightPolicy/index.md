@@ -6,7 +6,7 @@
 
 # Interface: MaxExperimentWeightPolicy
 
-Defined in: [core/src/types/policy.ts:211](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L211)
+Defined in: [core/src/types/policy.ts:211](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L211)
 
 Max-experiment-weight policy: caps the traffic share of a non-control arm of a label
 experiment. Arms above `maxWeight` need `approvals`, and nothing passes above `ceiling`.
@@ -21,7 +21,7 @@ experiment. Arms above `maxWeight` need `approvals`, and nothing passes above `c
 
 > `optional` **approvals?**: [`RequiredApproval`](https://getpromptscript.dev/api-reference/core/src/interfaces/RequiredApproval/index.md)[]
 
-Defined in: [core/src/types/policy.ts:230](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L230)
+Defined in: [core/src/types/policy.ts:230](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L230)
 
 Approvals per role an arm above `maxWeight` needs. Absent means the cap is hard.
 
@@ -35,7 +35,7 @@ Approvals per role an arm above `maxWeight` needs. Absent means the cap is hard.
 
 > `optional` **ceiling?**: `number`
 
-Defined in: [core/src/types/policy.ts:237](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L237)
+Defined in: [core/src/types/policy.ts:237](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L237)
 
 Percent above which no arm passes, at most two decimals and at least `maxWeight`.
 Only with `approvals`.
@@ -54,7 +54,7 @@ Only with `approvals`.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L36)
 
 Human-readable description
 
@@ -68,7 +68,7 @@ Human-readable description
 
 > `optional` **environments?**: [`ReleaseEnvironmentName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/ReleaseEnvironmentName/index.md)[]
 
-Defined in: [core/src/types/policy.ts:219](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L219)
+Defined in: [core/src/types/policy.ts:219](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L219)
 
 Environments from `releases.environments` the policy applies to. Absent means all.
 
@@ -82,7 +82,7 @@ Environments from `releases.environments` the policy applies to. Absent means al
 
 > **kind**: `"max-experiment-weight"`
 
-Defined in: [core/src/types/policy.ts:212](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L212)
+Defined in: [core/src/types/policy.ts:212](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L212)
 
 Policy kind discriminator
 
@@ -96,7 +96,7 @@ Policy kind discriminator
 
 > `optional` **match?**: [`PromptPolicyMatch`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptPolicyMatch/index.md)
 
-Defined in: [core/src/types/policy.ts:214](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L214)
+Defined in: [core/src/types/policy.ts:214](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L214)
 
 Prompts the policy applies to
 
@@ -106,7 +106,7 @@ Prompts the policy applies to
 
 > **maxWeight**: `number`
 
-Defined in: [core/src/types/policy.ts:225](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L225)
+Defined in: [core/src/types/policy.ts:225](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L225)
 
 Percent of traffic an arm may get without extra approvals, at most two decimals
 
@@ -124,7 +124,7 @@ Percent of traffic an arm may get without extra approvals, at most two decimals
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:34](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L34)
+Defined in: [core/src/types/policy.ts:34](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L34)
 
 Unique policy name within the config
 
@@ -138,7 +138,7 @@ Unique policy name within the config
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:40](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/policy.ts#L40)
+Defined in: [core/src/types/policy.ts:40](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/policy.ts#L40)
 
 Violation severity
 

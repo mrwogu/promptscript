@@ -300,6 +300,13 @@ if (
 }
 ```
 
+The guard exit code depends on the event. For `pre-tool-use` and
+`pre-terminal-command` it is `2`: Claude Code, Factory Droid, Cursor, Codex,
+Gemini CLI, and Grok Build block the tool call on exit 2 and let it run on any
+other code, so a gate hook fails closed when the root is missing. All other
+events exit `1` as shown above. On `stop` exit 2 would keep the agent running
+instead of stopping, so it stays `1` there too.
+
 The same guards apply to a `command` array when it declares `cwd`. A command
 without `cwd` remains target-native and does not perform an unnecessary root
 lookup. No root strategy falls back to `$PWD`, `pwd`, or the process working

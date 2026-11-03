@@ -8,4 +8,4 @@
 
 > `const` **RELEASE\_REPORT\_VERSION**: `1`
 
-Defined in: [cli/src/utils/release-report.ts:10](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/release-report.ts#L10)
+Defined in: [cli/src/utils/release-report.ts:10](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L10)

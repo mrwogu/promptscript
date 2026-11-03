@@ -6,7 +6,7 @@
 
 # Interface: EvalLatencyV1
 
-Defined in: [core/src/types/eval.ts:570](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L570)
+Defined in: [core/src/types/eval.ts:570](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L570)
 
 Latency percentiles over the recorded latencies, nearest rank.
 
@@ -16,7 +16,7 @@ Latency percentiles over the recorded latencies, nearest rank.
 
 > **p50**: `number`
 
-Defined in: [core/src/types/eval.ts:576](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L576)
+Defined in: [core/src/types/eval.ts:576](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L576)
 
 Median latency in milliseconds.
 
@@ -34,7 +34,7 @@ integer
 
 > **p95**: `number`
 
-Defined in: [core/src/types/eval.ts:582](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/eval.ts#L582)
+Defined in: [core/src/types/eval.ts:582](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L582)
 
 95th percentile latency in milliseconds.
 

@@ -6,7 +6,7 @@
 
 # Interface: EvalPlan
 
-Defined in: [eval/src/run.ts:1040](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1040)
+Defined in: [eval/src/run.ts:1040](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1040)
 
 What a run would do, without any call.
 
@@ -16,7 +16,7 @@ What a run would do, without any call.
 
 > `optional` **budgetUsd?**: `number`
 
-Defined in: [eval/src/run.ts:1054](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1054)
+Defined in: [eval/src/run.ts:1054](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1054)
 
 The `--max-cost` limit, when given
 
@@ -26,7 +26,7 @@ The `--max-cost` limit, when given
 
 > **calls**: `number`
 
-Defined in: [eval/src/run.ts:1046](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1046)
+Defined in: [eval/src/run.ts:1046](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1046)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [eval/src/run.ts:1046](https://github.com/mrwogu/promptscript/blob/2
 
 > **errors**: [`EvalFinding`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalFinding/index.md)[]
 
-Defined in: [eval/src/run.ts:1056](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1056)
+Defined in: [eval/src/run.ts:1056](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1056)
 
 Setup errors: the same a run would stop at
 
@@ -44,7 +44,7 @@ Setup errors: the same a run would stop at
 
 > **hits**: `number`
 
-Defined in: [eval/src/run.ts:1044](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1044)
+Defined in: [eval/src/run.ts:1044](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1044)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [eval/src/run.ts:1044](https://github.com/mrwogu/promptscript/blob/2
 
 > `optional` **judgeCalls?**: `number`
 
-Defined in: [eval/src/run.ts:1050](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1050)
+Defined in: [eval/src/run.ts:1050](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1050)
 
 Judge calls a run would make; only when a suite has judge assertions
 
@@ -62,7 +62,7 @@ Judge calls a run would make; only when a suite has judge assertions
 
 > `optional` **judgeHits?**: `number`
 
-Defined in: [eval/src/run.ts:1048](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1048)
+Defined in: [eval/src/run.ts:1048](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1048)
 
 Judge calls the cache answers; only when a suite has judge assertions
 
@@ -72,7 +72,7 @@ Judge calls the cache answers; only when a suite has judge assertions
 
 > **misses**: `number`
 
-Defined in: [eval/src/run.ts:1045](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1045)
+Defined in: [eval/src/run.ts:1045](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1045)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [eval/src/run.ts:1045](https://github.com/mrwogu/promptscript/blob/2
 
 > **mode**: [`EvalCacheMode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalCacheMode/index.md)
 
-Defined in: [eval/src/run.ts:1041](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1041)
+Defined in: [eval/src/run.ts:1041](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1041)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [eval/src/run.ts:1041](https://github.com/mrwogu/promptscript/blob/2
 
 > **suites**: [`EvalPlanSuite`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalPlanSuite/index.md)[]
 
-Defined in: [eval/src/run.ts:1043](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1043)
+Defined in: [eval/src/run.ts:1043](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1043)
 
 Empty when setup found errors
 
@@ -98,6 +98,6 @@ Empty when setup found errors
 
 > `optional` **worstCaseUsd?**: `number`
 
-Defined in: [eval/src/run.ts:1052](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/eval/src/run.ts#L1052)
+Defined in: [eval/src/run.ts:1052](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1052)
 
 Worst case of every planned call in USD, when a budget applies

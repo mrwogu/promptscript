@@ -6,7 +6,7 @@
 
 # Interface: BuildCompilationDiffOptions
 
-Defined in: [cli/src/utils/diff-report.ts:89](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L89)
+Defined in: [cli/src/utils/diff-report.ts:89](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L89)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/diff-report.ts:89](https://github.com/mrwogu/promptsc
 
 > **entryPath**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:92](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L92)
+Defined in: [cli/src/utils/diff-report.ts:92](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L92)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/diff-report.ts:92](https://github.com/mrwogu/promptsc
 
 > `optional` **includeContent?**: `boolean`
 
-Defined in: [cli/src/utils/diff-report.ts:95](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L95)
+Defined in: [cli/src/utils/diff-report.ts:95](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L95)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [cli/src/utils/diff-report.ts:95](https://github.com/mrwogu/promptsc
 
 > `optional` **omittedDirectories?**: readonly [`OmittedManagedDirectory`](https://getpromptscript.dev/api-reference/core/src/interfaces/OmittedManagedDirectory/index.md)[]
 
-Defined in: [cli/src/utils/diff-report.ts:97](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L97)
+Defined in: [cli/src/utils/diff-report.ts:97](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L97)
 
 Directories of omitted outputs, from the compiler plan, so removed files are reported
 
@@ -40,7 +40,7 @@ Directories of omitted outputs, from the compiler plan, so removed files are rep
 
 > **outputRoot**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:91](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L91)
+Defined in: [cli/src/utils/diff-report.ts:91](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L91)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [cli/src/utils/diff-report.ts:91](https://github.com/mrwogu/promptsc
 
 > **outputs**: `Map`\<`string`, [`FormatterOutput`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/FormatterOutput/index.md)\>
 
-Defined in: [cli/src/utils/diff-report.ts:93](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L93)
+Defined in: [cli/src/utils/diff-report.ts:93](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L93)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [cli/src/utils/diff-report.ts:93](https://github.com/mrwogu/promptsc
 
 > **projectRoot**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:90](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L90)
+Defined in: [cli/src/utils/diff-report.ts:90](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L90)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [cli/src/utils/diff-report.ts:90](https://github.com/mrwogu/promptsc
 
 > **warnings**: [`ValidationMessage`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationMessage/index.md)[]
 
-Defined in: [cli/src/utils/diff-report.ts:94](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/cli/src/utils/diff-report.ts#L94)
+Defined in: [cli/src/utils/diff-report.ts:94](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L94)

@@ -6,7 +6,7 @@
 
 # Interface: BlockReplacement
 
-Defined in: [core/src/types/ast.ts:356](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L356)
+Defined in: [core/src/types/ast.ts:356](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L356)
 
 Complete replacement for a block body.
 
@@ -20,7 +20,7 @@ Complete replacement for a block body.
 
 > **body**: [`BlockBody`](https://getpromptscript.dev/api-reference/core/src/interfaces/BlockBody/index.md)
 
-Defined in: [core/src/types/ast.ts:358](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L358)
+Defined in: [core/src/types/ast.ts:358](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L358)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:358](https://github.com/mrwogu/promptscript/b
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -42,7 +42,7 @@ Source location
 
 > `readonly` **type**: `"BlockReplacement"`
 
-Defined in: [core/src/types/ast.ts:357](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/core/src/types/ast.ts#L357)
+Defined in: [core/src/types/ast.ts:357](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L357)
 
 Node type discriminator
 

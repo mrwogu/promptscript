@@ -6,7 +6,7 @@
 
 # Interface: MarkdownCommandConfig
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:24](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L24)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:24](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/markdown-instruction-formatter.ts#L24)
 
 Configuration for a markdown-based command file.
 
@@ -16,7 +16,7 @@ Configuration for a markdown-based command file.
 
 > `optional` **argumentHint?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:30](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L30)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:30](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/markdown-instruction-formatter.ts#L30)
 
 Optional argument hint
 
@@ -26,7 +26,7 @@ Optional argument hint
 
 > **content**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:32](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L32)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:32](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/markdown-instruction-formatter.ts#L32)
 
 Command content/instructions
 
@@ -36,7 +36,7 @@ Command content/instructions
 
 > **description**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:28](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L28)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:28](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/markdown-instruction-formatter.ts#L28)
 
 Description
 
@@ -46,6 +46,6 @@ Description
 
 > **name**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:26](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/formatters/src/markdown-instruction-formatter.ts#L26)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:26](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/markdown-instruction-formatter.ts#L26)
 
 Command name (without leading slash)

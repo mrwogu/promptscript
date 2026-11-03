@@ -6,7 +6,7 @@
 
 # Interface: MergedBlock
 
-Defined in: [importer/src/merger.ts:7](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L7)
+Defined in: [importer/src/merger.ts:7](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L7)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/merger.ts:7](https://github.com/mrwogu/promptscript/bl
 
 > **confidence**: `number`
 
-Defined in: [importer/src/merger.ts:11](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L11)
+Defined in: [importer/src/merger.ts:11](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L11)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/merger.ts:11](https://github.com/mrwogu/promptscript/b
 
 > **content**: `string`
 
-Defined in: [importer/src/merger.ts:9](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L9)
+Defined in: [importer/src/merger.ts:9](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L9)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [importer/src/merger.ts:9](https://github.com/mrwogu/promptscript/bl
 
 > **reviewComments**: `string`[]
 
-Defined in: [importer/src/merger.ts:12](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L12)
+Defined in: [importer/src/merger.ts:12](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L12)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [importer/src/merger.ts:12](https://github.com/mrwogu/promptscript/b
 
 > **sources**: `string`[]
 
-Defined in: [importer/src/merger.ts:10](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L10)
+Defined in: [importer/src/merger.ts:10](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L10)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [importer/src/merger.ts:10](https://github.com/mrwogu/promptscript/b
 
 > **targetBlock**: `string`
 
-Defined in: [importer/src/merger.ts:8](https://github.com/mrwogu/promptscript/blob/2f8713a5e2c669137313fe996620094cb7a470e9/packages/importer/src/merger.ts#L8)
+Defined in: [importer/src/merger.ts:8](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/merger.ts#L8)
