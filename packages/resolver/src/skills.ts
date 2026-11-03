@@ -2498,7 +2498,7 @@ function parseLegacyLine(line: string): { key: string; value: unknown } | null |
 function unquoteLegacy(value: string): string {
   const first = value.charAt(0);
   const start = first === '"' || first === "'" ? 1 : 0;
-  const last = value.charAt(value.length - 1);
+  const last = value.at(-1);
   const end =
     value.length > start && (last === '"' || last === "'") ? value.length - 1 : value.length;
   return value.slice(start, end);

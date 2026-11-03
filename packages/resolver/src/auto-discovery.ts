@@ -163,21 +163,30 @@ async function readMarkdownFiles(dir: string, logger?: Logger): Promise<Markdown
     return null;
   }
 
+  const markdownEntries = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.md'));
+  const contents = await Promise.all(
+    markdownEntries.map((entry) => readPlainFile(resolve(dir, entry.name)))
+  );
+
   const files: MarkdownFile[] = [];
-  for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+  markdownEntries.forEach((entry, index) => {
+    const raw = contents[index];
+    if (raw === undefined) return;
     const fullPath = resolve(dir, entry.name);
-    let raw: string;
-    try {
-      if ((await lstat(fullPath)).isSymbolicLink()) continue;
-      raw = await readFile(fullPath, 'utf-8');
-    } catch {
-      continue;
-    }
     const parsed = parseMarkdownFrontmatter(raw, fullPath, logger);
     if (parsed) files.push({ name: entry.name.replace(/\.md$/, ''), path: fullPath, raw, parsed });
-  }
+  });
   return files;
+}
+
+/** Read a file that is not a symlink, or undefined when it can not be read. */
+async function readPlainFile(path: string): Promise<string | undefined> {
+  try {
+    if ((await lstat(path)).isSymbolicLink()) return undefined;
+    return await readFile(path, 'utf-8');
+  } catch {
+    return undefined;
+  }
 }
 
 /**
