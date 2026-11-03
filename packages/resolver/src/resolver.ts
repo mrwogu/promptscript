@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { lstat, readdir, readFile } from 'node:fs/promises';
-import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { parse } from '@promptscript/parser';
 import {
   noopLogger,
@@ -753,7 +753,13 @@ export class Resolver {
 
     // Resolve native skill files (replace @skills content with SKILL.md files if available)
     // Preserve the parent fallback for custom local paths.
-    const configuredProjectRoot = this.options.skills?.projectRoot ?? this.options.projectRoot;
+    // An inherited project reads its native skills, commands and agents from
+    // its own .promptscript directory, like it does when it compiles alone.
+    const inheritedLocalPath = this.inheritedLocalPath(absPath);
+    const localDiscoveryPath = inheritedLocalPath ?? this.loader.getLocalPath();
+    const configuredProjectRoot = inheritedLocalPath
+      ? dirname(inheritedLocalPath)
+      : (this.options.skills?.projectRoot ?? this.options.projectRoot);
     const projectRoot =
       configuredProjectRoot ??
       (basename(this.loader.getLocalPath()) === '.promptscript'
@@ -764,25 +770,25 @@ export class Resolver {
       ...(projectRoot ? { projectRoot } : {}),
       logger: this.logger,
     };
-    const skillDiscoveryOptions = isEntry
-      ? discoveryOptions
-      : { ...discoveryOptions, discoverUndeclared: false };
+    const skillDiscoveryOptions =
+      isEntry || inheritedLocalPath
+        ? discoveryOptions
+        : { ...discoveryOptions, discoverUndeclared: false };
 
     ast = await resolveNativeSkills(
       ast,
       this.loader.getRegistryPath(),
       absPath,
-      this.loader.getLocalPath(),
+      localDiscoveryPath,
       skillDiscoveryOptions
     );
 
     // Auto-discover command files from local and universal directories
-    ast = await resolveNativeCommands(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
+    ast = await resolveNativeCommands(ast, absPath, localDiscoveryPath, discoveryOptions);
 
     // Auto-discover agent files from local and universal directories
-    ast = await resolveNativeAgents(ast, absPath, this.loader.getLocalPath(), discoveryOptions);
+    ast = await resolveNativeAgents(ast, absPath, localDiscoveryPath, discoveryOptions);
 
-    const localDiscoveryPath = this.loader.getLocalPath();
     for (const directory of ['skills', 'commands', 'agents', 'shared'] as const) {
       dependencies.add(resolve(localDiscoveryPath, directory));
     }
@@ -1147,6 +1153,25 @@ export class Resolver {
   /**
    * Count nodes in AST for debug output.
    */
+  /**
+   * The `.promptscript` directory of another local project when `absPath` is
+   * that project's file (for example `@inherit ../tool/.promptscript/project`).
+   * Files of this project, the registry and the Git cache return undefined.
+   */
+  private inheritedLocalPath(absPath: string): string | undefined {
+    const directory = dirname(absPath);
+    if (basename(directory) !== '.promptscript') return undefined;
+    const isInside = (root: string): boolean => {
+      const rel = relative(root, absPath);
+      return !rel.startsWith('..') && !isAbsolute(rel);
+    };
+    if (isInside(this.loader.getLocalPath()) || isInside(this.loader.getRegistryPath())) {
+      return undefined;
+    }
+    if (absPath.split(sep).includes('.cache')) return undefined;
+    return directory;
+  }
+
   private countNodes(ast: Program): number {
     let count = 1; // Program node itself
     if (ast.meta) count++;
