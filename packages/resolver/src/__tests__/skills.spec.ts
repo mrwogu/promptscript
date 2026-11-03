@@ -1981,6 +1981,42 @@ describe('resolveNativeCommands', () => {
     expect(content.value).toContain('Deploy the application');
   });
 
+  it('should read command frontmatter instead of copying it into the body', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const commandsDir = join(localPath, 'commands');
+    await mkdir(commandsDir, { recursive: true });
+    await writeFile(
+      join(commandsDir, 'migrate.md'),
+      [
+        '---',
+        'description: >-',
+        '  Run one migration step.',
+        '  Produces: a report',
+        'argument-hint: <module>',
+        'allowed-tools: Read, Bash(git:*)',
+        'model: sonnet',
+        '---',
+        '',
+        'Migrate $ARGUMENTS.',
+      ].join('\n')
+    );
+
+    const ast = createProgram([]);
+    const result = await resolveNativeCommands(ast, join(localPath, 'test.prs'), localPath);
+
+    const props = (result.blocks.find((b) => b.name === 'shortcuts')!.content as ObjectContent)
+      .properties;
+    const command = props['/migrate'] as Record<string, unknown>;
+    expect(command['description']).toBe('Run one migration step. Produces: a report');
+    expect(command['argumentHint']).toBe('<module>');
+    expect(command['allowedTools']).toEqual(['Read', 'Bash(git:*)']);
+    expect(command['model']).toBe('sonnet');
+    expect(command['prompt']).toBe(true);
+    const body = command['content'] as TextContent;
+    expect(body.value).toBe('Migrate $ARGUMENTS.');
+    expect(body.value).not.toContain('---');
+  });
+
   it('should discover command files from universal directory', async () => {
     const localPath = join(testDir, '.promptscript');
     const commandsDir = join(testDir, '.agents', 'commands');

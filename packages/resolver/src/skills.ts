@@ -20,6 +20,7 @@ import type {
   SkillContractField,
   SourceLocation,
 } from '@promptscript/core';
+import { agentPropsFromFrontmatter, commandPropsFromFrontmatter } from './markdown-frontmatter.js';
 import {
   limitSkillResources,
   MAX_RESOURCE_COUNT,
@@ -2259,6 +2260,31 @@ export async function resolveNativeSkills(
 }
 
 /**
+ * Build the shortcut value of a command file. A file with frontmatter becomes
+ * an object, so its description, argument hint, allowed tools and model reach
+ * the generated command and the frontmatter is not copied into the body. A
+ * file without frontmatter stays plain text, as before.
+ *
+ * @internal
+ */
+export function commandValueFromFile(
+  content: string,
+  sourceFile: string,
+  logger?: Logger,
+  parsed: MarkdownFrontmatter | null = parseMarkdownFrontmatter(content, sourceFile, logger)
+): Value {
+  const loc = { file: sourceFile, line: 1, column: 1, offset: 0 };
+  if (!parsed) {
+    return { type: 'TextContent', value: content.trim(), loc } as TextContent;
+  }
+  return {
+    ...commandPropsFromFrontmatter(parsed.fields, sourceFile),
+    prompt: true,
+    content: { type: 'TextContent', value: parsed.body, loc } as TextContent,
+  };
+}
+
+/**
  * Discover command .md files from a directory.
  * Each .md file becomes a shortcut: filename (without .md) → file content.
  *
@@ -2298,18 +2324,16 @@ async function discoverCommandFiles(
           continue;
         }
 
-        commands[cmdName] = {
-          type: 'TextContent',
-          value: content.trim(),
-          loc: { file: fullPath, line: 1, column: 1, offset: 0 },
-        } as TextContent;
+        commands[cmdName] = commandValueFromFile(content, fullPath, logger);
 
         logger.verbose(`Auto-discovered command: ${cmdName} (from ${dir})`);
-      } catch {
+      } catch (error: unknown) {
+        if (error instanceof ResolveError) throw error;
         logger.verbose(`Skipping unreadable command file: ${entry.name}`);
       }
     }
-  } catch {
+  } catch (error: unknown) {
+    if (error instanceof ResolveError) throw error;
     // Directory doesn't exist or can't be read
   }
   return commands;
@@ -2413,55 +2437,84 @@ export async function resolveNativeCommands(
 // ============================================================
 
 /**
- * Parse YAML frontmatter from a markdown file.
- * Returns the frontmatter key-value pairs and the body after the closing ---.
+ * Frontmatter and body of an agent or command markdown file.
  */
-function parseAgentFrontmatter(
-  content: string
-): { frontmatter: Record<string, unknown>; body: string } | null {
+export interface MarkdownFrontmatter {
+  /** Top-level frontmatter fields */
+  fields: Record<string, unknown>;
+  /** Markdown body after the closing delimiter, without a leading marker, trimmed */
+  body: string;
+}
+
+/**
+ * Old line parser, kept as a fallback for files whose frontmatter is not
+ * valid YAML (for example `description: Use when: x`). It reads one
+ * `key: value` pair per line. It returns null when a line needs real YAML
+ * (an indented line, a block list, a folded or literal scalar), so such a
+ * value is never read wrong or dropped.
+ */
+function parseLegacyFrontmatter(content: string): MarkdownFrontmatter | null {
   const trimmed = content.trimStart();
   if (!trimmed.startsWith('---')) return null;
+  const lines = trimmed.split('\n').map((line) => line.replace(/\r$/, ''));
+  const end = lines.findIndex((line, index) => index > 0 && line.trimEnd() === '---');
+  if (end < 0) return null;
 
-  // Find closing --- that starts at the beginning of a line
-  let endIdx = -1;
-  let searchFrom = 3;
-  while (searchFrom < trimmed.length) {
-    const idx = trimmed.indexOf('---', searchFrom);
-    if (idx === -1) break;
-    if (idx === 0 || trimmed[idx - 1] === '\n') {
-      endIdx = idx;
-      break;
+  const fields: Record<string, unknown> = {};
+  for (const line of lines.slice(1, end)) {
+    if (line.trim() === '' || line.startsWith('#')) continue;
+    const match = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line);
+    if (!match) {
+      // An indented line or a list item belongs to the key above it.
+      if (/^\s/.test(line) || /^-(\s|$)/.test(line)) return null;
+      continue;
     }
-    searchFrom = idx + 1;
-  }
-  if (endIdx === -1) return null;
-
-  const yamlStr = stripFrontmatterMarkerLines(trimmed.slice(3, endIdx)).trim();
-  const body = stripLeadingHtmlMarker(trimmed.slice(endIdx + 3)).trim();
-
-  // Simple YAML key-value parser for agent frontmatter
-  const frontmatter: Record<string, unknown> = {};
-  for (const line of yamlStr.split('\n')) {
-    const colonIdx = line.indexOf(':');
-    if (colonIdx === -1) continue;
-    const key = line.slice(0, colonIdx).trim();
-    let val: unknown = line.slice(colonIdx + 1).trim();
-
-    // Parse inline arrays: ["Read", "Grep"]
-    if (typeof val === 'string' && val.startsWith('[') && val.endsWith(']')) {
-      val = val
+    if (/^[>|][-+0-9]*$/.test(match[2]!.trim())) return null;
+    let value: unknown = match[2]!.trim();
+    if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
+      value = value
         .slice(1, -1)
         .split(',')
-        .map((s) => s.trim().replace(/^["']|["']$/g, ''))
+        .map((item) => item.trim().replace(/^["']|["']$/g, ''))
         .filter(Boolean);
+    } else if (typeof value === 'string') {
+      value = value.replace(/^["']|["']$/g, '');
     }
-    // Unquote strings
-    if (typeof val === 'string') {
-      val = val.replace(/^["']|["']$/g, '');
-    }
-    frontmatter[key] = val;
+    fields[match[1]!] = value === '' ? null : value;
   }
-  return { frontmatter, body };
+  return { fields, body: stripLeadingHtmlMarker(lines.slice(end + 1).join('\n')).trim() };
+}
+
+/**
+ * Parse the frontmatter of an agent or command file with the YAML parser used
+ * for SKILL.md. Frontmatter that is not valid YAML falls back to the old line
+ * parser, so files that loaded before still load, and a warning names the file.
+ *
+ * @returns Parsed frontmatter, or null when the file has no frontmatter
+ * @internal
+ */
+export function parseMarkdownFrontmatter(
+  content: string,
+  sourceFile: string,
+  logger?: Logger
+): MarkdownFrontmatter | null {
+  const frontmatter = extractSkillFrontmatter(content, sourceFile);
+  if (frontmatter === null) return null;
+  try {
+    const parsed = parseYamlFrontmatter(frontmatter, sourceFile);
+    return { fields: parsed.fields, body: stripLeadingHtmlMarker(frontmatter.body).trim() };
+  } catch (error: unknown) {
+    if (!(error instanceof ResolveError)) throw error;
+    const legacy = parseLegacyFrontmatter(content);
+    // Frontmatter that is neither valid YAML nor simple lines can not be
+    // read safely, so stop here instead of dropping fields.
+    if (!legacy) throw error;
+    logger?.warn(
+      `${sourceFile}: frontmatter is not valid YAML (${error.message}). ` +
+        'Read it one "key: value" per line instead. Quote values that contain ": ".'
+    );
+    return legacy;
+  }
 }
 
 /**
@@ -2500,15 +2553,16 @@ async function discoverAgentFiles(
           continue;
         }
 
-        const parsed = parseAgentFrontmatter(fileContent);
+        const parsed = parseMarkdownFrontmatter(fileContent, fullPath, logger);
         if (!parsed) {
           logger.verbose(`Skipping agent file without frontmatter: ${entry.name}`);
           continue;
         }
 
-        const { frontmatter, body: agentBody } = parsed;
-        // Use || to fall back on empty string (not just null/undefined)
-        const name = (frontmatter['name'] as string) || entry.name.replace(/\.md$/, '');
+        const { fields: frontmatter, body: agentBody } = parsed;
+        const frontmatterName =
+          typeof frontmatter['name'] === 'string' ? frontmatter['name'].trim() : '';
+        const name = frontmatterName || entry.name.replace(/\.md$/, '');
 
         // Sanitize name to prevent path traversal in output paths
         if (!isSafeSkillName(name)) {
@@ -2516,48 +2570,30 @@ async function discoverAgentFiles(
           continue;
         }
 
-        const description = frontmatter['description'] as string | undefined;
-
-        if (!description) {
+        const agentProps = agentPropsFromFrontmatter(frontmatter, fullPath);
+        if (!agentProps['description']) {
           logger.verbose(`Skipping agent without description: ${entry.name}`);
           continue;
-        }
-
-        const loc = { file: fullPath, line: 1, column: 1, offset: 0 };
-
-        // Build the agent properties as an ObjectContent value
-        const agentProps: Record<string, Value> = {
-          description: description,
-        };
-
-        if (frontmatter['tools'] && Array.isArray(frontmatter['tools'])) {
-          agentProps['tools'] = frontmatter['tools'] as string[];
-        } else if (frontmatter['tools'] === '') {
-          // Block-style YAML tools (- Read\n- Grep) not parsed by simple parser
-          logger.verbose(
-            `Agent ${name}: tools field detected but not in inline array format. Use tools: ["Read", "Grep"] syntax.`
-          );
-        }
-
-        if (frontmatter['model']) {
-          agentProps['model'] = frontmatter['model'] as string;
         }
 
         if (agentBody) {
           agentProps['content'] = {
             type: 'TextContent',
             value: agentBody,
-            loc,
+            loc: { file: fullPath, line: 1, column: 1, offset: 0 },
           } as TextContent;
         }
 
         agents[name] = { value: agentProps, source: fullPath };
         logger.verbose(`Auto-discovered agent: ${name} (from ${dir})`);
-      } catch {
+      } catch (error: unknown) {
+        // A broken field must stop the build, not drop the agent quietly.
+        if (error instanceof ResolveError) throw error;
         logger.verbose(`Skipping unreadable agent file: ${entry.name}`);
       }
     }
-  } catch {
+  } catch (error: unknown) {
+    if (error instanceof ResolveError) throw error;
     // Directory doesn't exist or can't be read
   }
   return agents;

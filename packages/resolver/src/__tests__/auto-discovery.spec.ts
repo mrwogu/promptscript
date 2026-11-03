@@ -59,9 +59,13 @@ describe('discoverNativeContent', () => {
     const content = shortcutsBlock!.content as ObjectContent;
     expect(content.properties).toHaveProperty('/verify');
 
-    const cmd = content.properties['/verify'] as TextContent;
-    expect(cmd.type).toBe('TextContent');
-    expect(cmd.value).toContain('Verify Command');
+    const cmd = content.properties['/verify'] as Record<string, unknown>;
+    expect(cmd['description']).toBeDefined();
+    expect(cmd['prompt']).toBe(true);
+    const body = cmd['content'] as TextContent;
+    expect(body.type).toBe('TextContent');
+    expect(body.value).toContain('Verify Command');
+    expect(body.value.startsWith('---')).toBe(false);
   });
 
   it('should return null for a nonexistent directory', async () => {
