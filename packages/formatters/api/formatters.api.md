@@ -223,6 +223,7 @@ export abstract class BaseFormatter implements Formatter {
     abstract readonly outputPath: string;
     protected referenceProvenance(sourcePath: string): string;
     referencesMode(): 'directory' | 'inline' | 'none';
+    protected removeRawFrontmatterKeys(rawFrontmatter: string, keys: ReadonlySet<string>): string;
     protected renderCodeFence(content: string, lang?: string): string;
     protected renderExamplesSection(ast: Program, renderer: ConventionRenderer, sectionName?: string): string | null;
     protected resolveSkillDir(defaultSkillBasePath: string, skillName: string, outputDir?: string, options?: FormatOptions): string;
@@ -231,6 +232,8 @@ export abstract class BaseFormatter implements Formatter {
         content: string;
         executable?: boolean;
     }> | undefined, targetDir: string): FormatterOutput[];
+    protected shiftContextHeadings(text: string): string;
+    protected shiftHeadingsToMinLevel(text: string, targetLevel: number): string;
     protected shortcutSummary(value: Value, fallback?: string): string;
     protected shouldIncludeSkill(name: string, options?: FormatOptions): boolean;
     // Warning: (ae-forgotten-export) The symbol "StandardsExtractor" needs to be exported by the entry point index.d.ts

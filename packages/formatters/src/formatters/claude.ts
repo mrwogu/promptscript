@@ -25,6 +25,12 @@ import {
 import { resolveSectionTitle, resolveSourceSectionTitle } from '../section-title-resolver.js';
 
 /**
+ * SKILL.md frontmatter keys that only PromptScript reads. `params` is
+ * resolved at compile time, so the generated skill does not carry it.
+ */
+const PROMPTSCRIPT_ONLY_SKILL_KEYS: ReadonlySet<string> = new Set(['params']);
+
+/**
  * Claude formatter version information.
  */
 export const CLAUDE_VERSIONS = {
@@ -714,7 +720,11 @@ export class ClaudeFormatter extends BaseFormatter {
     // YAML frontmatter (use quotes compatible with Prettier)
     lines.push('---');
     if (config.rawFrontmatter) {
-      lines.push(this.applyRawFrontmatterModel(config.rawFrontmatter, config.model, options));
+      const frontmatter = this.removeRawFrontmatterKeys(
+        config.rawFrontmatter,
+        PROMPTSCRIPT_ONLY_SKILL_KEYS
+      );
+      lines.push(this.applyRawFrontmatterModel(frontmatter, config.model, options));
     } else {
       lines.push(`name: '${config.name}'`);
       // Use double quotes if description contains apostrophe, single quotes otherwise
@@ -1314,9 +1324,8 @@ export class ClaudeFormatter extends BaseFormatter {
       const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
       if (remainingText) {
-        // Downgrade "## " headings to "### " so they do not collide with the
-        // formatter's own h2 section headings.
-        const downgradedText = remainingText.replace(/^([ \t]*)## /gm, '$1### ');
+        // Shift headings below the formatter's h2 sections, keeping their relative levels
+        const downgradedText = this.shiftContextHeadings(remainingText);
         body = this.normalizeMarkdownForPrettier(downgradedText).trim();
       }
     }

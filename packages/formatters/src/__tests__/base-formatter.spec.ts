@@ -100,6 +100,14 @@ class TestFormatter extends BaseFormatter {
     return this.normalizeMarkdownForPrettier(content);
   }
 
+  public testShiftContextHeadings(text: string): string {
+    return this.shiftContextHeadings(text);
+  }
+
+  public testRemoveRawFrontmatterKeys(raw: string, keys: ReadonlySet<string>): string {
+    return this.removeRawFrontmatterKeys(raw, keys);
+  }
+
   public testStripAllIndent(content: string): string {
     return this.stripAllIndent(content);
   }
@@ -848,6 +856,91 @@ describe('BaseFormatter', () => {
       // Tables are formatted with padding
       expect(result).toContain('| A');
       expect(result).toContain('| C');
+    });
+
+    it('should keep an escaped pipe in a code span inside one cell', () => {
+      const content = '| Pattern | Flag | Note |\n| --- | --- | --- |\n| `a\\|b` | -- | x |';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe(
+        '| Pattern | Flag | Note |\n| ------- | ---- | ---- |\n| `a\\|b`  | --   | x    |'
+      );
+    });
+
+    it('should only treat the second row as the delimiter row', () => {
+      const content = '| A | B |\n| --- | :-: |\n| -- | - |';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe('| A   | B   |\n| --- | :-: |\n| --  | -   |');
+    });
+
+    it('should keep pipe rows that are not a table as written', () => {
+      const content = '| just | text |\n| more | text |';
+      expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe(content);
+    });
+
+    it('should keep an indented table inside its list item', () => {
+      const content = '1. Step one:\n   | Col | Val |\n   | --- | --- |\n   | a | b |\n2. Step two';
+      const result = formatter.testNormalizeMarkdownForPrettier(content);
+      expect(result).toBe(
+        '1. Step one:\n   | Col | Val |\n   | --- | --- |\n   | a   | b   |\n2. Step two'
+      );
+    });
+
+    it('should keep a tight list with continuation lines tight', () => {
+      const content = '- item one\n  continuation line\n- item two\n  - nested:\n  - nested two';
+      expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe(content);
+    });
+
+    it('should keep an indented code block inside its list item', () => {
+      const content = '- item\n  ```sh\n  ls\n  ```\n- next';
+      expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe(content);
+    });
+
+    it('should add a blank line before a list after a paragraph that ends a list', () => {
+      const content = '- a\n\nText\n- b';
+      expect(formatter.testNormalizeMarkdownForPrettier(content)).toBe('- a\n\nText\n\n- b');
+    });
+
+    it('should not escape __name__ inside code spans', () => {
+      const result = formatter.testNormalizeMarkdownForPrettier(
+        'Keep `__init__.py` and ``a ` __b__`` but escape __c__'
+      );
+      expect(result).toBe('Keep `__init__.py` and ``a ` __b__`` but escape \\_\\_c\\_\\_');
+    });
+
+    it('should escape glob asterisks next to a double backtick code span', () => {
+      const result = formatter.testNormalizeMarkdownForPrettier(
+        '``a/*`` and services/*, gateways/*'
+      );
+      expect(result).toBe('``a/*`` and services/\\*, gateways/\\*');
+    });
+  });
+
+  describe('shiftContextHeadings', () => {
+    it('should shift all headings by the same amount', () => {
+      expect(formatter.testShiftContextHeadings('## A\n### A.1\n## B')).toBe(
+        '### A\n#### A.1\n### B'
+      );
+    });
+
+    it('should keep text that already starts at h3', () => {
+      const text = '### A\n#### A.1';
+      expect(formatter.testShiftContextHeadings(text)).toBe(text);
+    });
+
+    it('should leave headings in code fences alone', () => {
+      expect(formatter.testShiftContextHeadings('## A\n```\n## not a heading\n```')).toBe(
+        '### A\n```\n## not a heading\n```'
+      );
+    });
+  });
+
+  describe('removeRawFrontmatterKeys', () => {
+    it('should drop a key with its nested lines and keep the rest', () => {
+      const raw =
+        "name: x\nparams:\n  language:\n    type: string\n'description': y\nmetadata:\n  params: kept";
+      expect(formatter.testRemoveRawFrontmatterKeys(raw, new Set(['params']))).toBe(
+        "name: x\n'description': y\nmetadata:\n  params: kept"
+      );
     });
   });
 
