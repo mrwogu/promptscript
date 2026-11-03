@@ -85,6 +85,8 @@ sidebar:
 - `CLAUDE.md` is gitignored by many project templates - you may need to `git add -f CLAUDE.md`
 - `CLAUDE.local.md` is intentionally not committed to git (private developer overrides)
 - Skills support frontmatter fields: `name`, `description`, plus newer fields like `model`, `allowedTools`, `disallowedTools`, `permissionMode`, `specModel`, `specReasoningEffort`
+- A local SKILL.md keeps its own frontmatter, except `params`: parameters are filled in at compile time, so the generated skill does not carry them (Factory drops them too)
+- Skill and agent bodies are normalized for Prettier (aligned tables, a blank line between a paragraph and a list), without changing their meaning: table cells, code spans, list nesting and tight lists stay as written
 - Agent files support: `description`, `content`, `tools`, `disallowedTools`, `model`, `permissionMode`, `skills`, `maxTurns`, `memory`, `mcpServers`, `background`, `isolation`. Fields other targets own (`reasoningEffort`, `specModel`, `specReasoningEffort`, `sandboxMode`, `nicknameCandidates`, `handoffs`) are reported with `PS4003` and omitted
 - Agent and skill `model` values keep floating aliases (`opus`, `sonnet`, `haiku`, `fable`) and `inherit` as written; pinned Claude releases become API ids such as `claude-sonnet-4-5-20250929`, and models from other providers are omitted with `PS4004` (see [Model Catalog](../models.md#target-model-names))
 - Agent-level lifecycle hooks are not part of `@agents`; define them through `@hooks`
