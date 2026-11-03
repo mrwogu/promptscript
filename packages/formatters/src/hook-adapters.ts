@@ -158,7 +158,7 @@ function serializeGitRootGuard(target: GitRootTarget, exitCode: 1 | 2): string {
   const message = quotePosixArgument(
     `PromptScript ${target} hook requires a Git worktree project root.`
   );
-  const failure = `printf '%s\\n' ${message} >&2; exit ${exitCode}`;
+  const failure = String.raw`printf '%s\n' ${message} >&2; exit ${exitCode}`;
   return `PROMPTSCRIPT_PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { ${failure}; }; case "$PROMPTSCRIPT_PROJECT_ROOT" in *[![:space:]]*) ;; *) ${failure} ;; esac; `;
 }
 
