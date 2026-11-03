@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/core",
-  "version": "1.28.0",
+  "version": "1.28.1",
   "description": "Core types, errors and utilities for PromptScript",
   "keywords": [
     "cli",
