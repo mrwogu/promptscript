@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.1](https://github.com/mrwogu/promptscript/compare/v1.28.0...v1.28.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **formatters:** fail closed in pre-tool hook root guards ([#768](https://github.com/mrwogu/promptscript/issues/768)) ([674d6c2](https://github.com/mrwogu/promptscript/commit/674d6c2903386f2015c42b763b2c9b129183c37e)), closes [#766](https://github.com/mrwogu/promptscript/issues/766)
+* **validator:** skip long camelCase identifiers in PS012 ([#767](https://github.com/mrwogu/promptscript/issues/767)) ([d0cdb96](https://github.com/mrwogu/promptscript/commit/d0cdb96f321c3fa3a6fb46083d69fc1e2f66f329)), closes [#765](https://github.com/mrwogu/promptscript/issues/765)
+
 ## [1.28.0](https://github.com/mrwogu/promptscript/compare/v1.27.0...v1.28.0) (2026-11-03)
 
 

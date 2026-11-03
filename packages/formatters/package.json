@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/formatters",
-  "version": "1.28.0",
+  "version": "1.28.1",
   "description": "Output formatters for PromptScript (GitHub Copilot, Claude, Cursor, etc.)",
   "keywords": [
     "cli",
