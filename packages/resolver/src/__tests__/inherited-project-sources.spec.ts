@@ -22,6 +22,22 @@ ${body}
 `;
 }
 
+/** A .prs file with a @meta block and the given body. */
+function prs(id: string, body: string): string {
+  return `@meta {
+  id: "${id}"
+  syntax: "1.4.0"
+}
+
+${body}
+`;
+}
+
+/** Write the workspace project file. */
+async function putWorkspace(workspace: string, body: string): Promise<void> {
+  await put(join(workspace, '.promptscript/project.prs'), prs('workspace', body));
+}
+
 /** A tool project with native sources, and a workspace that inherits it. */
 async function createLayout(linkTool: boolean): Promise<{ workspace: string; tool: string }> {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'prs-inherited-sources-')));
@@ -32,17 +48,7 @@ async function createLayout(linkTool: boolean): Promise<{ workspace: string; too
 
   await put(
     join(toolDir, 'project.prs'),
-    `@meta {
-  id: "tool"
-  syntax: "1.4.0"
-}
-
-@skills {
-  check-code: {
-    description: "check-code skill"
-  }
-}
-`
+    prs('tool', '@skills {\n  check-code: {\n    description: "check-code skill"\n  }\n}')
   );
   await put(join(toolDir, 'skills/check-code/SKILL.md'), skillMd('check-code', 'Tool check.'));
   await put(join(toolDir, 'skills/check-code/scripts/check.py'), 'print("ok")\n');
@@ -59,16 +65,7 @@ Help.
 `
   );
 
-  await put(
-    join(workspace, '.promptscript/project.prs'),
-    `@meta {
-  id: "workspace"
-  syntax: "1.4.0"
-}
-
-@inherit ../tool/.promptscript/project
-`
-  );
+  await putWorkspace(workspace, '@inherit ../tool/.promptscript/project');
   if (linkTool) await symlink(tool, join(workspace, 'tool'));
 
   return { workspace, tool };
@@ -84,8 +81,12 @@ function skill(blocks: Block[], name: string): Record<string, Value> {
   return properties(blocks, 'skills')[name] as Record<string, Value>;
 }
 
-function resolverFor(workspace: string, skills?: { universalDir: string }): Resolver {
-  return new Resolver({
+/** Resolve the workspace project and check that it has no errors. */
+async function resolveWorkspace(
+  workspace: string,
+  skills?: { universalDir: string }
+): Promise<{ blocks: Block[]; dependencies: string[] }> {
+  const resolver = new Resolver({
     registryPath: join(workspace, 'registry'),
     localPath: join(workspace, '.promptscript'),
     projectRoot: workspace,
@@ -93,6 +94,13 @@ function resolverFor(workspace: string, skills?: { universalDir: string }): Reso
     cache: false,
     ...(skills ? { skills } : {}),
   });
+  const result = await resolver.resolve(join(workspace, '.promptscript/project.prs'));
+  expect(result.errors).toEqual([]);
+  return { blocks: result.ast!.blocks, dependencies: result.dependencies ?? [] };
+}
+
+function contentOf(blocks: Block[], name: string): string {
+  return (skill(blocks, name)['content'] as TextContent).value;
 }
 
 afterEach(async () => {
@@ -108,18 +116,12 @@ describe('native sources of an inherited project', () => {
   ])('reads skills, commands and agents from %s', async (_kind, linkTool) => {
     const { workspace } = await createLayout(linkTool);
 
-    const result = await resolverFor(workspace).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    const blocks = result.ast!.blocks;
-    const checkCode = skill(blocks, 'check-code');
-    expect((checkCode['content'] as TextContent).value).toContain('Tool check.');
-    expect(checkCode['resources']).toEqual([
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(contentOf(blocks, 'check-code')).toContain('Tool check.');
+    expect(skill(blocks, 'check-code')['resources']).toEqual([
       expect.objectContaining({ relativePath: 'scripts/check.py', content: 'print("ok")\n' }),
     ]);
-    expect((skill(blocks, 'write-notes')['content'] as TextContent).value).toContain('Tool notes.');
+    expect(contentOf(blocks, 'write-notes')).toContain('Tool notes.');
     expect(Object.keys(properties(blocks, 'shortcuts'))).toContain('/ship');
     expect(Object.keys(properties(blocks, 'agents'))).toContain('helper');
   });
@@ -131,13 +133,8 @@ describe('native sources of an inherited project', () => {
       skillMd('check-code', 'Workspace check.')
     );
 
-    const result = await resolverFor(workspace).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    const content = skill(result.ast!.blocks, 'check-code')['content'] as TextContent;
-    expect(content.value).toContain('Workspace check.');
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(contentOf(blocks, 'check-code')).toContain('Workspace check.');
   });
 
   it.each([
@@ -154,36 +151,13 @@ describe('native sources of an inherited project', () => {
     const teamDir = join(workspace, directory, '.promptscript');
     await put(
       join(teamDir, 'project.prs'),
-      `@meta {
-  id: "team"
-  syntax: "1.4.0"
-}
-
-@identity {
-  """
-  Team rules.
-  """
-}
-`
+      prs('team', '@identity {\n  """\n  Team rules.\n  """\n}')
     );
     await put(join(teamDir, 'commands/team-only.md'), 'Team only.\n');
-    await put(
-      join(workspace, '.promptscript/project.prs'),
-      `@meta {
-  id: "workspace"
-  syntax: "1.4.0"
-}
+    await putWorkspace(workspace, `@inherit ${inherit}`);
 
-@inherit ${inherit}
-`
-    );
-
-    const result = await resolverFor(workspace).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    expect(Object.keys(properties(result.ast!.blocks, 'shortcuts'))).not.toContain('/team-only');
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(Object.keys(properties(blocks, 'shortcuts'))).not.toContain('/team-only');
   });
 
   it('keeps the inherited skill over a registry skill with the same name', async () => {
@@ -193,45 +167,22 @@ describe('native sources of an inherited project', () => {
       skillMd('check-code', 'Registry check.')
     );
 
-    const result = await resolverFor(workspace).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    const content = skill(result.ast!.blocks, 'check-code')['content'] as TextContent;
-    expect(content.value).toContain('Tool check.');
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(contentOf(blocks, 'check-code')).toContain('Tool check.');
   });
 
   it('tracks the universal dir of the inherited project as a dependency', async () => {
     const { workspace, tool } = await createLayout(false);
 
-    const result = await resolverFor(workspace, { universalDir: '.agents' }).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    expect(result.dependencies).toContain(join(tool, '.agents', 'skills'));
+    const { dependencies } = await resolveWorkspace(workspace, { universalDir: '.agents' });
+    expect(dependencies).toContain(join(tool, '.agents', 'skills'));
   });
 
   it('keeps the workspace sources for a @use of the same file', async () => {
     const { workspace } = await createLayout(false);
-    await put(
-      join(workspace, '.promptscript/project.prs'),
-      `@meta {
-  id: "workspace"
-  syntax: "1.4.0"
-}
+    await putWorkspace(workspace, '@use ../tool/.promptscript/project');
 
-@use ../tool/.promptscript/project
-`
-    );
-
-    const result = await resolverFor(workspace).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    const blocks = result.ast!.blocks;
+    const { blocks } = await resolveWorkspace(workspace);
     expect(skill(blocks, 'check-code')['content']).toBeUndefined();
     expect(Object.keys(properties(blocks, 'skills'))).not.toContain('write-notes');
     expect(Object.keys(properties(blocks, 'shortcuts'))).not.toContain('/ship');
@@ -242,40 +193,16 @@ describe('native sources of an inherited project', () => {
     const { workspace } = await createLayout(false);
     await put(
       join(workspace, '.promptscript/base.prs'),
-      `@meta {
-  id: "base"
-  syntax: "1.4.0"
-}
-
-@skills {
-  local-skill: {
-    description: "local-skill skill"
-  }
-}
-`
+      prs('base', '@skills {\n  local-skill: {\n    description: "local-skill skill"\n  }\n}')
     );
     await put(
       join(workspace, '.promptscript/skills/local-skill/SKILL.md'),
       skillMd('local-skill', 'Local body.')
     );
-    await put(
-      join(workspace, '.promptscript/project.prs'),
-      `@meta {
-  id: "workspace"
-  syntax: "1.4.0"
-}
+    await putWorkspace(workspace, '@inherit ./base');
 
-@inherit ./base
-`
-    );
-
-    const result = await resolverFor(workspace).resolve(
-      join(workspace, '.promptscript/project.prs')
-    );
-
-    expect(result.errors).toEqual([]);
-    const blocks = result.ast!.blocks;
-    expect((skill(blocks, 'local-skill')['content'] as TextContent).value).toContain('Local body.');
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(contentOf(blocks, 'local-skill')).toContain('Local body.');
     expect(Object.keys(properties(blocks, 'skills'))).not.toContain('check-code');
   });
 });
