@@ -70,11 +70,12 @@ export async function postFormatWithPrettier(
     }
 
     try {
-      output.content = await prettier.format(output.content, {
+      const formatted = await prettier.format(protectGlobAsterisks(output.content), {
         ...(config ?? {}),
         filepath: absPath,
         parser: 'markdown',
       });
+      output.content = restoreGlobAsterisks(formatted);
     } catch (err) {
       const warning = `Prettier rejected ${output.path}: ${
         err instanceof Error ? err.message : String(err)
@@ -85,6 +86,39 @@ export async function postFormatWithPrettier(
   }
 
   return warnings;
+}
+
+/**
+ * Stand-in for a glob asterisk while Prettier runs. A private use character,
+ * so Prettier treats it as plain text.
+ */
+const GLOB_STAR = '\uE000';
+
+/**
+ * Hide the `*` of glob paths like `services/*` from Prettier. Two of them on
+ * one line (`services/*, gateways/*`) parse as emphasis, and Prettier would
+ * rewrite them to `_`, so the agent reads `services/_`. Fenced code is left
+ * alone because Prettier may format embedded code.
+ */
+function protectGlobAsterisks(content: string): string {
+  if (!content.includes('/*') || content.includes(GLOB_STAR)) return content;
+  let fence: string | undefined;
+  return content
+    .split('\n')
+    .map((line) => {
+      const marker = /^\s*(`{3,}|~{3,})/.exec(line)?.[1];
+      if (marker) {
+        if (fence === undefined) fence = marker;
+        else if (marker[0] === fence[0] && marker.length >= fence.length) fence = undefined;
+        return line;
+      }
+      return fence === undefined ? line.replace(/\/\*/g, `/${GLOB_STAR}`) : line;
+    })
+    .join('\n');
+}
+
+function restoreGlobAsterisks(content: string): string {
+  return content.replaceAll(GLOB_STAR, '*');
 }
 
 /**
