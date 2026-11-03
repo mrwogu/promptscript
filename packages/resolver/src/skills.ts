@@ -1996,12 +1996,12 @@ function replaceFrontmatterDescription(rawFrontmatter: string, description: stri
   );
 }
 
-/** Whether a skill's content was already read from a SKILL.md file. */
-function hasNativeContent(skill: Record<string, Value>): boolean {
+/** The SKILL.md a skill's content was already read from, if any. */
+function nativeSkillFile(skill: Record<string, Value>): string | null {
   const content = skill['content'];
-  if (typeof content !== 'object' || content === null || Array.isArray(content)) return false;
+  if (typeof content !== 'object' || content === null || Array.isArray(content)) return null;
   const loc = (content as { loc?: { file?: unknown } }).loc;
-  return typeof loc?.file === 'string' && basename(loc.file) === 'SKILL.md';
+  return typeof loc?.file === 'string' && basename(loc.file) === 'SKILL.md' ? loc.file : null;
 }
 
 /**
@@ -2133,9 +2133,9 @@ export async function resolveNativeSkills(
           if (universalCandidate && (await fileExists(universalCandidate)))
             return universalCandidate;
           // A skill already read from a SKILL.md (for example by an inherited
-          // project) keeps it: the registry does not outrank a local source.
-          if (hasNativeContent(skillObj)) return null;
-          return registryCandidate;
+          // project) is read again from that file, so this project's arguments
+          // and shared files apply. The registry does not outrank it.
+          return nativeSkillFile(skillObj) ?? registryCandidate;
         })();
 
     if (skillMdPath && (await fileExists(skillMdPath))) {

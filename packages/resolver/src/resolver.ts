@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { lstat, readdir, readFile } from 'node:fs/promises';
+import { lstat, readdir, readFile, realpath } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { parse } from '@promptscript/parser';
 import {
@@ -814,8 +814,15 @@ export class Resolver {
       const universalBase = inheritedLocalPath
         ? dirname(inheritedLocalPath)
         : this.loader.getProjectRoot();
-      for (const directory of ['skills', 'commands', 'agents'] as const) {
-        dependencies.add(resolve(universalBase, discoveryOptions.universalDir, directory));
+      // Discovery reads the real directory, so track a symlinked one under both paths.
+      const universalBases = new Set([
+        universalBase,
+        await realpath(universalBase).catch(() => universalBase),
+      ]);
+      for (const base of universalBases) {
+        for (const directory of ['skills', 'commands', 'agents'] as const) {
+          dependencies.add(resolve(base, discoveryOptions.universalDir, directory));
+        }
       }
     }
 

@@ -178,6 +178,52 @@ describe('native sources of an inherited project', () => {
     expect(dependencies).toContain(join(tool, '.agents', 'skills'));
   });
 
+  it('tracks the symlinked and the real universal dir of the inherited project', async () => {
+    const { workspace, tool } = await createLayout(true);
+
+    const { dependencies } = await resolveWorkspace(workspace, { universalDir: '.agents' });
+    expect(dependencies).toContain(join(workspace, 'tool', '.agents', 'skills'));
+    expect(dependencies).toContain(join(tool, '.agents', 'skills'));
+  });
+
+  it('adds the workspace shared files to an inherited skill', async () => {
+    const { workspace } = await createLayout(false);
+    await put(join(workspace, '.promptscript/shared/glossary.md'), '# Glossary\n');
+
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(skill(blocks, 'check-code')['resources']).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ relativePath: 'scripts/check.py' }),
+        expect.objectContaining({ relativePath: '@shared/glossary.md', content: '# Glossary\n' }),
+      ])
+    );
+  });
+
+  it('interpolates an inherited skill with the arguments of the workspace', async () => {
+    const { workspace, tool } = await createLayout(false);
+    await put(
+      join(tool, '.promptscript/skills/check-code/SKILL.md'),
+      `---
+name: check-code
+description: check-code skill
+params:
+  language:
+    type: string
+    default: typescript
+---
+
+Check {{language}} code.
+`
+    );
+    await putWorkspace(
+      workspace,
+      '@inherit ../tool/.promptscript/project\n\n@extend skills.check-code {\n  language: "java"\n}'
+    );
+
+    const { blocks } = await resolveWorkspace(workspace);
+    expect(contentOf(blocks, 'check-code')).toContain('Check java code.');
+  });
+
   it('keeps the workspace sources for a @use of the same file', async () => {
     const { workspace } = await createLayout(false);
     await putWorkspace(workspace, '@use ../tool/.promptscript/project');
