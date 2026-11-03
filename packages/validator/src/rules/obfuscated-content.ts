@@ -314,6 +314,47 @@ function isLikelyTechnicalContent(match: string): boolean {
 }
 
 /**
+ * camelCase or PascalCase identifier: letters only, at least two words.
+ * A word can be a single uppercase letter, like the `A` in `updateAUser`.
+ */
+const IDENTIFIER_PATTERN = /^[A-Za-z][a-z]*(?:[A-Z][a-z]*)+$/;
+
+/**
+ * Longest run checked as an identifier. Longer runs are not code names.
+ */
+const MAX_IDENTIFIER_LENGTH = 200;
+
+/**
+ * Characters that can be part of a Base64 run.
+ */
+const BASE64_RUN_CHAR = /[A-Za-z0-9+/=]/;
+
+/**
+ * Check if a Base64 match at `index` is part of a long code identifier,
+ * like `updatePaymentVariantSelectListItems`.
+ *
+ * The whole run around the match is checked, because the Base64 pattern
+ * can cut an identifier in the middle of a word. Real Base64 almost always
+ * has digits, `+`, `/` or `=`, and random letters rarely split into words
+ * that each have a vowel.
+ *
+ * Only for the generic long-Base64 warning. A run that looks like an
+ * identifier can still decode to a payload, so the decode check ignores it.
+ * The caller stops at the first run that is not exempt, so each run is
+ * scanned once and the check stays linear.
+ */
+function isLikelyIdentifier(text: string, index: number, length: number): boolean {
+  let start = index;
+  while (start > 0 && BASE64_RUN_CHAR.test(text.charAt(start - 1))) start--;
+  let end = index + length;
+  while (end < text.length && BASE64_RUN_CHAR.test(text.charAt(end))) end++;
+
+  const run = text.substring(start, end);
+  if (run.length > MAX_IDENTIFIER_LENGTH || !IDENTIFIER_PATTERN.test(run)) return false;
+  return run.split(/(?=[A-Z])/).every((word) => /[aeiouy]/i.test(word));
+}
+
+/**
  * One-letter codes for nucleotides (plus N for ambiguous bases).
  */
 const NUCLEOTIDE_CHARS = new Set('ACGTUN');
@@ -648,9 +689,12 @@ export const obfuscatedContent: ValidationRule = {
           return;
         }
 
-        const longBase64Match = (text.match(BASE64_PATTERN) || []).find(
-          (m) => m.length >= MIN_ENCODED_LENGTH * 2 && !isLikelyLegitimateBase64(text, m)
-        );
+        const longBase64Match = [...text.matchAll(BASE64_PATTERN)].find(
+          (m) =>
+            m[0].length >= MIN_ENCODED_LENGTH * 2 &&
+            !isLikelyLegitimateBase64(text, m[0]) &&
+            !isLikelyIdentifier(text, m.index, m[0].length)
+        )?.[0];
 
         if (longBase64Match && encodedMatches.length === 0) {
           const snippet =
