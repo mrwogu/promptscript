@@ -1595,83 +1595,73 @@ describe('FactoryFormatter', () => {
 
     it('should keep continuation lines of a folded description', () => {
       const content = factorySkill(
-        [
-          'name: migrate',
-          'description: >-',
-          '  Migrates one module.',
-          '  Produces: a report and a patch.',
-          '',
-          '  Use when: the module is ready.',
-          'license: MIT',
-          'metadata:',
-          '  Produces: nothing',
-          'user-invocable: true',
-        ].join('\n')
+        `name: migrate
+description: >-
+  Migrates one module.
+  Produces: a report and a patch.
+
+  Use when: the module is ready.
+license: MIT
+metadata:
+  Produces: nothing
+user-invocable: true`
       );
 
       expect(content).toBe(
-        [
-          '---',
-          'name: migrate',
-          'description: >-',
-          '  Migrates one module.',
-          '  Produces: a report and a patch.',
-          '',
-          '  Use when: the module is ready.',
-          'user-invocable: true',
-          '---',
-          '',
-          'Body.',
-          '',
-        ].join('\n')
+        `---
+name: migrate
+description: >-
+  Migrates one module.
+  Produces: a report and a patch.
+
+  Use when: the module is ready.
+user-invocable: true
+---
+
+Body.
+`
       );
     });
 
     it('should drop comments and unsupported keys of any shape', () => {
       const content = factorySkill(
-        [
-          '# leading comment',
-          'name: migrate # trailing comment',
-          'allowed-tools:',
-          '- Read',
-          '- Grep',
-          'description: |',
-          '  Line one.',
-          '  Note: line two.',
-          '# comment between keys',
-          'metadata: { owner: team, tags: [a, b] }',
-          'disable-model-invocation: true',
-        ].join('\n')
+        `# leading comment
+name: migrate # trailing comment
+allowed-tools:
+- Read
+- Grep
+description: |
+  Line one.
+  Note: line two.
+# comment between keys
+metadata: { owner: team, tags: [a, b] }
+disable-model-invocation: true`
       );
 
       expect(content).toBe(
-        [
-          '---',
-          'name: migrate',
-          'description: |',
-          '  Line one.',
-          '  Note: line two.',
-          'disable-model-invocation: true',
-          '---',
-          '',
-          'Body.',
-          '',
-        ].join('\n')
+        `---
+name: migrate
+description: |
+  Line one.
+  Note: line two.
+disable-model-invocation: true
+---
+
+Body.
+`
       );
     });
 
     it('should fall back to the line filter when frontmatter is not valid YAML', () => {
       const content = factorySkill(
-        [
-          'name: migrate',
-          '# note',
-          'description: Use when: x',
-          '',
-          '  more text',
-          'license: MIT',
-          '',
-          '  under license',
-        ].join('\n')
+        `name: migrate
+# note
+description: Use when: x
+
+  more text
+license: MIT
+
+  under license`
       );
 
       expect(content).toContain('name: migrate\ndescription: Use when: x\n\n  more text\n---');
