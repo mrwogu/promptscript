@@ -174,6 +174,7 @@ function answerWorkerRequest(root: string, session: WorkerSession, line: string)
   let answer: { id?: unknown; status?: unknown };
   try {
     answer = JSON.parse(line) as { id?: unknown; status?: unknown };
+    /* v8 ignore next 3 -- the worker writes only JSON lines; a broken line is dropped */
   } catch {
     return;
   }

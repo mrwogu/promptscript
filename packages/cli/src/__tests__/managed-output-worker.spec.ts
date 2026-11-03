@@ -3,11 +3,13 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdtemp, readFile, rm, stat, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { PassThrough } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   handleServeRequest,
   MANAGED_OUTPUT_WORKER_COMMAND,
+  serveRequests,
   performManagedOutputOperation,
   runManagedOutputWorkerProtocol,
   wasDispatchedAsManagedOutputWorker,
@@ -462,6 +464,32 @@ describe('managed output worker protocol', () => {
       expect(
         serveInProcess({ id: 3, directory: join(project, 'missing'), op: 'mkdir', args: [] })
       ).toEqual({ id: 3, error: true });
+    });
+
+    it('answers requests split across stream chunks', async () => {
+      const project = await createProject('worker-serve-stream-');
+      const directory = await stat(project);
+      const input = new PassThrough();
+      const lines: string[] = [];
+      const originalCwd = process.cwd();
+      serveRequests(input, { write: (chunk: string) => lines.push(chunk) });
+
+      const request = JSON.stringify({
+        id: 4,
+        directory: project,
+        op: 'mkdir',
+        args: ['hooks', String(directory.dev), String(directory.ino)],
+      });
+      try {
+        input.write(request.slice(0, 10));
+        input.write(`${request.slice(10)}\n\n`);
+        await new Promise((resolve) => setImmediate(resolve));
+      } finally {
+        process.chdir(originalCwd);
+      }
+
+      expect(lines).toEqual([`${JSON.stringify({ id: 4, status: 'ready' })}\n`]);
+      expect((await lstat(join(project, 'hooks'))).isDirectory()).toBe(true);
     });
 
     it.skipIf(!canStripTypes)('serves many requests from one spawned process', async () => {

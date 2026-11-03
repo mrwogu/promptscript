@@ -396,17 +396,23 @@ export function handleServeRequest(line: string): string {
   }
 }
 
-/** Answer JSON line requests from stdin until stdin closes. */
-function serve(): void {
+/**
+ * Answer JSON line requests from `input` until it closes. A spawned worker
+ * passes its stdin and stdout.
+ */
+export function serveRequests(
+  input: NodeJS.ReadableStream,
+  output: { write(chunk: string): unknown }
+): void {
   let buffer = '';
-  process.stdin.setEncoding('utf-8');
-  process.stdin.on('data', (chunk: string) => {
+  input.setEncoding('utf-8');
+  input.on('data', (chunk: string) => {
     buffer += chunk;
     let newline = buffer.indexOf('\n');
     while (newline !== -1) {
       const line = buffer.slice(0, newline);
       buffer = buffer.slice(newline + 1);
-      if (line.length > 0) process.stdout.write(handleServeRequest(line));
+      if (line.length > 0) output.write(handleServeRequest(line));
       newline = buffer.indexOf('\n');
     }
   });
@@ -424,7 +430,8 @@ let dispatchedAsWorker = false;
 if (process.argv[2] === MANAGED_OUTPUT_WORKER_COMMAND) {
   dispatchedAsWorker = true;
   if (process.argv[3] === WORKER_SERVE_OPERATION) {
-    serve();
+    /* v8 ignore next -- runs only in a spawned worker; serveRequests is tested in-process */
+    serveRequests(process.stdin, process.stdout);
   } else {
     process.exitCode = runManagedOutputWorkerProtocol(process.argv.slice(3));
   }
