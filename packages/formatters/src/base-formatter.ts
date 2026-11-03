@@ -43,6 +43,20 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * True while a `format` call runs with `verbatimMarkdown`. Then
+   * `normalizeMarkdownForPrettier` only strips the indentation of the block.
+   */
+  private verbatimMarkdown = false;
+
+  /**
+   * Call first in `format`, so markdown helpers know whether to keep the text
+   * as written. The state is reset on every call.
+   */
+  protected startFormat(options?: FormatOptions): void {
+    this.verbatimMarkdown = options?.verbatimMarkdown === true;
+  }
+
+  /**
    * Shared standards extractor for consistent extraction across all formatters.
    */
   protected readonly standardsExtractor = new StandardsExtractor();
@@ -56,6 +70,7 @@ export abstract class BaseFormatter implements Formatter {
     return new ConventionRenderer({
       convention,
       prettier: options?.prettier,
+      verbatim: options?.verbatimMarkdown === true,
     });
   }
 
@@ -443,6 +458,32 @@ export abstract class BaseFormatter implements Formatter {
   }
 
   /**
+   * Smallest indentation of the non-empty lines. Code fence markers count,
+   * lines inside a fence do not, so content that is mostly code still works.
+   */
+  private commonIndent(lines: string[]): number {
+    let minIndent = Infinity;
+    let inCodeBlock = false;
+    for (const line of lines) {
+      const trimmed = line.trimEnd();
+      const leadingSpaces = /^(\s*)/.exec(line)?.[1]?.length ?? 0;
+      if (trimmed.trimStart().startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+        if (trimmed.length > 0) minIndent = Math.min(minIndent, leadingSpaces);
+        continue;
+      }
+      if (inCodeBlock || trimmed.length === 0) continue;
+      minIndent = Math.min(minIndent, leadingSpaces);
+    }
+    return minIndent === Infinity ? 0 : minIndent;
+  }
+
+  /** Remove `indent` columns from every line, nothing else. */
+  private stripIndent(lines: string[], indent: number): string {
+    return (indent > 0 ? lines.map((line) => line.slice(indent)) : lines).join('\n');
+  }
+
+  /**
    * Normalize markdown content to match Prettier formatting.
    * - Strips common leading indentation from lines
    * - Trims trailing whitespace from lines
@@ -453,43 +494,23 @@ export abstract class BaseFormatter implements Formatter {
    *
    * The result must keep the meaning of the input: table cells, code spans
    * and list nesting (including tight lists) are never changed.
+   *
+   * With `verbatimMarkdown` (`formatting.postFormat: false`) only the common
+   * indentation is removed and the text stays as written.
    */
   protected normalizeMarkdownForPrettier(content: string): string {
     const lines = content.split('\n');
-
-    // Find common leading indentation (minimum non-empty line indent)
-    // Include code block markers in calculation to handle content that's mainly code blocks
-    let minIndent = Infinity;
-    let inCodeBlock = false;
-    for (const line of lines) {
-      const trimmed = line.trimEnd();
-      // Check for code block markers (need trimStart to handle indented markers)
-      if (trimmed.trimStart().startsWith('```')) {
-        inCodeBlock = !inCodeBlock;
-        // Include code block markers in minIndent calculation
-        if (trimmed.length > 0) {
-          const match = line.match(/^(\s*)/);
-          const leadingSpaces = match?.[1]?.length ?? 0;
-          minIndent = Math.min(minIndent, leadingSpaces);
-        }
-        continue;
-      }
-      if (inCodeBlock) continue;
-      if (trimmed.length === 0) continue;
-      const match = line.match(/^(\s*)/);
-      const leadingSpaces = match?.[1]?.length ?? 0;
-      minIndent = Math.min(minIndent, leadingSpaces);
-    }
-    if (minIndent === Infinity) minIndent = 0;
+    const minIndent = this.commonIndent(lines);
+    if (this.verbatimMarkdown) return this.stripIndent(lines, minIndent);
 
     // Process lines
     const result: string[] = [];
+    let inCodeBlock = false;
     let tableLines: string[] = [];
     // True while the current block belongs to a list (items, continuation
     // lines, nested content). No blank lines go in there, so tight lists
     // stay tight.
     let inList = false;
-    inCodeBlock = false;
 
     const flushTable = (): void => {
       if (tableLines.length === 0) return;
@@ -646,9 +667,12 @@ export abstract class BaseFormatter implements Formatter {
    * Strip all leading indentation from markdown content.
    * Used for AGENTS.md where content from multiple sources has inconsistent indentation.
    * Preserves indentation inside code blocks.
+   *
+   * With `verbatimMarkdown` only the common indentation is removed.
    */
   protected stripAllIndent(content: string): string {
     const lines = content.split('\n');
+    if (this.verbatimMarkdown) return this.stripIndent(lines, this.commonIndent(lines));
     const result: string[] = [];
     let inCodeBlock = false;
 

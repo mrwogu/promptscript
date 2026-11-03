@@ -635,8 +635,10 @@ describe.each([
     for (const file of ['runtime/claude/CLAUDE.md', 'runtime/factory/AGENTS.md']) {
       const text = await readFile(join(directory, file), 'utf-8');
       expect(text, file).toContain(MERMAID_NODE);
-      // The normalizer may escape the asterisks, but a glob never turns into emphasis.
-      expect(text, file).toMatch(/services\/\\?\*, gateways\/\\?\*/);
+      // Kept as written without post format, escaped (never turned into emphasis) with it.
+      expect(text, file).toContain(
+        postFormat === false ? 'services/*, gateways/*' : 'services/\\*, gateways/\\*'
+      );
     }
   });
 

@@ -66,6 +66,25 @@ ${config}`
   return directory;
 }
 
+async function addContext(directory: string): Promise<void> {
+  const file = join(directory, '.promptscript', 'project.prs');
+  const text = await readFile(file, 'utf-8');
+  await writeFile(
+    file,
+    `${text}
+@context {
+  """
+  Code lives in services/*, gateways/*.
+
+  Steps:
+  - one
+  - two
+  """
+}
+`
+  );
+}
+
 async function setSource(directory: string, skills: string[], agents: string[]): Promise<void> {
   // Skills in .promptscript/skills are found without a declaration, so a
   // removed skill loses its directory too.
@@ -226,6 +245,31 @@ describe('skill resource files', () => {
 
     const agent = await readFile(join(directory, '.claude/agents/reviewer.md'), 'utf-8');
     expect(agent).toContain('* first\n* second');
+  });
+
+  it('keeps @context text in CLAUDE.md and AGENTS.md as written with formatting.postFormat false', async () => {
+    const directory = await project('formatting:\n  postFormat: false\n');
+    await addContext(directory);
+
+    await compile(directory);
+
+    for (const file of ['CLAUDE.md', 'AGENTS.md']) {
+      const text = await readFile(join(directory, file), 'utf-8');
+      expect(text, file).toContain('Code lives in services/*, gateways/*.\n\nSteps:\n- one\n- two');
+    }
+  });
+
+  it('escapes the glob in @context text by default, never turns it into emphasis', async () => {
+    const directory = await project('');
+    await addContext(directory);
+
+    await compile(directory);
+
+    for (const file of ['CLAUDE.md', 'AGENTS.md']) {
+      const text = await readFile(join(directory, file), 'utf-8');
+      expect(text, file).toContain('services/\\*, gateways/\\*');
+      expect(text, file).not.toContain('services/_');
+    }
   });
 
   it('normalizes agent bodies for Prettier by default', async () => {

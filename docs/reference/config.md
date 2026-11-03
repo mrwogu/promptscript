@@ -1268,11 +1268,13 @@ formatting:
 ```
 
 By default every generated Markdown file goes through Prettier after
-compilation, and the Claude formatter normalizes skill and agent bodies for it
-(for example a blank line goes in before a list). With `postFormat: false` neither
-happens, so bodies stay as you wrote them. Skill resource files such as
-templates, references and scripts are never reformatted, with or without this
-option.
+compilation, and the formatters normalize the text for it first (for example a
+blank line goes in before a list, and `*` in a path like `services/*` is
+escaped). With `postFormat: false` neither happens, so skill, agent, command and
+`@context` text stay as you wrote them in every file, `CLAUDE.md` and
+`AGENTS.md` included. Only the indentation of a text block is removed. Skill
+resource files such as templates, references and scripts are never reformatted,
+with or without this option.
 
 ### universalDir
 

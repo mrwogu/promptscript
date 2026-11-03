@@ -22,6 +22,12 @@ export interface ConventionRendererOptions {
    * Prettier formatting options.
    */
   prettier?: PrettierMarkdownOptions;
+  /**
+   * Keep section text as written: skip the escaping done for Prettier
+   * (`formatting.postFormat: false`).
+   * @default false
+   */
+  verbatim?: boolean;
 }
 
 /**
@@ -30,6 +36,7 @@ export interface ConventionRendererOptions {
 export class ConventionRenderer {
   private convention: OutputConvention;
   private prettierOptions: Required<PrettierMarkdownOptions>;
+  private verbatim = false;
 
   constructor(conventionOrOptions: OutputConvention | string | ConventionRendererOptions = 'xml') {
     let convention: OutputConvention | string;
@@ -40,11 +47,14 @@ export class ConventionRenderer {
     // OutputConvention has required 'name' field but not 'convention' or 'prettier'
     if (
       typeof conventionOrOptions === 'object' &&
-      ('convention' in conventionOrOptions || 'prettier' in conventionOrOptions)
+      ('convention' in conventionOrOptions ||
+        'prettier' in conventionOrOptions ||
+        'verbatim' in conventionOrOptions)
     ) {
       const opts = conventionOrOptions as ConventionRendererOptions;
       convention = opts.convention ?? 'xml';
       prettier = opts.prettier;
+      this.verbatim = opts.verbatim === true;
     } else {
       convention = conventionOrOptions as OutputConvention | string;
     }
@@ -108,7 +118,7 @@ export class ConventionRenderer {
     }
 
     // For markdown, escape special characters for Prettier compatibility
-    if (this.convention.name === 'markdown') {
+    if (this.convention.name === 'markdown' && !this.verbatim) {
       trimmedContent = this.escapeMarkdownSpecialChars(trimmedContent);
     }
 
