@@ -138,6 +138,51 @@ describe('native sources of an inherited project', () => {
     expect(content.value).toContain('Workspace check.');
   });
 
+  it.each([
+    ['the registry', 'registry/team', '../registry/team/.promptscript/project'],
+    ['the Git cache', '.cache/team', '../.cache/team/.promptscript/project'],
+    [
+      'the own .promptscript dir',
+      '.promptscript/vendor/team',
+      './vendor/team/.promptscript/project',
+    ],
+  ])('does not read the sources of a project in %s', async (_kind, directory, inherit) => {
+    const { workspace } = await createLayout(false);
+    const teamDir = join(workspace, directory, '.promptscript');
+    await put(
+      join(teamDir, 'project.prs'),
+      `@meta {
+  id: "team"
+  syntax: "1.4.0"
+}
+
+@identity {
+  """
+  Team rules.
+  """
+}
+`
+    );
+    await put(join(teamDir, 'commands/team-only.md'), 'Team only.\n');
+    await put(
+      join(workspace, '.promptscript/project.prs'),
+      `@meta {
+  id: "workspace"
+  syntax: "1.4.0"
+}
+
+@inherit ${inherit}
+`
+    );
+
+    const result = await resolverFor(workspace).resolve(
+      join(workspace, '.promptscript/project.prs')
+    );
+
+    expect(result.errors).toEqual([]);
+    expect(Object.keys(properties(result.ast!.blocks, 'shortcuts'))).not.toContain('/team-only');
+  });
+
   it('keeps the workspace sources for a @use of the same file', async () => {
     const { workspace } = await createLayout(false);
     await put(
