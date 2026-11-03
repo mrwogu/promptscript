@@ -310,8 +310,7 @@ async function resolveInlineUse(
     );
   }
 
-  // Apply parameter interpolation when the inline @use has params
-  if (inlineUse.params && inlineUse.params.length > 0) {
+  if (subAst.meta?.params || inlineUse.params?.length) {
     try {
       const boundParams = bindParams(inlineUse.params, subAst.meta?.params, absPath, inlineUse.loc);
       if (boundParams.size > 0) {
