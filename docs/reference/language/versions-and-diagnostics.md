@@ -98,6 +98,7 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS045      | `{{name}}` left in text (syntax 1.6.0+)                                                         | Bind it with a parameter or remove it                                  |
 | PS046      | Runtime slot in the system message                                                              | Move the slot to the user message                                      |
 | PS047      | Owner, reviewer or data class off the config                                                    | Use a Git host identity or a listed class                              |
+| PS048      | Declared skill has no SKILL.md and no content                                                   | Add the SKILL.md next to the declaring project or set content          |
 | PS4002     | Target cannot preserve requested capability                                                     | Use documented target fallback                                         |
 | PS4004     | Target cannot run or write the model                                                            | Pick another model or set a target name                                |
 | PS5001     | `releases` missing or invalid                                                                   | Add `releases.environments`                                            |

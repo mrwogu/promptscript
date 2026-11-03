@@ -196,6 +196,8 @@ When PromptScript encounters a skill name in `@skills {}`, it looks for `SKILL.m
 
 Local skills take priority over registry skills with the same name, letting you override or customize registry-provided skills per project.
 
+A declared skill with no `SKILL.md` and no `content` in the declaration is reported as `PS048`. It is a warning, so `prs validate --strict` fails on it. Before, such a skill was written as an empty stub with only its description.
+
 ### Skills of an inherited project
 
 When a project inherits another local project, for example `@inherit ../tool/.promptscript/project`, the skills, commands and agents of that project come from its own `.promptscript/` directory, like when it compiles alone. Skill resources and `.promptscript/shared/` files come along. A skill of the inheriting project with the same name still wins.
