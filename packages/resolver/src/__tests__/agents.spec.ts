@@ -418,6 +418,120 @@ You are an expert planning specialist.`
     expect(agent['tools']).toBeUndefined();
   });
 
+  async function writeAgents(files: Record<string, string>): Promise<void> {
+    const agentsDir = join(localPath, 'agents');
+    await mkdir(agentsDir, { recursive: true });
+    for (const [name, content] of Object.entries(files)) {
+      await writeFile(join(agentsDir, `${name}.md`), content);
+    }
+  }
+
+  function resolveAgents(): Promise<Program> {
+    return resolveNativeAgents(emptyAst(join(localPath, 'project.prs')), '', localPath);
+  }
+
+  async function resolvedAgent(name: string): Promise<Record<string, unknown>> {
+    const result = await resolveAgents();
+    const props = (result.blocks.find((b) => b.name === 'agents')!.content as ObjectContent)
+      .properties;
+    return props[name] as Record<string, unknown>;
+  }
+
+  it('should read a folded multi-line description', async () => {
+    await writeAgents({
+      folded:
+        '---\nname: folded\ndescription: >-\n  Reviews a module.\n  Produces: findings\n---\nBody.',
+    });
+
+    const agent = await resolvedAgent('folded');
+    expect(agent['description']).toBe('Reviews a module. Produces: findings');
+    expect((agent['content'] as TextContent).value).toBe('Body.');
+  });
+
+  it.each([
+    ['comma', 'tools: Read, Grep, Execute', ['Read', 'Grep', 'Execute']],
+    ['block', 'tools:\n  - Read\n  - Create', ['Read', 'Create']],
+    ['category', 'tools: read-only', 'read-only'],
+    [
+      'parens',
+      'tools: Read, Bash(git add:*, git commit:*), Grep',
+      ['Read', 'Bash(git add:*, git commit:*)', 'Grep'],
+    ],
+  ])('should read %s tools', async (name, toolsLine, expected) => {
+    await writeAgents({
+      [name]: `---\nname: ${name}\ndescription: Tools\n${toolsLine}\n---\nBody.`,
+    });
+
+    expect((await resolvedAgent(name))['tools']).toEqual(expected);
+  });
+
+  it('should read a quoted description that contains ": "', async () => {
+    await writeAgents({
+      git: '---\nname: git\ndescription: "Commits work. Use when: the change is ready"\n---\nBody.',
+    });
+
+    expect((await resolvedAgent('git'))['description']).toBe(
+      'Commits work. Use when: the change is ready'
+    );
+  });
+
+  it.each([
+    ['a mapping', 'tools:\n  read: true', /tools must be a list of tool names/],
+    [
+      'a non string item',
+      'tools:\n  - Read\n  - 42',
+      /tools must be a list of tool names, found 42/,
+    ],
+    [
+      'invalid YAML with a block list',
+      'description: Use when: x\ntools:\n  - Read',
+      /YAML parse error/,
+    ],
+    [
+      'invalid YAML with a folded description',
+      'model: a: b\ndescription: >-\n  Folded text.',
+      /YAML parse error/,
+    ],
+  ])('should fail on %s', async (_label, frontmatter, error) => {
+    await writeAgents({
+      broken: `---\nname: broken\ndescription: Broken\n${frontmatter}\n---\nBody.`,
+    });
+
+    await expect(resolveAgents()).rejects.toThrow(error);
+  });
+
+  it('should keep per-target overrides and droid fields', async () => {
+    await writeAgents({
+      reviewer: [
+        '---',
+        'name: reviewer',
+        'description: Reviews code',
+        'tools: [Read, Execute]',
+        'reasoningEffort: high',
+        'targets:',
+        '  claude:',
+        '    tools: Read, Bash',
+        '    model: sonnet',
+        '---',
+        'Body.',
+      ].join('\n'),
+    });
+
+    const agent = await resolvedAgent('reviewer');
+    expect(agent['reasoningEffort']).toBe('high');
+    expect(agent['targets']).toEqual({ claude: { tools: ['Read', 'Bash'], model: 'sonnet' } });
+  });
+
+  it('should fall back to the line reader when frontmatter is not valid YAML', async () => {
+    await writeAgents({
+      loose: '---\nname: loose\ndescription: Use when: tests fail\ntools: Read, Grep\n---\nBody.',
+    });
+
+    const agent = await resolvedAgent('loose');
+    expect(agent['description']).toBe('Use when: tests fail');
+    expect(agent['tools']).toEqual(['Read', 'Grep']);
+  });
+
   it('should merge discovered agents with existing @agents block', async () => {
     const agentsDir = join(localPath, 'agents');
     await mkdir(agentsDir, { recursive: true });

@@ -385,6 +385,40 @@ Codex also emits agent TOML files in `multifile` mode. Compiling a version
 that cannot emit agents reports `PS4003` for the whole block instead of
 dropping it silently.
 
+## Agents and Commands as Markdown Files
+
+Agents can also live as markdown files in `.promptscript/agents/*.md`, and
+commands in `.promptscript/commands/*.md`. The frontmatter is read with the
+same YAML parser as `SKILL.md`, so folded descriptions and lists work:
+
+```markdown
+---
+name: reviewer
+description: >-
+  Reviews one module against its spec.
+  Produces: a findings list.
+tools:
+  - Read
+  - Grep
+model: inherit
+---
+
+Review the module.
+```
+
+- `tools` (and `disallowedTools`) is a YAML list or a comma separated string
+  such as `Read, Grep, Bash(git add:*, git commit:*)`. A single name without
+  commas, like `read-only`, stays a string. Any other value, for example a
+  mapping or a number in the list, fails the build instead of giving the
+  agent all tools.
+- A value with `: ` inside must be quoted to be valid YAML. Old files that
+  are not valid YAML still load one `key: value` per line, with a warning.
+  When such a file also has a block list or a folded value, the build fails
+  with the YAML error.
+- Command frontmatter is not copied into the command body. `description` and
+  `argument-hint` reach Claude Code and Factory commands, and `allowed-tools`
+  and `model` reach Claude Code commands.
+
 ## Global Installs
 
 `output.baseDir` (or `prs compile --output`) can point at a global root such

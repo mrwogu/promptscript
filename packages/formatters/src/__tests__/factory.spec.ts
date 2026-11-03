@@ -20,12 +20,12 @@ const createMinimalProgram = (): Program => ({
   loc: createLoc(),
 });
 
-const createStandardsProgram = (properties: Record<string, Value>): Program => ({
+const createObjectBlockProgram = (name: string, properties: Record<string, Value>): Program => ({
   ...createMinimalProgram(),
   blocks: [
     {
       type: 'Block',
-      name: 'standards',
+      name,
       content: {
         type: 'ObjectContent',
         properties,
@@ -35,6 +35,9 @@ const createStandardsProgram = (properties: Record<string, Value>): Program => (
     },
   ],
 });
+
+const createStandardsProgram = (properties: Record<string, Value>): Program =>
+  createObjectBlockProgram('standards', properties);
 
 const createTextStandardsProgram = (text: string): Program => ({
   ...createMinimalProgram(),
@@ -1046,6 +1049,33 @@ describe('FactoryFormatter', () => {
       expect(cmdFile?.content).toContain('Create a detailed spec for the given feature.');
     });
 
+    it('should emit argument-hint for commands', () => {
+      const ast = createObjectBlockProgram('shortcuts', {
+        '/migrate': {
+          description: 'Migrate a module',
+          argumentHint: '<module> [--dry-run]',
+          prompt: true,
+          content: 'Migrate $ARGUMENTS.',
+        },
+      });
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const cmdFile = result.additionalFiles?.find(
+        (f) => f.path === '.factory/commands/migrate.md'
+      );
+      expect(cmdFile?.content).toBe(
+        [
+          '---',
+          'description: Migrate a module',
+          'argument-hint: <module> [--dry-run]',
+          '---',
+          '',
+          'Migrate $ARGUMENTS.',
+          '',
+        ].join('\n')
+      );
+    });
+
     it('should generate command files from shortcuts with content', () => {
       const ast: Program = {
         ...createMinimalProgram(),
@@ -1544,6 +1574,110 @@ describe('FactoryFormatter', () => {
       expect(skill?.content).not.toContain('author: PromptScript');
       expect(skill?.content).not.toContain('compatibility:');
       expect(skill?.content).not.toContain('allowed-tools:');
+    });
+
+    function skillWithRawFrontmatter(rawFrontmatter: string): Program {
+      return createObjectBlockProgram('skills', {
+        migrate: {
+          description: 'Migrates one module.',
+          content: 'Body.',
+          __rawFrontmatter: rawFrontmatter,
+        },
+      });
+    }
+
+    function factorySkill(rawFrontmatter: string): string | undefined {
+      const result = formatter.format(skillWithRawFrontmatter(rawFrontmatter), {
+        version: 'multifile',
+      });
+      return result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'))?.content;
+    }
+
+    it('should keep continuation lines of a folded description', () => {
+      const content = factorySkill(
+        `name: migrate
+description: >-
+  Migrates one module.
+  Produces: a report and a patch.
+
+  Use when: the module is ready.
+license: MIT
+metadata:
+  Produces: nothing
+user-invocable: true`
+      );
+
+      expect(content).toBe(
+        `---
+name: migrate
+description: >-
+  Migrates one module.
+  Produces: a report and a patch.
+
+  Use when: the module is ready.
+user-invocable: true
+---
+
+Body.
+`
+      );
+    });
+
+    it('should drop comments and unsupported keys of any shape', () => {
+      const content = factorySkill(
+        `# leading comment
+name: migrate # trailing comment
+allowed-tools:
+- Read
+- Grep
+description: |
+  Line one.
+  Note: line two.
+# comment between keys
+metadata: { owner: team, tags: [a, b] }
+disable-model-invocation: true`
+      );
+
+      expect(content).toBe(
+        `---
+name: migrate
+description: |
+  Line one.
+  Note: line two.
+disable-model-invocation: true
+---
+
+Body.
+`
+      );
+    });
+
+    it('should fall back to the line filter when frontmatter is not valid YAML', () => {
+      const content = factorySkill(
+        `name: migrate
+# note
+description: Use when: x
+
+  more text
+license: MIT
+
+  under license`
+      );
+
+      expect(content).toContain('name: migrate\ndescription: Use when: x\n\n  more text\n---');
+      expect(content).not.toContain('license');
+    });
+
+    it.each([
+      ['empty', '# only a comment', 'name: migrate\ndescription: Migrates one module.\n---'],
+      ['a list', '- name\n- description', 'name: migrate\ndescription: Migrates one module.\n---'],
+      [
+        'a key without value',
+        'name: migrate\ndescription:\n? [complex]\n: key',
+        'name: migrate\ndescription:\n---',
+      ],
+    ])('should handle %s frontmatter', (_label, raw, expected) => {
+      expect(factorySkill(raw)).toContain(expected);
     });
 
     it('should handle empty lines within unsupported nested blocks', () => {

@@ -59,9 +59,13 @@ describe('discoverNativeContent', () => {
     const content = shortcutsBlock!.content as ObjectContent;
     expect(content.properties).toHaveProperty('/verify');
 
-    const cmd = content.properties['/verify'] as TextContent;
-    expect(cmd.type).toBe('TextContent');
-    expect(cmd.value).toContain('Verify Command');
+    const cmd = content.properties['/verify'] as Record<string, unknown>;
+    expect(cmd['description']).toBeDefined();
+    expect(cmd['prompt']).toBe(true);
+    const body = cmd['content'] as TextContent;
+    expect(body.type).toBe('TextContent');
+    expect(body.value).toContain('Verify Command');
+    expect(body.value.startsWith('---')).toBe(false);
   });
 
   it('should return null for a nonexistent directory', async () => {
@@ -630,6 +634,43 @@ describe('discoverNativeContent', () => {
       // No actual skill content — result should be null
       const result = await discoverNativeContent(tmpDir);
       expect(result).toBeNull();
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    [
+      'an agent with a tools mapping',
+      'agent.md',
+      '---\ndescription: A\ntools:\n  read: true\n---\nBody.',
+    ],
+    [
+      'a command with unreadable frontmatter',
+      'cmd.md',
+      '---\ndescription: a: b\nargument-hint:\n  - x\n---\nBody.',
+    ],
+  ])('should fail on %s', async (_label, file, content) => {
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-'));
+    try {
+      await writeFile(resolve(tmpDir, file), content);
+      await expect(discoverNativeContent(tmpDir)).rejects.toThrow(/tools must be|YAML parse error/);
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('should keep an agent without a body', async () => {
+    const { mkdtemp, writeFile, rm } = await import('fs/promises');
+    const { tmpdir } = await import('os');
+    const tmpDir = await mkdtemp(resolve(tmpdir(), 'prs-autodiscovery-'));
+    try {
+      await writeFile(resolve(tmpDir, 'empty.md'), '---\ndescription: Empty\nmodel: sonnet\n---\n');
+      const result = await discoverNativeContent(tmpDir);
+      const agents = result!.blocks.find((b) => b.name === 'agents')!.content as ObjectContent;
+      expect(agents.properties['empty']).toEqual({ description: 'Empty', model: 'sonnet' });
     } finally {
       await rm(tmpDir, { recursive: true, force: true });
     }
