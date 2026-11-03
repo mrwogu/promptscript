@@ -418,77 +418,91 @@ You are an expert planning specialist.`
     expect(agent['tools']).toBeUndefined();
   });
 
-  it('should read a folded multi-line description', async () => {
+  async function writeAgents(files: Record<string, string>): Promise<void> {
     const agentsDir = join(localPath, 'agents');
     await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'folded.md'),
-      '---\nname: folded\ndescription: >-\n  Reviews a module.\n  Produces: findings\n---\nBody.'
-    );
+    for (const [name, content] of Object.entries(files)) {
+      await writeFile(join(agentsDir, `${name}.md`), content);
+    }
+  }
 
-    const result = await resolveNativeAgents(
-      emptyAst(join(localPath, 'project.prs')),
-      '',
-      localPath
-    );
+  function resolveAgents(): Promise<Program> {
+    return resolveNativeAgents(emptyAst(join(localPath, 'project.prs')), '', localPath);
+  }
+
+  async function resolvedAgent(name: string): Promise<Record<string, unknown>> {
+    const result = await resolveAgents();
     const props = (result.blocks.find((b) => b.name === 'agents')!.content as ObjectContent)
       .properties;
-    const agent = props['folded'] as Record<string, unknown>;
+    return props[name] as Record<string, unknown>;
+  }
+
+  it('should read a folded multi-line description', async () => {
+    await writeAgents({
+      folded:
+        '---\nname: folded\ndescription: >-\n  Reviews a module.\n  Produces: findings\n---\nBody.',
+    });
+
+    const agent = await resolvedAgent('folded');
     expect(agent['description']).toBe('Reviews a module. Produces: findings');
     expect((agent['content'] as TextContent).value).toBe('Body.');
   });
 
-  it('should read comma separated and block list tools', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'comma.md'),
-      '---\nname: comma\ndescription: Comma tools\ntools: Read, Grep, Execute\n---\nBody.'
-    );
-    await writeFile(
-      join(agentsDir, 'block.md'),
-      '---\nname: block\ndescription: Block tools\ntools:\n  - Read\n  - Create\n---\nBody.'
-    );
-    await writeFile(
-      join(agentsDir, 'category.md'),
-      '---\nname: category\ndescription: Tool category\ntools: read-only\n---\nBody.'
-    );
+  it.each([
+    ['comma', 'tools: Read, Grep, Execute', ['Read', 'Grep', 'Execute']],
+    ['block', 'tools:\n  - Read\n  - Create', ['Read', 'Create']],
+    ['category', 'tools: read-only', 'read-only'],
+    [
+      'parens',
+      'tools: Read, Bash(git add:*, git commit:*), Grep',
+      ['Read', 'Bash(git add:*, git commit:*)', 'Grep'],
+    ],
+  ])('should read %s tools', async (name, toolsLine, expected) => {
+    await writeAgents({
+      [name]: `---\nname: ${name}\ndescription: Tools\n${toolsLine}\n---\nBody.`,
+    });
 
-    const result = await resolveNativeAgents(
-      emptyAst(join(localPath, 'project.prs')),
-      '',
-      localPath
-    );
-    const props = (result.blocks.find((b) => b.name === 'agents')!.content as ObjectContent)
-      .properties;
-    expect((props['comma'] as Record<string, unknown>)['tools']).toEqual([
-      'Read',
-      'Grep',
-      'Execute',
-    ]);
-    expect((props['block'] as Record<string, unknown>)['tools']).toEqual(['Read', 'Create']);
-    expect((props['category'] as Record<string, unknown>)['tools']).toBe('read-only');
+    expect((await resolvedAgent(name))['tools']).toEqual(expected);
   });
 
-  it('should fail on a tools value that is not a list of names', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'broken.md'),
-      '---\nname: broken\ndescription: Broken tools\ntools:\n  read: true\n---\nBody.'
-    );
+  it('should read a quoted description that contains ": "', async () => {
+    await writeAgents({
+      git: '---\nname: git\ndescription: "Commits work. Use when: the change is ready"\n---\nBody.',
+    });
 
-    await expect(
-      resolveNativeAgents(emptyAst(join(localPath, 'project.prs')), '', localPath)
-    ).rejects.toThrow(/tools must be a list of tool names/);
+    expect((await resolvedAgent('git'))['description']).toBe(
+      'Commits work. Use when: the change is ready'
+    );
+  });
+
+  it.each([
+    ['a mapping', 'tools:\n  read: true', /tools must be a list of tool names/],
+    [
+      'a non string item',
+      'tools:\n  - Read\n  - 42',
+      /tools must be a list of tool names, found 42/,
+    ],
+    [
+      'invalid YAML with a block list',
+      'description: Use when: x\ntools:\n  - Read',
+      /YAML parse error/,
+    ],
+    [
+      'invalid YAML with a folded description',
+      'model: a: b\ndescription: >-\n  Folded text.',
+      /YAML parse error/,
+    ],
+  ])('should fail on %s', async (_label, frontmatter, error) => {
+    await writeAgents({
+      broken: `---\nname: broken\ndescription: Broken\n${frontmatter}\n---\nBody.`,
+    });
+
+    await expect(resolveAgents()).rejects.toThrow(error);
   });
 
   it('should keep per-target overrides and droid fields', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'reviewer.md'),
-      [
+    await writeAgents({
+      reviewer: [
         '---',
         'name: reviewer',
         'description: Reviews code',
@@ -500,105 +514,22 @@ You are an expert planning specialist.`
         '    model: sonnet',
         '---',
         'Body.',
-      ].join('\n')
-    );
+      ].join('\n'),
+    });
 
-    const result = await resolveNativeAgents(
-      emptyAst(join(localPath, 'project.prs')),
-      '',
-      localPath
-    );
-    const props = (result.blocks.find((b) => b.name === 'agents')!.content as ObjectContent)
-      .properties;
-    const agent = props['reviewer'] as Record<string, unknown>;
+    const agent = await resolvedAgent('reviewer');
     expect(agent['reasoningEffort']).toBe('high');
     expect(agent['targets']).toEqual({ claude: { tools: ['Read', 'Bash'], model: 'sonnet' } });
   });
 
   it('should fall back to the line reader when frontmatter is not valid YAML', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'loose.md'),
-      '---\nname: loose\ndescription: Use when: tests fail\ntools: Read, Grep\n---\nBody.'
-    );
+    await writeAgents({
+      loose: '---\nname: loose\ndescription: Use when: tests fail\ntools: Read, Grep\n---\nBody.',
+    });
 
-    const result = await resolveNativeAgents(
-      emptyAst(join(localPath, 'project.prs')),
-      '',
-      localPath
-    );
-    const props = (result.blocks.find((b) => b.name === 'agents')!.content as ObjectContent)
-      .properties;
-    const agent = props['loose'] as Record<string, unknown>;
+    const agent = await resolvedAgent('loose');
     expect(agent['description']).toBe('Use when: tests fail');
     expect(agent['tools']).toEqual(['Read', 'Grep']);
-  });
-
-  it('should fail when invalid YAML hides a block list of tools', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'hidden.md'),
-      '---\nname: hidden\ndescription: Use when: tests fail\ntools:\n  - Read\n---\nBody.'
-    );
-
-    await expect(
-      resolveNativeAgents(emptyAst(join(localPath, 'project.prs')), '', localPath)
-    ).rejects.toThrow(/YAML parse error/);
-  });
-
-  it('should fail when invalid YAML hides a folded description', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'hidden.md'),
-      '---\nname: hidden\nmodel: a: b\ndescription: >-\n  Folded text.\n---\nBody.'
-    );
-
-    await expect(
-      resolveNativeAgents(emptyAst(join(localPath, 'project.prs')), '', localPath)
-    ).rejects.toThrow(/YAML parse error/);
-  });
-
-  it('should fail on a tools list with a non string item', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'numbers.md'),
-      '---\nname: numbers\ndescription: Numbers\ntools:\n  - Read\n  - 42\n---\nBody.'
-    );
-
-    await expect(
-      resolveNativeAgents(emptyAst(join(localPath, 'project.prs')), '', localPath)
-    ).rejects.toThrow(/tools must be a list of tool names, found 42/);
-  });
-
-  it('should keep commas inside tool arguments', async () => {
-    const agentsDir = join(localPath, 'agents');
-    await mkdir(agentsDir, { recursive: true });
-    await writeFile(
-      join(agentsDir, 'git.md'),
-      [
-        '---',
-        'name: git',
-        'description: "Commits work. Use when: the change is ready"',
-        'tools: Read, Bash(git add:*, git commit:*), Grep',
-        '---',
-        'Body.',
-      ].join('\n')
-    );
-
-    const result = await resolveNativeAgents(
-      emptyAst(join(localPath, 'project.prs')),
-      '',
-      localPath
-    );
-    const props = (result.blocks.find((b) => b.name === 'agents')!.content as ObjectContent)
-      .properties;
-    const agent = props['git'] as Record<string, unknown>;
-    expect(agent['description']).toBe('Commits work. Use when: the change is ready');
-    expect(agent['tools']).toEqual(['Read', 'Bash(git add:*, git commit:*)', 'Grep']);
   });
 
   it('should merge discovered agents with existing @agents block', async () => {

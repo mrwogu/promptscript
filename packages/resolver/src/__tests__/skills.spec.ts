@@ -1981,6 +1981,20 @@ describe('resolveNativeCommands', () => {
     expect(content.value).toContain('Deploy the application');
   });
 
+  it('should fail on command frontmatter that can not be read', async () => {
+    const localPath = join(testDir, '.promptscript');
+    const commandsDir = join(localPath, 'commands');
+    await mkdir(commandsDir, { recursive: true });
+    await writeFile(
+      join(commandsDir, 'broken.md'),
+      '---\ndescription: a: b\nargument-hint:\n  - x\n---\nBody.'
+    );
+
+    await expect(
+      resolveNativeCommands(createProgram([]), join(localPath, 'test.prs'), localPath)
+    ).rejects.toThrow(/YAML parse error/);
+  });
+
   it('should read command frontmatter instead of copying it into the body', async () => {
     const localPath = join(testDir, '.promptscript');
     const commandsDir = join(localPath, 'commands');
