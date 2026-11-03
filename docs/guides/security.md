@@ -171,6 +171,8 @@ The pipeline also avoids false positives for legitimate content like MD5/SHA256 
 
 Long uppercase runs over the nucleotide alphabet (`ACGTUN`) are treated as DNA data, not Base64. Amino-acid one-letter codes cover every uppercase letter, so a run of them counts as protein data only when the surrounding text has biological context (for example "protein sequence" or "residues"). Reference files shipped with scientific skills regularly carry such sequences.
 
+Long camelCase or PascalCase identifiers, like `updatePaymentVariantSelectListItems` or `ExtCustomersAccountConfiguration`, are not Base64 either. A run counts as an identifier when it has only letters, splits into at least two words at uppercase letters and every word has a vowel or `y`. A run with digits, `+`, `/` or `=` is checked as Base64.
+
 **Imported content:** the speculative "long Base64" heuristic and the reference-content check (PS026) skip content that was inlined from the registry cache or a vendored repository, because the importing project cannot fix findings in someone else's skill and `--strict` would turn them into hard failures. Findings that decode to concrete malicious payloads always scan imported content. To scan imported content with the heuristics as well, set `validation.scanExternalContent: true` in `promptscript.yaml`. The content scans skip the records the resolver keeps on a skill for `@extend` and composition (`__baseSource`, `__layerTrace`, `__composedFrom`). They hold file paths and merge steps, no output contains them, and a random-looking project path in them would otherwise be reported as Base64. The skill text itself, extended or imported, is scanned as before.
 
 #### Suppressing false positives on imported content

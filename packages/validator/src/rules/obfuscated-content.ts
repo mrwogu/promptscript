@@ -314,6 +314,39 @@ function isLikelyTechnicalContent(match: string): boolean {
 }
 
 /**
+ * camelCase or PascalCase identifier: letters only, at least two words.
+ */
+const IDENTIFIER_PATTERN = /^[A-Za-z][a-z]+(?:[A-Z][a-z]+)+$/;
+
+/**
+ * Characters that can be part of a Base64 run.
+ */
+const BASE64_RUN_CHAR = /[A-Za-z0-9+/=]/;
+
+/**
+ * Check if a candidate Base64 match is part of a long code identifier,
+ * like `updatePaymentVariantSelectListItems`.
+ *
+ * The whole run around the match is checked, because the Base64 pattern
+ * can cut an identifier in the middle of a word. Real Base64 almost always
+ * has digits, `+`, `/` or `=`, and random letters rarely split into words
+ * that each have a vowel.
+ */
+function isLikelyIdentifier(text: string, match: string): boolean {
+  const index = text.indexOf(match);
+  if (index === -1) return false;
+
+  let start = index;
+  while (start > 0 && BASE64_RUN_CHAR.test(text.charAt(start - 1))) start--;
+  let end = index + match.length;
+  while (end < text.length && BASE64_RUN_CHAR.test(text.charAt(end))) end++;
+
+  const run = text.substring(start, end);
+  if (!IDENTIFIER_PATTERN.test(run)) return false;
+  return run.split(/(?=[A-Z])/).every((word) => /[aeiouy]/i.test(word));
+}
+
+/**
  * One-letter codes for nucleotides (plus N for ambiguous bases).
  */
 const NUCLEOTIDE_CHARS = new Set('ACGTUN');
@@ -367,6 +400,7 @@ function isLikelyLegitimateBase64(text: string, match: string): boolean {
   if (precedingText.includes('data:text/')) return true;
 
   if (isLikelyTechnicalContent(match)) return true;
+  if (isLikelyIdentifier(text, match)) return true;
   if (isLikelyBioSequence(text, match)) return true;
 
   return false;
