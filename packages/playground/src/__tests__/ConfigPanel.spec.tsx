@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { act, render, screen, fireEvent } from '@testing-library/react';
+import { TARGET_DEFINITIONS, type KnownTarget } from '@promptscript/core';
 import { ConfigPanel } from '../components/ConfigPanel';
 import { usePlaygroundStore } from '../store';
 
@@ -309,5 +310,98 @@ describe('ConfigPanel prompt targets', () => {
 
     expect(usePlaygroundStore.getState().config.targets['bundle'].enabled).toBe(true);
     expect(usePlaygroundStore.getState().config.targets['prompt-text'].enabled).toBe(true);
+  });
+});
+
+describe('ConfigPanel version options', () => {
+  function versionSelectFor(label: string): HTMLSelectElement {
+    const row = screen.getByText(label).closest('div');
+    const selects = row?.querySelectorAll('select');
+    return selects?.[0] as HTMLSelectElement;
+  }
+
+  function optionValues(select: HTMLSelectElement): string[] {
+    return Array.from(select.options).map((option) => option.value);
+  }
+
+  beforeEach(() => {
+    act(() => {
+      usePlaygroundStore.setState({ showConfig: true });
+      usePlaygroundStore.getState().setTargetEnabled('cursor', true);
+      usePlaygroundStore.getState().setTargetEnabled('antigravity', true);
+      usePlaygroundStore.getState().setTargetVersion('cursor', 'standard');
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      usePlaygroundStore.setState({ showConfig: false });
+    });
+  });
+
+  it('offers every cursor version', () => {
+    render(<ConfigPanel />);
+
+    expect(optionValues(versionSelectFor('Cursor'))).toEqual([
+      'modern',
+      'agents-md',
+      'full',
+      'multifile',
+      'legacy',
+    ]);
+  });
+
+  it('offers every antigravity version', () => {
+    render(<ConfigPanel />);
+
+    expect(optionValues(versionSelectFor('Antigravity'))).toEqual([
+      'simple',
+      'frontmatter',
+      'agents-md',
+    ]);
+  });
+
+  it('renders the catalog versions for every target', () => {
+    render(<ConfigPanel />);
+    fireEvent.click(screen.getByText(/^All \(/));
+
+    const targets = Object.keys(TARGET_DEFINITIONS) as KnownTarget[];
+    const selects = screen
+      .getAllByRole('combobox')
+      .filter((select) => select.querySelector('option[value="markdown"]') === null)
+      .slice(1);
+
+    expect(selects).toHaveLength(targets.length);
+    targets.forEach((target, index) => {
+      expect(optionValues(selects[index] as HTMLSelectElement)).toEqual(
+        Object.keys(TARGET_DEFINITIONS[target].versions)
+      );
+    });
+  });
+
+  it('shows the alias target of a stored cursor version', () => {
+    render(<ConfigPanel />);
+
+    expect(versionSelectFor('Cursor').value).toBe('modern');
+  });
+
+  it('stores the version picked for cursor', () => {
+    render(<ConfigPanel />);
+
+    fireEvent.change(versionSelectFor('Cursor'), { target: { value: 'full' } });
+
+    expect(usePlaygroundStore.getState().config.targets.cursor.version).toBe('full');
+  });
+
+  it('shows the catalog default for a target missing from the store', () => {
+    usePlaygroundStore.setState((state) => {
+      const targets = { ...state.config.targets };
+      delete targets['aider'];
+      return { config: { ...state.config, targets } };
+    });
+    render(<ConfigPanel />);
+    fireEvent.click(screen.getByText(/^All \(/));
+
+    expect(versionSelectFor('Aider').value).toBe('full');
   });
 });
