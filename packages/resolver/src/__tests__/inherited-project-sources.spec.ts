@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import type { Block, ObjectContent, TextContent, Value } from '@promptscript/core';
-import { Resolver } from '../resolver.js';
+import { Resolver, type ResolverOptions } from '../resolver.js';
 
 const directories: string[] = [];
 
@@ -84,7 +84,7 @@ function skill(blocks: Block[], name: string): Record<string, Value> {
 /** Resolve the workspace project and check that it has no errors. */
 async function resolveWorkspace(
   workspace: string,
-  skills?: { universalDir: string }
+  options: Partial<ResolverOptions> = {}
 ): Promise<{ blocks: Block[]; dependencies: string[] }> {
   const resolver = new Resolver({
     registryPath: join(workspace, 'registry'),
@@ -92,7 +92,7 @@ async function resolveWorkspace(
     projectRoot: workspace,
     vendorDir: join(workspace, 'vendor'),
     cache: false,
-    ...(skills ? { skills } : {}),
+    ...options,
   });
   const result = await resolver.resolve(join(workspace, '.promptscript/project.prs'));
   expect(result.errors).toEqual([]);
@@ -174,16 +174,40 @@ describe('native sources of an inherited project', () => {
   it('tracks the universal dir of the inherited project as a dependency', async () => {
     const { workspace, tool } = await createLayout(false);
 
-    const { dependencies } = await resolveWorkspace(workspace, { universalDir: '.agents' });
+    const { dependencies } = await resolveWorkspace(workspace, {
+      skills: { universalDir: '.agents' },
+    });
     expect(dependencies).toContain(join(tool, '.agents', 'skills'));
   });
 
   it('tracks the symlinked and the real universal dir of the inherited project', async () => {
     const { workspace, tool } = await createLayout(true);
 
-    const { dependencies } = await resolveWorkspace(workspace, { universalDir: '.agents' });
+    const { dependencies } = await resolveWorkspace(workspace, {
+      skills: { universalDir: '.agents' },
+    });
     expect(dependencies).toContain(join(workspace, 'tool', '.agents', 'skills'));
     expect(dependencies).toContain(join(tool, '.agents', 'skills'));
+  });
+
+  it('tracks the universal dir of a project root that does not exist yet', async () => {
+    const { workspace } = await createLayout(false);
+    const missingRoot = join(workspace, 'not-created');
+    // No @inherit, so the missing root does not stop the import check.
+    await putWorkspace(workspace, '@identity {\n  """\n  Workspace.\n  """\n}');
+
+    const { dependencies } = await resolveWorkspace(workspace, {
+      projectRoot: missingRoot,
+      skills: { universalDir: '.agents' },
+    });
+    expect(dependencies).toContain(join(missingRoot, '.agents', 'skills'));
+  });
+
+  it('reads the inherited sources without a configured vendor dir', async () => {
+    const { workspace } = await createLayout(false);
+
+    const { blocks } = await resolveWorkspace(workspace, { vendorDir: undefined });
+    expect(contentOf(blocks, 'check-code')).toContain('Tool check.');
   });
 
   it('adds the workspace shared files to an inherited skill', async () => {
