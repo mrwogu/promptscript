@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.28.0](https://github.com/mrwogu/promptscript/compare/v1.27.0...v1.28.0) (2026-11-03)
+
+
+### Features
+
+* **cli:** reproducible output, verbatim skill resources, --check ([#750](https://github.com/mrwogu/promptscript/issues/750)) ([c7a6a91](https://github.com/mrwogu/promptscript/commit/c7a6a918059ddff481e6cba56340b282981a4bef)), closes [#753](https://github.com/mrwogu/promptscript/issues/753)
+* **formatters:** per-target agents and target path tokens ([#751](https://github.com/mrwogu/promptscript/issues/751)) ([15f7d2b](https://github.com/mrwogu/promptscript/commit/15f7d2bd433bc28cf133c4cb0ef9be4151d83724))
+* **formatters:** write settings for Claude and Factory targets ([#749](https://github.com/mrwogu/promptscript/issues/749)) ([3e7d223](https://github.com/mrwogu/promptscript/commit/3e7d223d0e88f71c31110f84e7549b61542d5e82))
+
+
+### Bug Fixes
+
+* **cli:** cover approval directories in CODEOWNERS on every host ([#734](https://github.com/mrwogu/promptscript/issues/734)) ([c0098ca](https://github.com/mrwogu/promptscript/commit/c0098ca11b8a16701b6ccd39653ee8f0eea160f9))
+* **cli:** stop publishing types that point at unpublished packages ([#733](https://github.com/mrwogu/promptscript/issues/733)) ([c3bb6bf](https://github.com/mrwogu/promptscript/commit/c3bb6bf0a8bf5ba97d3d182e411b060c97332927))
+* **formatters:** keep all markdown as written with postFormat false ([#764](https://github.com/mrwogu/promptscript/issues/764)) ([20719ba](https://github.com/mrwogu/promptscript/commit/20719ba826d3e27af84bf7081ccf64edbeb6d7c0)), closes [#762](https://github.com/mrwogu/promptscript/issues/762)
+* **formatters:** keep markdown meaning in Claude and context output ([#760](https://github.com/mrwogu/promptscript/issues/760)) ([3426650](https://github.com/mrwogu/promptscript/commit/34266503903de9fdc5f89173fde5d928d9878f4f))
+* **resolver:** merge found skills once and prefer .prs description ([#761](https://github.com/mrwogu/promptscript/issues/761)) ([8569cd3](https://github.com/mrwogu/promptscript/commit/8569cd348f73e026356f04728c28685a9e7f3ff3)), closes [#737](https://github.com/mrwogu/promptscript/issues/737)
+* **resolver:** parse agent and command frontmatter as YAML ([#748](https://github.com/mrwogu/promptscript/issues/748)) ([9cddbe6](https://github.com/mrwogu/promptscript/commit/9cddbe6b93185a3ef09d771104af11be2112ced5)), closes [#737](https://github.com/mrwogu/promptscript/issues/737)
+
 ## [1.27.0](https://github.com/mrwogu/promptscript/compare/v1.26.0...v1.27.0) (2026-11-02)
 
 
