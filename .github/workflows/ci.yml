@@ -507,10 +507,10 @@ jobs:
           test ! -x .factory/skills/security-review/scripts/report.sh
           grep -q "issue-tracker" .factory/mcp.json
           grep -q "engineering" .factory/plugins.json
-          node -e 'const h=require("./.factory/hooks.json");const x=h.hooks.PostToolUse?.[0]?.hooks?.[0];if(!x?.command?.includes("node \"$FACTORY_PROJECT_DIR\"/"))process.exit(1)'
+          node -e 'const h=require("./.factory/hooks.json");const x=h.PostToolUse?.[0]?.hooks?.[0];if(h.hooks||!x?.command?.includes("node \"$FACTORY_PROJECT_DIR\"/"))process.exit(1)'
           node -e "const h=require('./.github/hooks/promptscript.json');const x=h.hooks.postToolUse?.[0];if(h.version!==1||!x?.bash||!x?.powershell||x.cwd!=='.')process.exit(1)"
           mkdir -p packages/nested
-          node -e 'const{spawnSync}=require("node:child_process");const h=require("./.factory/hooks.json");const c=h.hooks.PostToolUse[0].hooks[0].command;const r=spawnSync("/bin/sh",["-c",c],{cwd:"packages/nested",env:{...process.env,FACTORY_PROJECT_DIR:process.cwd()},stdio:"inherit"});process.exit(r.status??1)'
+          node -e 'const{spawnSync}=require("node:child_process");const h=require("./.factory/hooks.json");const c=h.PostToolUse[0].hooks[0].command;const r=spawnSync("/bin/sh",["-c",c],{cwd:"packages/nested",env:{...process.env,FACTORY_PROJECT_DIR:process.cwd()},stdio:"inherit"});process.exit(r.status??1)'
           test "$(cat .promptscript/hook-cwd.txt)" = "$(pwd)"
 
           chmod -x .factory/skills/security-review/scripts/check.sh
