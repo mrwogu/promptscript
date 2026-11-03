@@ -1587,61 +1587,6 @@ describe('FactoryFormatter', () => {
       expect(skill?.content).not.toContain('allowed-tools:');
     });
 
-    it('should keep continuation lines of a folded description', () => {
-      const ast: Program = {
-        ...createMinimalProgram(),
-        blocks: [
-          {
-            type: 'Block',
-            name: 'skills',
-            content: {
-              type: 'ObjectContent',
-              properties: {
-                migrate: {
-                  description: 'Migrates one module.',
-                  content: 'Body.',
-                  __rawFrontmatter: [
-                    'name: migrate',
-                    'description: >-',
-                    '  Migrates one module.',
-                    '  Produces: a report and a patch.',
-                    '',
-                    '  Use when: the module is ready.',
-                    'license: MIT',
-                    'metadata:',
-                    '  Produces: nothing',
-                    'user-invocable: true',
-                  ].join('\n'),
-                },
-              },
-              loc: createLoc(),
-            },
-            loc: createLoc(),
-          },
-        ],
-      };
-
-      const result = formatter.format(ast, { version: 'multifile' });
-      const skill = result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'));
-
-      expect(skill?.content).toBe(
-        [
-          '---',
-          'name: migrate',
-          'description: >-',
-          '  Migrates one module.',
-          '  Produces: a report and a patch.',
-          '',
-          '  Use when: the module is ready.',
-          'user-invocable: true',
-          '---',
-          '',
-          'Body.',
-          '',
-        ].join('\n')
-      );
-    });
-
     function skillWithRawFrontmatter(rawFrontmatter: string): Program {
       return {
         ...createMinimalProgram(),
@@ -1666,8 +1611,49 @@ describe('FactoryFormatter', () => {
       };
     }
 
+    function factorySkill(rawFrontmatter: string): string | undefined {
+      const result = formatter.format(skillWithRawFrontmatter(rawFrontmatter), {
+        version: 'multifile',
+      });
+      return result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'))?.content;
+    }
+
+    it('should keep continuation lines of a folded description', () => {
+      const content = factorySkill(
+        [
+          'name: migrate',
+          'description: >-',
+          '  Migrates one module.',
+          '  Produces: a report and a patch.',
+          '',
+          '  Use when: the module is ready.',
+          'license: MIT',
+          'metadata:',
+          '  Produces: nothing',
+          'user-invocable: true',
+        ].join('\n')
+      );
+
+      expect(content).toBe(
+        [
+          '---',
+          'name: migrate',
+          'description: >-',
+          '  Migrates one module.',
+          '  Produces: a report and a patch.',
+          '',
+          '  Use when: the module is ready.',
+          'user-invocable: true',
+          '---',
+          '',
+          'Body.',
+          '',
+        ].join('\n')
+      );
+    });
+
     it('should drop comments and unsupported keys of any shape', () => {
-      const ast = skillWithRawFrontmatter(
+      const content = factorySkill(
         [
           '# leading comment',
           'name: migrate # trailing comment',
@@ -1683,10 +1669,7 @@ describe('FactoryFormatter', () => {
         ].join('\n')
       );
 
-      const result = formatter.format(ast, { version: 'multifile' });
-      const skill = result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'));
-
-      expect(skill?.content).toBe(
+      expect(content).toBe(
         [
           '---',
           'name: migrate',
@@ -1703,15 +1686,33 @@ describe('FactoryFormatter', () => {
     });
 
     it('should fall back to the line filter when frontmatter is not valid YAML', () => {
-      const ast = skillWithRawFrontmatter(
-        ['name: migrate', 'description: Use when: x', 'license: MIT'].join('\n')
+      const content = factorySkill(
+        [
+          'name: migrate',
+          '# note',
+          'description: Use when: x',
+          '',
+          '  more text',
+          'license: MIT',
+          '',
+          '  under license',
+        ].join('\n')
       );
 
-      const result = formatter.format(ast, { version: 'multifile' });
-      const skill = result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'));
+      expect(content).toContain('name: migrate\ndescription: Use when: x\n\n  more text\n---');
+      expect(content).not.toContain('license');
+    });
 
-      expect(skill?.content).toContain('name: migrate\ndescription: Use when: x\n---');
-      expect(skill?.content).not.toContain('license');
+    it.each([
+      ['empty', '# only a comment', 'name: migrate\ndescription: Migrates one module.\n---'],
+      ['a list', '- name\n- description', 'name: migrate\ndescription: Migrates one module.\n---'],
+      [
+        'a key without value',
+        'name: migrate\ndescription:\n? [complex]\n: key',
+        'name: migrate\ndescription:\n---',
+      ],
+    ])('should handle %s frontmatter', (_label, raw, expected) => {
+      expect(factorySkill(raw)).toContain(expected);
     });
 
     it('should handle empty lines within unsupported nested blocks', () => {
