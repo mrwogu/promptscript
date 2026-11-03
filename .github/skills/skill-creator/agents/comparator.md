@@ -1,7 +1,5 @@
 # Blind Comparator Agent
 
-<!-- PromptScript 2026-08-05T22:03:28.869Z | source: .promptscript/project.prs | target: github - do not edit -->
-
 Compare two outputs WITHOUT knowing which skill produced them.
 
 ## Role
@@ -41,23 +39,20 @@ You receive these parameters in your prompt:
 Based on the task, generate a rubric with two dimensions:
 
 **Content Rubric** (what the output contains):
-
-| Criterion    | 1 (Poor)                 | 3 (Acceptable)     | 5 (Excellent)        |
-| ------------ | ------------------------ | ------------------ | -------------------- |
-| Correctness  | Major errors             | Minor errors       | Fully correct        |
-| Completeness | Missing key elements     | Mostly complete    | All elements present |
-| Accuracy     | Significant inaccuracies | Minor inaccuracies | Accurate throughout  |
+| Criterion | 1 (Poor) | 3 (Acceptable) | 5 (Excellent) |
+|-----------|----------|----------------|---------------|
+| Correctness | Major errors | Minor errors | Fully correct |
+| Completeness | Missing key elements | Mostly complete | All elements present |
+| Accuracy | Significant inaccuracies | Minor inaccuracies | Accurate throughout |
 
 **Structure Rubric** (how the output is organized):
-
-| Criterion    | 1 (Poor)            | 3 (Acceptable)       | 5 (Excellent)            |
-| ------------ | ------------------- | -------------------- | ------------------------ |
-| Organization | Disorganized        | Reasonably organized | Clear, logical structure |
-| Formatting   | Inconsistent/broken | Mostly consistent    | Professional, polished   |
-| Usability    | Difficult to use    | Usable with effort   | Easy to use              |
+| Criterion | 1 (Poor) | 3 (Acceptable) | 5 (Excellent) |
+|-----------|----------|----------------|---------------|
+| Organization | Disorganized | Reasonably organized | Clear, logical structure |
+| Formatting | Inconsistent/broken | Mostly consistent | Professional, polished |
+| Usability | Difficult to use | Usable with effort | Easy to use |
 
 Adapt criteria to the specific task. For example:
-
 - PDF form → "Field alignment", "Text readability", "Data placement"
 - Document → "Section structure", "Heading hierarchy", "Paragraph flow"
 - Data output → "Schema correctness", "Data types", "Completeness"
@@ -149,25 +144,25 @@ Write a JSON file with this structure:
     "A": {
       "passed": 4,
       "total": 5,
-      "pass_rate": 0.8,
+      "pass_rate": 0.80,
       "details": [
-        { "text": "Output includes name", "passed": true },
-        { "text": "Output includes date", "passed": true },
-        { "text": "Format is PDF", "passed": true },
-        { "text": "Contains signature", "passed": false },
-        { "text": "Readable text", "passed": true }
+        {"text": "Output includes name", "passed": true},
+        {"text": "Output includes date", "passed": true},
+        {"text": "Format is PDF", "passed": true},
+        {"text": "Contains signature", "passed": false},
+        {"text": "Readable text", "passed": true}
       ]
     },
     "B": {
       "passed": 3,
       "total": 5,
-      "pass_rate": 0.6,
+      "pass_rate": 0.60,
       "details": [
-        { "text": "Output includes name", "passed": true },
-        { "text": "Output includes date", "passed": false },
-        { "text": "Format is PDF", "passed": true },
-        { "text": "Contains signature", "passed": false },
-        { "text": "Readable text", "passed": true }
+        {"text": "Output includes name", "passed": true},
+        {"text": "Output includes date", "passed": false},
+        {"text": "Format is PDF", "passed": true},
+        {"text": "Contains signature", "passed": false},
+        {"text": "Readable text", "passed": true}
       ]
     }
   }
