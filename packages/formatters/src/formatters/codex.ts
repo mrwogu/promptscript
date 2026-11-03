@@ -383,8 +383,7 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
   /**
    * Override format to inject additional agent fields from the AST.
    */
-  override format(input: Program, options?: FormatOptions): FormatterOutput {
-    const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
+  override format(ast: Program, options?: FormatOptions): FormatterOutput {
     const version = this.resolveVersion(options?.version);
 
     // For simple mode, just emit AGENTS.md
@@ -492,10 +491,12 @@ export class CodexFormatter extends MarkdownInstructionFormatter {
       }
     }
 
-    // Override agent files with full TOML including all fields
-    const agentsBlock = ast.blocks.find((b) => b.name === 'agents');
+    // Override agent files with full TOML including all fields.
+    // super.format() already applied the agent targeting, do the same here.
+    const targetedAst = applyAgentTargeting(ast, this.name, options?.targetConfig);
+    const agentsBlock = targetedAst.blocks.find((b) => b.name === 'agents');
     if (agentsBlock && agentsBlock.content.type === 'ObjectContent') {
-      const nativeNames = this.getNativeAgentNameMap(ast);
+      const nativeNames = this.getNativeAgentNameMap(targetedAst);
       for (const [agentName, agentValue] of Object.entries(agentsBlock.content.properties)) {
         if (typeof agentValue !== 'object' || agentValue === null || Array.isArray(agentValue))
           continue;

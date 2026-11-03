@@ -3,7 +3,7 @@ import { replacePathTokens, type PathTokenValues } from '@promptscript/core';
 import type { FormatOptions, Formatter, FormatterOutput, FormatterWarning } from './types.js';
 
 function trimSlashes(path: string): string {
-  let result = path.replace(/\\/g, '/');
+  let result = path.replaceAll('\\', '/');
   while (result.startsWith('/')) result = result.slice(1);
   while (result.endsWith('/')) result = result.slice(0, -1);
   return result;

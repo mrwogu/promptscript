@@ -532,7 +532,7 @@ export const CODEX_VERSIONS: Readonly<Record<string, {
 // @public
 export class CodexFormatter extends MarkdownInstructionFormatter {
     constructor();
-    format(input: Program, options?: FormatOptions): FormatterOutput;
+    format(ast: Program, options?: FormatOptions): FormatterOutput;
     protected generateAgentFile(config: MarkdownAgentConfig): FormatterOutput;
     protected generateFrontmatter(ast: Program, options?: FormatOptions): string | undefined;
     getDotDir(): string | null;
