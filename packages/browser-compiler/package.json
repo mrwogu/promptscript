@@ -1,6 +1,6 @@
 {
   "name": "@promptscript/browser-compiler",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "Browser-compatible PromptScript compiler with in-memory file system",
   "keywords": [
     "browser",
