@@ -54,37 +54,55 @@ export async function postFormatWithPrettier(
 
   const skillResources = collectSkillResourcePaths(queue.map((output) => output.path));
 
-  for (const output of queue) {
-    if (!isFormattable(output) || skillResources.has(output.path)) continue;
-    const absPath = resolve(projectRoot, output.path);
+  const formattable = queue.filter(
+    (output) => isFormattable(output) && !skillResources.has(output.path)
+  );
+  const results = await Promise.all(
+    formattable.map((output) => formatOutput(prettier, output, projectRoot, logger))
+  );
+  for (const result of results) warnings.push(...result);
 
-    let config: import('prettier').Options | null = null;
-    try {
-      config = await prettier.resolveConfig(absPath);
-    } catch (err) {
-      const warning = `Could not resolve Prettier config for ${output.path}: ${
-        err instanceof Error ? err.message : String(err)
-      }`;
-      warnings.push(warning);
-      logger.verbose(warning);
-    }
+  return warnings;
+}
 
-    try {
-      const formatted = await prettier.format(protectGlobAsterisks(output.content), {
-        ...(config ?? {}),
-        filepath: absPath,
-        parser: 'markdown',
-      });
-      output.content = restoreGlobAsterisks(formatted);
-    } catch (err) {
-      const warning = `Prettier rejected ${output.path}: ${
-        err instanceof Error ? err.message : String(err)
-      }`;
-      warnings.push(warning);
-      logger.verbose(warning);
-    }
+/**
+ * Run Prettier over one output. Returns the warnings of this file, so the
+ * caller can keep them in file order.
+ */
+async function formatOutput(
+  prettier: typeof import('prettier'),
+  output: FormatterOutput,
+  projectRoot: string,
+  logger: Logger
+): Promise<string[]> {
+  const warnings: string[] = [];
+  const absPath = resolve(projectRoot, output.path);
+
+  let config: import('prettier').Options | null = null;
+  try {
+    config = await prettier.resolveConfig(absPath);
+  } catch (err) {
+    const warning = `Could not resolve Prettier config for ${output.path}: ${
+      err instanceof Error ? err.message : String(err)
+    }`;
+    warnings.push(warning);
+    logger.verbose(warning);
   }
 
+  try {
+    const formatted = await prettier.format(protectGlobAsterisks(output.content), {
+      ...(config ?? {}),
+      filepath: absPath,
+      parser: 'markdown',
+    });
+    output.content = restoreGlobAsterisks(formatted);
+  } catch (err) {
+    const warning = `Prettier rejected ${output.path}: ${
+      err instanceof Error ? err.message : String(err)
+    }`;
+    warnings.push(warning);
+    logger.verbose(warning);
+  }
   return warnings;
 }
 
