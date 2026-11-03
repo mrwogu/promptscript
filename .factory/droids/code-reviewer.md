@@ -1,9 +1,9 @@
 ---
-# promptscript-generated: 2026-10-18T07:17:21.833Z | source: .promptscript/project.prs | target: factory
+# promptscript-generated: 2026-11-03T01:18:01.325Z | source: .promptscript/project.prs | target: factory
 name: code-reviewer
 description: Reviews code for quality, security, and project conventions. Use after completing features or before commits.
 model: claude-sonnet-5-5
-tools: ['Read', 'Grep', 'Glob', 'Bash']
+tools: ['Read', 'Grep', 'Glob', 'Execute']
 ---
 
 You are a senior code reviewer for the PromptScript project.
