@@ -20,12 +20,12 @@ const createMinimalProgram = (): Program => ({
   loc: createLoc(),
 });
 
-const createStandardsProgram = (properties: Record<string, Value>): Program => ({
+const createObjectBlockProgram = (name: string, properties: Record<string, Value>): Program => ({
   ...createMinimalProgram(),
   blocks: [
     {
       type: 'Block',
-      name: 'standards',
+      name,
       content: {
         type: 'ObjectContent',
         properties,
@@ -35,6 +35,9 @@ const createStandardsProgram = (properties: Record<string, Value>): Program => (
     },
   ],
 });
+
+const createStandardsProgram = (properties: Record<string, Value>): Program =>
+  createObjectBlockProgram('standards', properties);
 
 const createTextStandardsProgram = (text: string): Program => ({
   ...createMinimalProgram(),
@@ -1047,28 +1050,14 @@ describe('FactoryFormatter', () => {
     });
 
     it('should emit argument-hint for commands', () => {
-      const ast: Program = {
-        ...createMinimalProgram(),
-        blocks: [
-          {
-            type: 'Block',
-            name: 'shortcuts',
-            content: {
-              type: 'ObjectContent',
-              properties: {
-                '/migrate': {
-                  description: 'Migrate a module',
-                  argumentHint: '<module> [--dry-run]',
-                  prompt: true,
-                  content: 'Migrate $ARGUMENTS.',
-                },
-              },
-              loc: createLoc(),
-            },
-            loc: createLoc(),
-          },
-        ],
-      };
+      const ast = createObjectBlockProgram('shortcuts', {
+        '/migrate': {
+          description: 'Migrate a module',
+          argumentHint: '<module> [--dry-run]',
+          prompt: true,
+          content: 'Migrate $ARGUMENTS.',
+        },
+      });
 
       const result = formatter.format(ast, { version: 'multifile' });
       const cmdFile = result.additionalFiles?.find(
@@ -1588,27 +1577,13 @@ describe('FactoryFormatter', () => {
     });
 
     function skillWithRawFrontmatter(rawFrontmatter: string): Program {
-      return {
-        ...createMinimalProgram(),
-        blocks: [
-          {
-            type: 'Block',
-            name: 'skills',
-            content: {
-              type: 'ObjectContent',
-              properties: {
-                migrate: {
-                  description: 'Migrates one module.',
-                  content: 'Body.',
-                  __rawFrontmatter: rawFrontmatter,
-                },
-              },
-              loc: createLoc(),
-            },
-            loc: createLoc(),
-          },
-        ],
-      };
+      return createObjectBlockProgram('skills', {
+        migrate: {
+          description: 'Migrates one module.',
+          content: 'Body.',
+          __rawFrontmatter: rawFrontmatter,
+        },
+      });
     }
 
     function factorySkill(rawFrontmatter: string): string | undefined {
