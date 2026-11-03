@@ -83,3 +83,59 @@ export function stripFrontmatterMarkerLines(frontmatter: string): string {
 export function stripLeadingHtmlMarker(body: string): string {
   return body.replace(new RegExp(`^\\s*${HTML_MARKER}\\n*`), '');
 }
+
+/**
+ * How generated files are marked.
+ * - `timestamp`: marker with the generation time (honours `SOURCE_DATE_EPOCH`)
+ * - `static`: marker without a time, so output is byte-for-byte reproducible
+ * - `none`: no marker; ownership comes from the generated files manifest
+ */
+export type MarkerMode = 'timestamp' | 'static' | 'none';
+
+/**
+ * Time part of a marker. `static` mode writes the word `static`. Timestamp
+ * mode writes the clock, or `SOURCE_DATE_EPOCH` (seconds since the epoch) when
+ * it is set, so reproducible builds stay stable.
+ *
+ * @param mode - Marker mode
+ * @param sourceDateEpoch - Value of the `SOURCE_DATE_EPOCH` variable, if set
+ * @returns Stamp written into the marker
+ * @internal Used by the compiler for generated file markers.
+ */
+export function markerStamp(mode: MarkerMode, sourceDateEpoch?: string): string {
+  if (mode === 'static') return 'static';
+  const epoch = sourceDateEpoch?.trim();
+  if (epoch !== undefined && /^\d+$/.test(epoch)) {
+    return new Date(Number(epoch) * 1000).toISOString();
+  }
+  return new Date().toISOString();
+}
+
+const SKILL_FILE = /(?:^|\/)skill\.md$/i;
+
+/**
+ * Find skill resource files among planned output paths: every file inside the
+ * directory of a planned `SKILL.md` (or `skill.md`), or below it, other than a
+ * skill file. Resource files are copied as they are, so they get no marker and
+ * no reformatting.
+ *
+ * @param paths - Planned output paths, relative and `/` separated
+ * @returns Map from resource path to the path of its skill file
+ * @internal Used by the compiler and CLI for skill resource handling.
+ */
+export function collectSkillResourcePaths(paths: Iterable<string>): Map<string, string> {
+  const all = [...paths];
+  const skillFiles = all
+    .filter((path) => SKILL_FILE.test(path) && path.includes('/'))
+    // Deepest skill directory first, so a nested skill owns its own files.
+    .sort((a, b) => b.length - a.length);
+  const resources = new Map<string, string>();
+  for (const path of all) {
+    if (SKILL_FILE.test(path)) continue;
+    const skillFile = skillFiles.find((file) =>
+      path.startsWith(file.slice(0, file.lastIndexOf('/') + 1))
+    );
+    if (skillFile !== undefined) resources.set(path, skillFile);
+  }
+  return resources;
+}

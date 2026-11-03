@@ -185,6 +185,12 @@ output:
   # Overwrite existing files
   overwrite: true
 
+  # Generated file marker: timestamp (default), static or none
+  markers: timestamp
+
+  # Write .promptscript-generated.json and remove stale generated files
+  manifest: false
+
 # =========================
 # Formatting Configuration
 # =========================
@@ -199,6 +205,9 @@ formatting:
   # proseWrap: always    # 'always' | 'never' | 'preserve'
   # tabWidth: 4          # Number of spaces per indent
   # printWidth: 100      # Max line width for prose wrapping
+
+  # Run Prettier over generated markdown (default true)
+  # postFormat: false
 
 # =============================
 # Universal Directory & Skills
@@ -1138,20 +1147,50 @@ output:
   resources:
     - agents
     - skills
+  markers: static
+  manifest: true
 ```
 
-| Field       | Type     | Default | Description                                                                                                                           |
-| ----------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `baseDir`   | string   | `.`     | Base directory for generated output                                                                                                   |
-| `header`    | string   | -       | Header added to Markdown after PromptScript metadata and frontmatter                                                                  |
-| `overwrite` | boolean  | `false` | Overwrite conflicting user files without prompting, like `--force`                                                                    |
-| `resources` | string[] | -       | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
+| Field       | Type     | Default     | Description                                                                                                                           |
+| ----------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseDir`   | string   | `.`         | Base directory for generated output                                                                                                   |
+| `header`    | string   | -           | Header added to Markdown after PromptScript metadata and frontmatter                                                                  |
+| `overwrite` | boolean  | `false`     | Overwrite conflicting user files without prompting, like `--force`                                                                    |
+| `resources` | string[] | -           | Compile only these resource kinds (`agents`, `skills`, `commands`, `mcp`, `hooks`, `plugins`, `main`); `prs compile --resources` wins |
+| `markers`   | string   | `timestamp` | Generated file marker: `timestamp`, `static` or `none`                                                                                |
+| `manifest`  | boolean  | `false`     | Write `.promptscript-generated.json` in the output directory and remove stale generated files                                         |
 
 `resources` selects what a compile emits. A selection without `main` omits
 root instruction files, so `baseDir: '${HOME}'` with `resources: [agents,
 skills]` installs only generated agent and skill directories into the global
 root. Protected personal files such as `~/.factory/AGENTS.md` are never
 written, and resource-only runs skip managed cleanup.
+
+`markers` sets the comment that marks a generated Markdown file:
+
+- `timestamp` (default) writes the generation time, for example
+  `<!-- PromptScript 2026-11-03T10:00:00.000Z | source: ... -->`. When the
+  `SOURCE_DATE_EPOCH` environment variable holds a number of seconds, that time
+  is used instead of the clock.
+- `static` writes `static` instead of the time, so two compiles of the same
+  sources give byte-identical files.
+- `none` writes no marker. PromptScript then knows its files from the manifest,
+  so `none` turns `manifest` on. `header` needs a marker, so it is not added.
+
+With `static` or `none`, a file whose content differs only in the marker is
+rewritten, so switching from `timestamp` replaces the old timestamps once.
+Skill resource files (everything next to a generated `SKILL.md`, like
+templates, references and scripts) never get a marker.
+
+`manifest: true` writes `.promptscript-generated.json` in the output directory.
+It lists every generated file with its SHA-256 hash, target and build profile.
+On the next compile, files that are in the manifest but no longer generated,
+for example the files of a removed skill or agent, are deleted, and directories
+left empty go too. A stale file that was edited after it was generated is kept
+with a warning. `--target` and `--build` runs only touch entries of their own
+target and build. Commit the manifest when CI runs `prs compile --check`, so
+the check also finds stale files. Hook files that PromptScript merges with your
+own entries are not listed; managed cleanup handles them.
 
 ### formatting
 
@@ -1188,6 +1227,7 @@ When `prettier: true`, PromptScript searches for Prettier configuration files in
 | `proseWrap`  | `'always'` \| `'never'` \| `'preserve'` | `'preserve'` | How to wrap prose in markdown        |
 | `tabWidth`   | number                                  | `2`          | Number of spaces per indentation     |
 | `printWidth` | number                                  | `80`         | Maximum line width for wrapping      |
+| `postFormat` | boolean                                 | `true`       | Run Prettier over generated markdown |
 
 **ProseWrap Options:**
 
@@ -1219,6 +1259,20 @@ formatting:
   proseWrap: always
   printWidth: 100
 ```
+
+**Example: Keep Generated Bodies As Written**
+
+```yaml
+formatting:
+  postFormat: false
+```
+
+By default every generated Markdown file goes through Prettier after
+compilation, and the Claude formatter normalizes skill and agent bodies for it
+(for example `*` list markers become `-`). With `postFormat: false` neither
+happens, so bodies stay as you wrote them. Skill resource files such as
+templates, references and scripts are never reformatted, with or without this
+option.
 
 ### universalDir
 

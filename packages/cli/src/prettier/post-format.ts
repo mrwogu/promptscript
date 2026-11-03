@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import type { FormatterOutput } from '@promptscript/compiler';
-import { isPromptTarget, type Logger } from '@promptscript/core';
+import { collectSkillResourcePaths, isPromptTarget, type Logger } from '@promptscript/core';
 
 /**
  * Markdown-family extensions that should be post-processed through Prettier.
@@ -21,7 +21,9 @@ const MARKDOWN_RE = /\.(md|mdx|markdown)$/i;
  *
  * The project's `.prettierignore` is intentionally NOT consulted here — these
  * files are owned by PromptScript and should always be normalised, even if a
- * user ignores them from manual prettier runs.
+ * user ignores them from manual prettier runs. Skill resource files
+ * (templates, references, scripts) are the exception: they are copied as they
+ * are, because scripts may read them byte for byte.
  *
  * @param outputs - Outputs from the compiler (mutated in place)
  * @param projectRoot - Project root used both for resolving Prettier configs
@@ -50,8 +52,10 @@ export async function postFormatWithPrettier(
     collectOutputs(output, queue);
   }
 
+  const skillResources = collectSkillResourcePaths(queue.map((output) => output.path));
+
   for (const output of queue) {
-    if (!isFormattable(output)) continue;
+    if (!isFormattable(output) || skillResources.has(output.path)) continue;
     const absPath = resolve(projectRoot, output.path);
 
     let config: import('prettier').Options | null = null;

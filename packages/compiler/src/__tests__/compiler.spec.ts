@@ -3760,6 +3760,104 @@ describe('addMarkerToOutput edge cases', () => {
   });
 });
 
+describe('marker modes', () => {
+  function skillFormatter(): Formatter {
+    return {
+      name: 'skill-formatter',
+      outputPath: 'MAIN.md',
+      description: 'Main file with a skill and its resources',
+      defaultConvention: 'markdown',
+      format: vi.fn(() => ({
+        path: 'MAIN.md',
+        content: '# Main\n\nBody\n',
+        additionalFiles: [
+          {
+            path: 'skills/demo/SKILL.md',
+            content: '---\nname: demo\n---\n\nSkill body\n',
+            additionalFiles: [
+              { path: 'skills/demo/templates/report.md', content: '|a|b|\n' },
+              { path: 'skills/demo/references/notes.md', content: '# Notes\n' },
+            ],
+          },
+        ],
+      })),
+      getSkillBasePath: () => null,
+      getSkillFileName: () => null,
+      referencesMode: () => 'none' as const,
+    };
+  }
+
+  async function compileWith(markers?: 'timestamp' | 'static' | 'none') {
+    mockResolve.mockResolvedValue(createResolveSuccess(createTestProgram()));
+    mockValidate.mockReturnValue(createValidationSuccess());
+    const compiler = new Compiler({
+      resolver: { registryPath: '/registry' },
+      formatters: [skillFormatter()],
+      ...(markers ? { markers } : {}),
+    });
+    const result = await compiler.compile('./test.prs');
+    expect(result.success).toBe(true);
+    return result;
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('writes a timestamp by default', async () => {
+    const result = await compileWith();
+    expect(result.outputs.get('MAIN.md')?.content).toMatch(/<!-- PromptScript \d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('takes the timestamp from SOURCE_DATE_EPOCH', async () => {
+    vi.stubEnv('SOURCE_DATE_EPOCH', '0');
+    const result = await compileWith('timestamp');
+    expect(result.outputs.get('MAIN.md')?.content).toContain(
+      '<!-- PromptScript 1970-01-01T00:00:00.000Z |'
+    );
+  });
+
+  it('ignores a SOURCE_DATE_EPOCH that is not a number', async () => {
+    vi.stubEnv('SOURCE_DATE_EPOCH', 'yesterday');
+    const result = await compileWith('timestamp');
+    expect(result.outputs.get('MAIN.md')?.content).not.toContain('yesterday');
+    expect(result.outputs.get('MAIN.md')?.content).toMatch(/<!-- PromptScript \d{4}-/);
+  });
+
+  it('writes the same marker on every run in static mode', async () => {
+    const first = await compileWith('static');
+    const second = await compileWith('static');
+    expect(first.outputs.get('MAIN.md')?.content).toContain('<!-- PromptScript static |');
+    expect(first.outputs.get('skills/demo/SKILL.md')?.content).toContain(
+      '# promptscript-generated: static |'
+    );
+    for (const [path, output] of first.outputs) {
+      expect(second.outputs.get(path)?.content).toBe(output.content);
+    }
+  });
+
+  it('writes no marker in none mode', async () => {
+    const result = await compileWith('none');
+    expect(result.outputs.get('MAIN.md')?.content).toBe('# Main\n\nBody\n');
+    expect(result.outputs.get('skills/demo/SKILL.md')?.content).toBe(
+      '---\nname: demo\n---\n\nSkill body\n'
+    );
+  });
+
+  it('never marks skill resource files', async () => {
+    const result = await compileWith('timestamp');
+    expect(result.outputs.get('skills/demo/templates/report.md')?.content).toBe('|a|b|\n');
+    expect(result.outputs.get('skills/demo/references/notes.md')?.content).toBe('# Notes\n');
+    expect(result.outputs.get('skills/demo/SKILL.md')?.content).toContain(
+      '# promptscript-generated:'
+    );
+  });
+});
+
 describe('marker uses relative source path', () => {
   beforeEach(() => {
     vi.clearAllMocks();

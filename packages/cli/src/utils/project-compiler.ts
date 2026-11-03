@@ -61,5 +61,7 @@ export function createProjectCompiler(
     models: config.models,
     logger: options.logger,
     skillContent: options.skillContent,
+    markers: config.output?.markers,
+    verbatimMarkdown: config.formatting?.postFormat === false,
   });
 }

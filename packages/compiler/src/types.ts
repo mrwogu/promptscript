@@ -4,6 +4,7 @@ import type {
   CanonicalProgram,
   FactoryRulesMode,
   Logger,
+  MarkerMode,
   ModelsConfig,
   OutputConvention,
   OutputArtifact,
@@ -195,6 +196,17 @@ export interface CompilerOptions {
   skillContent?: string;
   /** Skip reference integrity hash verification */
   ignoreHashes?: boolean;
+  /**
+   * How generated markdown files are marked (`output.markers` in
+   * promptscript.yaml).
+   * @default 'timestamp'
+   */
+  markers?: MarkerMode;
+  /**
+   * Keep generated markdown as written: formatters skip their Prettier-style
+   * normalization (`formatting.postFormat: false` in promptscript.yaml).
+   */
+  verbatimMarkdown?: boolean;
 }
 
 /**

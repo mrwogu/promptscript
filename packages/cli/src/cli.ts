@@ -144,6 +144,7 @@ program
   .option('-o, --output <dir>', 'Output directory')
   .option(RESOURCES_FLAG, RESOURCES_DESCRIPTION, collectResourceKinds, [] as string[])
   .option('--dry-run', 'Preview changes')
+  .option('--check', 'Write nothing, list out-of-date and stale files, exit 1 if any')
   .option(
     '--no-migrate-factory-hooks',
     'Warn instead of migrating legacy .factory/settings.json hooks'
@@ -165,6 +166,7 @@ program
   .option('-o, --output <dir>', 'Output directory')
   .option(RESOURCES_FLAG, RESOURCES_DESCRIPTION, collectResourceKinds, [] as string[])
   .option('--dry-run', 'Preview changes')
+  .option('--check', 'Write nothing, list out-of-date and stale files, exit 1 if any')
   .option(
     '--no-migrate-factory-hooks',
     'Warn instead of migrating legacy .factory/settings.json hooks'

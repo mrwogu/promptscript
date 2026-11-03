@@ -172,6 +172,8 @@ export async function finalizeOutputPlan(
     projectRoot: string;
     logger: Logger;
     additionalOutputPaths?: readonly string[];
+    /** Run Prettier over generated markdown (`formatting.postFormat`). Default true. */
+    postFormat?: boolean;
   }
 ): Promise<{
   outputs: Map<string, FormatterOutput>;
@@ -179,11 +181,10 @@ export async function finalizeOutputPlan(
   warnings: string[];
 }> {
   applyConfiguredHeader(result.outputs, options.header);
-  const warnings = await postFormatWithPrettier(
-    result.outputs,
-    options.projectRoot,
-    options.logger
-  );
+  const warnings =
+    options.postFormat === false
+      ? []
+      : await postFormatWithPrettier(result.outputs, options.projectRoot, options.logger);
 
   const flattenedOutputs = flattenOutputMap(result.outputs);
   const outputPlan = createOutputPlan(

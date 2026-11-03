@@ -326,7 +326,7 @@ export class ClaudeFormatter extends BaseFormatter {
     // Generate agent files
     const agents = this.extractAgents(ast, options);
     for (const agent of agents) {
-      additionalFiles.push(this.generateAgentFile(agent));
+      additionalFiles.push(this.generateAgentFile(agent, options));
     }
 
     // Generate workflow files
@@ -751,8 +751,11 @@ export class ClaudeFormatter extends BaseFormatter {
       // First dedent (using lines 2+ for indent calculation since line 1 may be trimmed)
       // Then normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
-      lines.push(normalizedContent);
+      lines.push(
+        options?.verbatimMarkdown
+          ? dedentedContent
+          : this.normalizeMarkdownForPrettier(dedentedContent)
+      );
     }
 
     const skillDirPath = this.resolveSkillDir(
@@ -993,7 +996,7 @@ export class ClaudeFormatter extends BaseFormatter {
    *
    * @see https://code.claude.com/docs/en/sub-agents
    */
-  private generateAgentFile(config: ClaudeAgentConfig): FormatterOutput {
+  private generateAgentFile(config: ClaudeAgentConfig, options?: FormatOptions): FormatterOutput {
     const lines: string[] = [];
 
     // YAML frontmatter
@@ -1055,8 +1058,11 @@ export class ClaudeFormatter extends BaseFormatter {
     if (config.content) {
       // Dedent content and normalize for Prettier compatibility
       const dedentedContent = this.dedent(config.content);
-      const normalizedContent = this.normalizeMarkdownForPrettier(dedentedContent);
-      lines.push(normalizedContent);
+      lines.push(
+        options?.verbatimMarkdown
+          ? dedentedContent
+          : this.normalizeMarkdownForPrettier(dedentedContent)
+      );
     }
 
     return {
