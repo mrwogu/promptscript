@@ -320,13 +320,14 @@ function isLikelyTechnicalContent(match: string): boolean {
 const IDENTIFIER_PATTERN = /^[A-Za-z][a-z]*(?:[A-Z][a-z]*)+$/;
 
 /**
- * Longest letter run checked as an identifier. Longer runs are not code
- * names, and the cap keeps the scan linear on huge letter-only runs.
+ * Longest run checked as an identifier. Longer runs are not code names.
  */
 const MAX_IDENTIFIER_LENGTH = 200;
 
-const LETTER = /[A-Za-z]/;
-const BASE64_NON_LETTER = /[0-9+/=]/;
+/**
+ * Characters that can be part of a Base64 run.
+ */
+const BASE64_RUN_CHAR = /[A-Za-z0-9+/=]/;
 
 /**
  * Check if a Base64 match at `index` is part of a long code identifier,
@@ -339,24 +340,17 @@ const BASE64_NON_LETTER = /[0-9+/=]/;
  *
  * Only for the generic long-Base64 warning. A run that looks like an
  * identifier can still decode to a payload, so the decode check ignores it.
+ * The caller stops at the first run that is not exempt, so each run is
+ * scanned once and the check stays linear.
  */
 function isLikelyIdentifier(text: string, index: number, length: number): boolean {
   let start = index;
-  while (start > 0 && LETTER.test(text.charAt(start - 1))) {
-    start--;
-    if (index + length - start > MAX_IDENTIFIER_LENGTH) return false;
-  }
-  if (start > 0 && BASE64_NON_LETTER.test(text.charAt(start - 1))) return false;
-
+  while (start > 0 && BASE64_RUN_CHAR.test(text.charAt(start - 1))) start--;
   let end = index + length;
-  while (end < text.length && LETTER.test(text.charAt(end))) {
-    end++;
-    if (end - start > MAX_IDENTIFIER_LENGTH) return false;
-  }
-  if (end < text.length && BASE64_NON_LETTER.test(text.charAt(end))) return false;
+  while (end < text.length && BASE64_RUN_CHAR.test(text.charAt(end))) end++;
 
   const run = text.substring(start, end);
-  if (!IDENTIFIER_PATTERN.test(run)) return false;
+  if (run.length > MAX_IDENTIFIER_LENGTH || !IDENTIFIER_PATTERN.test(run)) return false;
   return run.split(/(?=[A-Z])/).every((word) => /[aeiouy]/i.test(word));
 }
 

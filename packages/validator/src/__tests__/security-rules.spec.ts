@@ -1956,6 +1956,34 @@ describe('obfuscated-content rule (PS012)', () => {
       expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
     });
 
+    it('should flag identifier-shaped runs longer than 200 chars', () => {
+      const run = 'updatePaymentVariantSelectListItems'.repeat(6);
+      const { ctx, messages } = createRuleContext(
+        createTestProgram({
+          blocks: [createTextBlock('@knowledge', `Call ${run}.`)],
+        })
+      );
+
+      obfuscatedContent.validate(ctx);
+
+      expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
+    });
+
+    it('should check the whole run when the identifier is glued to other Base64', () => {
+      // The DNA part is exempt on its own, the identifier part is not an
+      // identifier once the run around it is taken into account.
+      const run = `${'ACGT'.repeat(10)}=updatePaymentVariantSelectListItems`;
+      const { ctx, messages } = createRuleContext(
+        createTestProgram({
+          blocks: [createTextBlock('@knowledge', `Data: ${run}`)],
+        })
+      );
+
+      obfuscatedContent.validate(ctx);
+
+      expect(messages.some((m) => m.message.includes('Long Base64'))).toBe(true);
+    });
+
     it('should check each run at its own position', () => {
       // Both runs share the first 32 characters, the second one ends with a digit.
       const text =
