@@ -663,6 +663,10 @@ When you import a repository that does not contain `.prs` files, PromptScript lo
 | `.claude/commands/*.md`                   | `@shortcuts` block |
 | `.github/skills/*/SKILL.md`               | `@skills` block    |
 
+Agent and command frontmatter is parsed as YAML, the same way as in
+`.promptscript/agents/` and `.promptscript/commands/`. See
+[Agents and Commands as Markdown Files](../features/agents.md#agents-and-commands-as-markdown-files).
+
 ### Example: Importing an Open-Source Skill Library
 
 ```promptscript
