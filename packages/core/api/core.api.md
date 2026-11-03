@@ -352,6 +352,7 @@ export type BlockTypeName = (typeof BLOCK_TYPES)[number];
 
 // @public
 export interface BuildProfileConfig {
+    enabled?: boolean;
     entry?: string;
     output?: string;
     targets?: TargetEntry[];

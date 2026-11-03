@@ -414,6 +414,42 @@ describe('config extends', () => {
     );
   });
 
+  it('should drop a base build that the project turns off', async () => {
+    const root = project({
+      'tool/promptscript.yaml': [
+        'builds:',
+        '  factory:',
+        '    targets: [factory]',
+        '  system-messages:',
+        '    entry: .promptscript/system-messages.prs',
+        '    targets: [claude]',
+      ].join('\n'),
+      'promptscript.yaml': [
+        'extends: tool/promptscript.yaml',
+        'builds:',
+        '  system-messages:',
+        '    enabled: false',
+      ].join('\n'),
+    });
+
+    const config = await loadConfig(join(root, 'promptscript.yaml'));
+
+    expect(config.builds).toEqual({ factory: { targets: ['factory'] } });
+  });
+
+  it('should let a later config turn a build on again', async () => {
+    const root = project({
+      'base.yaml': 'builds:\n  docs:\n    targets: [github]\n',
+      'team.yaml': 'extends: ./base.yaml\nbuilds:\n  docs:\n    enabled: false\n',
+      'promptscript.yaml': 'extends: ./team.yaml\nbuilds:\n  docs:\n    enabled: true\n',
+    });
+
+    expect((await loadConfig(join(root, 'team.yaml'))).builds).toEqual({});
+    expect((await loadConfig(join(root, 'promptscript.yaml'))).builds).toEqual({
+      docs: { targets: ['github'], enabled: true },
+    });
+  });
+
   it('should reject a circular extends chain', async () => {
     const root = project({
       'a.yaml': 'extends: ./b.yaml\n',
