@@ -1,5 +1,6 @@
 import type { Program, Value } from '@promptscript/core';
 import { posix } from 'node:path';
+import { isMap, isNode, isScalar, parseDocument } from 'yaml';
 import type { ConventionRenderer } from '../convention-renderer.js';
 import {
   MarkdownInstructionFormatter,
@@ -1233,54 +1234,63 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
    * `license`, `metadata`, `compatibility`, `allowed-tools`, and comments,
    * which cause Factory to fail to load the skill.
    *
+   * The frontmatter is parsed as YAML and each kept key is copied from the
+   * source text as it is, so quoting and folded lines do not change.
+   *
    * @param rawFrontmatter - Raw YAML frontmatter string (between --- markers)
    * @returns Array of filtered frontmatter lines
    */
   private filterFactoryFrontmatter(rawFrontmatter: string): string[] {
-    const lines = rawFrontmatter.split('\n');
+    const document = parseDocument(rawFrontmatter);
+    if (document.errors.length > 0) {
+      return this.filterFactoryFrontmatterLines(rawFrontmatter);
+    }
+    if (document.contents === null) return [];
+    if (!isMap(document.contents)) {
+      return this.filterFactoryFrontmatterLines(rawFrontmatter);
+    }
+
     const filtered: string[] = [];
-    let skipBlock = false;
-    let blockIndent = -1;
+    for (const pair of document.contents.items) {
+      if (!isScalar(pair.key) || !pair.key.range) continue;
+      if (!FactoryFormatter.FACTORY_SKILL_FRONTMATTER_FIELDS.has(String(pair.key.value))) continue;
+      const start = pair.key.range[0];
+      // range[1] is the end of the value itself, before any trailing comment
+      const end = isNode(pair.value) && pair.value.range ? pair.value.range[1] : pair.key.range[1];
+      filtered.push(...rawFrontmatter.slice(start, end).trimEnd().split('\n'));
+    }
+    return filtered;
+  }
 
-    for (const line of lines) {
-      const trimmed = line.trim();
+  /**
+   * Line based filter, used only when the frontmatter is not valid YAML.
+   */
+  private filterFactoryFrontmatterLines(rawFrontmatter: string): string[] {
+    // A top-level key starts at column 0. Everything indented below it, blank
+    // lines included, belongs to that key: nested maps, lists, and the lines
+    // of a folded or literal scalar such as `Produces: x` inside a description.
+    const filtered: string[] = [];
+    // Blank lines are kept only inside a value, for example a literal block.
+    let pendingBlank: string[] = [];
+    let keep = true;
 
-      // Skip comment lines
-      if (trimmed.startsWith('#')) continue;
-
-      // Skip empty lines within skipped blocks
-      if (skipBlock) {
-        if (trimmed === '') {
-          // Empty line might end a block — reset skip state and continue
-          skipBlock = false;
-          blockIndent = -1;
-          continue;
-        }
-        // Check if still inside a nested block (more indented than the skipped key)
-        const currentIndent = line.length - line.trimStart().length;
-        if (currentIndent > blockIndent) continue;
-        // Back at same/lower indent — no longer in skipped block
-        skipBlock = false;
-        blockIndent = -1;
+    for (const line of rawFrontmatter.split('\n')) {
+      if (line.trim() === '') {
+        pendingBlank.push(line);
+        continue;
       }
-
-      if (trimmed === '') continue;
-
-      // Detect key at this line
-      const keyMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9_-]*):/);
-      if (keyMatch) {
-        const key = keyMatch[1]!;
-        const indent = line.length - line.trimStart().length;
-
-        if (!FactoryFormatter.FACTORY_SKILL_FRONTMATTER_FIELDS.has(key)) {
-          // Skip this key and its nested block
-          skipBlock = true;
-          blockIndent = indent;
-          continue;
-        }
+      const atColumnZero = !/^\s/.test(line);
+      if (atColumnZero) {
+        pendingBlank = [];
+        if (line.startsWith('#')) continue;
+        const keyMatch = /^([a-zA-Z][a-zA-Z0-9_-]*)\s*:/.exec(line);
+        keep =
+          keyMatch !== null && FactoryFormatter.FACTORY_SKILL_FRONTMATTER_FIELDS.has(keyMatch[1]!);
       }
-
-      filtered.push(line);
+      if (keep) {
+        filtered.push(...pendingBlank, line);
+      }
+      pendingBlank = [];
     }
 
     return filtered;

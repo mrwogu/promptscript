@@ -1587,6 +1587,133 @@ describe('FactoryFormatter', () => {
       expect(skill?.content).not.toContain('allowed-tools:');
     });
 
+    it('should keep continuation lines of a folded description', () => {
+      const ast: Program = {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                migrate: {
+                  description: 'Migrates one module.',
+                  content: 'Body.',
+                  __rawFrontmatter: [
+                    'name: migrate',
+                    'description: >-',
+                    '  Migrates one module.',
+                    '  Produces: a report and a patch.',
+                    '',
+                    '  Use when: the module is ready.',
+                    'license: MIT',
+                    'metadata:',
+                    '  Produces: nothing',
+                    'user-invocable: true',
+                  ].join('\n'),
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'));
+
+      expect(skill?.content).toBe(
+        [
+          '---',
+          'name: migrate',
+          'description: >-',
+          '  Migrates one module.',
+          '  Produces: a report and a patch.',
+          '',
+          '  Use when: the module is ready.',
+          'user-invocable: true',
+          '---',
+          '',
+          'Body.',
+          '',
+        ].join('\n')
+      );
+    });
+
+    function skillWithRawFrontmatter(rawFrontmatter: string): Program {
+      return {
+        ...createMinimalProgram(),
+        blocks: [
+          {
+            type: 'Block',
+            name: 'skills',
+            content: {
+              type: 'ObjectContent',
+              properties: {
+                migrate: {
+                  description: 'Migrates one module.',
+                  content: 'Body.',
+                  __rawFrontmatter: rawFrontmatter,
+                },
+              },
+              loc: createLoc(),
+            },
+            loc: createLoc(),
+          },
+        ],
+      };
+    }
+
+    it('should drop comments and unsupported keys of any shape', () => {
+      const ast = skillWithRawFrontmatter(
+        [
+          '# leading comment',
+          'name: migrate # trailing comment',
+          'allowed-tools:',
+          '- Read',
+          '- Grep',
+          'description: |',
+          '  Line one.',
+          '  Note: line two.',
+          '# comment between keys',
+          'metadata: { owner: team, tags: [a, b] }',
+          'disable-model-invocation: true',
+        ].join('\n')
+      );
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'));
+
+      expect(skill?.content).toBe(
+        [
+          '---',
+          'name: migrate',
+          'description: |',
+          '  Line one.',
+          '  Note: line two.',
+          'disable-model-invocation: true',
+          '---',
+          '',
+          'Body.',
+          '',
+        ].join('\n')
+      );
+    });
+
+    it('should fall back to the line filter when frontmatter is not valid YAML', () => {
+      const ast = skillWithRawFrontmatter(
+        ['name: migrate', 'description: Use when: x', 'license: MIT'].join('\n')
+      );
+
+      const result = formatter.format(ast, { version: 'multifile' });
+      const skill = result.additionalFiles?.find((f) => f.path.endsWith('migrate/SKILL.md'));
+
+      expect(skill?.content).toContain('name: migrate\ndescription: Use when: x\n---');
+      expect(skill?.content).not.toContain('license');
+    });
+
     it('should handle empty lines within unsupported nested blocks', () => {
       const ast: Program = {
         ...createMinimalProgram(),

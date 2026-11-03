@@ -41,7 +41,8 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@swc/helpers": "~0.5.23",
-    "@promptscript/core": "workspace:*"
+    "@promptscript/core": "workspace:*",
+    "yaml": "^2.9.1"
   },
   "publishConfig": {
     "access": "public",

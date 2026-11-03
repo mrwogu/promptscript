@@ -347,6 +347,9 @@ importers:
       '@swc/helpers':
         specifier: ~0.5.23
         version: 0.5.23
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
 
   packages/importer:
     dependencies:
