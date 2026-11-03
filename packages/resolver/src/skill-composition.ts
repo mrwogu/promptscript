@@ -15,9 +15,11 @@ import type {
 import {
   blockContentToBody,
   buildSkillPhaseSection,
+  bindParams,
   deepClone,
   getSkillPhaseSourceLabel,
   getSyntaxFeatureUsages,
+  interpolateAST,
   isTextContent,
   reconcileBlockBody,
   ResolveError,
@@ -331,6 +333,20 @@ async function resolveInlineUse(
       `Failed to resolve sub-skill '${inlineUse.path.raw}': ${err instanceof Error ? err.message : String(err)}`,
       inlineUse.loc
     );
+  }
+
+  if (subAst.meta?.params || inlineUse.params?.length) {
+    try {
+      const params = bindParams(inlineUse.params, subAst.meta?.params, absPath, inlineUse.loc);
+      if (params.size > 0) {
+        subAst = interpolateAST(subAst, { params, sourceFile: absPath });
+      }
+    } catch (err) {
+      throw new ResolveError(
+        `Failed to bind params for sub-skill '${inlineUse.path.raw}': ${err instanceof Error ? err.message : String(err)}`,
+        inlineUse.loc
+      );
+    }
   }
 
   // Extract skill definition from the sub-skill's @skills block
