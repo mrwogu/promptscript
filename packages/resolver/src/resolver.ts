@@ -393,6 +393,9 @@ type PreflightRegistryImport =
       readonly error: unknown;
     };
 
+/** Cache key prefix for a file resolved as the entry, not as an import. */
+const ENTRY_CACHE_PREFIX = '\0entry:';
+
 interface ParsedFile {
   readonly ast: Program;
   readonly errors: readonly ResolveError[];
@@ -582,21 +585,25 @@ export class Resolver {
       throw new CircularDependencyError([...context.resolving, absPath]);
     }
 
+    // The entry file also adds skills found on disk, so it has its own cache entry.
+    const isEntry = context.resolving.size === 0;
+    const cacheKey = isEntry ? `${ENTRY_CACHE_PREFIX}${absPath}` : absPath;
+
     // Check cache
-    if (!compositionContext && this.cacheEnabled && this.cache.has(absPath)) {
+    if (!compositionContext && this.cacheEnabled && this.cache.has(cacheKey)) {
       this.logger.debug(`Cache hit: ${absPath}`);
-      return this.cache.get(absPath)!;
+      return this.cache.get(cacheKey)!;
     }
 
     context.resolving.add(absPath);
     this.logger.verbose(`Parsing ${absPath}`);
 
     try {
-      const result = await this.doResolve(absPath, context, compositionContext);
+      const result = await this.doResolve(absPath, context, compositionContext, isEntry);
 
       if (!compositionContext && this.cacheEnabled) {
         this.logger.debug(`Cache store: ${absPath}`);
-        this.cache.set(absPath, result);
+        this.cache.set(cacheKey, result);
       }
 
       return result;
@@ -611,7 +618,8 @@ export class Resolver {
   private async doResolve(
     absPath: string,
     context: ResolutionContext,
-    compositionContext?: CompositionResolutionContext
+    compositionContext?: CompositionResolutionContext,
+    isEntry = true
   ): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const dependencies = new Set<string>([absPath]);
@@ -756,13 +764,16 @@ export class Resolver {
       ...(projectRoot ? { projectRoot } : {}),
       logger: this.logger,
     };
+    const skillDiscoveryOptions = isEntry
+      ? discoveryOptions
+      : { ...discoveryOptions, discoverUndeclared: false };
 
     ast = await resolveNativeSkills(
       ast,
       this.loader.getRegistryPath(),
       absPath,
       this.loader.getLocalPath(),
-      discoveryOptions
+      skillDiscoveryOptions
     );
 
     // Auto-discover command files from local and universal directories

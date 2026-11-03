@@ -422,6 +422,7 @@ export function makeTextContent(value: string, file?: string): TextContent;
 
 // @public
 export interface NativeSkillOptions {
+    discoverUndeclared?: boolean;
     logger?: Logger;
     projectRoot?: string;
     universalDir?: string;

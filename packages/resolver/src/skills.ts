@@ -1817,6 +1817,13 @@ export interface NativeSkillOptions {
   projectRoot?: string;
   /** Logger for reporting skipped files and resolution decisions. */
   logger?: Logger;
+  /**
+   * Add skills found in the skills directories that the file does not
+   * declare. Defaults to true. The resolver turns it off for imported files,
+   * so each found skill is added once, by the entry file, and two fragments
+   * with `@skills` do not both carry it.
+   */
+  discoverUndeclared?: boolean;
 }
 
 /**
@@ -1997,7 +2004,7 @@ export async function resolveNativeSkills(
       const discovered = await discoverSkillDirs(dir);
       for (const [skillName, skillDir] of discovered) {
         // Only add if not already declared in @skills block
-        if (!Object.hasOwn(updatedProperties, skillName)) {
+        if (options?.discoverUndeclared !== false && !Object.hasOwn(updatedProperties, skillName)) {
           logger.verbose(`Auto-discovered skill: ${skillName} (from ${skillDir})`);
           updatedProperties[skillName] = {};
           hasUpdates = true;
