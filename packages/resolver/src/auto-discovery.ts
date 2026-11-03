@@ -3,6 +3,7 @@ import { resolve, basename } from 'node:path';
 import { ResolveError } from '@promptscript/core';
 import type { Logger, Program, Block, TextContent, Value } from '@promptscript/core';
 import { commandValueFromFile, parseMarkdownFrontmatter, parseSkillMd } from './skills.js';
+import type { MarkdownFrontmatter } from './skills.js';
 import { agentPropsFromFrontmatter } from './markdown-frontmatter.js';
 import { collectSkillResources, toSkillResourceValues } from './skill-resources.js';
 import { fileLoc, makeBlock, makeObjectContent, makeTextContent } from './ast-factory.js';
@@ -143,11 +144,18 @@ async function discoverRootSkill(
   }
 }
 
+interface MarkdownFile {
+  name: string;
+  path: string;
+  raw: string;
+  parsed: MarkdownFrontmatter;
+}
+
 /**
- * Discover agent .md files (frontmatter contains `tools:` or `model:`).
- * Returns an ObjectContent mapping agent-name -> agent properties.
+ * Read the .md files of a directory that have frontmatter. Symlinks and
+ * unreadable files are skipped. Frontmatter that can not be read throws.
  */
-async function discoverAgents(dir: string, logger?: Logger): Promise<Record<string, Value> | null> {
+async function readMarkdownFiles(dir: string, logger?: Logger): Promise<MarkdownFile[] | null> {
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
@@ -155,35 +163,41 @@ async function discoverAgents(dir: string, logger?: Logger): Promise<Record<stri
     return null;
   }
 
-  const properties: Record<string, Value> = {};
-
+  const files: MarkdownFile[] = [];
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
-
     const fullPath = resolve(dir, entry.name);
+    let raw: string;
     try {
-      const stat = await lstat(fullPath);
-      if (stat.isSymbolicLink()) continue;
-
-      const raw = await readFile(fullPath, 'utf-8');
-      const parsed = parseMarkdownFrontmatter(raw, fullPath, logger);
-      if (!parsed) continue;
-      const fm = parsed.fields;
-
-      // An agent file must have tools: or model: in frontmatter
-      if (!('tools' in fm) && !('model' in fm)) continue;
-
-      const agentName = entry.name.replace(/\.md$/, '');
-      const agentProps = agentPropsFromFrontmatter(fm, fullPath);
-      if (parsed.body) {
-        agentProps['content'] = makeTextContent(parsed.body, fullPath);
-      }
-
-      properties[agentName] = agentProps;
-    } catch (error: unknown) {
-      if (error instanceof ResolveError) throw error;
-      // Skip unreadable files
+      if ((await lstat(fullPath)).isSymbolicLink()) continue;
+      raw = await readFile(fullPath, 'utf-8');
+    } catch {
+      continue;
     }
+    const parsed = parseMarkdownFrontmatter(raw, fullPath, logger);
+    if (parsed) files.push({ name: entry.name.replace(/\.md$/, ''), path: fullPath, raw, parsed });
+  }
+  return files;
+}
+
+/**
+ * Discover agent .md files (frontmatter contains `tools:` or `model:`).
+ * Returns an ObjectContent mapping agent-name -> agent properties.
+ */
+async function discoverAgents(dir: string, logger?: Logger): Promise<Record<string, Value> | null> {
+  const files = await readMarkdownFiles(dir, logger);
+  const properties: Record<string, Value> = {};
+
+  for (const file of files ?? []) {
+    const fm = file.parsed.fields;
+    // An agent file must have tools: or model: in frontmatter
+    if (!('tools' in fm) && !('model' in fm)) continue;
+
+    const agentProps = agentPropsFromFrontmatter(fm, file.path);
+    if (file.parsed.body) {
+      agentProps['content'] = makeTextContent(file.parsed.body, file.path);
+    }
+    properties[file.name] = agentProps;
   }
 
   return Object.keys(properties).length > 0 ? properties : null;
@@ -191,52 +205,49 @@ async function discoverAgents(dir: string, logger?: Logger): Promise<Record<stri
 
 /**
  * Discover command .md files (frontmatter contains `description:` but NOT `tools:` or `model:`).
- * Returns an ObjectContent mapping /command-name -> TextContent.
+ * Returns an ObjectContent mapping /command-name -> command value.
  */
 async function discoverCommands(
   dir: string,
   logger?: Logger
 ): Promise<Record<string, Value> | null> {
-  let entries;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return null;
-  }
-
+  const files = await readMarkdownFiles(dir, logger);
   const properties: Record<string, Value> = {};
 
-  for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
-
-    // Skip SKILL.md — these are skill files, not commands.
+  for (const file of files ?? []) {
+    // Skip SKILL.md - these are skill files, not commands.
     // Without this guard, discoverRootSkill and discoverCommands both
     // claim the same file, producing a phantom /SKILL command.
-    if (entry.name === 'SKILL.md') continue;
+    if (file.name === 'SKILL') continue;
 
-    const fullPath = resolve(dir, entry.name);
-    try {
-      const stat = await lstat(fullPath);
-      if (stat.isSymbolicLink()) continue;
+    const fm = file.parsed.fields;
+    // A command file must have description: but NOT tools: or model:
+    if (!('description' in fm)) continue;
+    if ('tools' in fm || 'model' in fm) continue;
 
-      const raw = await readFile(fullPath, 'utf-8');
-      const parsed = parseMarkdownFrontmatter(raw, fullPath, logger);
-      if (!parsed) continue;
-      const fm = parsed.fields;
-
-      // A command file must have description: but NOT tools: or model:
-      if (!('description' in fm)) continue;
-      if ('tools' in fm || 'model' in fm) continue;
-
-      const cmdName = '/' + entry.name.replace(/\.md$/, '');
-      properties[cmdName] = commandValueFromFile(raw, fullPath, logger, parsed);
-    } catch (error: unknown) {
-      if (error instanceof ResolveError) throw error;
-      // Skip unreadable files
-    }
+    properties['/' + file.name] = commandValueFromFile(file.raw, file.path, logger, file.parsed);
   }
 
   return Object.keys(properties).length > 0 ? properties : null;
+}
+
+/**
+ * Run a discover function on each wrapper directory that exists, in
+ * parallel, and merge the results in wrapper order.
+ */
+async function discoverInWrappers(
+  dir: string,
+  wrappers: readonly string[],
+  discover: (candidate: string, logger?: Logger) => Promise<Record<string, Value> | null>,
+  logger?: Logger
+): Promise<Record<string, Value>> {
+  const results = await Promise.all(
+    wrappers.map(async (name) => {
+      const candidate = resolve(dir, name);
+      return (await safeIsDirectory(candidate)) ? discover(candidate, logger) : null;
+    })
+  );
+  return Object.assign({}, ...results.filter((found) => found !== null));
 }
 
 /**
@@ -331,14 +342,7 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
 
   // Discover agents (root + agents/ wrapper)
   const rootAgents = (await discoverAgents(dir, logger)) ?? {};
-  const wrappedAgents: Record<string, Value> = {};
-  for (const name of AGENT_WRAPPER_DIRS) {
-    const candidate = resolve(dir, name);
-    if (await safeIsDirectory(candidate)) {
-      const found = await discoverAgents(candidate, logger);
-      if (found) Object.assign(wrappedAgents, found);
-    }
-  }
+  const wrappedAgents = await discoverInWrappers(dir, AGENT_WRAPPER_DIRS, discoverAgents, logger);
   const mergedAgents = { ...wrappedAgents, ...rootAgents };
   if (Object.keys(mergedAgents).length > 0) {
     blocks.push(makeBlock('agents', makeObjectContent(mergedAgents, dir), dir));
@@ -346,14 +350,12 @@ export async function discoverNativeContent(dir: string, logger?: Logger): Promi
 
   // Discover commands -> @shortcuts (root + commands/ wrapper)
   const rootCommands = (await discoverCommands(dir, logger)) ?? {};
-  const wrappedCommands: Record<string, Value> = {};
-  for (const name of COMMAND_WRAPPER_DIRS) {
-    const candidate = resolve(dir, name);
-    if (await safeIsDirectory(candidate)) {
-      const found = await discoverCommands(candidate, logger);
-      if (found) Object.assign(wrappedCommands, found);
-    }
-  }
+  const wrappedCommands = await discoverInWrappers(
+    dir,
+    COMMAND_WRAPPER_DIRS,
+    discoverCommands,
+    logger
+  );
   const mergedCommands = { ...wrappedCommands, ...rootCommands };
   if (Object.keys(mergedCommands).length > 0) {
     blocks.push(makeBlock('shortcuts', makeObjectContent(mergedCommands, dir), dir));

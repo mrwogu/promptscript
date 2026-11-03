@@ -2462,27 +2462,46 @@ function parseLegacyFrontmatter(content: string): MarkdownFrontmatter | null {
 
   const fields: Record<string, unknown> = {};
   for (const line of lines.slice(1, end)) {
-    if (line.trim() === '' || line.startsWith('#')) continue;
-    const match = /^([A-Za-z][\w-]*):\s*(.*)$/.exec(line);
-    if (!match) {
-      // An indented line or a list item belongs to the key above it.
-      if (/^\s/.test(line) || /^-(\s|$)/.test(line)) return null;
-      continue;
-    }
-    if (/^[>|][-+0-9]*$/.test(match[2]!.trim())) return null;
-    let value: unknown = match[2]!.trim();
-    if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
-      value = value
-        .slice(1, -1)
-        .split(',')
-        .map((item) => item.trim().replace(/^["']|["']$/g, ''))
-        .filter(Boolean);
-    } else if (typeof value === 'string') {
-      value = value.replace(/^["']|["']$/g, '');
-    }
-    fields[match[1]!] = value === '' ? null : value;
+    const entry = parseLegacyLine(line);
+    if (entry === null) return null;
+    if (entry !== undefined) fields[entry.key] = entry.value;
   }
   return { fields, body: stripLeadingHtmlMarker(lines.slice(end + 1).join('\n')).trim() };
+}
+
+/**
+ * Read one `key: value` line. Returns undefined for a line to skip and null
+ * for a line that needs real YAML.
+ */
+function parseLegacyLine(line: string): { key: string; value: unknown } | null | undefined {
+  if (line.trim() === '' || line.startsWith('#')) return undefined;
+  // An indented line or a list item belongs to the key above it.
+  if (/^\s/.test(line) || line === '-' || line.startsWith('- ')) return null;
+  const colon = line.indexOf(':');
+  const key = colon > 0 ? line.slice(0, colon) : '';
+  if (!/^[A-Za-z][\w-]*$/.test(key)) return undefined;
+
+  const raw = line.slice(colon + 1).trim();
+  if (/^[>|][-+0-9]*$/.test(raw)) return null;
+  if (raw === '') return { key, value: null };
+  if (raw.startsWith('[') && raw.endsWith(']')) {
+    const items = raw
+      .slice(1, -1)
+      .split(',')
+      .map((item) => unquoteLegacy(item.trim()))
+      .filter(Boolean);
+    return { key, value: items };
+  }
+  return { key, value: unquoteLegacy(raw) };
+}
+
+function unquoteLegacy(value: string): string {
+  const first = value.charAt(0);
+  const start = first === '"' || first === "'" ? 1 : 0;
+  const last = value.charAt(value.length - 1);
+  const end =
+    value.length > start && (last === '"' || last === "'") ? value.length - 1 : value.length;
+  return value.slice(start, end);
 }
 
 /**

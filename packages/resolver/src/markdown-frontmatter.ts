@@ -115,25 +115,33 @@ function readTargetOverrides(
   }
   const result: Record<string, Value> = {};
   for (const [target, overrides] of Object.entries(value)) {
-    if (!isRecord(overrides)) {
-      throw new ResolveError(
-        `targets.${target} must be a mapping, found ${JSON.stringify(overrides)}`,
-        fileLocation(sourceFile)
-      );
-    }
-    const entry: Record<string, Value> = {};
-    for (const field of AGENT_TARGET_FIELDS) {
-      if (!(field in overrides)) continue;
-      const raw = overrides[field];
-      const parsed =
-        field === 'tools' || field === 'disallowedTools'
-          ? readToolsField(raw, `targets.${target}.${field}`, sourceFile)
-          : readStringField(raw, `targets.${target}.${field}`, sourceFile);
-      if (parsed !== undefined) entry[field] = parsed;
-    }
-    result[target] = entry;
+    result[target] = readTargetEntry(target, overrides, sourceFile);
   }
   return result;
+}
+
+function readTargetEntry(
+  target: string,
+  overrides: unknown,
+  sourceFile: string
+): Record<string, Value> {
+  if (!isRecord(overrides)) {
+    throw new ResolveError(
+      `targets.${target} must be a mapping, found ${JSON.stringify(overrides)}`,
+      fileLocation(sourceFile)
+    );
+  }
+  const entry: Record<string, Value> = {};
+  for (const field of AGENT_TARGET_FIELDS) {
+    if (!(field in overrides)) continue;
+    const raw = overrides[field];
+    const parsed =
+      field === 'tools' || field === 'disallowedTools'
+        ? readToolsField(raw, `targets.${target}.${field}`, sourceFile)
+        : readStringField(raw, `targets.${target}.${field}`, sourceFile);
+    if (parsed !== undefined) entry[field] = parsed;
+  }
+  return entry;
 }
 
 /**
