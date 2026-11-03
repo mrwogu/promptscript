@@ -1,5 +1,6 @@
 import { constants, existsSync } from 'node:fs';
-import { execFile, spawn } from 'node:child_process';
+import { execFile, spawn, type ChildProcessByStdio } from 'node:child_process';
+import type { Readable, Writable } from 'node:stream';
 import { createHash } from 'node:crypto';
 import {
   lstat,
@@ -18,7 +19,7 @@ import type { FormatterOutput } from '@promptscript/compiler';
 import { getRuntimeInfo } from '../runtime/runtime-info.js';
 import { resolveSelfInvocation, type SelfInvocation } from '../runtime/self-invocation.js';
 import { compareCodeUnits, isPromptTarget, type OmittedManagedDirectory } from '@promptscript/core';
-import { MANAGED_OUTPUT_WORKER_COMMAND } from '../managed-output-worker.js';
+import { MANAGED_OUTPUT_WORKER_COMMAND, WORKER_SERVE_OPERATION } from '../managed-output-worker.js';
 import { isVerifiedPromptBundleOutput } from './prompt-bundle-ownership.js';
 import { isFactoryHooksPath, unwrapFactoryHooks, wrapFactoryHooks } from './factory-hooks-shape.js';
 
@@ -98,6 +99,132 @@ function workerSpawnArgs(
   ...operationArgs: string[]
 ): string[] {
   return [...invocation.prefixArgs, MANAGED_OUTPUT_WORKER_COMMAND, operation, ...operationArgs];
+}
+
+/** A serving worker for one output root, shared by guarded creates and mkdirs. */
+interface WorkerSession {
+  child: ChildProcessByStdio<Writable, Readable, null>;
+  pending: Map<number, (status: string | undefined) => void>;
+  nextId: number;
+  buffer: string;
+  idleTimer?: NodeJS.Timeout;
+}
+
+/** Close a session this long after its last answer. */
+const WORKER_SESSION_IDLE_MS = 500;
+
+const workerSessions = new Map<string, WorkerSession>();
+
+interface Refable {
+  ref?: () => void;
+  unref?: () => void;
+}
+
+/**
+ * Keep the event loop alive only while a request waits for its answer, so an
+ * idle worker never holds the CLI open.
+ */
+function setSessionActive(session: WorkerSession, active: boolean): void {
+  // Pipe streams are sockets with ref and unref, which the stream types do not show.
+  const handles: Refable[] = [
+    session.child,
+    session.child.stdout as unknown as Refable,
+    session.child.stdin as unknown as Refable,
+  ];
+  for (const handle of handles) {
+    if (active) handle.ref?.();
+    else handle.unref?.();
+  }
+}
+
+function closeWorkerSession(root: string, session: WorkerSession): void {
+  if (workerSessions.get(root) === session) workerSessions.delete(root);
+  if (session.idleTimer) clearTimeout(session.idleTimer);
+  for (const resolvePending of session.pending.values()) resolvePending(undefined);
+  session.pending.clear();
+  session.child.stdin.end();
+}
+
+function startWorkerSession(root: string, invocation: SelfInvocation): WorkerSession {
+  // The worker starts in the output root: `deno run` scopes its read and
+  // write permissions to that directory, and every request stays inside it.
+  const child = spawn(invocation.executable, workerSpawnArgs(invocation, WORKER_SERVE_OPERATION), {
+    cwd: root,
+    stdio: ['pipe', 'pipe', 'ignore'],
+    windowsHide: true,
+  });
+  const session: WorkerSession = { child, pending: new Map(), nextId: 0, buffer: '' };
+  child.stdout.setEncoding('utf-8');
+  child.stdout.on('data', (chunk: string) => {
+    session.buffer += chunk;
+    let newline = session.buffer.indexOf('\n');
+    while (newline !== -1) {
+      answerWorkerRequest(root, session, session.buffer.slice(0, newline));
+      session.buffer = session.buffer.slice(newline + 1);
+      newline = session.buffer.indexOf('\n');
+    }
+  });
+  child.on('error', () => closeWorkerSession(root, session));
+  child.on('close', () => closeWorkerSession(root, session));
+  child.stdin.on('error', () => closeWorkerSession(root, session));
+  return session;
+}
+
+function answerWorkerRequest(root: string, session: WorkerSession, line: string): void {
+  let answer: { id?: unknown; status?: unknown };
+  try {
+    answer = JSON.parse(line) as { id?: unknown; status?: unknown };
+  } catch {
+    return;
+  }
+  if (typeof answer.id !== 'number') return;
+  const resolvePending = session.pending.get(answer.id);
+  if (!resolvePending) return;
+  session.pending.delete(answer.id);
+  resolvePending(typeof answer.status === 'string' ? answer.status : undefined);
+  if (session.pending.size === 0) {
+    setSessionActive(session, false);
+    session.idleTimer = setTimeout(() => closeWorkerSession(root, session), WORKER_SESSION_IDLE_MS);
+    session.idleTimer.unref();
+  }
+}
+
+/**
+ * Run one guarded operation in the serving worker of an output root. One
+ * worker process serves every create and mkdir of a compile, instead of one
+ * process per file. Resolves undefined when the worker fails.
+ */
+function requestWorkerOperation(
+  root: string,
+  invocation: SelfInvocation,
+  directory: string,
+  op: string,
+  args: string[],
+  content?: string
+): Promise<string | undefined> {
+  let session = workerSessions.get(root);
+  if (!session) {
+    session = startWorkerSession(root, invocation);
+    workerSessions.set(root, session);
+  }
+  const active = session;
+  if (active.idleTimer) {
+    clearTimeout(active.idleTimer);
+    active.idleTimer = undefined;
+  }
+  const id = active.nextId++;
+  const request = {
+    id,
+    directory,
+    op,
+    args,
+    ...(content === undefined ? {} : { content: Buffer.from(content).toString('base64') }),
+  };
+  return new Promise((resolveStatus) => {
+    active.pending.set(id, resolveStatus);
+    setSessionActive(active, true);
+    active.child.stdin.write(`${JSON.stringify(request)}\n`);
+  });
 }
 
 export interface ManagedOutputCleanupResult {
@@ -675,7 +802,7 @@ export async function createHookOutputSafely(
       return false;
     }
 
-    return guardedCreate(directory, basename(candidate), directoryStat, content, mode);
+    return guardedCreate(root, directory, basename(candidate), directoryStat, content, mode);
   } finally {
     await closeDirectoryGuards(guards);
   }
@@ -767,6 +894,7 @@ async function guardedRewrite(
 }
 
 async function guardedCreate(
+  root: string,
   directory: string,
   name: string,
   directoryStat: FileIdentity,
@@ -777,39 +905,15 @@ async function guardedCreate(
   if (invocation === undefined) {
     return false;
   }
-  return new Promise((resolveResult) => {
-    const child = spawn(
-      invocation.executable,
-      workerSpawnArgs(
-        invocation,
-        'create',
-        name,
-        String(directoryStat.dev),
-        String(directoryStat.ino),
-        String(mode)
-      ),
-      {
-        cwd: directory,
-        stdio: ['pipe', 'pipe', 'ignore'],
-        windowsHide: true,
-      }
-    );
-    let stdout = '';
-    child.stdout.setEncoding('utf-8');
-    child.stdout.on('data', (chunk: string) => {
-      stdout += chunk;
-    });
-    child.on('error', () => {
-      resolveResult(false);
-    });
-    child.on('close', (code) => {
-      resolveResult(code === 0 && stdout === 'created');
-    });
-    child.stdin.on('error', () => {
-      resolveResult(false);
-    });
-    child.stdin.end(content);
-  });
+  const status = await requestWorkerOperation(
+    root,
+    invocation,
+    directory,
+    'create',
+    [name, String(directoryStat.dev), String(directoryStat.ino), String(mode)],
+    content
+  );
+  return status === 'created';
 }
 
 async function visitDirectory(
@@ -1006,7 +1110,7 @@ async function openOrCreateAncestorDirectories(
       return undefined;
     }
     const parentStat = await guards.at(-1)!.handle.stat();
-    if (!(await guardedMkdir(current, segment, parentStat))) {
+    if (!(await guardedMkdir(root, current, segment, parentStat))) {
       await closeDirectoryGuards(guards);
       return undefined;
     }
@@ -1023,6 +1127,7 @@ async function openOrCreateAncestorDirectories(
 }
 
 async function guardedMkdir(
+  root: string,
   directory: string,
   name: string,
   directoryStat: FileIdentity
@@ -1031,26 +1136,12 @@ async function guardedMkdir(
   if (invocation === undefined) {
     return false;
   }
-  try {
-    const result = await execFileAsync(
-      invocation.executable,
-      workerSpawnArgs(
-        invocation,
-        'mkdir',
-        name,
-        String(directoryStat.dev),
-        String(directoryStat.ino)
-      ),
-      {
-        cwd: directory,
-        encoding: 'utf-8',
-        windowsHide: true,
-      }
-    );
-    return result.stdout === 'ready';
-  } catch {
-    return false;
-  }
+  const status = await requestWorkerOperation(root, invocation, directory, 'mkdir', [
+    name,
+    String(directoryStat.dev),
+    String(directoryStat.ino),
+  ]);
+  return status === 'ready';
 }
 
 async function closeDirectoryGuards(guards: DirectoryGuard[]): Promise<void> {

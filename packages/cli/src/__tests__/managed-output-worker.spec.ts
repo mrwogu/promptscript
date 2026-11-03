@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  handleServeRequest,
   MANAGED_OUTPUT_WORKER_COMMAND,
   performManagedOutputOperation,
   runManagedOutputWorkerProtocol,
@@ -409,6 +410,103 @@ describe('managed output worker protocol', () => {
       expect((await lstat(join(project, 'hooks'))).isDirectory()).toBe(true);
     }
   );
+
+  describe('serve mode', () => {
+    function serveInProcess(request: unknown): unknown {
+      const originalCwd = process.cwd();
+      try {
+        return JSON.parse(
+          handleServeRequest(typeof request === 'string' ? request : JSON.stringify(request))
+        ) as unknown;
+      } finally {
+        process.chdir(originalCwd);
+      }
+    }
+
+    it('creates a file in the requested directory after the identity check', async () => {
+      const project = await createProject('worker-serve-');
+      const directory = await stat(project);
+
+      const answer = serveInProcess({
+        id: 7,
+        directory: project,
+        op: 'create',
+        args: ['out.md', String(directory.dev), String(directory.ino), '420'],
+        content: Buffer.from('hello').toString('base64'),
+      });
+
+      expect(answer).toEqual({ id: 7, status: 'created' });
+      expect(await readFile(join(project, 'out.md'), 'utf-8')).toBe('hello');
+    });
+
+    it('skips a directory whose identity changed', async () => {
+      const project = await createProject('worker-serve-');
+      const directory = await stat(project);
+
+      const answer = serveInProcess({
+        id: 1,
+        directory: project,
+        op: 'mkdir',
+        args: ['hooks', String(directory.dev), String(Number(directory.ino) + 1)],
+      });
+
+      expect(answer).toEqual({ id: 1, status: 'skipped' });
+      await expect(lstat(join(project, 'hooks'))).rejects.toMatchObject({ code: 'ENOENT' });
+    });
+
+    it('answers malformed and failing requests with an error', async () => {
+      const project = await createProject('worker-serve-');
+
+      expect(serveInProcess('not json')).toEqual({ id: -1, error: true });
+      expect(serveInProcess({ id: 2, directory: project })).toEqual({ id: -1, error: true });
+      expect(
+        serveInProcess({ id: 3, directory: join(project, 'missing'), op: 'mkdir', args: [] })
+      ).toEqual({ id: 3, error: true });
+    });
+
+    it.skipIf(!canStripTypes)('serves many requests from one spawned process', async () => {
+      const project = await createProject('worker-serve-spawned-');
+      const directory = await stat(project);
+      const requests = ['a.md', 'b.md', 'c.md'].map((name, id) => ({
+        id,
+        directory: project,
+        op: 'create',
+        args: [name, String(directory.dev), String(directory.ino), '420'],
+        content: Buffer.from(name).toString('base64'),
+      }));
+
+      const stdout = await new Promise<string>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          [workerPath, MANAGED_OUTPUT_WORKER_COMMAND, 'serve'],
+          {
+            cwd: project,
+            stdio: ['pipe', 'pipe', 'pipe'],
+          }
+        );
+        let output = '';
+        child.stdout.setEncoding('utf-8');
+        child.stdout.on('data', (chunk: string) => {
+          output += chunk;
+        });
+        child.on('error', reject);
+        child.on('close', () => resolve(output));
+        child.stdin.end(requests.map((request) => `${JSON.stringify(request)}\n`).join(''));
+      });
+
+      expect(
+        stdout
+          .trim()
+          .split('\n')
+          .map((line) => JSON.parse(line) as unknown)
+      ).toEqual([
+        { id: 0, status: 'created' },
+        { id: 1, status: 'created' },
+        { id: 2, status: 'created' },
+      ]);
+      expect(await readFile(join(project, 'c.md'), 'utf-8')).toBe('c.md');
+    });
+  });
 
   it('dispatches the hidden command from argv at import time', async () => {
     const originalArgv = process.argv;
