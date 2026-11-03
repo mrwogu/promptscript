@@ -53,6 +53,42 @@ describe('presentation metadata', () => {
     ]);
   });
 
+  it('keeps the heading in the text when the block has an explicit @header', () => {
+    const entries: BlockEntry[] = [
+      {
+        type: 'PresentationEntry',
+        title: 'Background',
+        source: 'explicit',
+        loc: LOC,
+        titleLoc: LOC,
+      },
+      { type: 'TextEntry', text: '## A\nText a.', loc: LOC },
+    ];
+
+    expect(normalizeLegacyHeadingEntries('context', entries, '1.5.0')).toBe(entries);
+  });
+
+  it('still promotes the heading when @header names another section', () => {
+    const entries: BlockEntry[] = [
+      {
+        type: 'PresentationEntry',
+        sectionId: 'architecture',
+        sectionLoc: LOC,
+        title: 'Design',
+        source: 'explicit',
+        loc: LOC,
+        titleLoc: LOC,
+      },
+      { type: 'TextEntry', text: '## A\nText a.', loc: LOC },
+    ];
+
+    expect(normalizeLegacyHeadingEntries('context', entries, '1.5.0')).toMatchObject([
+      { type: 'PresentationEntry', title: 'Design', source: 'explicit' },
+      { type: 'PresentationEntry', title: 'A', source: 'legacy' },
+      { type: 'TextEntry', text: 'Text a.' },
+    ]);
+  });
+
   it('ignores whitespace-only headings in linear time', () => {
     const entries: BlockEntry[] = [
       {

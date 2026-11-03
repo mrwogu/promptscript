@@ -503,6 +503,23 @@ describe('parse', () => {
       ]);
     });
 
+    it('should keep the initial heading as text when @header is explicit', () => {
+      const result = parse(`
+        @meta { id: "header" syntax: "1.5.0" }
+        @context {
+          @header "Background"
+          """## A
+          Text a."""
+        }
+      `);
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.ast?.blocks[0]?.canonicalBody?.entries).toMatchObject([
+        { type: 'PresentationEntry', title: 'Background', source: 'explicit' },
+        { type: 'TextEntry', text: '## A\n          Text a.' },
+      ]);
+    });
+
     it('should preserve initial headings in unregistered custom blocks', () => {
       const result = parse(`
         @meta { id: "custom" syntax: "1.5.0" }

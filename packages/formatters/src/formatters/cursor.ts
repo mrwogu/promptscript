@@ -941,9 +941,8 @@ ${fullText}`;
       const archMatch = this.extractSectionWithCodeBlock(text, '## Architecture');
       const remainingText = archMatch ? text.replace(archMatch, '').trim() : text.trim();
       if (remainingText) {
-        // Downgrade "## " headings to "### " so they do not collide with the
-        // formatter's own h2 section headings.
-        const downgradedText = remainingText.replace(/^([ \t]*)## /gm, '$1### ');
+        // Shift headings below the formatter's h2 sections, keeping their relative levels
+        const downgradedText = this.shiftContextHeadings(remainingText);
         body = downgradedText.trim();
       }
     }

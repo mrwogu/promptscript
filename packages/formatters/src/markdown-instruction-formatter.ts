@@ -789,7 +789,7 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
    *
    * The "## Architecture" subsection (with code block) is stripped because
    * it is already rendered separately by {@link architecture}. Remaining
-   * "## " headings are downgraded to "### " to avoid clashing with the
+   * headings are shifted below h2, keeping their relative levels, to avoid clashing with the
    * formatter's own h2 section headings. When no @identity block exists,
    * the project() fallback already consumes the full @context text, so only
    * the generic properties are rendered to avoid duplication.
@@ -810,8 +810,8 @@ export abstract class MarkdownInstructionFormatter extends BaseFormatter {
       // Dedent so trimmed first line does not leave later lines nested
       const remainingText = strippedText.trim();
       if (remainingText) {
-        // Downgrade "## " headings to "### " to avoid h2 collisions with formatter sections
-        const downgradedText = remainingText.replace(/^([ \t]*)## /gm, '$1### ');
+        // Shift headings below the formatter's h2 sections, keeping their relative levels
+        const downgradedText = this.shiftContextHeadings(remainingText);
         body = this.normalizeMarkdownForPrettier(downgradedText).trim();
       }
     }

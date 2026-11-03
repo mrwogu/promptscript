@@ -450,6 +450,9 @@ export abstract class BaseFormatter implements Formatter {
    * - Adds blank lines before lists when preceded by text
    * - Adds blank lines before code blocks when preceded by text
    * - Escapes markdown special characters in paths
+   *
+   * The result must keep the meaning of the input: table cells, code spans
+   * and list nesting (including tight lists) are never changed.
    */
   protected normalizeMarkdownForPrettier(content: string): string {
     const lines = content.split('\n');
@@ -481,9 +484,18 @@ export abstract class BaseFormatter implements Formatter {
 
     // Process lines
     const result: string[] = [];
-    let inTable = false;
     let tableLines: string[] = [];
+    // True while the current block belongs to a list (items, continuation
+    // lines, nested content). No blank lines go in there, so tight lists
+    // stay tight.
+    let inList = false;
     inCodeBlock = false;
+
+    const flushTable = (): void => {
+      if (tableLines.length === 0) return;
+      result.push(...this.formatMarkdownTable(tableLines));
+      tableLines = [];
+    };
 
     for (const line of lines) {
       const trimmedLine = line.trimEnd();
@@ -502,10 +514,15 @@ export abstract class BaseFormatter implements Formatter {
 
       // Inside code blocks, just use unindented line
       if (inCodeBlock || unindentedLine.startsWith('```')) {
+        flushTable();
         // Add blank line before code block if previous line is non-empty text
         if (isCodeBlockStart) {
           const prevLine = result.length > 0 ? (result[result.length - 1] ?? '') : '';
-          if (prevLine.trim() && !prevLine.startsWith('#')) {
+          // An indented fence inside a list belongs to the item, a fence at
+          // column 0 ends the list
+          const fenceInList = inList && /^\s/.test(unindentedLine);
+          if (!fenceInList) inList = false;
+          if (prevLine.trim() && !prevLine.startsWith('#') && !fenceInList) {
             result.push('');
           }
         }
@@ -515,10 +532,11 @@ export abstract class BaseFormatter implements Formatter {
 
       let processedLine = unindentedLine;
 
-      // Escape markdown special characters in path-like content (outside code blocks)
-      // Only escape __name__ outside of backticks
-      // __name__ → \_\_name\_\_ (prevents bold)
-      processedLine = processedLine.replace(/__([^_]+)__/g, '\\_\\_$1\\_\\_');
+      // Escape markdown special characters in path-like content, outside code spans
+      processedLine = this.mapOutsideCodeSpans(processedLine, (part) =>
+        // __name__ -> \_\_name\_\_ (prevents bold)
+        part.replace(/__([^_]+)__/g, String.raw`\_\_$1\_\_`)
+      );
       // Escape * in glob patterns (like packages/* or .cursor/rules/*.md) outside backticks
       processedLine = this.escapeGlobAsteriskOutsideBackticks(processedLine);
 
@@ -533,42 +551,86 @@ export abstract class BaseFormatter implements Formatter {
 
       // Detect table rows (lines starting with |)
       if (processedLine.trimStart().startsWith('|') && processedLine.trimEnd().endsWith('|')) {
-        inTable = true;
-        tableLines.push(processedLine.trim());
-      } else {
-        // If we were in a table, format and flush it
-        if (inTable && tableLines.length > 0) {
-          result.push(...this.formatMarkdownTable(tableLines));
-          tableLines = [];
-          inTable = false;
-        }
-
-        const isListItem = processedLine.trimStart().startsWith('- ');
-        const isNumberedItem = /^\d+\.\s/.test(processedLine.trimStart());
-        const prevLineTrimmed = prevLine?.trimStart() ?? '';
-        const isPrevListItem = prevLineTrimmed.startsWith('- ') || /^\d+\.\s/.test(prevLineTrimmed);
-        // Check if previous line ends with colon (like "Security mindset:")
-        const prevEndsWithColon = prevLine?.trimEnd().endsWith(':') ?? false;
-
-        // Add blank line before list item if:
-        // - previous line was non-empty text that's not a list item, header, or blank
-        // - OR previous line ends with colon (like "Security mindset:")
-        if ((isListItem || isNumberedItem) && prevLine && !isPrevListItem && !isHeader) {
-          result.push('');
-        } else if ((isListItem || isNumberedItem) && prevEndsWithColon) {
-          result.push('');
-        }
-
-        result.push(processedLine);
+        tableLines.push(processedLine);
+        continue;
       }
+      flushTable();
+
+      const trimmedStart = processedLine.trimStart();
+      const isListItem = /^[-*+]\s/.test(trimmedStart) || /^\d+[.)]\s/.test(trimmedStart);
+      const isIndented = processedLine.length > trimmedStart.length;
+      const prevIsBlank = !prevLine?.trim();
+
+      if (!trimmedStart) {
+        result.push(processedLine);
+        continue;
+      }
+
+      // A heading, or a paragraph at column 0 after a blank line, ends the list
+      const isHeading = /^#{1,6}(\s|$)/.test(trimmedStart);
+      if (!isIndented && (isHeading || (!isListItem && prevIsBlank))) {
+        inList = false;
+      }
+
+      // Add a blank line before a list that follows a paragraph. Inside a
+      // list nothing is added, so items, continuation lines and nested
+      // content keep their tight layout.
+      if (isListItem && !inList && prevLine && !prevIsBlank && !isHeader) {
+        result.push('');
+      }
+      if (isListItem) inList = true;
+
+      result.push(processedLine);
     }
 
     // Handle table at end of content
-    if (tableLines.length > 0) {
-      result.push(...this.formatMarkdownTable(tableLines));
-    }
+    flushTable();
 
     return result.join('\n');
+  }
+
+  /**
+   * Apply `transform` to the parts of a line that are outside inline code
+   * spans. Code spans open and close with backtick runs of the same length.
+   */
+  private mapOutsideCodeSpans(line: string, transform: (part: string) => string): string {
+    if (!line.includes('`')) return transform(line);
+    let output = '';
+    let index = 0;
+    let textStart = 0;
+    while (index < line.length) {
+      if (line[index] !== '`') {
+        index++;
+        continue;
+      }
+      let runEnd = index;
+      while (line[runEnd] === '`') runEnd++;
+      const fence = line.slice(index, runEnd);
+      const close = this.findClosingBacktickRun(line, runEnd, fence.length);
+      if (close === -1) {
+        index = runEnd;
+        continue;
+      }
+      output += transform(line.slice(textStart, index)) + line.slice(index, close + fence.length);
+      index = close + fence.length;
+      textStart = index;
+    }
+    return output + transform(line.slice(textStart));
+  }
+
+  private findClosingBacktickRun(line: string, from: number, length: number): number {
+    let index = from;
+    while (index < line.length) {
+      if (line[index] !== '`') {
+        index++;
+        continue;
+      }
+      let runEnd = index;
+      while (line[runEnd] === '`') runEnd++;
+      if (runEnd - index === length) return index;
+      index = runEnd;
+    }
+    return -1;
   }
 
   /**
@@ -576,18 +638,8 @@ export abstract class BaseFormatter implements Formatter {
    * Prettier escapes these to prevent them from being interpreted as emphasis markers.
    */
   private escapeGlobAsteriskOutsideBackticks(line: string): string {
-    // Split by backticks to identify code spans
-    const parts = line.split('`');
-    return parts
-      .map((part, index) => {
-        // Even indices are outside backticks, odd indices are inside
-        if (index % 2 === 0) {
-          // Escape * when preceded by / (glob patterns like packages/* or .cursor/rules/*.md)
-          return part.replace(/\/\*/g, '/\\*');
-        }
-        return part;
-      })
-      .join('`');
+    // Escape * when preceded by / (glob patterns like packages/* or .cursor/rules/*.md)
+    return this.mapOutsideCodeSpans(line, (part) => part.replaceAll('/*', String.raw`/\*`));
   }
 
   /**
@@ -652,45 +704,130 @@ export abstract class BaseFormatter implements Formatter {
 
   /**
    * Format a markdown table to match Prettier output.
-   * Prettier removes trailing whitespace from cells.
+   * Prettier removes trailing whitespace from cells. Only a real table (a
+   * header row followed by a delimiter row) is touched; anything else is
+   * kept as written. The table keeps its indentation, so a table inside a
+   * list item stays there.
    */
   private formatMarkdownTable(tableLines: string[]): string[] {
     if (tableLines.length === 0) return [];
 
-    // Parse table into cells
-    const rows = tableLines.map((line) =>
-      line
-        .split('|')
-        .slice(1, -1) // Remove empty first/last from split
-        .map((cell) => cell.trim())
-    );
-
-    // Calculate column widths (minimum width for content)
+    const indent = /^\s*/.exec(tableLines[0] ?? '')?.[0] ?? '';
+    const rows = tableLines.map((line) => this.splitTableRow(line.trim()));
     const colCount = rows[0]?.length ?? 0;
-    const colWidths: number[] = new Array(colCount).fill(0);
-
-    for (const row of rows) {
-      for (let i = 0; i < row.length; i++) {
-        const cell = row[i] ?? '';
-        // For separator row, use 3 as minimum (---)
-        const width = cell.match(/^-+$/) ? 3 : cell.length;
-        colWidths[i] = Math.max(colWidths[i] ?? 0, width);
-      }
+    const delimiter = rows[1];
+    const isDelimiterRow =
+      delimiter?.length === colCount && delimiter.every((cell) => /^:?-+:?$/.test(cell));
+    if (!isDelimiterRow || rows.some((row) => row.length !== colCount)) {
+      return tableLines;
     }
 
+    // Calculate column widths (minimum width for content)
+    const colWidths: number[] = new Array(colCount).fill(0);
+    rows.forEach((row, rowIndex) => {
+      row.forEach((cell, i) => {
+        // The delimiter row needs at least 3 characters (---)
+        const width = rowIndex === 1 ? 3 : cell.length;
+        colWidths[i] = Math.max(colWidths[i] ?? 0, width);
+      });
+    });
+
     // Rebuild table with proper formatting
-    return rows.map((row) => {
+    return rows.map((row, rowIndex) => {
       const cells = row.map((cell, colIndex) => {
         const width = colWidths[colIndex] ?? 0;
-        // Separator row uses dashes
-        if (cell.match(/^-+$/)) {
-          return '-'.repeat(width);
-        }
-        // Pad cell content
+        if (rowIndex === 1) return this.formatDelimiterCell(cell, width);
         return cell.padEnd(width);
       });
-      return '| ' + cells.join(' | ') + ' |';
+      return indent + '| ' + cells.join(' | ') + ' |';
     });
+  }
+
+  /**
+   * Split a table row into trimmed cells. A pipe escaped with a backslash
+   * (also inside a code span, as GFM requires) does not split cells.
+   */
+  private splitTableRow(row: string): string[] {
+    const cells: string[] = [];
+    let current = '';
+    for (let i = 0; i < row.length; i++) {
+      const char = row[i];
+      if (char === '\\' && i + 1 < row.length) {
+        current += char + row[i + 1];
+        i++;
+        continue;
+      }
+      if (char === '|') {
+        cells.push(current);
+        current = '';
+        continue;
+      }
+      current += char;
+    }
+    cells.push(current);
+    // Drop the empty parts before the leading and after the trailing pipe
+    return cells.slice(1, -1).map((cell) => cell.trim());
+  }
+
+  private formatDelimiterCell(cell: string, width: number): string {
+    const left = cell.startsWith(':');
+    const right = cell.endsWith(':');
+    const dashes = Math.max(1, width - (left ? 1 : 0) - (right ? 1 : 0));
+    return (left ? ':' : '') + '-'.repeat(dashes) + (right ? ':' : '');
+  }
+
+  /**
+   * Shift all ATX headings by the same amount so the shallowest heading lands
+   * at targetLevel. Levels clamp to h1-h6 and fenced code blocks are ignored.
+   */
+  protected shiftHeadingsToMinLevel(text: string, targetLevel: number): string {
+    const headingPattern = /^(\s*)(#{1,6}) /;
+    let minLevel = Infinity;
+    this.mapHeadingsOutsideCodeFences(text, (line) => {
+      const match = headingPattern.exec(line);
+      if (match?.[2]) minLevel = Math.min(minLevel, match[2].length);
+      return line;
+    });
+    if (minLevel === Infinity) return text;
+    const delta = targetLevel - minLevel;
+    if (delta === 0) return text;
+    return this.mapHeadingsOutsideCodeFences(text, (line) => {
+      return line.replace(headingPattern, (_match, indent: string, hashes: string) => {
+        const level = Math.max(1, Math.min(6, hashes.length + delta));
+        return `${indent}${'#'.repeat(level)} `;
+      });
+    });
+  }
+
+  private mapHeadingsOutsideCodeFences(text: string, mapLine: (line: string) => string): string {
+    let inFence = false;
+    return text
+      .split('\n')
+      .map((line) => {
+        if (/^\s*(`{3,}|~{3,})/.test(line)) {
+          inFence = !inFence;
+          return line;
+        }
+        return inFence ? line : mapLine(line);
+      })
+      .join('\n');
+  }
+
+  /**
+   * Shift @context headings so none of them reaches the formatter's own h1
+   * and h2 levels. All headings move by the same amount, so their relative
+   * levels stay as written. Text that already starts at h3 or deeper is
+   * kept as is.
+   */
+  protected shiftContextHeadings(text: string): string {
+    const levels: number[] = [];
+    this.mapHeadingsOutsideCodeFences(text, (line) => {
+      const match = /^(\s*)(#{1,6}) /.exec(line);
+      if (match?.[2]) levels.push(match[2].length);
+      return line;
+    });
+    if (levels.length === 0 || Math.min(...levels) >= 3) return text;
+    return this.shiftHeadingsToMinLevel(text, 3);
   }
 
   /**
@@ -1062,6 +1199,40 @@ export abstract class BaseFormatter implements Formatter {
       return JSON.stringify(value);
     }
     return `'${value}'`;
+  }
+
+  /**
+   * Remove top-level keys (with their nested lines) from raw SKILL.md
+   * frontmatter. Used for PromptScript-only keys such as `params`, which are
+   * resolved at compile time and mean nothing to the target tool.
+   */
+  protected removeRawFrontmatterKeys(rawFrontmatter: string, keys: ReadonlySet<string>): string {
+    const lines = rawFrontmatter.split('\n');
+    const kept: string[] = [];
+    let skipping = false;
+    for (const line of lines) {
+      const isTopLevel = line.length > 0 && !/^[ \t]/.test(line);
+      if (skipping && !isTopLevel) continue;
+      skipping = false;
+      if (isTopLevel) {
+        const separator = line.indexOf(':');
+        const key = separator > 0 ? this.unquoteYamlKey(line.slice(0, separator).trim()) : '';
+        if (keys.has(key)) {
+          skipping = true;
+          continue;
+        }
+      }
+      kept.push(line);
+    }
+    return kept.join('\n');
+  }
+
+  private unquoteYamlKey(key: string): string {
+    const quote = key[0];
+    if ((quote === "'" || quote === '"') && key.length > 1 && key.endsWith(quote)) {
+      return key.slice(1, -1);
+    }
+    return key;
   }
 
   /**

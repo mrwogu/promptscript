@@ -258,43 +258,6 @@ export class FactoryFormatter extends MarkdownInstructionFormatter {
     return this.normalizeMarkdownForPrettier(shiftedText).trim();
   }
 
-  /**
-   * Shift all ATX headings by the same amount so the shallowest heading lands
-   * at targetLevel. Levels clamp to h1-h6 and fenced code blocks are ignored.
-   */
-  private shiftHeadingsToMinLevel(text: string, targetLevel: number): string {
-    const headingPattern = /^(\s*)(#{1,6}) /;
-    let minLevel = Infinity;
-    this.mapHeadingsOutsideCodeFences(text, (line) => {
-      const match = line.match(headingPattern);
-      if (match?.[2]) minLevel = Math.min(minLevel, match[2].length);
-      return line;
-    });
-    if (minLevel === Infinity) return text;
-    const delta = targetLevel - minLevel;
-    if (delta === 0) return text;
-    return this.mapHeadingsOutsideCodeFences(text, (line) => {
-      return line.replace(headingPattern, (_match, indent: string, hashes: string) => {
-        const level = Math.max(1, Math.min(6, hashes.length + delta));
-        return `${indent}${'#'.repeat(level)} `;
-      });
-    });
-  }
-
-  private mapHeadingsOutsideCodeFences(text: string, mapLine: (line: string) => string): string {
-    let inFence = false;
-    return text
-      .split('\n')
-      .map((line) => {
-        if (/^\s*(`{3,}|~{3,})/.test(line)) {
-          inFence = !inFence;
-          return line;
-        }
-        return inFence ? line : mapLine(line);
-      })
-      .join('\n');
-  }
-
   override format(input: Program, options?: FormatOptions): FormatterOutput {
     const ast = applyAgentTargeting(input, this.name, options?.targetConfig);
     if (
