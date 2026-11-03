@@ -789,38 +789,44 @@ export class ClaudeFormatter extends BaseFormatter {
     for (const [name, value] of Object.entries(props)) {
       const commandName = name.replace(/^\/+/, '');
       if (!this.isSafeName(commandName)) continue;
-
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        // TextContent from auto-discovered command files or triple-quoted strings
-        if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent') {
-          const content = this.valueToString(value);
-          if (content.includes('\n')) {
-            commands.push({
-              name: commandName,
-              description: commandName,
-              content,
-            });
-          }
-          continue;
-        }
-
-        const obj = value as Record<string, Value>;
-
-        // Generate command file if it has prompt: true or multiline content
-        if (obj['prompt'] === true || obj['content']) {
-          commands.push({
-            name: commandName,
-            description: obj['description'] ? this.valueToString(obj['description']) : name,
-            argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
-            allowedTools: this.parseStringArray(obj['allowedTools']),
-            model: this.claudeModel(obj['model'], options),
-            content: obj['content'] ? this.valueToString(obj['content']) : '',
-          });
-        }
-      }
+      const command = this.commandFromShortcut(name, commandName, value, options);
+      if (command) commands.push(command);
     }
 
     return commands;
+  }
+
+  /**
+   * Build one command from a shortcut value, or undefined when the shortcut
+   * is not a command (a one line text or an object without prompt/content).
+   */
+  private commandFromShortcut(
+    name: string,
+    commandName: string,
+    value: Value,
+    options?: FormatOptions
+  ): ClaudeCommandConfig | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+
+    // TextContent from auto-discovered command files or triple-quoted strings
+    if ('type' in value && (value as Record<string, unknown>)['type'] === 'TextContent') {
+      const content = this.valueToString(value);
+      return content.includes('\n')
+        ? { name: commandName, description: commandName, content }
+        : undefined;
+    }
+
+    const obj = value as Record<string, Value>;
+    // Generate command file if it has prompt: true or multiline content
+    if (obj['prompt'] !== true && !obj['content']) return undefined;
+    return {
+      name: commandName,
+      description: obj['description'] ? this.valueToString(obj['description']) : name,
+      argumentHint: obj['argumentHint'] ? this.valueToString(obj['argumentHint']) : undefined,
+      allowedTools: this.parseStringArray(obj['allowedTools']),
+      model: this.claudeModel(obj['model'], options),
+      content: obj['content'] ? this.valueToString(obj['content']) : '',
+    };
   }
 
   /**
@@ -985,9 +991,11 @@ export class ClaudeFormatter extends BaseFormatter {
     const lines: string[] = [];
 
     // YAML frontmatter
-    lines.push('---');
-    lines.push(`name: ${config.name}`);
-    lines.push(`description: ${this.yamlString(config.description)}`);
+    lines.push(
+      '---',
+      `name: ${config.name}`,
+      `description: ${this.yamlString(config.description)}`
+    );
 
     if (config.tools && config.tools.length > 0) {
       const arr = config.tools.map((t) => `'${t}'`).join(', ');
