@@ -395,6 +395,8 @@ type PreflightRegistryImport =
 
 /** Cache key prefix for a file resolved as the entry, not as an import. */
 const ENTRY_CACHE_PREFIX = '\0entry:';
+// An @inherit target can read the native sources of its own project, see inheritedLocalPath.
+const INHERIT_CACHE_PREFIX = '\0inherit:';
 
 interface ParsedFile {
   readonly ast: Program;
@@ -575,7 +577,8 @@ export class Resolver {
   private async resolveWithContext(
     entryPath: string,
     context: ResolutionContext,
-    compositionContext?: CompositionResolutionContext
+    compositionContext?: CompositionResolutionContext,
+    viaInherit = false
   ): Promise<ResolvedAST> {
     const absPath = this.loader.toAbsolutePath(entryPath);
 
@@ -587,7 +590,11 @@ export class Resolver {
 
     // The entry file also adds skills found on disk, so it has its own cache entry.
     const isEntry = context.resolving.size === 0;
-    const cacheKey = isEntry ? `${ENTRY_CACHE_PREFIX}${absPath}` : absPath;
+    const cacheKey = isEntry
+      ? `${ENTRY_CACHE_PREFIX}${absPath}`
+      : viaInherit
+        ? `${INHERIT_CACHE_PREFIX}${absPath}`
+        : absPath;
 
     // Check cache
     if (!compositionContext && this.cacheEnabled && this.cache.has(cacheKey)) {
@@ -599,7 +606,13 @@ export class Resolver {
     this.logger.verbose(`Parsing ${absPath}`);
 
     try {
-      const result = await this.doResolve(absPath, context, compositionContext, isEntry);
+      const result = await this.doResolve(
+        absPath,
+        context,
+        compositionContext,
+        isEntry,
+        viaInherit
+      );
 
       if (!compositionContext && this.cacheEnabled) {
         this.logger.debug(`Cache store: ${absPath}`);
@@ -619,7 +632,8 @@ export class Resolver {
     absPath: string,
     context: ResolutionContext,
     compositionContext?: CompositionResolutionContext,
-    isEntry = true
+    isEntry = true,
+    viaInherit = false
   ): Promise<ResolvedAST> {
     const sources: string[] = [absPath];
     const dependencies = new Set<string>([absPath]);
@@ -755,7 +769,8 @@ export class Resolver {
     // Preserve the parent fallback for custom local paths.
     // An inherited project reads its native skills, commands and agents from
     // its own .promptscript directory, like it does when it compiles alone.
-    const inheritedLocalPath = this.inheritedLocalPath(absPath);
+    // Only for @inherit: a @use of the same file keeps this project's sources.
+    const inheritedLocalPath = viaInherit ? this.inheritedLocalPath(absPath) : undefined;
     const localDiscoveryPath = inheritedLocalPath ?? this.loader.getLocalPath();
     const configuredProjectRoot = inheritedLocalPath
       ? dirname(inheritedLocalPath)
@@ -1154,8 +1169,10 @@ export class Resolver {
    * Count nodes in AST for debug output.
    */
   /**
-   * The `.promptscript` directory of another local project when `absPath` is
-   * that project's file (for example `@inherit ../tool/.promptscript/project`).
+   * The `.promptscript` directory of another local project when the
+   * `@inherit` target `absPath` is that project's file (for example
+   * `@inherit ../tool/.promptscript/project`). `@use` keeps the current
+   * project's sources.
    * Files of this project, the registry and the Git cache return undefined.
    */
   private inheritedLocalPath(absPath: string): string | undefined {
@@ -1384,7 +1401,7 @@ export class Resolver {
       if (parentPath.startsWith(REGISTRY_MARKER_PREFIX)) {
         parent = await this.resolveRegistryImport(parentPath, errors, context);
       } else {
-        parent = await this.resolveWithContext(parentPath, context);
+        parent = await this.resolveWithContext(parentPath, context, undefined, true);
       }
       sources.push(...parent.sources);
       addDependencyPaths(dependencies, parent.dependencies ?? []);

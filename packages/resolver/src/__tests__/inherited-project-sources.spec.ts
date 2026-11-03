@@ -137,4 +137,29 @@ describe('native sources of an inherited project', () => {
     const content = skill(result.ast!.blocks, 'check-code')['content'] as TextContent;
     expect(content.value).toContain('Workspace check.');
   });
+
+  it('keeps the workspace sources for a @use of the same file', async () => {
+    const { workspace } = await createLayout(false);
+    await put(
+      join(workspace, '.promptscript/project.prs'),
+      `@meta {
+  id: "workspace"
+  syntax: "1.4.0"
+}
+
+@use ../tool/.promptscript/project
+`
+    );
+
+    const result = await resolverFor(workspace).resolve(
+      join(workspace, '.promptscript/project.prs')
+    );
+
+    expect(result.errors).toEqual([]);
+    const blocks = result.ast!.blocks;
+    expect(skill(blocks, 'check-code')['content']).toBeUndefined();
+    expect(Object.keys(properties(blocks, 'skills'))).not.toContain('write-notes');
+    expect(Object.keys(properties(blocks, 'shortcuts'))).not.toContain('/ship');
+    expect(Object.keys(properties(blocks, 'agents'))).not.toContain('helper');
+  });
 });
