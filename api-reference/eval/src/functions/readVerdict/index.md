@@ -8,7 +8,7 @@
 
 > **readVerdict**(`text`): [`JudgeVerdict`](https://getpromptscript.dev/api-reference/eval/src/interfaces/JudgeVerdict/index.md) \| `undefined`
 
-Defined in: [eval/src/judge.ts:80](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/judge.ts#L80)
+Defined in: [eval/src/judge.ts:80](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/judge.ts#L80)
 
 The verdict of one judge run: the response must be a JSON object with
 exactly `verdict` (`pass` or `fail`) and `reason` (a string), each key once,

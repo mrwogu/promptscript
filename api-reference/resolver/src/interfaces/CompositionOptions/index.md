@@ -6,7 +6,7 @@
 
 # Interface: CompositionOptions
 
-Defined in: [resolver/src/skill-composition.ts:44](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L44)
+Defined in: [resolver/src/skill-composition.ts:44](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L44)
 
 Options for skill composition resolution.
 
@@ -16,7 +16,7 @@ Options for skill composition resolution.
 
 > **currentFile**: `string`
 
-Defined in: [resolver/src/skill-composition.ts:53](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L53)
+Defined in: [resolver/src/skill-composition.ts:53](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L53)
 
 Absolute path of the file being resolved (for cycle detection).
 
@@ -26,7 +26,7 @@ Absolute path of the file being resolved (for cycle detection).
 
 > `optional` **depth?**: `number`
 
-Defined in: [resolver/src/skill-composition.ts:59](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L59)
+Defined in: [resolver/src/skill-composition.ts:59](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L59)
 
 Current nesting depth (0-based).
 
@@ -36,7 +36,7 @@ Current nesting depth (0-based).
 
 > `optional` **projectRoot?**: `string`
 
-Defined in: [resolver/src/skill-composition.ts:55](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L55)
+Defined in: [resolver/src/skill-composition.ts:55](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L55)
 
 Project root used to build portable `composed-from` markers.
 
@@ -46,7 +46,7 @@ Project root used to build portable `composed-from` markers.
 
 > `optional` **resolutionStack?**: `Set`\<`string`\>
 
-Defined in: [resolver/src/skill-composition.ts:57](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L57)
+Defined in: [resolver/src/skill-composition.ts:57](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L57)
 
 Accumulated resolution stack for cycle detection.
 
@@ -56,7 +56,7 @@ Accumulated resolution stack for cycle detection.
 
 > **resolveFile**: (`absPath`, `context?`) => `Promise`\<[`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md) \| `ResolvedCompositionFile`\>
 
-Defined in: [resolver/src/skill-composition.ts:46](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L46)
+Defined in: [resolver/src/skill-composition.ts:46](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L46)
 
 Resolve a sub-skill file through the full resolver pipeline.
 
@@ -80,7 +80,7 @@ Resolve a sub-skill file through the full resolver pipeline.
 
 > **resolvePath**: (`ref`, `fromFile`) => `string`
 
-Defined in: [resolver/src/skill-composition.ts:51](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L51)
+Defined in: [resolver/src/skill-composition.ts:51](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L51)
 
 Resolve a path reference string to an absolute path.
 

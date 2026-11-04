@@ -8,7 +8,7 @@
 
 > **getHighestKnownSyntaxVersion**(): `string`
 
-Defined in: [core/src/syntax-versions.ts:214](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/syntax-versions.ts#L214)
+Defined in: [core/src/syntax-versions.ts:214](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/syntax-versions.ts#L214)
 
 Get the highest syntax version in the registry, which can be above the
 default version that new files are written with.

@@ -8,7 +8,7 @@
 
 > **isTemplateExpression**(`value`): `value is TemplateExpression`
 
-Defined in: [core/src/template.ts:43](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/template.ts#L43)
+Defined in: [core/src/template.ts:43](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/template.ts#L43)
 
 Type guard to check if a value is a TemplateExpression.
 

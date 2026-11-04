@@ -8,7 +8,7 @@
 
 > **parseFileOrThrow**(`filePath`, `options?`): [`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)
 
-Defined in: [parser/src/parse.ts:336](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/parser/src/parse.ts#L336)
+Defined in: [parser/src/parse.ts:336](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/parser/src/parse.ts#L336)
 
 Parse a PromptScript file from disk, throwing on error.
 

@@ -8,7 +8,7 @@
 
 > **printProgram**(`program`, `comments?`): `string`
 
-Defined in: [parser/src/printer.ts:711](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/parser/src/printer.ts#L711)
+Defined in: [parser/src/printer.ts:711](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/parser/src/printer.ts#L711)
 
 Print a parsed program as canonical `.prs` source (2-space indent), in the
 order the author wrote it.

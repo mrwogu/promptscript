@@ -6,7 +6,7 @@
 
 # Interface: ModelTargetScheme
 
-Defined in: [core/src/model-catalog.ts:515](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L515)
+Defined in: [core/src/model-catalog.ts:515](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L515)
 
 How an agent target names models in its native `model` field.
 
@@ -20,7 +20,7 @@ tools accept names no catalog can list, such as gateway model ids,
 
 > `readonly` **keepsFloatingAliases**: `boolean`
 
-Defined in: [core/src/model-catalog.ts:524](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L524)
+Defined in: [core/src/model-catalog.ts:524](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L524)
 
 Write floating aliases (opus, sonnet, haiku, fable) as-is instead of resolving them
 
@@ -30,7 +30,7 @@ Write floating aliases (opus, sonnet, haiku, fable) as-is instead of resolving t
 
 > `readonly` **naming**: `"id"` \| `"displayName"` \| `"apiId"`
 
-Defined in: [core/src/model-catalog.ts:522](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L522)
+Defined in: [core/src/model-catalog.ts:522](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L522)
 
 Profile field written for a resolved model: the display name, the API id
 (a dated snapshot for older releases), or the dateless profile id
@@ -41,7 +41,7 @@ Profile field written for a resolved model: the display name, the API id
 
 > `readonly` `optional` **nativeValues?**: `Readonly`\<`Record`\<`string`, `string`\>\>
 
-Defined in: [core/src/model-catalog.ts:528](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L528)
+Defined in: [core/src/model-catalog.ts:528](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L528)
 
 Native spellings of values that are not catalog models, keyed by lower-case name
 
@@ -51,7 +51,7 @@ Native spellings of values that are not catalog models, keyed by lower-case name
 
 > `readonly` `optional` **providers?**: readonly `string`[]
 
-Defined in: [core/src/model-catalog.ts:517](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L517)
+Defined in: [core/src/model-catalog.ts:517](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L517)
 
 Providers whose models the target runs; every provider when omitted
 
@@ -61,6 +61,6 @@ Providers whose models the target runs; every provider when omitted
 
 > `readonly` **writesInherit**: `boolean`
 
-Defined in: [core/src/model-catalog.ts:526](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L526)
+Defined in: [core/src/model-catalog.ts:526](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L526)
 
 Write `inherit`; otherwise the field is omitted

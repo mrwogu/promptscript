@@ -6,7 +6,7 @@
 
 # Interface: PropertyProtectionPolicy
 
-Defined in: [core/src/types/policy.ts:57](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L57)
+Defined in: [core/src/types/policy.ts:57](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L57)
 
 Property-protection policy: prevents overriding specific properties.
 
@@ -20,7 +20,7 @@ Property-protection policy: prevents overriding specific properties.
 
 > `optional` **description?**: `string`
 
-Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L36)
+Defined in: [core/src/types/policy.ts:36](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L36)
 
 Human-readable description
 
@@ -34,7 +34,7 @@ Human-readable description
 
 > **kind**: `"property-protection"`
 
-Defined in: [core/src/types/policy.ts:58](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L58)
+Defined in: [core/src/types/policy.ts:58](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L58)
 
 Policy kind discriminator
 
@@ -48,7 +48,7 @@ Policy kind discriminator
 
 > **name**: `string`
 
-Defined in: [core/src/types/policy.ts:34](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L34)
+Defined in: [core/src/types/policy.ts:34](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L34)
 
 Unique policy name within the config
 
@@ -62,7 +62,7 @@ Unique policy name within the config
 
 > **properties**: `string`[]
 
-Defined in: [core/src/types/policy.ts:60](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L60)
+Defined in: [core/src/types/policy.ts:60](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L60)
 
 Properties that cannot be overridden
 
@@ -72,7 +72,7 @@ Properties that cannot be overridden
 
 > **severity**: [`PolicySeverity`](https://getpromptscript.dev/api-reference/core/src/type-aliases/PolicySeverity/index.md)
 
-Defined in: [core/src/types/policy.ts:40](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L40)
+Defined in: [core/src/types/policy.ts:40](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L40)
 
 Violation severity
 
@@ -86,6 +86,6 @@ Violation severity
 
 > `optional` **targetPattern?**: `string`
 
-Defined in: [core/src/types/policy.ts:62](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/policy.ts#L62)
+Defined in: [core/src/types/policy.ts:62](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/policy.ts#L62)
 
 Glob pattern for target skills (e.g., '@core/*'). If omitted, applies to all.

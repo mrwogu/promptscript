@@ -6,7 +6,7 @@
 
 # Interface: TemplateContext
 
-Defined in: [core/src/template.ts:33](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/template.ts#L33)
+Defined in: [core/src/template.ts:33](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/template.ts#L33)
 
 Context for template interpolation.
 
@@ -16,7 +16,7 @@ Context for template interpolation.
 
 > **params**: `Map`\<`string`, [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)\>
 
-Defined in: [core/src/template.ts:35](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/template.ts#L35)
+Defined in: [core/src/template.ts:35](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/template.ts#L35)
 
 Bound parameter values
 
@@ -26,6 +26,6 @@ Bound parameter values
 
 > **sourceFile**: `string`
 
-Defined in: [core/src/template.ts:37](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/template.ts#L37)
+Defined in: [core/src/template.ts:37](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/template.ts#L37)
 
 Source file being interpolated (for error messages)

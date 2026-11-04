@@ -6,7 +6,7 @@
 
 # Class: Compiler
 
-Defined in: [compiler/src/compiler.ts:277](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L277)
+Defined in: [compiler/src/compiler.ts:277](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L277)
 
 Compiler that orchestrates the PromptScript compilation pipeline.
 
@@ -38,7 +38,7 @@ if (result.success) {
 
 > **new Compiler**(`options`): `Compiler`
 
-Defined in: [compiler/src/compiler.ts:288](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L288)
+Defined in: [compiler/src/compiler.ts:288](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L288)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: [compiler/src/compiler.ts:288](https://github.com/mrwogu/promptscrip
 
 > **compile**(`entryPath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:442](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L442)
+Defined in: [compiler/src/compiler.ts:442](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L442)
 
 Compile a PromptScript file through the full pipeline.
 
@@ -80,7 +80,7 @@ Compilation result with outputs, errors, and stats
 
 > **compileAll**(`entryPath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:1036](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L1036)
+Defined in: [compiler/src/compiler.ts:1036](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L1036)
 
 Compile to all registered formatters.
 Useful when you want to ensure all formatters are used regardless of config.
@@ -105,7 +105,7 @@ Compilation result with all formatter outputs
 
 > **compileFile**(`filePath`): `Promise`\<[`CompileResult`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileResult/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:1025](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L1025)
+Defined in: [compiler/src/compiler.ts:1025](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L1025)
 
 Compile a PromptScript file from a file path.
 This is an alias for compile() for consistency with the documented API.
@@ -130,7 +130,7 @@ Compilation result
 
 > **getFormatters**(): readonly [`Formatter`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/Formatter/index.md)[]
 
-Defined in: [compiler/src/compiler.ts:1014](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L1014)
+Defined in: [compiler/src/compiler.ts:1014](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L1014)
 
 Get the configured formatters.
 
@@ -144,7 +144,7 @@ readonly [`Formatter`](https://getpromptscript.dev/api-reference/compiler/src/in
 
 > **watch**(`entryPath`, `options?`): `Promise`\<[`Watcher`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/Watcher/index.md)\>
 
-Defined in: [compiler/src/compiler.ts:1070](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L1070)
+Defined in: [compiler/src/compiler.ts:1070](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/compiler.ts#L1070)
 
 Watch for file changes and recompile automatically.
 

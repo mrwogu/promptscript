@@ -6,7 +6,7 @@
 
 # Interface: ReadDatasetOptions
 
-Defined in: [eval/src/dataset/read.ts:27](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/dataset/read.ts#L27)
+Defined in: [eval/src/dataset/read.ts:27](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/dataset/read.ts#L27)
 
 Options of [readDataset](https://getpromptscript.dev/api-reference/eval/src/functions/readDataset/index.md).
 
@@ -16,7 +16,7 @@ Options of [readDataset](https://getpromptscript.dev/api-reference/eval/src/func
 
 > `optional` **contract?**: `Pick`\<[`PromptBundleV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleV1/index.md), `"inputs"` \| `"output"`\>
 
-Defined in: [eval/src/dataset/read.ts:33](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/dataset/read.ts#L33)
+Defined in: [eval/src/dataset/read.ts:33](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/dataset/read.ts#L33)
 
 Prompt contract, used to coerce CSV cells by input and output type
 
@@ -26,7 +26,7 @@ Prompt contract, used to coerce CSV cells by input and output type
 
 > `optional` **maxRows?**: `number`
 
-Defined in: [eval/src/dataset/read.ts:31](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/dataset/read.ts#L31)
+Defined in: [eval/src/dataset/read.ts:31](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/dataset/read.ts#L31)
 
 Largest number of rows; default 1000
 
@@ -36,7 +36,7 @@ Largest number of rows; default 1000
 
 > **projectRoot**: `string`
 
-Defined in: [eval/src/dataset/read.ts:29](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/dataset/read.ts#L29)
+Defined in: [eval/src/dataset/read.ts:29](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/dataset/read.ts#L29)
 
 Project root; error locations are relative to it
 
@@ -46,7 +46,7 @@ Project root; error locations are relative to it
 
 > `optional` **writtenPath?**: `string`
 
-Defined in: [eval/src/dataset/read.ts:39](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/dataset/read.ts#L39)
+Defined in: [eval/src/dataset/read.ts:39](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/dataset/read.ts#L39)
 
 Dataset path as written in the suite. Its extension picks the format, so
 a link named `rows.csv` reads as CSV whatever its target is called.

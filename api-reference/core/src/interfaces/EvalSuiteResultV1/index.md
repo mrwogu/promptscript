@@ -6,7 +6,7 @@
 
 # Interface: EvalSuiteResultV1
 
-Defined in: [core/src/types/eval.ts:739](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L739)
+Defined in: [core/src/types/eval.ts:739](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L739)
 
 Result of one suite.
 
@@ -16,7 +16,7 @@ Result of one suite.
 
 > **dataset**: [`EvalDatasetRefV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalDatasetRefV1/index.md)
 
-Defined in: [core/src/types/eval.ts:750](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L750)
+Defined in: [core/src/types/eval.ts:750](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L750)
 
 Dataset the suite ran on
 
@@ -26,7 +26,7 @@ Dataset the suite ran on
 
 > **findings**: [`EvalFindingV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalFindingV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:758](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L758)
+Defined in: [core/src/types/eval.ts:758](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L758)
 
 Dataset findings
 
@@ -36,7 +36,7 @@ Dataset findings
 
 > `optional` **judges?**: [`EvalJudgeRefV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalJudgeRefV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:752](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L752)
+Defined in: [core/src/types/eval.ts:752](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L752)
 
 Judge rubrics the suite used, sorted by rubric id
 
@@ -46,7 +46,7 @@ Judge rubrics the suite used, sorted by rubric id
 
 > **models**: [`EvalModelResultV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalModelResultV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:760](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L760)
+Defined in: [core/src/types/eval.ts:760](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L760)
 
 Model entries in suite order
 
@@ -56,7 +56,7 @@ Model entries in suite order
 
 > **name**: `string`
 
-Defined in: [core/src/types/eval.ts:741](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L741)
+Defined in: [core/src/types/eval.ts:741](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L741)
 
 Suite name
 
@@ -66,7 +66,7 @@ Suite name
 
 > **passed**: `boolean`
 
-Defined in: [core/src/types/eval.ts:754](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L754)
+Defined in: [core/src/types/eval.ts:754](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L754)
 
 Whether every threshold held
 
@@ -76,7 +76,7 @@ Whether every threshold held
 
 > **prompt**: [`EvalPromptRefV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalPromptRefV1/index.md)
 
-Defined in: [core/src/types/eval.ts:748](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L748)
+Defined in: [core/src/types/eval.ts:748](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L748)
 
 Prompt under test
 
@@ -86,7 +86,7 @@ Prompt under test
 
 > **suiteHash**: `string`
 
-Defined in: [core/src/types/eval.ts:746](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L746)
+Defined in: [core/src/types/eval.ts:746](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L746)
 
 SHA-256 of the suite file bytes.
 
@@ -100,6 +100,6 @@ SHA-256 of the suite file bytes.
 
 > **thresholds**: [`EvalThresholdResultV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalThresholdResultV1/index.md)[]
 
-Defined in: [core/src/types/eval.ts:756](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L756)
+Defined in: [core/src/types/eval.ts:756](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L756)
 
 Threshold checks

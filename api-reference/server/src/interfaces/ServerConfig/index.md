@@ -6,7 +6,7 @@
 
 # Interface: ServerConfig
 
-Defined in: [server/src/types.ts:14](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/server/src/types.ts#L14)
+Defined in: [server/src/types.ts:14](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/server/src/types.ts#L14)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [server/src/types.ts:14](https://github.com/mrwogu/promptscript/blob
 
 > **mode**: `"readwrite"` \| `"readonly"`
 
-Defined in: [server/src/types.ts:15](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/server/src/types.ts#L15)
+Defined in: [server/src/types.ts:15](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/server/src/types.ts#L15)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [server/src/types.ts:15](https://github.com/mrwogu/promptscript/blob
 
 > **workspace**: `string`
 
-Defined in: [server/src/types.ts:16](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/server/src/types.ts#L16)
+Defined in: [server/src/types.ts:16](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/server/src/types.ts#L16)

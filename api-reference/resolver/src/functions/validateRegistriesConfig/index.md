@@ -8,7 +8,7 @@
 
 > **validateRegistriesConfig**(`registries`): [`RegistriesValidationResult`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/RegistriesValidationResult/index.md)
 
-Defined in: [resolver/src/alias-resolver.ts:91](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/alias-resolver.ts#L91)
+Defined in: [resolver/src/alias-resolver.ts:91](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/alias-resolver.ts#L91)
 
 Validate all alias entries in a registries configuration.
 

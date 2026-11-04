@@ -6,7 +6,7 @@
 
 # Interface: UseOperation
 
-Defined in: [core/src/types/ast.ts:686](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L686)
+Defined in: [core/src/types/ast.ts:686](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/ast.ts#L686)
 
 Canonical top-level import operation.
 
@@ -20,7 +20,7 @@ Canonical top-level import operation.
 
 > `readonly` **declaration**: `object`
 
-Defined in: [core/src/types/ast.ts:688](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L688)
+Defined in: [core/src/types/ast.ts:688](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/ast.ts#L688)
 
 #### alias?
 
@@ -156,7 +156,7 @@ Node type discriminator
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L499)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -192,7 +192,7 @@ Byte offset from start of file
 
 > `readonly` **sourceLayerId**: `string`
 
-Defined in: [core/src/types/ast.ts:689](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L689)
+Defined in: [core/src/types/ast.ts:689](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/ast.ts#L689)
 
 ***
 
@@ -200,7 +200,7 @@ Defined in: [core/src/types/ast.ts:689](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"UseOperation"`
 
-Defined in: [core/src/types/ast.ts:687](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L687)
+Defined in: [core/src/types/ast.ts:687](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/ast.ts#L687)
 
 #### Overrides
 

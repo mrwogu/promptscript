@@ -8,7 +8,7 @@
 
 > **getTargetFeatureStatus**(`capability`, `featureId`): [`TargetFeatureStatus`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetFeatureStatus/index.md)
 
-Defined in: [core/src/target-capabilities.ts:1632](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/target-capabilities.ts#L1632)
+Defined in: [core/src/target-capabilities.ts:1632](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/target-capabilities.ts#L1632)
 
 ## Parameters
 

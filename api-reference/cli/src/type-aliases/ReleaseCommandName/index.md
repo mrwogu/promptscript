@@ -8,7 +8,7 @@
 
 > **ReleaseCommandName** = `"build"` \| `"promote"` \| `"rollback"` \| `"split"` \| `"status"`
 
-Defined in: [cli/src/utils/release-report.ts:17](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L17)
+Defined in: [cli/src/utils/release-report.ts:17](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/utils/release-report.ts#L17)
 
 Name of the release command.
 

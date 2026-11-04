@@ -6,7 +6,7 @@
 
 # Interface: MarkdownSection
 
-Defined in: [importer/src/parsers/markdown.ts:1](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/parsers/markdown.ts#L1)
+Defined in: [importer/src/parsers/markdown.ts:1](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/parsers/markdown.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/parsers/markdown.ts:1](https://github.com/mrwogu/promp
 
 > **content**: `string`
 
-Defined in: [importer/src/parsers/markdown.ts:4](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/parsers/markdown.ts#L4)
+Defined in: [importer/src/parsers/markdown.ts:4](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/parsers/markdown.ts#L4)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/parsers/markdown.ts:4](https://github.com/mrwogu/promp
 
 > **heading**: `string`
 
-Defined in: [importer/src/parsers/markdown.ts:2](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/parsers/markdown.ts#L2)
+Defined in: [importer/src/parsers/markdown.ts:2](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/parsers/markdown.ts#L2)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [importer/src/parsers/markdown.ts:2](https://github.com/mrwogu/promp
 
 > **level**: `number`
 
-Defined in: [importer/src/parsers/markdown.ts:3](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/parsers/markdown.ts#L3)
+Defined in: [importer/src/parsers/markdown.ts:3](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/parsers/markdown.ts#L3)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [importer/src/parsers/markdown.ts:3](https://github.com/mrwogu/promp
 
 > `optional` **metadata?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [importer/src/parsers/markdown.ts:7](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/parsers/markdown.ts#L7)
+Defined in: [importer/src/parsers/markdown.ts:7](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/parsers/markdown.ts#L7)
 
 Optional metadata for specialized parsers.
 
@@ -48,4 +48,4 @@ Optional metadata for specialized parsers.
 
 > **rawLines**: `string`[]
 
-Defined in: [importer/src/parsers/markdown.ts:5](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/parsers/markdown.ts#L5)
+Defined in: [importer/src/parsers/markdown.ts:5](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/parsers/markdown.ts#L5)

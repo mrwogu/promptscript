@@ -6,7 +6,7 @@
 
 # Interface: CompileError
 
-Defined in: [compiler/src/types.ts:215](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L215)
+Defined in: [compiler/src/types.ts:215](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L215)
 
 Compilation error with additional metadata.
 
@@ -16,7 +16,7 @@ Compilation error with additional metadata.
 
 > `optional` **agentName?**: `string`
 
-Defined in: [compiler/src/types.ts:235](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L235)
+Defined in: [compiler/src/types.ts:235](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L235)
 
 First agent name included in the diagnostic
 
@@ -26,7 +26,7 @@ First agent name included in the diagnostic
 
 > `optional` **causeCode?**: `string`
 
-Defined in: [compiler/src/types.ts:223](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L223)
+Defined in: [compiler/src/types.ts:223](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L223)
 
 Code of the underlying error, such as the parser code behind a resolve error
 
@@ -36,7 +36,7 @@ Code of the underlying error, such as the parser code behind a resolve error
 
 > **code**: `string`
 
-Defined in: [compiler/src/types.ts:219](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L219)
+Defined in: [compiler/src/types.ts:219](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L219)
 
 Error code or rule ID
 
@@ -46,7 +46,7 @@ Error code or rule ID
 
 > `optional` **conflicts?**: [`AgentConflict`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentConflict/index.md)[]
 
-Defined in: [compiler/src/types.ts:233](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L233)
+Defined in: [compiler/src/types.ts:233](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L233)
 
 All agent conflicts included in the diagnostic
 
@@ -56,7 +56,7 @@ All agent conflicts included in the diagnostic
 
 > `optional` **format?**: () => `string`
 
-Defined in: [compiler/src/types.ts:237](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L237)
+Defined in: [compiler/src/types.ts:237](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L237)
 
 Format error for display
 
@@ -70,7 +70,7 @@ Format error for display
 
 > `optional` **location?**: `object`
 
-Defined in: [compiler/src/types.ts:225](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L225)
+Defined in: [compiler/src/types.ts:225](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L225)
 
 Source location
 
@@ -92,7 +92,7 @@ Source location
 
 > **message**: `string`
 
-Defined in: [compiler/src/types.ts:221](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L221)
+Defined in: [compiler/src/types.ts:221](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L221)
 
 Error message
 
@@ -102,7 +102,7 @@ Error message
 
 > **name**: `string`
 
-Defined in: [compiler/src/types.ts:217](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L217)
+Defined in: [compiler/src/types.ts:217](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L217)
 
 Error name/type
 
@@ -112,6 +112,6 @@ Error name/type
 
 > `optional` **provenance?**: [`AgentProvenance`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentProvenance/index.md)[]
 
-Defined in: [compiler/src/types.ts:231](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L231)
+Defined in: [compiler/src/types.ts:231](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L231)
 
 Agent provenance when resolution reports a name conflict

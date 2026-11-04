@@ -6,7 +6,7 @@
 
 # Interface: CompileOptions
 
-Defined in: [cli/src/types.ts:58](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L58)
+Defined in: [cli/src/types.ts:58](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L58)
 
 Options for the compile command.
 
@@ -16,7 +16,7 @@ Options for the compile command.
 
 > `optional` **all?**: `boolean`
 
-Defined in: [cli/src/types.ts:68](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L68)
+Defined in: [cli/src/types.ts:68](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L68)
 
 Compile all configured targets
 
@@ -26,7 +26,7 @@ Compile all configured targets
 
 > `optional` **allBuilds?**: `boolean`
 
-Defined in: [cli/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L62)
+Defined in: [cli/src/types.ts:62](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L62)
 
 Compile all named build profiles in deterministic key order
 
@@ -36,7 +36,7 @@ Compile all named build profiles in deterministic key order
 
 > `optional` **build?**: `string`
 
-Defined in: [cli/src/types.ts:60](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L60)
+Defined in: [cli/src/types.ts:60](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L60)
 
 Named build profile from config.builds
 
@@ -46,7 +46,7 @@ Named build profile from config.builds
 
 > `optional` **check?**: `boolean`
 
-Defined in: [cli/src/types.ts:85](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L85)
+Defined in: [cli/src/types.ts:85](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L85)
 
 Write nothing and exit 1 when generated files are out of date: files to
 write or change, and stale generated files to remove.
@@ -57,7 +57,7 @@ write or change, and stale generated files to remove.
 
 > `optional` **config?**: `string`
 
-Defined in: [cli/src/types.ts:91](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L91)
+Defined in: [cli/src/types.ts:91](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L91)
 
 Path to custom config file
 
@@ -67,7 +67,7 @@ Path to custom config file
 
 > `optional` **cwd?**: `string`
 
-Defined in: [cli/src/types.ts:99](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L99)
+Defined in: [cli/src/types.ts:99](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L99)
 
 Working directory (project root)
 
@@ -77,7 +77,7 @@ Working directory (project root)
 
 > `optional` **dryRun?**: `boolean`
 
-Defined in: [cli/src/types.ts:80](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L80)
+Defined in: [cli/src/types.ts:80](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L80)
 
 Preview changes without writing files
 
@@ -87,7 +87,7 @@ Preview changes without writing files
 
 > `optional` **force?**: `boolean`
 
-Defined in: [cli/src/types.ts:93](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L93)
+Defined in: [cli/src/types.ts:93](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L93)
 
 Force overwrite existing files without prompts
 
@@ -97,7 +97,7 @@ Force overwrite existing files without prompts
 
 > `optional` **format?**: `string`
 
-Defined in: [cli/src/types.ts:66](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L66)
+Defined in: [cli/src/types.ts:66](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L66)
 
 Output format (github, claude, cursor) - alias for target
 
@@ -107,7 +107,7 @@ Output format (github, claude, cursor) - alias for target
 
 > `optional` **ignoreHashes?**: `boolean`
 
-Defined in: [cli/src/types.ts:97](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L97)
+Defined in: [cli/src/types.ts:97](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L97)
 
 Skip reference integrity hash verification
 
@@ -117,7 +117,7 @@ Skip reference integrity hash verification
 
 > `optional` **migrateFactoryHooks?**: `boolean`
 
-Defined in: [cli/src/types.ts:87](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L87)
+Defined in: [cli/src/types.ts:87](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L87)
 
 Migrate unambiguous legacy Factory settings hooks during compilation
 
@@ -127,7 +127,7 @@ Migrate unambiguous legacy Factory settings hooks during compilation
 
 > `optional` **output?**: `string`
 
-Defined in: [cli/src/types.ts:72](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L72)
+Defined in: [cli/src/types.ts:72](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L72)
 
 Output directory
 
@@ -137,7 +137,7 @@ Output directory
 
 > `optional` **registry?**: `string`
 
-Defined in: [cli/src/types.ts:89](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L89)
+Defined in: [cli/src/types.ts:89](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L89)
 
 Registry path or URL (overrides config)
 
@@ -147,7 +147,7 @@ Registry path or URL (overrides config)
 
 > `optional` **resources?**: `string`[]
 
-Defined in: [cli/src/types.ts:78](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L78)
+Defined in: [cli/src/types.ts:78](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L78)
 
 Compile only selected resource kinds (agents, skills, commands, mcp,
 hooks, plugins, main). Omits unselected resources and, without `main`,
@@ -159,7 +159,7 @@ all root instruction files.
 
 > `optional` **strict?**: `boolean`
 
-Defined in: [cli/src/types.ts:95](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L95)
+Defined in: [cli/src/types.ts:95](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L95)
 
 Treat output path conflicts as errors
 
@@ -169,7 +169,7 @@ Treat output path conflicts as errors
 
 > `optional` **target?**: `string`
 
-Defined in: [cli/src/types.ts:64](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L64)
+Defined in: [cli/src/types.ts:64](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L64)
 
 Specific target to compile (github, claude, cursor)
 
@@ -179,6 +179,6 @@ Specific target to compile (github, claude, cursor)
 
 > `optional` **watch?**: `boolean`
 
-Defined in: [cli/src/types.ts:70](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L70)
+Defined in: [cli/src/types.ts:70](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L70)
 
 Watch mode for continuous compilation

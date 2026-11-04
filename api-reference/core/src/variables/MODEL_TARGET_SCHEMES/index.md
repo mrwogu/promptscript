@@ -8,6 +8,6 @@
 
 > `const` **MODEL\_TARGET\_SCHEMES**: `Readonly`\<`Partial`\<`Record`\<[`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md), [`ModelTargetScheme`](https://getpromptscript.dev/api-reference/core/src/interfaces/ModelTargetScheme/index.md)\>\>\>
 
-Defined in: [core/src/model-catalog.ts:541](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L541)
+Defined in: [core/src/model-catalog.ts:541](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L541)
 
 Model naming schemes of the targets that emit a native `model` field.

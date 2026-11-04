@@ -6,7 +6,7 @@
 
 # Interface: LegacyProjectionOptions
 
-Defined in: [core/src/canonical-ast.ts:72](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/canonical-ast.ts#L72)
+Defined in: [core/src/canonical-ast.ts:72](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/canonical-ast.ts#L72)
 
 Options for the legacy projection. It is part of the compatibility
 projection and may be removed in a later major version.
@@ -17,4 +17,4 @@ projection and may be removed in a later major version.
 
 > `readonly` `optional` **preserveCanonicalBody?**: `boolean`
 
-Defined in: [core/src/canonical-ast.ts:73](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/canonical-ast.ts#L73)
+Defined in: [core/src/canonical-ast.ts:73](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/canonical-ast.ts#L73)

@@ -6,7 +6,7 @@
 
 # Interface: EvalDatasetRowV1
 
-Defined in: [core/src/types/eval.ts:13](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L13)
+Defined in: [core/src/types/eval.ts:13](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L13)
 
 One row of an eval dataset, version 1: a JSONL line, a YAML item or a
 CSV row.
@@ -17,7 +17,7 @@ CSV row.
 
 > `optional` **expected?**: `string` \| `Record`\<`string`, [`EvalExpectedValue`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalExpectedValue/index.md)\>
 
-Defined in: [core/src/types/eval.ts:28](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L28)
+Defined in: [core/src/types/eval.ts:28](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L28)
 
 Golden answer: the whole response text, or the expected output
 properties when the prompt has an output contract. A partial object
@@ -29,7 +29,7 @@ is allowed.
 
 > `optional` **id?**: `string`
 
-Defined in: [core/src/types/eval.ts:20](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L20)
+Defined in: [core/src/types/eval.ts:20](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L20)
 
 Row id, unique in the dataset. Absent ids default to `row-<n>`,
 counted from 1 in file order.
@@ -50,7 +50,7 @@ counted from 1 in file order.
 
 > **inputs**: `Record`\<`string`, [`EvalInputValue`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalInputValue/index.md)\>
 
-Defined in: [core/src/types/eval.ts:22](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L22)
+Defined in: [core/src/types/eval.ts:22](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L22)
 
 Prompt input values by input name
 
@@ -60,6 +60,6 @@ Prompt input values by input name
 
 > `optional` **tags?**: `string`[]
 
-Defined in: [core/src/types/eval.ts:30](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L30)
+Defined in: [core/src/types/eval.ts:30](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L30)
 
 Free-form tags, for filtering and reporting

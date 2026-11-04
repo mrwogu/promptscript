@@ -6,7 +6,7 @@
 
 # Interface: CompileResult
 
-Defined in: [compiler/src/types.ts:257](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L257)
+Defined in: [compiler/src/types.ts:257](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L257)
 
 Result of a compilation.
 
@@ -16,7 +16,7 @@ Result of a compilation.
 
 > `optional` **composition?**: [`PromptComposition`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptComposition/index.md)[]
 
-Defined in: [compiler/src/types.ts:275](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L275)
+Defined in: [compiler/src/types.ts:275](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L275)
 
 Blocks each prompt composed into its system message, when a prompt target ran
 
@@ -26,7 +26,7 @@ Blocks each prompt composed into its system message, when a prompt target ran
 
 > **errors**: [`CompileError`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileError/index.md)[]
 
-Defined in: [compiler/src/types.ts:269](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L269)
+Defined in: [compiler/src/types.ts:269](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L269)
 
 Errors encountered during compilation
 
@@ -36,7 +36,7 @@ Errors encountered during compilation
 
 > `optional` **outputPlan?**: [`OutputPlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlan/index.md)
 
-Defined in: [compiler/src/types.ts:267](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L267)
+Defined in: [compiler/src/types.ts:267](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L267)
 
 Shared filesystem-independent output plan.
 
@@ -48,7 +48,7 @@ Optional for compatibility with manually constructed compile results.
 
 > **outputs**: `Map`\<`string`, [`FormatterOutput`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/FormatterOutput/index.md)\>
 
-Defined in: [compiler/src/types.ts:261](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L261)
+Defined in: [compiler/src/types.ts:261](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L261)
 
 Formatter outputs keyed by normalized output path
 
@@ -58,7 +58,7 @@ Formatter outputs keyed by normalized output path
 
 > **stats**: [`CompileStats`](https://getpromptscript.dev/api-reference/compiler/src/interfaces/CompileStats/index.md)
 
-Defined in: [compiler/src/types.ts:273](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L273)
+Defined in: [compiler/src/types.ts:273](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L273)
 
 Compilation statistics
 
@@ -68,7 +68,7 @@ Compilation statistics
 
 > **success**: `boolean`
 
-Defined in: [compiler/src/types.ts:259](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L259)
+Defined in: [compiler/src/types.ts:259](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L259)
 
 Whether compilation succeeded
 
@@ -78,6 +78,6 @@ Whether compilation succeeded
 
 > **warnings**: [`ValidationMessage`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationMessage/index.md)[]
 
-Defined in: [compiler/src/types.ts:271](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L271)
+Defined in: [compiler/src/types.ts:271](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L271)
 
 Warnings from validation

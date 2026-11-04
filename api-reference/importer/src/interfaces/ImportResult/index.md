@@ -6,7 +6,7 @@
 
 # Interface: ImportResult
 
-Defined in: [importer/src/importer.ts:14](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L14)
+Defined in: [importer/src/importer.ts:14](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/importer.ts#L14)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [importer/src/importer.ts:14](https://github.com/mrwogu/promptscript
 
 > **prsContent**: `string`
 
-Defined in: [importer/src/importer.ts:15](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L15)
+Defined in: [importer/src/importer.ts:15](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/importer.ts#L15)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [importer/src/importer.ts:15](https://github.com/mrwogu/promptscript
 
 > **sections**: [`ScoredSection`](https://getpromptscript.dev/api-reference/importer/src/interfaces/ScoredSection/index.md)[]
 
-Defined in: [importer/src/importer.ts:17](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L17)
+Defined in: [importer/src/importer.ts:17](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/importer.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [importer/src/importer.ts:17](https://github.com/mrwogu/promptscript
 
 > **totalConfidence**: `number`
 
-Defined in: [importer/src/importer.ts:18](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L18)
+Defined in: [importer/src/importer.ts:18](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/importer.ts#L18)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [importer/src/importer.ts:18](https://github.com/mrwogu/promptscript
 
 > **warnings**: `string`[]
 
-Defined in: [importer/src/importer.ts:19](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L19)
+Defined in: [importer/src/importer.ts:19](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/importer.ts#L19)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [importer/src/importer.ts:19](https://github.com/mrwogu/promptscript
 
 > **yamlConfig**: `string`
 
-Defined in: [importer/src/importer.ts:16](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L16)
+Defined in: [importer/src/importer.ts:16](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/importer.ts#L16)

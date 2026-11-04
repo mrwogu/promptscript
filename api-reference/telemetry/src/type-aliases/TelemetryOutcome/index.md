@@ -8,4 +8,4 @@
 
 > **TelemetryOutcome** = `"success"` \| `"error"` \| `"cancelled"`
 
-Defined in: [telemetry/src/types.ts:1](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L1)
+Defined in: [telemetry/src/types.ts:1](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/telemetry/src/types.ts#L1)

@@ -6,7 +6,7 @@
 
 # Interface: EvalConfig
 
-Defined in: [core/src/types/config.ts:403](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L403)
+Defined in: [core/src/types/config.ts:403](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L403)
 
 Eval settings (`eval` in promptscript.yaml): the providers eval suites
 call and the limits of a run.
@@ -17,7 +17,7 @@ call and the limits of a run.
 
 > `optional` **maxCases?**: `number`
 
-Defined in: [core/src/types/config.ts:432](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L432)
+Defined in: [core/src/types/config.ts:432](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L432)
 
 Largest number of dataset rows a suite runs.
 
@@ -41,7 +41,7 @@ integer
 
 > `optional` **maxOutputTokens?**: `number`
 
-Defined in: [core/src/types/config.ts:425](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L425)
+Defined in: [core/src/types/config.ts:425](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L425)
 
 Output token cap of a model call when the prompt sets no `maxTokens`.
 
@@ -65,7 +65,7 @@ integer
 
 > `optional` **providers?**: `Record`\<`string`, [`EvalProviderConfig`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalProviderConfig/index.md)\>
 
-Defined in: [core/src/types/config.ts:411](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L411)
+Defined in: [core/src/types/config.ts:411](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L411)
 
 Providers by name. The name matches the `provider` of the resolved
 model profile, such as `anthropic` or `openai`.
@@ -83,7 +83,7 @@ providers:
 
 > `optional` **reportDir?**: `string`
 
-Defined in: [core/src/types/config.ts:437](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L437)
+Defined in: [core/src/types/config.ts:437](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L437)
 
 Directory for eval reports, relative to the project root.
 
@@ -99,7 +99,7 @@ Directory for eval reports, relative to the project root.
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [core/src/types/config.ts:418](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L418)
+Defined in: [core/src/types/config.ts:418](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L418)
 
 Time limit of one model call in milliseconds, response body included.
 

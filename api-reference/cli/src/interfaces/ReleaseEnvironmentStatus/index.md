@@ -6,7 +6,7 @@
 
 # Interface: ReleaseEnvironmentStatus
 
-Defined in: [cli/src/utils/release-report.ts:83](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L83)
+Defined in: [cli/src/utils/release-report.ts:83](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/utils/release-report.ts#L83)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:83](https://github.com/mrwogu/promp
 
 > **exists**: `boolean`
 
-Defined in: [cli/src/utils/release-report.ts:88](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L88)
+Defined in: [cli/src/utils/release-report.ts:88](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/utils/release-report.ts#L88)
 
 Whether the label file exists; an environment without one is empty
 
@@ -24,7 +24,7 @@ Whether the label file exists; an environment without one is empty
 
 > **name**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:84](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L84)
+Defined in: [cli/src/utils/release-report.ts:84](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/utils/release-report.ts#L84)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [cli/src/utils/release-report.ts:84](https://github.com/mrwogu/promp
 
 > **path**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:86](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L86)
+Defined in: [cli/src/utils/release-report.ts:86](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/utils/release-report.ts#L86)
 
 Project-relative path of the label
 
@@ -42,4 +42,4 @@ Project-relative path of the label
 
 > **prompts**: [`ReleasePromptStatus`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleasePromptStatus/index.md)[]
 
-Defined in: [cli/src/utils/release-report.ts:89](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L89)
+Defined in: [cli/src/utils/release-report.ts:89](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/utils/release-report.ts#L89)

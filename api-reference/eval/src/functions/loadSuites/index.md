@@ -8,7 +8,7 @@
 
 > **loadSuites**(`options`): `Promise`\<[`LoadSuitesResult`](https://getpromptscript.dev/api-reference/eval/src/interfaces/LoadSuitesResult/index.md)\>
 
-Defined in: [eval/src/suite/load.ts:216](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/suite/load.ts#L216)
+Defined in: [eval/src/suite/load.ts:216](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/suite/load.ts#L216)
 
 Load the suite files under `.promptscript/evals/`: `<name>.eval.yaml`,
 `.eval.yml` or `.eval.json`, with a lowercase name. Each file is parsed

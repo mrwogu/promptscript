@@ -6,7 +6,7 @@
 
 # Interface: MarkdownFormatterConfig
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:101](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L101)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:101](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L101)
 
 Configuration for a markdown instruction formatter.
 
@@ -16,7 +16,7 @@ Configuration for a markdown instruction formatter.
 
 > **defaultConvention**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:109](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L109)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:109](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L109)
 
 Default output convention
 
@@ -26,7 +26,7 @@ Default output convention
 
 > **description**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:107](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L107)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:107](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L107)
 
 Human-readable description
 
@@ -36,7 +36,7 @@ Human-readable description
 
 > **dotDir**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:113](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L113)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:113](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L113)
 
 Dot directory for additional files (e.g. '.opencode')
 
@@ -46,7 +46,7 @@ Dot directory for additional files (e.g. '.opencode')
 
 > **hasAgents**: `boolean`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:117](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L117)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:117](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L117)
 
 Whether this formatter supports agents
 
@@ -56,7 +56,7 @@ Whether this formatter supports agents
 
 > **hasCommands**: `boolean`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:119](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L119)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:119](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L119)
 
 Whether this formatter supports commands
 
@@ -66,7 +66,7 @@ Whether this formatter supports commands
 
 > **hasSkills**: `boolean`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:121](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L121)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:121](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L121)
 
 Whether this formatter supports skills
 
@@ -76,7 +76,7 @@ Whether this formatter supports skills
 
 > `optional` **hookAdapterTarget?**: `"claude"` \| `"cursor"` \| `"factory"` \| `"codex"`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:137](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L137)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:137](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L137)
 
 Hook adapter target name (default: same as formatter name)
 
@@ -86,7 +86,7 @@ Hook adapter target name (default: same as formatter name)
 
 > `optional` **hooksConfigPath?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:135](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L135)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:135](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L135)
 
 Hook settings file path (e.g. '.cursor/hooks.json'). If set,
 
@@ -100,7 +100,7 @@ block is emitted to this path.
 
 > **mainFileHeader**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:111](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L111)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:111](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L111)
 
 Main file header (e.g. '# OPENCODE.md')
 
@@ -110,7 +110,7 @@ Main file header (e.g. '# OPENCODE.md')
 
 > `optional` **mcpConfigFormat?**: `"json"` \| `"toml"`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:133](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L133)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:133](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L133)
 
 MCP config format (default: 'json')
 
@@ -120,7 +120,7 @@ MCP config format (default: 'json')
 
 > `optional` **mcpConfigPath?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:131](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L131)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:131](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L131)
 
 MCP config file path (e.g. '.windsurf/mcp_config.json'). If set,
 
@@ -134,7 +134,7 @@ block is emitted to this path.
 
 > **name**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:103](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L103)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:103](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L103)
 
 Formatter name (e.g. 'opencode', 'gemini')
 
@@ -144,7 +144,7 @@ Formatter name (e.g. 'opencode', 'gemini')
 
 > **outputPath**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:105](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L105)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:105](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L105)
 
 Default output file path (e.g. 'OPENCODE.md')
 
@@ -154,7 +154,7 @@ Default output file path (e.g. 'OPENCODE.md')
 
 > `optional` **restrictionsTransform?**: (`s`) => `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:129](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L129)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:129](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L129)
 
 Transform function for restriction items
 
@@ -174,7 +174,7 @@ Transform function for restriction items
 
 > `optional` **sectionNames?**: `Partial`\<`Record`\<[`SectionNameKey`](https://getpromptscript.dev/api-reference/formatters/src/type-aliases/SectionNameKey/index.md), `string`\>\>
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:127](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L127)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:127](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L127)
 
 Custom section header names
 
@@ -184,7 +184,7 @@ Custom section header names
 
 > **skillFileName**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:115](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L115)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:115](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L115)
 
 Skill file name (e.g. 'SKILL.md' or 'skill.md')
 
@@ -194,7 +194,7 @@ Skill file name (e.g. 'SKILL.md' or 'skill.md')
 
 > `optional` **skillsDir?**: `string`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:125](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L125)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:125](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L125)
 
 Skill directory override (default: `<dotDir>/skills`)
 
@@ -204,7 +204,7 @@ Skill directory override (default: `<dotDir>/skills`)
 
 > `optional` **skillsInMultifile?**: `boolean`
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:123](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L123)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:123](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L123)
 
 Whether skills are included in multifile mode (default: false, only in full)
 
@@ -214,6 +214,6 @@ Whether skills are included in multifile mode (default: false, only in full)
 
 > `optional` **unsupportedBlocks?**: readonly `string`[]
 
-Defined in: [formatters/src/markdown-instruction-formatter.ts:139](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/markdown-instruction-formatter.ts#L139)
+Defined in: [formatters/src/markdown-instruction-formatter.ts:139](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/markdown-instruction-formatter.ts#L139)
 
 PromptScript blocks omitted by this target with compatibility warnings.

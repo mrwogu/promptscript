@@ -8,7 +8,7 @@
 
 > **collectProvenance**(`input`, `options?`): [`ProvenanceTrace`](https://getpromptscript.dev/api-reference/core/src/interfaces/ProvenanceTrace/index.md)
 
-Defined in: [core/src/provenance.ts:622](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/provenance.ts#L622)
+Defined in: [core/src/provenance.ts:622](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/provenance.ts#L622)
 
 Collect source and composition provenance from a legacy or canonical program.
 

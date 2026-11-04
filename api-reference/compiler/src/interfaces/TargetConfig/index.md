@@ -6,7 +6,7 @@
 
 # Interface: TargetConfig
 
-Defined in: [compiler/src/types.ts:129](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L129)
+Defined in: [compiler/src/types.ts:129](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L129)
 
 Configuration for a single target.
 
@@ -16,7 +16,7 @@ Configuration for a single target.
 
 > `optional` **convention?**: `string`
 
-Defined in: [compiler/src/types.ts:135](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L135)
+Defined in: [compiler/src/types.ts:135](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L135)
 
 Output convention ('xml', 'markdown', or custom name)
 
@@ -26,7 +26,7 @@ Output convention ('xml', 'markdown', or custom name)
 
 > `optional` **enabled?**: `boolean`
 
-Defined in: [compiler/src/types.ts:131](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L131)
+Defined in: [compiler/src/types.ts:131](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L131)
 
 Whether this target is enabled
 
@@ -36,7 +36,7 @@ Whether this target is enabled
 
 > `optional` **excludeAgents?**: `string`[]
 
-Defined in: [compiler/src/types.ts:166](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L166)
+Defined in: [compiler/src/types.ts:166](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L166)
 
 Agent names never emitted for this target.
 
@@ -46,7 +46,7 @@ Agent names never emitted for this target.
 
 > `optional` **guardsAsSkills?**: `boolean`
 
-Defined in: [compiler/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L151)
+Defined in: [compiler/src/types.ts:151](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L151)
 
 Generate skills from
 
@@ -66,7 +66,7 @@ true
 
 > `optional` **guardsSkillsListing?**: `boolean`
 
-Defined in: [compiler/src/types.ts:154](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L154)
+Defined in: [compiler/src/types.ts:154](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L154)
 
 List generated guard skills in main output file (Factory).
 
@@ -82,7 +82,7 @@ true
 
 > `optional` **includeAgents?**: `boolean` \| `string`[]
 
-Defined in: [compiler/src/types.ts:163](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L163)
+Defined in: [compiler/src/types.ts:163](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L163)
 
 Controls which agents are emitted for this target.
 
@@ -92,7 +92,7 @@ Controls which agents are emitted for this target.
 
 > `optional` **includeSkills?**: `boolean` \| `string`[]
 
-Defined in: [compiler/src/types.ts:160](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L160)
+Defined in: [compiler/src/types.ts:160](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L160)
 
 Controls which skills are emitted for this target.
 
@@ -102,7 +102,7 @@ Controls which skills are emitted for this target.
 
 > `optional` **output?**: `string`
 
-Defined in: [compiler/src/types.ts:133](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L133)
+Defined in: [compiler/src/types.ts:133](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L133)
 
 Custom output path
 
@@ -112,7 +112,7 @@ Custom output path
 
 > `optional` **rulesMode?**: [`FactoryRulesMode`](https://getpromptscript.dev/api-reference/core/src/type-aliases/FactoryRulesMode/index.md)
 
-Defined in: [compiler/src/types.ts:148](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L148)
+Defined in: [compiler/src/types.ts:148](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L148)
 
 Factory always-on rules output mode.
 Split mode requires Factory's `multifile` or `full` version.
@@ -129,7 +129,7 @@ Split mode requires Factory's `multifile` or `full` version.
 
 > `optional` **skillBaseDir?**: `string`
 
-Defined in: [compiler/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L157)
+Defined in: [compiler/src/types.ts:157](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L157)
 
 Custom base directory for generated skill files.
 
@@ -139,7 +139,7 @@ Custom base directory for generated skill files.
 
 > `optional` **version?**: `string`
 
-Defined in: [compiler/src/types.ts:141](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/types.ts#L141)
+Defined in: [compiler/src/types.ts:141](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/compiler/src/types.ts#L141)
 
 Target version or format variant.
 Use 'legacy' for deprecated formats.

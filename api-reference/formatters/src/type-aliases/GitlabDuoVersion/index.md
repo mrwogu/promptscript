@@ -8,4 +8,4 @@
 
 > **GitlabDuoVersion** = `"simple"` \| `"multifile"` \| `"full"`
 
-Defined in: [formatters/src/formatters/gitlab-duo.ts:3](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/formatters/gitlab-duo.ts#L3)
+Defined in: [formatters/src/formatters/gitlab-duo.ts:3](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/formatters/gitlab-duo.ts#L3)

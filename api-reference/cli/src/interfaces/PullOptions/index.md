@@ -6,7 +6,7 @@
 
 # Interface: PullOptions
 
-Defined in: [cli/src/types.ts:133](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L133)
+Defined in: [cli/src/types.ts:133](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L133)
 
 Options for the pull command.
 
@@ -16,7 +16,7 @@ Options for the pull command.
 
 > `optional` **branch?**: `string`
 
-Defined in: [cli/src/types.ts:139](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L139)
+Defined in: [cli/src/types.ts:139](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L139)
 
 Git branch to pull from
 
@@ -26,7 +26,7 @@ Git branch to pull from
 
 > `optional` **commit?**: `string`
 
-Defined in: [cli/src/types.ts:143](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L143)
+Defined in: [cli/src/types.ts:143](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L143)
 
 Git commit hash to pull from
 
@@ -36,7 +36,7 @@ Git commit hash to pull from
 
 > `optional` **dryRun?**: `boolean`
 
-Defined in: [cli/src/types.ts:137](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L137)
+Defined in: [cli/src/types.ts:137](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L137)
 
 Preview changes without pulling
 
@@ -46,7 +46,7 @@ Preview changes without pulling
 
 > `optional` **force?**: `boolean`
 
-Defined in: [cli/src/types.ts:135](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L135)
+Defined in: [cli/src/types.ts:135](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L135)
 
 Force overwrite local files
 
@@ -56,7 +56,7 @@ Force overwrite local files
 
 > `optional` **refresh?**: `boolean`
 
-Defined in: [cli/src/types.ts:145](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L145)
+Defined in: [cli/src/types.ts:145](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L145)
 
 Force refresh/re-fetch from remote registry
 
@@ -66,6 +66,6 @@ Force refresh/re-fetch from remote registry
 
 > `optional` **tag?**: `string`
 
-Defined in: [cli/src/types.ts:141](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/types.ts#L141)
+Defined in: [cli/src/types.ts:141](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/types.ts#L141)
 
 Git tag to pull from

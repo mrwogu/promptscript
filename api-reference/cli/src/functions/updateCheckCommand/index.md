@@ -8,7 +8,7 @@
 
 > **updateCheckCommand**(): `Promise`\<`void`\>
 
-Defined in: [cli/src/commands/update-check.ts:9](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/commands/update-check.ts#L9)
+Defined in: [cli/src/commands/update-check.ts:9](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/commands/update-check.ts#L9)
 
 Check for CLI updates command.
 Always checks online (ignores cache) and displays current version + status.

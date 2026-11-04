@@ -6,7 +6,7 @@
 
 # Class: AgentConflictError
 
-Defined in: [core/src/errors/resolve.ts:72](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L72)
+Defined in: [core/src/errors/resolve.ts:72](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/resolve.ts#L72)
 
 Conflicting agent definitions detected during composition.
 
@@ -20,7 +20,7 @@ Conflicting agent definitions detected during composition.
 
 > **new AgentConflictError**(`conflicts`, `location?`): `AgentConflictError`
 
-Defined in: [core/src/errors/resolve.ts:80](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L80)
+Defined in: [core/src/errors/resolve.ts:80](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/resolve.ts#L80)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [core/src/errors/resolve.ts:80](https://github.com/mrwogu/promptscri
 
 > `readonly` **agentName**: `string`
 
-Defined in: [core/src/errors/resolve.ts:74](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L74)
+Defined in: [core/src/errors/resolve.ts:74](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/resolve.ts#L74)
 
 First conflicting agent name
 
@@ -56,7 +56,7 @@ First conflicting agent name
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -70,7 +70,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -84,7 +84,7 @@ Error code
 
 > `readonly` **conflicts**: [`AgentConflict`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentConflict/index.md)[]
 
-Defined in: [core/src/errors/resolve.ts:78](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L78)
+Defined in: [core/src/errors/resolve.ts:78](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/resolve.ts#L78)
 
 All conflicting names and their provenance
 
@@ -94,7 +94,7 @@ All conflicting names and their provenance
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -108,7 +108,7 @@ Source location where error occurred
 
 > `readonly` **provenance**: [`AgentProvenance`](https://getpromptscript.dev/api-reference/core/src/interfaces/AgentProvenance/index.md)[]
 
-Defined in: [core/src/errors/resolve.ts:76](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L76)
+Defined in: [core/src/errors/resolve.ts:76](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/resolve.ts#L76)
 
 Provenance for the first conflicting name
 
@@ -118,7 +118,7 @@ Provenance for the first conflicting name
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -136,7 +136,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/resolve.ts:104](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L104)
+Defined in: [core/src/errors/resolve.ts:104](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/errors/resolve.ts#L104)
 
 Convert to JSON-serializable object.
 

@@ -6,7 +6,7 @@
 
 # Interface: NamespaceDefinition
 
-Defined in: [core/src/types/manifest.ts:17](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/manifest.ts#L17)
+Defined in: [core/src/types/manifest.ts:17](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/manifest.ts#L17)
 
 Namespace definition in the registry.
 
@@ -16,7 +16,7 @@ Namespace definition in the registry.
 
 > **description**: `string`
 
-Defined in: [core/src/types/manifest.ts:19](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/manifest.ts#L19)
+Defined in: [core/src/types/manifest.ts:19](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/manifest.ts#L19)
 
 Human-readable description
 
@@ -26,7 +26,7 @@ Human-readable description
 
 > **priority**: `number`
 
-Defined in: [core/src/types/manifest.ts:21](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/manifest.ts#L21)
+Defined in: [core/src/types/manifest.ts:21](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/manifest.ts#L21)
 
 Priority for ordering (higher = shown first)
 
@@ -36,6 +36,6 @@ Priority for ordering (higher = shown first)
 
 > `optional` **subcategories?**: `Record`\<`string`, `string`\>
 
-Defined in: [core/src/types/manifest.ts:23](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/manifest.ts#L23)
+Defined in: [core/src/types/manifest.ts:23](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/manifest.ts#L23)
 
 Optional subcategories

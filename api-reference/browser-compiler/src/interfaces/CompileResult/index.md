@@ -6,7 +6,7 @@
 
 # Interface: CompileResult
 
-Defined in: [browser-compiler/src/compiler.ts:131](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L131)
+Defined in: [browser-compiler/src/compiler.ts:131](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L131)
 
 Result of a compilation.
 
@@ -16,7 +16,7 @@ Result of a compilation.
 
 > **errors**: [`CompileError`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileError/index.md)[]
 
-Defined in: [browser-compiler/src/compiler.ts:143](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L143)
+Defined in: [browser-compiler/src/compiler.ts:143](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L143)
 
 Errors encountered during compilation
 
@@ -26,7 +26,7 @@ Errors encountered during compilation
 
 > `optional` **outputOwners?**: `Map`\<`string`, `string`\>
 
-Defined in: [browser-compiler/src/compiler.ts:139](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L139)
+Defined in: [browser-compiler/src/compiler.ts:139](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L139)
 
 Maps each output path to the formatter name that produced it.
  Present on results from BrowserCompiler.compile(); may be absent in
@@ -38,7 +38,7 @@ Maps each output path to the formatter name that produced it.
 
 > `optional` **outputPlan?**: [`OutputPlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlan/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:141](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L141)
+Defined in: [browser-compiler/src/compiler.ts:141](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L141)
 
 Shared filesystem-independent output plan.
 
@@ -48,7 +48,7 @@ Shared filesystem-independent output plan.
 
 > **outputs**: `Map`\<`string`, [`FormatterOutput`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/FormatterOutput/index.md)\>
 
-Defined in: [browser-compiler/src/compiler.ts:135](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L135)
+Defined in: [browser-compiler/src/compiler.ts:135](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L135)
 
 Formatter outputs keyed by normalized output path
 
@@ -58,7 +58,7 @@ Formatter outputs keyed by normalized output path
 
 > **stats**: [`CompileStats`](https://getpromptscript.dev/api-reference/browser-compiler/src/interfaces/CompileStats/index.md)
 
-Defined in: [browser-compiler/src/compiler.ts:147](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L147)
+Defined in: [browser-compiler/src/compiler.ts:147](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L147)
 
 Compilation statistics
 
@@ -68,7 +68,7 @@ Compilation statistics
 
 > **success**: `boolean`
 
-Defined in: [browser-compiler/src/compiler.ts:133](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L133)
+Defined in: [browser-compiler/src/compiler.ts:133](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L133)
 
 Whether compilation succeeded
 
@@ -78,6 +78,6 @@ Whether compilation succeeded
 
 > **warnings**: [`ValidationMessage`](https://getpromptscript.dev/api-reference/validator/src/interfaces/ValidationMessage/index.md)[]
 
-Defined in: [browser-compiler/src/compiler.ts:145](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L145)
+Defined in: [browser-compiler/src/compiler.ts:145](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L145)
 
 Warnings from validation

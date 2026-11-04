@@ -8,7 +8,7 @@
 
 > **TargetModelIssue** = `"unknown-model"` \| `"unsupported-provider"` \| `"invalid-name"`
 
-Defined in: [core/src/model-catalog.ts:586](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/model-catalog.ts#L586)
+Defined in: [core/src/model-catalog.ts:586](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/model-catalog.ts#L586)
 
 Why a model reference was omitted or written unchanged.
 - `unknown-model`: the catalog has no model with this name, so it is written as-is

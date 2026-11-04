@@ -8,7 +8,7 @@
 
 > **resolveProjectPath**(`projectRoot`, `baseDir`, `value`): `string` \| `undefined`
 
-Defined in: [eval/src/paths.ts:46](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/paths.ts#L46)
+Defined in: [eval/src/paths.ts:46](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/paths.ts#L46)
 
 Resolve a relative path written in a suite against `baseDir` and return its
 real path. Returns undefined when the value is absolute, has a drive letter,

@@ -8,7 +8,7 @@
 
 > **findRuntimeSlots**(`text`): [`RuntimeSlotMatch`](https://getpromptscript.dev/api-reference/core/src/interfaces/RuntimeSlotMatch/index.md)[]
 
-Defined in: [core/src/utils/runtime-slots.ts:40](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/utils/runtime-slots.ts#L40)
+Defined in: [core/src/utils/runtime-slots.ts:40](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/utils/runtime-slots.ts#L40)
 
 Find the runtime slots, escapes and malformed `{{` in prompt text.
 

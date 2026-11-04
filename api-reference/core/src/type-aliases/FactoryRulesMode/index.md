@@ -8,7 +8,7 @@
 
 > **FactoryRulesMode** = `"monolith"` \| `"split"`
 
-Defined in: [core/src/types/config.ts:77](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L77)
+Defined in: [core/src/types/config.ts:77](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/config.ts#L77)
 
 Factory always-on rules output mode.
 - `monolith`: Keep all rule content in AGENTS.md

@@ -8,7 +8,7 @@
 
 > **importMultipleFiles**(`filePaths`, `options`): `Promise`\<[`MultiImportResult`](https://getpromptscript.dev/api-reference/importer/src/interfaces/MultiImportResult/index.md)\>
 
-Defined in: [importer/src/multi-importer.ts:22](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/multi-importer.ts#L22)
+Defined in: [importer/src/multi-importer.ts:22](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/importer/src/multi-importer.ts#L22)
 
 ## Parameters
 

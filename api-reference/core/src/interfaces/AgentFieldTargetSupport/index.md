@@ -6,7 +6,7 @@
 
 # Interface: AgentFieldTargetSupport
 
-Defined in: [core/src/agent-capabilities.ts:155](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/agent-capabilities.ts#L155)
+Defined in: [core/src/agent-capabilities.ts:155](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/agent-capabilities.ts#L155)
 
 Targets that support one canonical field, grouped by status.
 
@@ -16,7 +16,7 @@ Targets that support one canonical field, grouped by status.
 
 > `readonly` **emitted**: readonly [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)[]
 
-Defined in: [core/src/agent-capabilities.ts:156](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/agent-capabilities.ts#L156)
+Defined in: [core/src/agent-capabilities.ts:156](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/agent-capabilities.ts#L156)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [core/src/agent-capabilities.ts:156](https://github.com/mrwogu/promp
 
 > `readonly` **transformed**: readonly [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)[]
 
-Defined in: [core/src/agent-capabilities.ts:157](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/agent-capabilities.ts#L157)
+Defined in: [core/src/agent-capabilities.ts:157](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/agent-capabilities.ts#L157)

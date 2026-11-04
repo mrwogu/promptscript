@@ -8,6 +8,6 @@
 
 > **ImportContract** = `Pick`\<[`PromptBundleV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/PromptBundleV1/index.md), `"inputs"`\>
 
-Defined in: [eval/src/import/import.ts:31](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/import/import.ts#L31)
+Defined in: [eval/src/import/import.ts:31](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/import/import.ts#L31)
 
 What the import needs to know about the prompt of a sample.

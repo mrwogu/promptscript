@@ -6,7 +6,7 @@
 
 # Interface: EvalJsonSchemaAssertion
 
-Defined in: [core/src/types/eval.ts:160](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L160)
+Defined in: [core/src/types/eval.ts:160](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L160)
 
 Passes when the parsed response matches a JSON Schema.
 
@@ -20,7 +20,7 @@ Passes when the parsed response matches a JSON Schema.
 
 > `optional` **field?**: `string`
 
-Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L109)
+Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L109)
 
 Output property the assertion reads; absent means the whole response text
 
@@ -34,7 +34,7 @@ Output property the assertion reads; absent means the whole response text
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:107](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L107)
+Defined in: [core/src/types/eval.ts:107](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L107)
 
 Assertion id, unique in the suite.
 
@@ -58,7 +58,7 @@ Assertion id, unique in the suite.
 
 > **kind**: `"json-schema"`
 
-Defined in: [core/src/types/eval.ts:161](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L161)
+Defined in: [core/src/types/eval.ts:161](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L161)
 
 ***
 
@@ -66,6 +66,6 @@ Defined in: [core/src/types/eval.ts:161](https://github.com/mrwogu/promptscript/
 
 > `optional` **schema?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/types/eval.ts:163](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L163)
+Defined in: [core/src/types/eval.ts:163](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/types/eval.ts#L163)
 
 Inline JSON Schema; absent means the prompt's output contract

@@ -8,7 +8,7 @@
 
 > **resolveSkillComposition**(`ast`, `options`): `Promise`\<[`Program`](https://getpromptscript.dev/api-reference/core/src/interfaces/Program/index.md)\>
 
-Defined in: [resolver/src/skill-composition.ts:96](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-composition.ts#L96)
+Defined in: [resolver/src/skill-composition.ts:96](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/skill-composition.ts#L96)
 
 Resolve inline `@use` declarations inside `@skills` blocks.
 

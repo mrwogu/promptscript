@@ -6,7 +6,7 @@
 
 # Interface: LoadSuitesOptions
 
-Defined in: [eval/src/suite/load.ts:26](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/suite/load.ts#L26)
+Defined in: [eval/src/suite/load.ts:26](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/suite/load.ts#L26)
 
 Options of [loadSuites](https://getpromptscript.dev/api-reference/eval/src/functions/loadSuites/index.md).
 
@@ -16,7 +16,7 @@ Options of [loadSuites](https://getpromptscript.dev/api-reference/eval/src/funct
 
 > `optional` **names?**: readonly `string`[]
 
-Defined in: [eval/src/suite/load.ts:30](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/suite/load.ts#L30)
+Defined in: [eval/src/suite/load.ts:30](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/suite/load.ts#L30)
 
 Suite names to load; absent means every suite
 
@@ -26,6 +26,6 @@ Suite names to load; absent means every suite
 
 > **projectRoot**: `string`
 
-Defined in: [eval/src/suite/load.ts:28](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/suite/load.ts#L28)
+Defined in: [eval/src/suite/load.ts:28](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/suite/load.ts#L28)
 
 Project root directory

@@ -8,6 +8,6 @@
 
 > `const` **CONFIG\_FILES**: `string`[]
 
-Defined in: [cli/src/config/loader.ts:20](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/config/loader.ts#L20)
+Defined in: [cli/src/config/loader.ts:20](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/cli/src/config/loader.ts#L20)
 
 List of config file names to search for.

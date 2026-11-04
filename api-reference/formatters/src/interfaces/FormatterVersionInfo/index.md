@@ -6,7 +6,7 @@
 
 # Interface: FormatterVersionInfo
 
-Defined in: [formatters/src/types.ts:188](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/types.ts#L188)
+Defined in: [formatters/src/types.ts:188](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/types.ts#L188)
 
 Version information for a single formatter version.
 
@@ -16,7 +16,7 @@ Version information for a single formatter version.
 
 > `readonly` **description**: `string`
 
-Defined in: [formatters/src/types.ts:192](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/types.ts#L192)
+Defined in: [formatters/src/types.ts:192](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/types.ts#L192)
 
 Human-readable description
 
@@ -26,7 +26,7 @@ Human-readable description
 
 > `readonly` **name**: `string`
 
-Defined in: [formatters/src/types.ts:190](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/types.ts#L190)
+Defined in: [formatters/src/types.ts:190](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/types.ts#L190)
 
 Version identifier (e.g. 'simple', 'multifile', 'full')
 
@@ -36,6 +36,6 @@ Version identifier (e.g. 'simple', 'multifile', 'full')
 
 > `readonly` **outputPath**: `string`
 
-Defined in: [formatters/src/types.ts:194](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/types.ts#L194)
+Defined in: [formatters/src/types.ts:194](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/types.ts#L194)
 
 Default output file path for this version

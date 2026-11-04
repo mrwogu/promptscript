@@ -6,7 +6,7 @@
 
 # Interface: ReservedParamsResult
 
-Defined in: [resolver/src/imports.ts:58](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/imports.ts#L58)
+Defined in: [resolver/src/imports.ts:58](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/imports.ts#L58)
 
 Result of extracting reserved parameters from
 
@@ -20,7 +20,7 @@ arguments.
 
 > `optional` **exclude?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:62](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/imports.ts#L62)
+Defined in: [resolver/src/imports.ts:62](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/imports.ts#L62)
 
 Block names to exclude (mutually exclusive with only)
 
@@ -30,7 +30,7 @@ Block names to exclude (mutually exclusive with only)
 
 > `optional` **excludes?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:66](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/imports.ts#L66)
+Defined in: [resolver/src/imports.ts:66](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/imports.ts#L66)
 
 Skill names to exclude (mutually exclusive with includes)
 
@@ -40,7 +40,7 @@ Skill names to exclude (mutually exclusive with includes)
 
 > `optional` **includes?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:64](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/imports.ts#L64)
+Defined in: [resolver/src/imports.ts:64](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/imports.ts#L64)
 
 Skill names to include (mutually exclusive with excludes)
 
@@ -50,7 +50,7 @@ Skill names to include (mutually exclusive with excludes)
 
 > `optional` **only?**: `string`[]
 
-Defined in: [resolver/src/imports.ts:60](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/imports.ts#L60)
+Defined in: [resolver/src/imports.ts:60](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/imports.ts#L60)
 
 Block names to include (mutually exclusive with exclude)
 
@@ -60,6 +60,6 @@ Block names to include (mutually exclusive with exclude)
 
 > **remaining**: [`ParamArgument`](https://getpromptscript.dev/api-reference/core/src/interfaces/ParamArgument/index.md)[]
 
-Defined in: [resolver/src/imports.ts:68](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/imports.ts#L68)
+Defined in: [resolver/src/imports.ts:68](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/imports.ts#L68)
 
 Remaining non-reserved parameters for template interpolation

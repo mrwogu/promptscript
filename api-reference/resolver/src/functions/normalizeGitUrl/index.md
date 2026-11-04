@@ -8,7 +8,7 @@
 
 > **normalizeGitUrl**(`url`): `string`
 
-Defined in: [resolver/src/git-url-utils.ts:192](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-url-utils.ts#L192)
+Defined in: [resolver/src/git-url-utils.ts:192](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/git-url-utils.ts#L192)
 
 Normalize a Git URL to a canonical HTTPS form.
 

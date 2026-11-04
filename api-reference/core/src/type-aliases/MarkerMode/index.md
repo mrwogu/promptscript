@@ -8,7 +8,7 @@
 
 > **MarkerMode** = `"timestamp"` \| `"static"` \| `"none"`
 
-Defined in: [core/src/utils/markers.ts:93](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/utils/markers.ts#L93)
+Defined in: [core/src/utils/markers.ts:93](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/utils/markers.ts#L93)
 
 How generated files are marked.
 - `timestamp`: marker with the generation time (honours `SOURCE_DATE_EPOCH`)

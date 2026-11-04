@@ -6,7 +6,7 @@
 
 # Interface: RemoteValidation
 
-Defined in: [resolver/src/git-registry.ts:1271](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L1271)
+Defined in: [resolver/src/git-registry.ts:1271](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/git-registry.ts#L1271)
 
 Result of validating remote repository accessibility.
 
@@ -16,7 +16,7 @@ Result of validating remote repository accessibility.
 
 > **accessible**: `boolean`
 
-Defined in: [resolver/src/git-registry.ts:1273](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L1273)
+Defined in: [resolver/src/git-registry.ts:1273](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/git-registry.ts#L1273)
 
 Whether the remote repository is accessible
 
@@ -26,7 +26,7 @@ Whether the remote repository is accessible
 
 > `optional` **error?**: `string`
 
-Defined in: [resolver/src/git-registry.ts:1277](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L1277)
+Defined in: [resolver/src/git-registry.ts:1277](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/git-registry.ts#L1277)
 
 Error message describing why the repository is not accessible
 
@@ -36,6 +36,6 @@ Error message describing why the repository is not accessible
 
 > `optional` **headCommit?**: `string`
 
-Defined in: [resolver/src/git-registry.ts:1275](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L1275)
+Defined in: [resolver/src/git-registry.ts:1275](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/git-registry.ts#L1275)
 
 HEAD or default branch commit hash (only present when accessible)

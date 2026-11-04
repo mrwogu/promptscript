@@ -8,7 +8,7 @@
 
 > **reportFileName**(`suite`): `string`
 
-Defined in: [eval/src/format.ts:418](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/format.ts#L418)
+Defined in: [eval/src/format.ts:418](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/eval/src/format.ts#L418)
 
 File name of the report of one suite in a report directory:
 `<suite>.<first 12 hex characters of the prompt content hash>.json`.

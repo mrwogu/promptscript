@@ -6,7 +6,7 @@
 
 # Interface: HookTerminalCapability
 
-Defined in: [core/src/hook-capabilities.ts:13](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/hook-capabilities.ts#L13)
+Defined in: [core/src/hook-capabilities.ts:13](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/hook-capabilities.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/src/hook-capabilities.ts:13](https://github.com/mrwogu/prompts
 
 > **guarantee**: [`HookTerminalGuarantee`](https://getpromptscript.dev/api-reference/core/src/type-aliases/HookTerminalGuarantee/index.md)
 
-Defined in: [core/src/hook-capabilities.ts:14](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/hook-capabilities.ts#L14)
+Defined in: [core/src/hook-capabilities.ts:14](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/hook-capabilities.ts#L14)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/src/hook-capabilities.ts:14](https://github.com/mrwogu/prompts
 
 > **notes**: `string`
 
-Defined in: [core/src/hook-capabilities.ts:16](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/hook-capabilities.ts#L16)
+Defined in: [core/src/hook-capabilities.ts:16](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/hook-capabilities.ts#L16)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [core/src/hook-capabilities.ts:16](https://github.com/mrwogu/prompts
 
 > **toolNames**: readonly `string`[]
 
-Defined in: [core/src/hook-capabilities.ts:15](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/hook-capabilities.ts#L15)
+Defined in: [core/src/hook-capabilities.ts:15](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/core/src/hook-capabilities.ts#L15)

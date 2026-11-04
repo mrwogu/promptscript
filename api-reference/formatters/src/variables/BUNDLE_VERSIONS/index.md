@@ -8,7 +8,7 @@
 
 > `const` **BUNDLE\_VERSIONS**: `object`
 
-Defined in: [formatters/src/formatters/bundle.ts:12](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/formatters/bundle.ts#L12)
+Defined in: [formatters/src/formatters/bundle.ts:12](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/formatters/src/formatters/bundle.ts#L12)
 
 ## Type Declaration
 

@@ -6,7 +6,7 @@
 
 # Interface: ResolverOptions
 
-Defined in: [resolver/src/resolver.ts:335](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L335)
+Defined in: [resolver/src/resolver.ts:335](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L335)
 
 Options for the resolver.
 
@@ -24,7 +24,7 @@ Options for the resolver.
 
 > `optional` **cache?**: `boolean`
 
-Defined in: [resolver/src/resolver.ts:337](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L337)
+Defined in: [resolver/src/resolver.ts:337](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L337)
 
 Whether to cache resolved ASTs. Defaults to true.
 
@@ -34,7 +34,7 @@ Whether to cache resolved ASTs. Defaults to true.
 
 > `optional` **cacheDir?**: `string`
 
-Defined in: [resolver/src/resolver.ts:347](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L347)
+Defined in: [resolver/src/resolver.ts:347](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L347)
 
 Base directory for the registry cache (defaults to ~/.promptscript/cache)
 
@@ -44,7 +44,7 @@ Base directory for the registry cache (defaults to ~/.promptscript/cache)
 
 > `optional` **guardRequiresDepth?**: `number`
 
-Defined in: [resolver/src/resolver.ts:345](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L345)
+Defined in: [resolver/src/resolver.ts:345](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L345)
 
 Maximum depth for guard requires resolution. Defaults to 3.
 
@@ -54,7 +54,7 @@ Maximum depth for guard requires resolution. Defaults to 3.
 
 > `optional` **localPath?**: `string`
 
-Defined in: [resolver/src/loader.ts:64](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/loader.ts#L64)
+Defined in: [resolver/src/loader.ts:64](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/loader.ts#L64)
 
 Base path for local/relative file resolution (defaults to projectRoot, then cwd)
 
@@ -68,7 +68,7 @@ Base path for local/relative file resolution (defaults to projectRoot, then cwd)
 
 > `optional` **lockfile?**: [`Lockfile`](https://getpromptscript.dev/api-reference/core/src/interfaces/Lockfile/index.md)
 
-Defined in: [resolver/src/loader.ts:72](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/loader.ts#L72)
+Defined in: [resolver/src/loader.ts:72](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/loader.ts#L72)
 
 Lockfile for pinning remote dependencies
 
@@ -82,7 +82,7 @@ Lockfile for pinning remote dependencies
 
 > `optional` **logger?**: [`Logger`](https://getpromptscript.dev/api-reference/core/src/interfaces/Logger/index.md)
 
-Defined in: [resolver/src/resolver.ts:341](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L341)
+Defined in: [resolver/src/resolver.ts:341](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L341)
 
 Logger for verbose/debug output
 
@@ -92,7 +92,7 @@ Logger for verbose/debug output
 
 > `optional` **projectRoot?**: `string`
 
-Defined in: [resolver/src/loader.ts:66](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/loader.ts#L66)
+Defined in: [resolver/src/loader.ts:66](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/loader.ts#L66)
 
 Project root used as the traversal safety boundary
 
@@ -106,7 +106,7 @@ Project root used as the traversal safety boundary
 
 > `optional` **readOnly?**: `boolean`
 
-Defined in: [resolver/src/resolver.ts:339](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L339)
+Defined in: [resolver/src/resolver.ts:339](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L339)
 
 Refuse remote registry clones and cache metadata writes.
 
@@ -116,7 +116,7 @@ Refuse remote registry clones and cache metadata writes.
 
 > `optional` **referenceRoots?**: `Record`\<`string`, `string`[]\>
 
-Defined in: [resolver/src/resolver.ts:351](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L351)
+Defined in: [resolver/src/resolver.ts:351](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L351)
 
 Repository roots that use a cache layout other than RegistryCache
 
@@ -126,7 +126,7 @@ Repository roots that use a cache layout other than RegistryCache
 
 > `optional` **registries?**: [`RegistriesConfig`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RegistriesConfig/index.md)
 
-Defined in: [resolver/src/loader.ts:70](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/loader.ts#L70)
+Defined in: [resolver/src/loader.ts:70](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/loader.ts#L70)
 
 Registry alias configuration for remote imports
 
@@ -140,7 +140,7 @@ Registry alias configuration for remote imports
 
 > `optional` **registry?**: [`Registry`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/Registry/index.md)
 
-Defined in: [resolver/src/loader.ts:68](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/loader.ts#L68)
+Defined in: [resolver/src/loader.ts:68](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/loader.ts#L68)
 
 Optional Registry implementation for file fetching
 
@@ -154,7 +154,7 @@ Optional Registry implementation for file fetching
 
 > **registryPath**: `string`
 
-Defined in: [resolver/src/loader.ts:62](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/loader.ts#L62)
+Defined in: [resolver/src/loader.ts:62](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/loader.ts#L62)
 
 Base path for registry lookups (@namespace/...)
 
@@ -168,7 +168,7 @@ Base path for registry lookups (@namespace/...)
 
 > `optional` **skills?**: [`NativeSkillOptions`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/NativeSkillOptions/index.md)
 
-Defined in: [resolver/src/resolver.ts:343](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L343)
+Defined in: [resolver/src/resolver.ts:343](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L343)
 
 Options for native skill resolution
 
@@ -178,7 +178,7 @@ Options for native skill resolution
 
 > `optional` **skillTargets?**: `Record`\<`string`, `string`\>
 
-Defined in: [resolver/src/resolver.ts:357](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L357)
+Defined in: [resolver/src/resolver.ts:357](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L357)
 
 Map from `@use` source `path.raw` to a target output directory.
 Provides a config-driven default for skills imported via
@@ -194,6 +194,6 @@ inline `into "<path>"` clause is present on the directive.
 
 > `optional` **vendorDir?**: `string`
 
-Defined in: [resolver/src/resolver.ts:349](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L349)
+Defined in: [resolver/src/resolver.ts:349](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/resolver/src/resolver.ts#L349)
 
 Vendored registry directory to prefer over cache and network access

@@ -6,7 +6,7 @@
 
 # Interface: CompileStats
 
-Defined in: [browser-compiler/src/compiler.ts:117](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L117)
+Defined in: [browser-compiler/src/compiler.ts:117](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L117)
 
 Statistics about the compilation process.
 
@@ -16,7 +16,7 @@ Statistics about the compilation process.
 
 > **formatTime**: `number`
 
-Defined in: [browser-compiler/src/compiler.ts:123](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L123)
+Defined in: [browser-compiler/src/compiler.ts:123](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L123)
 
 Time spent formatting (ms)
 
@@ -26,7 +26,7 @@ Time spent formatting (ms)
 
 > **resolveTime**: `number`
 
-Defined in: [browser-compiler/src/compiler.ts:119](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L119)
+Defined in: [browser-compiler/src/compiler.ts:119](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L119)
 
 Time spent resolving (ms)
 
@@ -36,7 +36,7 @@ Time spent resolving (ms)
 
 > **totalTime**: `number`
 
-Defined in: [browser-compiler/src/compiler.ts:125](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L125)
+Defined in: [browser-compiler/src/compiler.ts:125](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L125)
 
 Total compilation time (ms)
 
@@ -46,6 +46,6 @@ Total compilation time (ms)
 
 > **validateTime**: `number`
 
-Defined in: [browser-compiler/src/compiler.ts:121](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/browser-compiler/src/compiler.ts#L121)
+Defined in: [browser-compiler/src/compiler.ts:121](https://github.com/mrwogu/promptscript/blob/49aa50f943865b985366c4eda6e95c5a31ef39a6/packages/browser-compiler/src/compiler.ts#L121)
 
 Time spent validating (ms)
