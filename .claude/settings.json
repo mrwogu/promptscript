@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 1; fi; cd \"${CLAUDE_PROJECT_DIR}\" && sh \"${CLAUDE_PROJECT_DIR}\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
+            "command": "if [ -z \"${CLAUDE_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript claude hook requires non-empty CLAUDE_PROJECT_DIR.' >&2; exit 2; fi; cd \"${CLAUDE_PROJECT_DIR}\" && sh \"${CLAUDE_PROJECT_DIR}\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
             "timeout": 30,
             "statusMessage": "code-review-graph: refreshing index..."
           }

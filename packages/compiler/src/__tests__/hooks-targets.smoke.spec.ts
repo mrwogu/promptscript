@@ -385,6 +385,11 @@ describe('Hook target smoke tests', () => {
     command: ["touch", ${JSON.stringify(sentinelPath)}]
     cwd: "project"
   }
+  record-post: {
+    event: "post-tool-use"
+    command: ["touch", ${JSON.stringify(sentinelPath)}]
+    cwd: "project"
+  }
 }
 `
     );
@@ -396,11 +401,14 @@ describe('Hook target smoke tests', () => {
     const hookFile = JSON.parse(result.outputs.get('.factory/hooks.json')!.content) as {
       SessionStart: Array<{ hooks: Array<{ command: string }> }>;
       PreToolUse: Array<{ hooks: Array<{ command: string }> }>;
+      PostToolUse: Array<{ hooks: Array<{ command: string }> }>;
     };
-    // A pre-tool-use guard exits 2, so the host blocks the tool call.
+    // A pre-tool-use guard exits 2, so the host blocks the tool call. On
+    // factory post-tool-use exits 2 too, so stderr goes back to the model.
     const commands: Array<[string, number]> = [
       [hookFile.SessionStart[0]!.hooks[0]!.command, 1],
       [hookFile.PreToolUse[0]!.hooks[0]!.command, 2],
+      [hookFile.PostToolUse[0]!.hooks[0]!.command, 2],
     ];
 
     for (const value of [undefined, '']) {
@@ -589,7 +597,7 @@ describe('Hook target smoke tests', () => {
       hooks: { PostToolUse: Array<{ hooks: Array<{ command: string }> }> };
     };
     expect(claude.hooks.PostToolUse[0]!.hooks[0]!.command).toBe(
-      `${environmentRootGuard('claude', 'CLAUDE_PROJECT_DIR')}cd "\${CLAUDE_PROJECT_DIR}" && python3 '.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`
+      `${environmentRootGuard('claude', 'CLAUDE_PROJECT_DIR', 2)}cd "\${CLAUDE_PROJECT_DIR}" && python3 '.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`
     );
     const cursor = JSON.parse(result.outputs.get('.cursor/hooks.json')!.content) as {
       hooks: { postToolUse: Array<{ command: string }> };
