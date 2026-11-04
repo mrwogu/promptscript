@@ -29,7 +29,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 1; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
+          "command": "if [ -z \"${FACTORY_PROJECT_DIR:-}\" ]; then printf '%s\\n' 'PromptScript factory hook requires non-empty FACTORY_PROJECT_DIR.' >&2; exit 2; fi; cd \"$FACTORY_PROJECT_DIR\" && sh \"$FACTORY_PROJECT_DIR\"/.promptscript/scripts/graph-update.sh # promptscript-generated:graph-update",
           "timeout": 30
         }
       ]

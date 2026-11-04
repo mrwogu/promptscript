@@ -139,13 +139,24 @@ function projectRootExpression(target: EnvironmentRootTarget): string {
 /**
  * Exit code of a root guard when the project root is missing.
  *
- * On pre-tool events exit 2 blocks the tool call for every target with a
- * root guard, and any other code lets the call run. So a gate hook must fail
- * closed there. Other events keep exit 1: there exit 2 either does nothing
- * more, or it blocks stopping (Stop), which would only keep the agent looping.
+ * Pre-tool events exit 2 on every target with a root guard. There exit 2
+ * blocks the tool call and any other code lets it run, so a gate hook must
+ * fail closed.
+ *
+ * Post-tool-use exits 2 only on claude and factory. The tool already ran, so
+ * exit 2 blocks nothing there, it only sends stderr back to the model. With
+ * exit 1 the message lands in the logs and the agent never learns the check
+ * was skipped. Gemini, Grok and Codex keep 1 until their post semantics are
+ * checked.
+ *
+ * All other events exit 1. On Stop exit 2 blocks stopping and keeps the agent
+ * looping, and on a prompt event like UserPromptSubmit it would block and
+ * wipe the user prompt.
  */
-function rootGuardExitCode(hook: HookDefinition): 1 | 2 {
-  return hook.event === 'pre-tool-use' || hook.event === 'pre-terminal-command' ? 2 : 1;
+function rootGuardExitCode(hook: HookDefinition, target: HookTarget): 1 | 2 {
+  if (hook.event === 'pre-tool-use' || hook.event === 'pre-terminal-command') return 2;
+  if (hook.event === 'post-tool-use' && (target === 'claude' || target === 'factory')) return 2;
+  return 1;
 }
 
 function serializeRequiredEnvRootGuard(target: EnvironmentRootTarget, exitCode: 1 | 2): string {
@@ -198,7 +209,7 @@ function serializeProjectScriptCommand(
 ): string {
   const prefix =
     hook.script || hook.cwd
-      ? `${serializeRequiredEnvRootGuard(target, rootGuardExitCode(hook))}${projectCwdPrefix(hook, target)}`
+      ? `${serializeRequiredEnvRootGuard(target, rootGuardExitCode(hook, target))}${projectCwdPrefix(hook, target)}`
       : '';
   if (!hook.script) {
     return serializeOwnedCommand(hook, quotePosixArgument, prefix);
@@ -220,7 +231,7 @@ function serializeGitRootScriptCommand(hook: HookDefinition, target: GitRootTarg
   }
 
   const root = '"$PROMPTSCRIPT_PROJECT_ROOT"';
-  const guard = serializeGitRootGuard(target, rootGuardExitCode(hook));
+  const guard = serializeGitRootGuard(target, rootGuardExitCode(hook, target));
   const cwd =
     hook.cwd === undefined
       ? ''
@@ -250,7 +261,7 @@ function serializePowerShellScriptCommand(hook: HookDefinition, target: 'codex')
     return serializeOwnedCommand(hook, quotePowerShellArgument, '& ');
   }
 
-  const guard = serializePowerShellGitRootGuard(target, rootGuardExitCode(hook));
+  const guard = serializePowerShellGitRootGuard(target, rootGuardExitCode(hook, target));
   const cwd =
     hook.cwd === undefined
       ? ''

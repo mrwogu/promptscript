@@ -1124,7 +1124,7 @@ describe('hook-adapters', () => {
 
       expect(handler).toEqual({
         type: 'command',
-        command: `${environmentGuard('claude', 'CLAUDE_PROJECT_DIR')}cd "\${CLAUDE_PROJECT_DIR}"/'tools/hook scripts' && python3 "\${CLAUDE_PROJECT_DIR}"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`,
+        command: `${environmentGuard('claude', 'CLAUDE_PROJECT_DIR', 2)}cd "\${CLAUDE_PROJECT_DIR}"/'tools/hook scripts' && python3 "\${CLAUDE_PROJECT_DIR}"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`,
         timeout: 2,
       });
     });
@@ -1146,7 +1146,7 @@ describe('hook-adapters', () => {
       const handler = (entry['hooks'] as Record<string, unknown>[])[0]!;
 
       expect(handler['command']).toBe(
-        `${environmentGuard('factory', 'FACTORY_PROJECT_DIR')}cd "$FACTORY_PROJECT_DIR"/'tools/hook scripts' && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`
+        `${environmentGuard('factory', 'FACTORY_PROJECT_DIR', 2)}cd "$FACTORY_PROJECT_DIR"/'tools/hook scripts' && python3 "$FACTORY_PROJECT_DIR"/'.promptscript/scripts/check file.py' '--label=hello world' # promptscript-generated:validate`
       );
       expect(handler['timeout']).toBe(2);
     });
@@ -1391,7 +1391,7 @@ describe('hook-adapters', () => {
       );
     });
 
-    it('fails closed with exit 2 only for pre-tool events', () => {
+    it('fails closed with exit 2 for pre-tool events', () => {
       const rooted = (event: HookDefinition['event']): HookDefinition[] => [
         { id: 'rooted', event, command: ['node', 'check.mjs'], cwd: 'project' },
       ];
@@ -1424,24 +1424,55 @@ describe('hook-adapters', () => {
       expect(grok.hooks[0]!.command).toContain(environmentGuard('grok', 'GROK_WORKSPACE_ROOT', 2));
     });
 
+    it('exits 2 on post-tool-use only for claude and factory', () => {
+      const rooted = (event: HookDefinition['event']): HookDefinition[] => [
+        { id: 'rooted', event, command: ['node', 'check.mjs'], cwd: 'project' },
+      ];
+      const firstCommand = (config: Record<string, unknown>, nativeEvent: string): string =>
+        (config[nativeEvent] as Array<{ hooks: Array<{ command: string }> }>)[0]!.hooks[0]!.command;
+
+      expect(firstCommand(generateClaudeHooks(rooted('post-tool-use')), 'PostToolUse')).toContain(
+        environmentGuard('claude', 'CLAUDE_PROJECT_DIR', 2)
+      );
+      expect(firstCommand(generateFactoryHooks(rooted('post-tool-use')), 'PostToolUse')).toContain(
+        environmentGuard('factory', 'FACTORY_PROJECT_DIR', 2)
+      );
+
+      expect(firstCommand(generateGeminiHooks(rooted('post-tool-use')), 'AfterTool')).toContain(
+        environmentGuard('gemini', 'GEMINI_PROJECT_DIR')
+      );
+      expect(firstCommand(generateGrokHooks(rooted('post-tool-use')), 'PostToolUse')).toContain(
+        environmentGuard('grok', 'GROK_WORKSPACE_ROOT')
+      );
+      expect(
+        firstCommand(generateCodexHookConfig(rooted('post-tool-use')), 'PostToolUse')
+      ).toContain(gitRootGuard('codex'));
+      expect(firstCommand(generateClaudeHooks(rooted('stop')), 'Stop')).toContain(
+        environmentGuard('claude', 'CLAUDE_PROJECT_DIR')
+      );
+      expect(firstCommand(generateFactoryHooks(rooted('stop')), 'Stop')).toContain(
+        environmentGuard('factory', 'FACTORY_PROJECT_DIR')
+      );
+    });
+
     it('uses the event after target overrides to pick the guard exit code', () => {
       const hooks: HookDefinition[] = [
         {
           id: 'rooted',
-          event: 'post-tool-use',
+          event: 'stop',
           command: ['node', 'check.mjs'],
           cwd: 'project',
-          targets: { factory: { event: 'pre-tool-use' } },
+          targets: { factory: { event: 'post-tool-use' } },
         },
       ];
 
-      const factory = generateFactoryHooks(hooks)['PreToolUse']![0] as {
+      const factory = generateFactoryHooks(hooks)['PostToolUse']![0] as {
         hooks: Array<{ command: string }>;
       };
       expect(factory.hooks[0]!.command).toContain(
         environmentGuard('factory', 'FACTORY_PROJECT_DIR', 2)
       );
-      const claude = generateClaudeHooks(hooks)['PostToolUse'] as Array<{
+      const claude = generateClaudeHooks(hooks)['Stop'] as Array<{
         hooks: Array<{ command: string }>;
       }>;
       expect(claude[0]!.hooks[0]!.command).toContain(
