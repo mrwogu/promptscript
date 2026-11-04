@@ -6,7 +6,7 @@
 
 # Interface: GuardRequiresOptions
 
-Defined in: [resolver/src/guard-requires.ts:7](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/guard-requires.ts#L7)
+Defined in: [resolver/src/guard-requires.ts:7](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/guard-requires.ts#L7)
 
 Options for guard requires resolution.
 
@@ -16,6 +16,6 @@ Options for guard requires resolution.
 
 > **maxDepth**: `number`
 
-Defined in: [resolver/src/guard-requires.ts:9](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/guard-requires.ts#L9)
+Defined in: [resolver/src/guard-requires.ts:9](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/guard-requires.ts#L9)
 
 Maximum depth for transitive dependency resolution

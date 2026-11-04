@@ -8,7 +8,7 @@
 
 > **runtimeMetadata**(`appVersion`, `input?`): [`RuntimeMetadata`](https://getpromptscript.dev/api-reference/telemetry/src/interfaces/RuntimeMetadata/index.md)
 
-Defined in: [telemetry/src/runtime.ts:38](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/runtime.ts#L38)
+Defined in: [telemetry/src/runtime.ts:38](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/runtime.ts#L38)
 
 ## Parameters
 

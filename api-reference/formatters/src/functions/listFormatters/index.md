@@ -8,7 +8,7 @@
 
 > **listFormatters**(): `string`[]
 
-Defined in: [formatters/src/standalone.ts:176](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/standalone.ts#L176)
+Defined in: [formatters/src/standalone.ts:176](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/standalone.ts#L176)
 
 List all registered formatter names.
 

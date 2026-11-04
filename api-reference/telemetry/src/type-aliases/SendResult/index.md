@@ -8,4 +8,4 @@
 
 > **SendResult** = `"sent"` \| `"unknown"` \| `"retryable"` \| `"rejected"`
 
-Defined in: [telemetry/src/types.ts:2](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L2)
+Defined in: [telemetry/src/types.ts:2](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L2)

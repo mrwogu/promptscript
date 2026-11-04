@@ -6,7 +6,7 @@
 
 # Interface: TargetSettingsPermissions
 
-Defined in: [core/src/types/config.ts:217](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L217)
+Defined in: [core/src/types/config.ts:217](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L217)
 
 Permission rules for Claude Code project settings.
 
@@ -16,7 +16,7 @@ Permission rules for Claude Code project settings.
 
 > `optional` **allow?**: `string`[]
 
-Defined in: [core/src/types/config.ts:219](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L219)
+Defined in: [core/src/types/config.ts:219](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L219)
 
 Rules that are allowed without a prompt, e.g. `Bash(npm run test:*)`.
 
@@ -26,7 +26,7 @@ Rules that are allowed without a prompt, e.g. `Bash(npm run test:*)`.
 
 > `optional` **ask?**: `string`[]
 
-Defined in: [core/src/types/config.ts:223](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L223)
+Defined in: [core/src/types/config.ts:223](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L223)
 
 Rules that always ask for confirmation.
 
@@ -36,6 +36,6 @@ Rules that always ask for confirmation.
 
 > `optional` **deny?**: `string`[]
 
-Defined in: [core/src/types/config.ts:221](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L221)
+Defined in: [core/src/types/config.ts:221](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L221)
 
 Rules that are always denied, e.g. `Read(./.env)`.

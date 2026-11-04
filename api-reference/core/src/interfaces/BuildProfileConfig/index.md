@@ -6,17 +6,34 @@
 
 # Interface: BuildProfileConfig
 
-Defined in: [core/src/types/config.ts:251](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L251)
+Defined in: [core/src/types/config.ts:251](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L251)
 
 Named build profile for compiling a specific entry point to specific outputs.
 
 ## Properties
 
+### enabled?
+
+> `optional` **enabled?**: `boolean`
+
+Defined in: [core/src/types/config.ts:263](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L263)
+
+Set to `false` to drop the profile, for example one inherited through
+`extends`. A dropped profile is removed when the config is loaded.
+
+#### Default
+
+```ts
+true
+```
+
+***
+
 ### entry?
 
 > `optional` **entry?**: `string`
 
-Defined in: [core/src/types/config.ts:253](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L253)
+Defined in: [core/src/types/config.ts:253](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L253)
 
 Entry file path for this build profile
 
@@ -26,7 +43,7 @@ Entry file path for this build profile
 
 > `optional` **output?**: `string`
 
-Defined in: [core/src/types/config.ts:255](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L255)
+Defined in: [core/src/types/config.ts:255](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L255)
 
 Output directory for this build profile
 
@@ -36,6 +53,6 @@ Output directory for this build profile
 
 > `optional` **targets?**: [`TargetEntry`](https://getpromptscript.dev/api-reference/core/src/type-aliases/TargetEntry/index.md)[]
 
-Defined in: [core/src/types/config.ts:257](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L257)
+Defined in: [core/src/types/config.ts:257](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L257)
 
 Target list for this build profile

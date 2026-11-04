@@ -8,7 +8,7 @@
 
 > **validateSkillFrontmatter**(`rawContent`, `options?`): [`SkillValidationResult`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/SkillValidationResult/index.md)
 
-Defined in: [resolver/src/skill-validation.ts:63](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/skill-validation.ts#L63)
+Defined in: [resolver/src/skill-validation.ts:63](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/skill-validation.ts#L63)
 
 Validate a SKILL.md frontmatter and body against the Agent Skills
 specification (see https://agentskills.io/specification) and PromptScript's

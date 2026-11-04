@@ -8,7 +8,7 @@
 
 > **EvalThresholdName** = `"passRate"` \| `"maxCostUsd"` \| `"maxCostPerCaseUsd"` \| `"latencyMs.p50"` \| `"latencyMs.p95"`
 
-Defined in: [core/src/types/eval.ts:637](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L637)
+Defined in: [core/src/types/eval.ts:637](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L637)
 
 Name of a suite threshold.
 

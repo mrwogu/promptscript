@@ -8,7 +8,7 @@
 
 > **buildAuthenticatedUrl**(`url`, `token`): `string`
 
-Defined in: [resolver/src/git-url-utils.ts:216](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-url-utils.ts#L216)
+Defined in: [resolver/src/git-url-utils.ts:216](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-url-utils.ts#L216)
 
 Build an authenticated Git URL with a token.
 

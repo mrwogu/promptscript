@@ -6,7 +6,7 @@
 
 # Interface: AgentFieldStatusGroups
 
-Defined in: [core/src/agent-capabilities.ts:51](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/agent-capabilities.ts#L51)
+Defined in: [core/src/agent-capabilities.ts:51](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/agent-capabilities.ts#L51)
 
 Status groups for one field: which native targets emit or transform it.
 
@@ -16,7 +16,7 @@ Status groups for one field: which native targets emit or transform it.
 
 > `readonly` `optional` **emitted?**: readonly [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)[]
 
-Defined in: [core/src/agent-capabilities.ts:52](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/agent-capabilities.ts#L52)
+Defined in: [core/src/agent-capabilities.ts:52](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/agent-capabilities.ts#L52)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [core/src/agent-capabilities.ts:52](https://github.com/mrwogu/prompt
 
 > `readonly` `optional` **transformed?**: readonly [`KnownTarget`](https://getpromptscript.dev/api-reference/core/src/type-aliases/KnownTarget/index.md)[]
 
-Defined in: [core/src/agent-capabilities.ts:53](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/agent-capabilities.ts#L53)
+Defined in: [core/src/agent-capabilities.ts:53](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/agent-capabilities.ts#L53)

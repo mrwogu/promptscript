@@ -6,7 +6,7 @@
 
 # Interface: ValidateSummaryV1
 
-Defined in: [core/src/types/validate-report.ts:61](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/validate-report.ts#L61)
+Defined in: [core/src/types/validate-report.ts:61](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/validate-report.ts#L61)
 
 Counts of errors and warnings in a validate report.
 
@@ -16,7 +16,7 @@ Counts of errors and warnings in a validate report.
 
 > **errorCount**: `number`
 
-Defined in: [core/src/types/validate-report.ts:67](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/validate-report.ts#L67)
+Defined in: [core/src/types/validate-report.ts:67](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/validate-report.ts#L67)
 
 Number of errors
 
@@ -34,7 +34,7 @@ integer
 
 > **warningCount**: `number`
 
-Defined in: [core/src/types/validate-report.ts:73](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/validate-report.ts#L73)
+Defined in: [core/src/types/validate-report.ts:73](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/validate-report.ts#L73)
 
 Number of warnings
 

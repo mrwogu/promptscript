@@ -8,7 +8,7 @@
 
 > **AmpFormatter**: \{new (): [`MarkdownInstructionFormatter`](https://getpromptscript.dev/api-reference/formatters/src/classes/MarkdownInstructionFormatter/index.md); `getSupportedVersions`(): [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md); \}
 
-Defined in: [formatters/src/formatters/amp.ts:5](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/amp.ts#L5)
+Defined in: [formatters/src/formatters/amp.ts:5](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/formatters/amp.ts#L5)
 
 ## Type Declaration
 

@@ -8,7 +8,7 @@
 
 > **importSamples**(`options`): `Promise`\<[`ImportResult`](https://getpromptscript.dev/api-reference/eval/src/interfaces/ImportResult/index.md)\>
 
-Defined in: [eval/src/import/import.ts:413](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/import/import.ts#L413)
+Defined in: [eval/src/import/import.ts:413](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/import/import.ts#L413)
 
 Turn a JSONL file of production samples into dataset rows. Every step runs before
 anything is written, and the function writes nothing itself.

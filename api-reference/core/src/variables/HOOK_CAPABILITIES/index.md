@@ -8,7 +8,7 @@
 
 > `const` **HOOK\_CAPABILITIES**: `object`
 
-Defined in: [core/src/hook-capabilities.ts:66](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/hook-capabilities.ts#L66)
+Defined in: [core/src/hook-capabilities.ts:66](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/hook-capabilities.ts#L66)
 
 Audited lifecycle-hook capabilities for every built-in formatter target.
 

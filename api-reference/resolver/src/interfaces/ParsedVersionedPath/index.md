@@ -6,7 +6,7 @@
 
 # Interface: ParsedVersionedPath
 
-Defined in: [resolver/src/git-url-utils.ts:35](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-url-utils.ts#L35)
+Defined in: [resolver/src/git-url-utils.ts:35](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-url-utils.ts#L35)
 
 Parsed versioned path structure.
 
@@ -16,7 +16,7 @@ Parsed versioned path structure.
 
 > **path**: `string`
 
-Defined in: [resolver/src/git-url-utils.ts:37](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-url-utils.ts#L37)
+Defined in: [resolver/src/git-url-utils.ts:37](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-url-utils.ts#L37)
 
 Path without version (e.g., @company/base)
 
@@ -26,6 +26,6 @@ Path without version (e.g., @company/base)
 
 > `optional` **version?**: `string`
 
-Defined in: [resolver/src/git-url-utils.ts:39](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-url-utils.ts#L39)
+Defined in: [resolver/src/git-url-utils.ts:39](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-url-utils.ts#L39)
 
 Version tag if specified (e.g., v1.0.0)

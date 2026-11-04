@@ -6,7 +6,7 @@
 
 # Interface: TextValueNode
 
-Defined in: [core/src/types/ast.ts:513](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L513)
+Defined in: [core/src/types/ast.ts:513](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L513)
 
 Canonical triple-quoted text value.
 
@@ -20,7 +20,7 @@ Canonical triple-quoted text value.
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L499)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -56,7 +56,7 @@ Byte offset from start of file
 
 > `readonly` **type**: `"TextValueNode"`
 
-Defined in: [core/src/types/ast.ts:514](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L514)
+Defined in: [core/src/types/ast.ts:514](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L514)
 
 #### Overrides
 
@@ -68,4 +68,4 @@ Defined in: [core/src/types/ast.ts:514](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **value**: `string`
 
-Defined in: [core/src/types/ast.ts:515](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L515)
+Defined in: [core/src/types/ast.ts:515](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L515)

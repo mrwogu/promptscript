@@ -6,7 +6,7 @@
 
 # Interface: ReleaseChange
 
-Defined in: [cli/src/utils/release-report.ts:38](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L38)
+Defined in: [cli/src/utils/release-report.ts:38](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L38)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:38](https://github.com/mrwogu/promp
 
 > **action**: [`ReleaseChangeAction`](https://getpromptscript.dev/api-reference/cli/src/type-aliases/ReleaseChangeAction/index.md)
 
-Defined in: [cli/src/utils/release-report.ts:41](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L41)
+Defined in: [cli/src/utils/release-report.ts:41](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L41)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:41](https://github.com/mrwogu/promp
 
 > `optional` **contentHash?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:45](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L45)
+Defined in: [cli/src/utils/release-report.ts:45](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L45)
 
 Content hash the entry holds after the command
 
@@ -32,7 +32,7 @@ Content hash the entry holds after the command
 
 > `optional` **experiment?**: `ReleaseChangeExperiment`
 
-Defined in: [cli/src/utils/release-report.ts:49](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L49)
+Defined in: [cli/src/utils/release-report.ts:49](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L49)
 
 Set on an arm item of an experiment; the entry item has none
 
@@ -42,7 +42,7 @@ Set on an arm item of an experiment; the entry item has none
 
 > `optional` **id?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:43](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L43)
+Defined in: [cli/src/utils/release-report.ts:43](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L43)
 
 Prompt id, for a bundle or label entry
 
@@ -52,7 +52,7 @@ Prompt id, for a bundle or label entry
 
 > **path**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:40](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L40)
+Defined in: [cli/src/utils/release-report.ts:40](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L40)
 
 Project-relative path of the file
 
@@ -62,6 +62,6 @@ Project-relative path of the file
 
 > `optional` **previousContentHash?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:47](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L47)
+Defined in: [cli/src/utils/release-report.ts:47](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L47)
 
 Content hash the entry held before the command

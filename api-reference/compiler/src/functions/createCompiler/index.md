@@ -8,7 +8,7 @@
 
 > **createCompiler**(`options`): [`Compiler`](https://getpromptscript.dev/api-reference/compiler/src/classes/Compiler/index.md)
 
-Defined in: [compiler/src/compiler.ts:1464](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/compiler/src/compiler.ts#L1464)
+Defined in: [compiler/src/compiler.ts:1464](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/compiler/src/compiler.ts#L1464)
 
 Create a new compiler instance.
 

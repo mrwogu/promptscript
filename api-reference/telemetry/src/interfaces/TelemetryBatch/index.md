@@ -6,7 +6,7 @@
 
 # Interface: TelemetryBatch
 
-Defined in: [telemetry/src/types.ts:46](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L46)
+Defined in: [telemetry/src/types.ts:46](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L46)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/types.ts:46](https://github.com/mrwogu/promptscript/b
 
 > **payload**: [`TelemetryPayload`](https://getpromptscript.dev/api-reference/telemetry/src/interfaces/TelemetryPayload/index.md)
 
-Defined in: [telemetry/src/types.ts:47](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L47)
+Defined in: [telemetry/src/types.ts:47](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L47)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [telemetry/src/types.ts:47](https://github.com/mrwogu/promptscript/b
 
 > **sourceIndexes**: `number`[]
 
-Defined in: [telemetry/src/types.ts:48](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L48)
+Defined in: [telemetry/src/types.ts:48](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L48)

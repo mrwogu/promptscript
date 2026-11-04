@@ -6,7 +6,7 @@
 
 # Interface: FlushState
 
-Defined in: [telemetry/src/types.ts:68](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L68)
+Defined in: [telemetry/src/types.ts:68](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L68)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [telemetry/src/types.ts:68](https://github.com/mrwogu/promptscript/b
 
 > `optional` **lastAttempt?**: `string`
 
-Defined in: [telemetry/src/types.ts:69](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L69)
+Defined in: [telemetry/src/types.ts:69](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L69)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [telemetry/src/types.ts:69](https://github.com/mrwogu/promptscript/b
 
 > `optional` **lastError?**: `string`
 
-Defined in: [telemetry/src/types.ts:71](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L71)
+Defined in: [telemetry/src/types.ts:71](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L71)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [telemetry/src/types.ts:71](https://github.com/mrwogu/promptscript/b
 
 > `optional` **lastSuccess?**: `string`
 
-Defined in: [telemetry/src/types.ts:70](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/types.ts#L70)
+Defined in: [telemetry/src/types.ts:70](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/types.ts#L70)

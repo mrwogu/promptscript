@@ -8,7 +8,7 @@
 
 > `const` **SYNTAX\_FEATURES**: `object`
 
-Defined in: [core/src/syntax-versions.ts:7](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/syntax-versions.ts#L7)
+Defined in: [core/src/syntax-versions.ts:7](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/syntax-versions.ts#L7)
 
 Syntax features that are versioned independently from block availability.
 

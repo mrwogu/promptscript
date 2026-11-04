@@ -6,7 +6,7 @@
 
 # Interface: BlockOperation
 
-Defined in: [core/src/types/ast.ts:695](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L695)
+Defined in: [core/src/types/ast.ts:695](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L695)
 
 Canonical block declaration operation.
 
@@ -20,7 +20,7 @@ Canonical block declaration operation.
 
 > `readonly` **block**: [`CanonicalBlock`](https://getpromptscript.dev/api-reference/core/src/interfaces/CanonicalBlock/index.md)
 
-Defined in: [core/src/types/ast.ts:697](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L697)
+Defined in: [core/src/types/ast.ts:697](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L697)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [core/src/types/ast.ts:697](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **loc**: `object`
 
-Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L499)
+Defined in: [core/src/types/ast.ts:499](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L499)
 
 #### column
 
@@ -64,7 +64,7 @@ Byte offset from start of file
 
 > `readonly` **sourceLayerId**: `string`
 
-Defined in: [core/src/types/ast.ts:698](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L698)
+Defined in: [core/src/types/ast.ts:698](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L698)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [core/src/types/ast.ts:698](https://github.com/mrwogu/promptscript/b
 
 > `readonly` **type**: `"BlockOperation"`
 
-Defined in: [core/src/types/ast.ts:696](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L696)
+Defined in: [core/src/types/ast.ts:696](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L696)
 
 #### Overrides
 

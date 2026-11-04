@@ -8,7 +8,7 @@
 
 > **ImportRow** = [`DatasetRecord`](https://getpromptscript.dev/api-reference/eval/src/interfaces/DatasetRecord/index.md)\[`"row"`\] & `object`
 
-Defined in: [eval/src/import/import.ts:68](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/import/import.ts#L68)
+Defined in: [eval/src/import/import.ts:68](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/import/import.ts#L68)
 
 A row ready to write, with the line it takes in the output.
 

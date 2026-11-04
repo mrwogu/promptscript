@@ -8,6 +8,6 @@
 
 > `const` **PROMPT\_BUNDLE\_SCHEMA\_URL**: `"https://getpromptscript.dev/schema/prompt-bundle/v1.json"` = `'https://getpromptscript.dev/schema/prompt-bundle/v1.json'`
 
-Defined in: [core/src/prompt-bundle-hash.ts:5](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/prompt-bundle-hash.ts#L5)
+Defined in: [core/src/prompt-bundle-hash.ts:5](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/prompt-bundle-hash.ts#L5)
 
 Schema URL of a prompt bundle. It is the version tag and is part of the hash.

@@ -6,7 +6,7 @@
 
 # Interface: DiffLocation
 
-Defined in: [cli/src/utils/diff-report.ts:35](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L35)
+Defined in: [cli/src/utils/diff-report.ts:35](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/diff-report.ts#L35)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/diff-report.ts:35](https://github.com/mrwogu/promptsc
 
 > `optional` **column?**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:38](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L38)
+Defined in: [cli/src/utils/diff-report.ts:38](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/diff-report.ts#L38)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/diff-report.ts:38](https://github.com/mrwogu/promptsc
 
 > `optional` **file?**: `string`
 
-Defined in: [cli/src/utils/diff-report.ts:36](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L36)
+Defined in: [cli/src/utils/diff-report.ts:36](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/diff-report.ts#L36)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [cli/src/utils/diff-report.ts:36](https://github.com/mrwogu/promptsc
 
 > `optional` **line?**: `number`
 
-Defined in: [cli/src/utils/diff-report.ts:37](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L37)
+Defined in: [cli/src/utils/diff-report.ts:37](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/diff-report.ts#L37)

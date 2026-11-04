@@ -6,7 +6,7 @@
 
 # Class: GitCloneError
 
-Defined in: [resolver/src/git-registry.ts:126](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-registry.ts#L126)
+Defined in: [resolver/src/git-registry.ts:126](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L126)
 
 Git clone error.
 
@@ -20,7 +20,7 @@ Git clone error.
 
 > **new GitCloneError**(`message`, `url`, `cause?`): `GitCloneError`
 
-Defined in: [resolver/src/git-registry.ts:129](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-registry.ts#L129)
+Defined in: [resolver/src/git-registry.ts:129](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L129)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [resolver/src/git-registry.ts:129](https://github.com/mrwogu/prompts
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [resolver/src/git-registry.ts:127](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-registry.ts#L127)
+Defined in: [resolver/src/git-registry.ts:127](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L127)
 
 #### Overrides
 
@@ -62,4 +62,4 @@ Defined in: [resolver/src/git-registry.ts:127](https://github.com/mrwogu/prompts
 
 > `readonly` **url**: `string`
 
-Defined in: [resolver/src/git-registry.ts:131](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-registry.ts#L131)
+Defined in: [resolver/src/git-registry.ts:131](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-registry.ts#L131)

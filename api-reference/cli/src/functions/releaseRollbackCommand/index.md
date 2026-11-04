@@ -8,7 +8,7 @@
 
 > **releaseRollbackCommand**(`environment`, `options`): `Promise`\<`void`\>
 
-Defined in: [cli/src/commands/release/rollback.ts:176](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/commands/release/rollback.ts#L176)
+Defined in: [cli/src/commands/release/rollback.ts:176](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/commands/release/rollback.ts#L176)
 
 Undo the last committed change of an environment's label. The label comes back whole,
 version 1 or 2. Every hash of a restored entry, experiment arms included, must exist and

@@ -8,7 +8,7 @@
 
 > **MockProvider** = [`EvalProvider`](https://getpromptscript.dev/api-reference/eval/src/type-aliases/EvalProvider/index.md) & `object`
 
-Defined in: [eval/src/provider.ts:76](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/provider.ts#L76)
+Defined in: [eval/src/provider.ts:76](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/provider.ts#L76)
 
 A provider that answers from a script and records its calls.
 

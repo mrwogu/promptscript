@@ -8,7 +8,7 @@
 
 > **createGitCacheManager**(`options?`): [`GitCacheManager`](https://getpromptscript.dev/api-reference/resolver/src/classes/GitCacheManager/index.md)
 
-Defined in: [resolver/src/git-cache-manager.ts:381](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/git-cache-manager.ts#L381)
+Defined in: [resolver/src/git-cache-manager.ts:381](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/git-cache-manager.ts#L381)
 
 Create a new GitCacheManager instance.
 

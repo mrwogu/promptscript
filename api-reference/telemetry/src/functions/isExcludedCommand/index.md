@@ -8,7 +8,7 @@
 
 > **isExcludedCommand**(`value`): `boolean`
 
-Defined in: [telemetry/src/schema.ts:34](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/telemetry/src/schema.ts#L34)
+Defined in: [telemetry/src/schema.ts:34](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/telemetry/src/schema.ts#L34)
 
 ## Parameters
 

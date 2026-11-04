@@ -6,7 +6,7 @@
 
 # Interface: ReleaseDiagnostic
 
-Defined in: [cli/src/utils/release-report.ts:110](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L110)
+Defined in: [cli/src/utils/release-report.ts:110](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L110)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [cli/src/utils/release-report.ts:110](https://github.com/mrwogu/prom
 
 > `optional` **code?**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:111](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L111)
+Defined in: [cli/src/utils/release-report.ts:111](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L111)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [cli/src/utils/release-report.ts:111](https://github.com/mrwogu/prom
 
 > `optional` **location?**: [`ReleaseLocation`](https://getpromptscript.dev/api-reference/cli/src/interfaces/ReleaseLocation/index.md)
 
-Defined in: [cli/src/utils/release-report.ts:113](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L113)
+Defined in: [cli/src/utils/release-report.ts:113](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L113)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [cli/src/utils/release-report.ts:113](https://github.com/mrwogu/prom
 
 > **message**: `string`
 
-Defined in: [cli/src/utils/release-report.ts:112](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/release-report.ts#L112)
+Defined in: [cli/src/utils/release-report.ts:112](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/release-report.ts#L112)

@@ -8,7 +8,7 @@
 
 > **formatComparison**(`comparison`, `format`, `options?`): `string`
 
-Defined in: [eval/src/format.ts:531](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/format.ts#L531)
+Defined in: [eval/src/format.ts:531](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/format.ts#L531)
 
 Format a comparison of two reports. JSON puts the schema URL first.
 

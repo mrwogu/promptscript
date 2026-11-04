@@ -6,7 +6,7 @@
 
 # Interface: EvalTokenUsageV1
 
-Defined in: [core/src/types/eval.ts:341](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L341)
+Defined in: [core/src/types/eval.ts:341](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L341)
 
 Token counts of one or more model calls.
 
@@ -20,7 +20,7 @@ Token counts of one or more model calls.
 
 > **inputTokens**: `number`
 
-Defined in: [core/src/types/eval.ts:347](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L347)
+Defined in: [core/src/types/eval.ts:347](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L347)
 
 Input tokens.
 
@@ -38,7 +38,7 @@ integer
 
 > **outputTokens**: `number`
 
-Defined in: [core/src/types/eval.ts:353](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L353)
+Defined in: [core/src/types/eval.ts:353](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L353)
 
 Output tokens.
 

@@ -8,4 +8,4 @@
 
 > `const` **TRAE\_VERSIONS**: [`SimpleFormatterVersions`](https://getpromptscript.dev/api-reference/formatters/src/interfaces/SimpleFormatterVersions/index.md)
 
-Defined in: [formatters/src/formatters/trae.ts:14](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/trae.ts#L14)
+Defined in: [formatters/src/formatters/trae.ts:14](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/formatters/trae.ts#L14)

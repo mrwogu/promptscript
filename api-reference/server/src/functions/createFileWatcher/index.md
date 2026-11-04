@@ -8,7 +8,7 @@
 
 > **createFileWatcher**(`workspace`, `watchPaths`, `onEvent`): `FSWatcher`
 
-Defined in: [server/src/watcher.ts:17](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/server/src/watcher.ts#L17)
+Defined in: [server/src/watcher.ts:17](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/server/src/watcher.ts#L17)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **replacePathTokens**(`text`, `values`): `object`
 
-Defined in: [core/src/utils/path-tokens.ts:33](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/utils/path-tokens.ts#L33)
+Defined in: [core/src/utils/path-tokens.ts:33](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/utils/path-tokens.ts#L33)
 
 Replace `{{prs.dotDir}}`, `{{prs.skillsDir}}` and `{{prs.skillDir}}` with
 the given values. Escaped `\{{prs.dotDir}}` is written as `{{prs.dotDir}}`.

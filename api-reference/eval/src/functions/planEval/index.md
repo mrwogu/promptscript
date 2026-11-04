@@ -8,7 +8,7 @@
 
 > **planEval**(`options`): `Promise`\<[`EvalPlan`](https://getpromptscript.dev/api-reference/eval/src/interfaces/EvalPlan/index.md)\>
 
-Defined in: [eval/src/run.ts:1120](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L1120)
+Defined in: [eval/src/run.ts:1120](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/run.ts#L1120)
 
 Plan a run without calling anything: the same checks as [runEval](https://getpromptscript.dev/api-reference/eval/src/functions/runEval/index.md),
 the cache lookups, and the worst-case cost of every miss. It creates no

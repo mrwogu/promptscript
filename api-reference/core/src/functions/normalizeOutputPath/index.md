@@ -8,7 +8,7 @@
 
 > **normalizeOutputPath**(`path`): `string`
 
-Defined in: [core/src/output-plan.ts:157](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L157)
+Defined in: [core/src/output-plan.ts:157](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/output-plan.ts#L157)
 
 Normalize a project-relative output path.
 

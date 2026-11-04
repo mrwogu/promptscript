@@ -8,6 +8,6 @@
 
 > **ManifestTarget** = `"github"` \| `"claude"` \| `"cursor"` \| `"antigravity"` \| `"factory"` \| `"opencode"` \| `"gemini"`
 
-Defined in: [core/src/types/manifest.ts:11](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/manifest.ts#L11)
+Defined in: [core/src/types/manifest.ts:11](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/manifest.ts#L11)
 
 Target AI tool identifiers.

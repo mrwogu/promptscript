@@ -6,7 +6,7 @@
 
 # Interface: EvalCacheUseV1
 
-Defined in: [core/src/types/eval.ts:429](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L429)
+Defined in: [core/src/types/eval.ts:429](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L429)
 
 How many calls came from the cache and how many went to a provider.
 
@@ -20,7 +20,7 @@ How many calls came from the cache and how many went to a provider.
 
 > **live**: `number`
 
-Defined in: [core/src/types/eval.ts:441](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L441)
+Defined in: [core/src/types/eval.ts:441](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L441)
 
 Calls made to a provider.
 
@@ -38,7 +38,7 @@ integer
 
 > **replayed**: `number`
 
-Defined in: [core/src/types/eval.ts:435](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L435)
+Defined in: [core/src/types/eval.ts:435](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L435)
 
 Calls answered from the cache.
 

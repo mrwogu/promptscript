@@ -8,7 +8,7 @@
 
 > **parseCanonicalFile**(`filePath`, `options?`): [`CanonicalParseResult`](https://getpromptscript.dev/api-reference/parser/src/interfaces/CanonicalParseResult/index.md)
 
-Defined in: [parser/src/parse.ts:285](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/parser/src/parse.ts#L285)
+Defined in: [parser/src/parse.ts:285](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/parser/src/parse.ts#L285)
 
 Parse a PromptScript file from disk into the canonical AST.
 

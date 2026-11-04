@@ -6,7 +6,7 @@
 
 # Interface: HttpRegistryOptions
 
-Defined in: [resolver/src/registry.ts:94](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/registry.ts#L94)
+Defined in: [resolver/src/registry.ts:94](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/registry.ts#L94)
 
 Options for HttpRegistry.
 
@@ -16,7 +16,7 @@ Options for HttpRegistry.
 
 > `optional` **auth?**: `object`
 
-Defined in: [resolver/src/registry.ts:98](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/registry.ts#L98)
+Defined in: [resolver/src/registry.ts:98](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/registry.ts#L98)
 
 Authentication options
 
@@ -38,7 +38,7 @@ Auth type: 'bearer' or 'basic'
 
 > **baseUrl**: `string`
 
-Defined in: [resolver/src/registry.ts:96](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/registry.ts#L96)
+Defined in: [resolver/src/registry.ts:96](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/registry.ts#L96)
 
 Base URL of the registry
 
@@ -48,7 +48,7 @@ Base URL of the registry
 
 > `optional` **cache?**: `object`
 
-Defined in: [resolver/src/registry.ts:105](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/registry.ts#L105)
+Defined in: [resolver/src/registry.ts:105](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/registry.ts#L105)
 
 Cache settings
 
@@ -70,7 +70,7 @@ TTL in milliseconds
 
 > `optional` **retry?**: `object`
 
-Defined in: [resolver/src/registry.ts:112](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/registry.ts#L112)
+Defined in: [resolver/src/registry.ts:112](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/registry.ts#L112)
 
 Retry settings
 
@@ -92,6 +92,6 @@ Maximum number of retries
 
 > `optional` **timeout?**: `number`
 
-Defined in: [resolver/src/registry.ts:119](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/registry.ts#L119)
+Defined in: [resolver/src/registry.ts:119](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/registry.ts#L119)
 
 Request timeout in ms

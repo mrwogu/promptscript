@@ -6,7 +6,7 @@
 
 # Interface: EvalProviderConfig
 
-Defined in: [core/src/types/config.ts:376](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L376)
+Defined in: [core/src/types/config.ts:382](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L382)
 
 One model provider that eval suites can call.
 
@@ -16,7 +16,7 @@ One model provider that eval suites can call.
 
 > `optional` **apiKeyEnvVar?**: `string`
 
-Defined in: [core/src/types/config.ts:390](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L390)
+Defined in: [core/src/types/config.ts:396](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L396)
 
 Environment variable that holds the provider API key. The key itself
 is never read from the config.
@@ -37,7 +37,7 @@ is never read from the config.
 
 > `optional` **baseUrl?**: `string`
 
-Defined in: [core/src/types/config.ts:383](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L383)
+Defined in: [core/src/types/config.ts:389](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L389)
 
 Base URL of the provider API.
 
@@ -53,6 +53,6 @@ Base URL of the provider API.
 
 > **kind**: [`EvalProviderKind`](https://getpromptscript.dev/api-reference/core/src/type-aliases/EvalProviderKind/index.md)
 
-Defined in: [core/src/types/config.ts:378](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L378)
+Defined in: [core/src/types/config.ts:384](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L384)
 
 Request and response format: the Anthropic Messages API or an OpenAI-compatible chat API

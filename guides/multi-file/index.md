@@ -322,12 +322,6 @@ later local blocks and modification operations apply after an earlier import.
 # Result: @restrictions contains both items
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz44GEY3ahNHKloffmp4LErGLAg2ZUCrXgBacJAAORgANxhqXiI0ZlLeAEEABQBJXgBrGEc4PMLWYvtXACsyrBqN3zdpigB6UvLKrEci3wa4JogWttYOuN6IgDFmKCgFl4AHkAOozADKc146jcECkUAgrHgmwefAASvA3FAsGF6o1mq12jo2CIkcoAEbMXDGDgkBD5OjobB4RAga4VKrHEAMFjsThYHi8CFuNDkCDSWTyWzjKLkOzUDzKHCjGAUXj9an2DDULCGMAKFW8cTMcpaERE1h0MSeXisLWiBoYKDaxjLDRqupCES8TrBeEpdllTl3PLBOAJETJPrpLK5EBxEgQQhIsJNNwwHxbfjPDCeHXiT5dFhSMLICJzKAYRgwHD-KRjXP56jeEAAXTiHGeSPUZYrVZrdagDdkImbrY7BTqTxeb2Jfp6fUr1dr9dGvBnhPemxA+TbDAF1Ec+CIpHl3IYI1o73wqV3QA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Alias for Selective Extension
 
 When you need to modify imported content rather than just merge it, use an alias:

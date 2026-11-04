@@ -8,7 +8,7 @@
 
 > **parseSample**(`value`): [`EvalSampleV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalSampleV1/index.md) \| `undefined`
 
-Defined in: [eval/src/import/sample.ts:121](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/import/sample.ts#L121)
+Defined in: [eval/src/import/sample.ts:121](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/import/sample.ts#L121)
 
 Check one parsed JSONL line against the closed sample schema
 (`schema/eval-sample-v1.json`) and copy it. Anything the schema does not list

@@ -70,7 +70,7 @@ runs later.
 
 - `@override` target must exist when operation runs.
 - `@extend` target should exist before extension.
-- Local duplicate blocks apply at their source positions.
+- A block name may appear only once per file; a second block with the same name in one file is a PS048 error. Same-name blocks from `@inherit` and `@use` merge by name in declaration order.
 - Imported source values use import merge policy before later operations.
 - Sealed skill properties remain protected regardless of operation order.
 - Older syntax using `@override` still resolves deterministically, but PS018

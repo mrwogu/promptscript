@@ -6,7 +6,7 @@
 
 # Interface: StructuredMergePlan
 
-Defined in: [core/src/structured-output.ts:21](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/structured-output.ts#L21)
+Defined in: [core/src/structured-output.ts:21](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/structured-output.ts#L21)
 
 Plan for merging generated values into a structured settings file.
 
@@ -16,7 +16,7 @@ Plan for merging generated values into a structured settings file.
 
 > **format**: `"json"` \| `"toml"`
 
-Defined in: [core/src/structured-output.ts:23](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/structured-output.ts#L23)
+Defined in: [core/src/structured-output.ts:23](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/structured-output.ts#L23)
 
 Target file format.
 
@@ -26,7 +26,7 @@ Target file format.
 
 > **operations**: [`StructuredMergeOperation`](https://getpromptscript.dev/api-reference/core/src/interfaces/StructuredMergeOperation/index.md)[]
 
-Defined in: [core/src/structured-output.ts:27](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/structured-output.ts#L27)
+Defined in: [core/src/structured-output.ts:27](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/structured-output.ts#L27)
 
 Merge operations to apply.
 
@@ -36,6 +36,6 @@ Merge operations to apply.
 
 > **owner**: `string`
 
-Defined in: [core/src/structured-output.ts:25](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/structured-output.ts#L25)
+Defined in: [core/src/structured-output.ts:25](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/structured-output.ts#L25)
 
 Owner identifier.

@@ -8,6 +8,6 @@
 
 > `const` **DEFAULT\_PROVIDER\_HOSTS**: readonly `string`[]
 
-Defined in: [eval/src/http-provider.ts:39](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/http-provider.ts#L39)
+Defined in: [eval/src/http-provider.ts:39](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/http-provider.ts#L39)
 
 Hosts a provider may call without `--allow-host`.

@@ -6,7 +6,7 @@
 
 # Interface: SourceRange
 
-Defined in: [core/src/types/source.ts:18](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/source.ts#L18)
+Defined in: [core/src/types/source.ts:18](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/source.ts#L18)
 
 Range in source code (start to end).
 
@@ -16,7 +16,7 @@ Range in source code (start to end).
 
 > **end**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/source.ts:20](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/source.ts#L20)
+Defined in: [core/src/types/source.ts:20](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/source.ts#L20)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [core/src/types/source.ts:20](https://github.com/mrwogu/promptscript
 
 > **start**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/source.ts:19](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/source.ts#L19)
+Defined in: [core/src/types/source.ts:19](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/source.ts#L19)

@@ -8,7 +8,7 @@
 
 > `const` **BLOCK\_SHAPE\_CONTRACTS**: `object`
 
-Defined in: [core/src/block-shapes.ts:31](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/block-shapes.ts#L31)
+Defined in: [core/src/block-shapes.ts:31](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/block-shapes.ts#L31)
 
 Canonical and compatibility shapes for every built-in block.
 

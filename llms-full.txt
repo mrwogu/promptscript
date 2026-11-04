@@ -8925,7 +8925,7 @@ All existing `@use` features work inside skill blocks:
     @use ./phases/health-scan
 
     # With parameters
-    @use ./phases/triage(severity: "critical", timeout: 30)
+    @use ./phases/triage(severity: "critical")
 
     # With alias (determines phase name)
     @use ./phases/code-fix as autofix
@@ -8935,6 +8935,8 @@ All existing `@use` features work inside skill blocks:
   }
 }
 ```
+
+Params passed to a composed phase are bound against the `params` declared in the phase's `@meta`. Declared defaults apply when an argument is omitted, and `{{name}}` is replaced in the phase's skill content, `@restrictions`, `@knowledge` and `@standards`. An unknown argument, a value of the wrong type, or a required param with no default and no argument is a compile error.
 
 ## How Composition Works
 
@@ -9912,6 +9914,14 @@ When PromptScript encounters a skill name in `@skills {}`, it looks for `SKILL.m
 
 Local skills take priority over registry skills with the same name, letting you override or customize registry-provided skills per project.
 
+A declared skill with no `SKILL.md` and no `content` in the declaration is reported as `PS049`. It is a warning, so `prs validate --strict` fails on it. Before, such a skill was written as an empty stub with only its description.
+
+### Skills of an inherited project
+
+When a project inherits another local project, for example `@inherit ../tool/.promptscript/project`, the skills, commands and agents of that project come from its own `.promptscript/` directory, like when it compiles alone. Skill resources and `.promptscript/shared/` files come along. A skill of the inheriting project with the same name still wins. A registry skill with the same name does not replace the inherited one.
+
+This works only for a file that sits directly in a `.promptscript/` directory of another project inside the project root, also through a symlinked directory. Files from the registry, the Git cache or `vendor/` are not affected.
+
 ### Universal `.agents/skills/` directory
 
 Tools like [`npx skills add`](https://www.npmjs.com/package/skills) install skills into `.agents/skills/` by default. PromptScript automatically discovers skills and commands from the `.agents/` directory.
@@ -10548,6 +10558,8 @@ Use `@inherit` to extend another PromptScript file:
 <!-- playground-link-end -->
 
 The child inherits all blocks from the parent, which can then be extended.
+
+When the parent is the project file of another local project (`@inherit ../tool/.promptscript/project`), its native skills, commands and agents come from that project's `.promptscript/` directory too. See [Skills of an inherited project](https://getpromptscript.dev/guides/local-skills/index.md#skills-of-an-inherited-project).
 
 ## Registry Structure
 
@@ -11988,12 +12000,6 @@ later local blocks and modification operations apply after an earlier import.
 
 # Result: @restrictions contains both items
 ```
-
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz44GEY3ahNHKloffmp4LErGLAg2ZUCrXgBacJAAORgANxhqXiI0ZlLeAEEABQBJXgBrGEc4PMLWYvtXACsyrBqN3zdpigB6UvLKrEci3wa4JogWttYOuN6IgDFmKCgFl4AHkAOozADKc146jcECkUAgrHgmwefAASvA3FAsGF6o1mq12jo2CIkcoAEbMXDGDgkBD5OjobB4RAga4VKrHEAMFjsThYHi8CFuNDkCDSWTyWzjKLkOzUDzKHCjGAUXj9an2DDULCGMAKFW8cTMcpaERE1h0MSeXisLWiBoYKDaxjLDRqupCES8TrBeEpdllTl3PLBOAJETJPrpLK5EBxEgQQhIsJNNwwHxbfjPDCeHXiT5dFhSMLICJzKAYRgwHD-KRjXP56jeEAAXTiHGeSPUZYrVZrdagDdkImbrY7BTqTxeb2Jfp6fUr1dr9dGvBnhPemxA+TbDAF1Ec+CIpHl3IYI1o73wqV3QA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
 
 ### Alias for Selective Extension
 
@@ -23571,12 +23577,6 @@ For incompatible block shapes, the existing target body wins. Under syntax
 # @restrictions contains both items (source first, then target)
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4AZXdqRhgw-hZqGAB6dTcManE4ergYRjdqE0cffjq4LF7GLAg2ZUCrXgBacJAAORgANxhqXiI0Zk7ZLrrTPMLWYt4AFRb1YTCKeppmACsurCpaAbddmuY6xubW9s63V6WH6J18QxGEDGE1YUzi8wiADFmFAoBZeAB5ADqAEESgAFXhNCBSKAQVjwI5FVh8ABK8DcUCwYjAHA2QmoV0Qp0G8Eh0MmOjYInJygARsxcMYOCRlAAKOQ9SoqCC0LB0BQ4TgKS7CACUIHydHQ2DwiBAXx+TRabQ6XR6fVe9CYws4WB4vBKbjQ5Ag0lk8lsmyi5Ds1A8yi1dQovEWkvsLWZzDAmrs4mY3S0InGbA1GE8vFY8dEdQwUATjAA1hoYBQBkIRLxpsESSkLbUGtb-nagX08sE4AkRMkFuksrkQHESBBCOSwiM3DAfMd+MN8+IbXCZiwpGFkBF8VAMJUcCipBs154bREALpxDjDcnqPcHo8ns-rWQiK+tW-LgYQqMOawk28ILIex4wKeUDnrwgFQsBRyGjeDButQjj4EQpChk6IAMGstAwvgqSGkAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Alias for @extend Access
 
 When you provide an alias, imported blocks are also stored with a prefix for use with `@extend`:
@@ -24567,6 +24567,8 @@ The `@local` block generates `CLAUDE.local.md` when using the Claude formatter w
 ### @commands
 
 Alias for `@shortcuts`. The `@commands` block is functionally identical to `@shortcuts` — both define command aliases. Use `@shortcuts` in new files; `@commands` is supported for backward compatibility.
+
+A file may declare either block once. Before syntax `1.5.0`, `@shortcuts` and `@commands` in one file are merged into one block. From `1.5.0`, they are two blocks with the same name and PS048 reports the second one.
 
 ```promptscript
 @commands {
@@ -26250,7 +26252,7 @@ runs later.
 
 - `@override` target must exist when operation runs.
 - `@extend` target should exist before extension.
-- Local duplicate blocks apply at their source positions.
+- A block name may appear only once per file; a second block with the same name in one file is a PS048 error. Same-name blocks from `@inherit` and `@use` merge by name in declaration order.
 - Imported source values use import merge policy before later operations.
 - Sealed skill properties remain protected regardless of operation order.
 - Older syntax using `@override` still resolves deterministically, but PS018
@@ -26490,6 +26492,11 @@ PS030 error too. With a `governance` section, PS047 warns on owners and reviewer
 not a Git host identity and on data classes outside `governance.dataClasses`. See the
 [Policy Engine guide](https://getpromptscript.dev/guides/policy-engine/index.md#prompt-policies).
 
+PS048 is an error for a second block with the same name in one file, because formatters read only
+the first block of a name. Same-name blocks from `@inherit` and `@use` are merged by name and are
+not reported. At syntax 1.5.0 and later, `@shortcuts` followed by `@commands` in one file is
+reported; before 1.5.0 the two are merged as aliases.
+
 ## Model Versions
 
 `@meta.syntax` does not track AI models. Agent and skill `model` values resolve
@@ -26517,6 +26524,8 @@ their replacement, models outside `models.supported`, and inconsistent
 | PS045      | `{{name}}` left in text (syntax 1.6.0+)                                                         | Bind it with a parameter or remove it                                  |
 | PS046      | Runtime slot in the system message                                                              | Move the slot to the user message                                      |
 | PS047      | Owner, reviewer or data class off the config                                                    | Use a Git host identity or a listed class                              |
+| PS048      | Second block with the same name in one file                                                     | Merge the blocks into one                                              |
+| PS049      | Declared skill has no SKILL.md and no content                                                   | Add the SKILL.md next to the declaring project or set content          |
 | PS4002     | Target cannot preserve requested capability                                                     | Use documented target fallback                                         |
 | PS4004     | Target cannot run or write the model                                                            | Pick another model or set a target name                                |
 | PS5001     | `releases` missing or invalid                                                                   | Add `releases.environments`                                            |
@@ -26629,7 +26638,8 @@ not require a registry entry.
 
 ## Compile-ready Canonical Example
 
-This single source covers every project-authorable built-in block.
+This single source covers every project-authorable built-in block except the
+`@commands` alias, which needs its own file (see [Block Aliases](#block-aliases)).
 Documentation validation parses, validates, and compiles it for Claude,
 GitHub, and Cursor.
 
@@ -26680,9 +26690,6 @@ GitHub, and Cursor.
       Run the complete test suite and report failures.
     """
   }
-}
-
-@commands {
   "/typecheck": {
     description: "Check types"
     content: """
@@ -26767,10 +26774,19 @@ GitHub, and Cursor.
 ```
 
 <!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMMrNhEYYoAWgBGUZowDW6uDgxp48sRLgBPdhkKz5ARgoBWCgAZzrAL5ix3aU4sCCwrYQs5EHMo8UEATWYAV0EMahgUwVU0sESoQQAVK1MAZUZqCDQsQRIMCFs6mGoKCOivX1Z-FnYiKtFYmmYAKxhGLAcQYuNTQQAlGDBGzkYYLwlqRPYIPnGAOWYpGApBuEEAJncAai8WqNuI-JwIE4Hh0cEDkjY4LGpseEzFMpVHkAArUZhkLClcqVQTaXR6OH7CDwZqxVoxdr+b6KKSpKQnPoSFgHWTIeQAVTg6W+5TehRKZQqWHkdEiVPSrFIMCkgiIaGY1CwcHkAF0IhxvnUAOZkynUwQANRC8BZIDZ8gAYswoDoAO6CACC1F+rGlMDZhtGlrg1KFYrEWNY3DStJUwS+4Vi6kiOxgADdGnzCAKFdSyvwRTEJD75H7A9RBHA9BVBGkAI6JCBpXn+tTSbAQNhtPzOvRKPWwKTmr0SDERADEDdm80WrGWpYkAGkYDA0IJzaxGn9eXVaYlRkXWCd89Kh7y9SEcIIwRDKtDmUmktRlmi63dMaXuEZBVhGIlhbXIgB6NL+lF6+TjOb3mAGknpTP50KrG+StWyESEjvPATKVFOz4bII-5RhExJsBw7DjK0sTAbMUG4OkLBkLAHDQaqSZZnhuJpn2p6CGAtRQIkrp7sB9axO0TrcNhNSsASV7yNeoSmIwOAjHoT5XhIBxwGBHqsOMADC-H6NBRRmNGwFdIhYyRChaESDMGH8QUCkbrC2FoNAQaLrgSRVDAJAhMEZoUSZcB0fuGmCExR7Sok+KEhE0o6JocByiAABUQXXkFFDCqykQhWFEVwIQDo+EemC-CQ3mxG6oxDrasimuaAAUziuAAlIIAC8ggAMwRBZaAXgA-LInCJCQ+XyBwhBqhqIDHMWIClRV7U9CWHTOsm0BQOlawBg+gFwSBYkwhJz4zW+mT7Fhxhmop80qUEyF3KhwEAJLTrxVQsCaIxYNlcBsjBbIkeGNEhFYTnqYdEhuaN3A6MCnEHhEHLQbpf1qCBgY6GgfDsEaILHXRDHMRgg6XkBd4Po0c1HaJ4kQZEL4PicH6ZFt5qwUdWDMDqAWCOSIBzBgUhRfIADiaRoIlaF7UhH2-mhhNrXxijmryJMkRz5EYJObAYNo6SQOxMqOfNDFfY6R56oKehgPqU2kbAGDUtjaG40t+PyGCfapOkQhpIb1L8+t3S82rmnaeIeZQAWEkpOxhEkDU5QAF7pPbMBG5tIuoqrgOMRrP04NTej617PswOoPHwCbwEBvtkQ0BnVM6uoiSO0p8GB7igVoKw0MsyA6wdOqkRZ3xAlc65Cf+CQjBoMUjQJvrYMaMXk05xIPyKHAApCuM3xSEWTusdXdPyEoBwNxQ3HU5N1692ghiD40FAkMcnfff45CJNKY5Xl+3uhBPC142w4wAIqeY-YRjxTaHjbqWm9MMZvk7hIJOzAU6BTTniDgmcFJRnFEdA+A9qBD0CiPTOu9EEREvs6IgpByD-HRpwbkz8zbMgtiAYGQhC6MCeJybkTs6h1TUvILo3xBCEHKoIHQTMOS0HysVJ2tULzjA4VUMujQTgVT4VIARcAhG-iYiAbwooGBBGoFYfABCcKHBoPQEAQ8pz4EcKooAA" target="_blank" rel="noopener noreferrer">
+<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gAIkxYYABMAA6rQYIgATRIJFMMrNhEYYoAWgBGUZowDW6uDgxp48sRLgBPdhkKz5ARgoBWCgAZzrAL5ix3aU4sCCwrYQs5EHMo8UEATWYAV0EMahgUwVU0sESoQQAVK1MAZUZqCDQsQRIMCFs6mGoKCOivX1Z-FnYiKtFYmmYAKxhGLAcQYuNTQQAlGDBGzkYYLwlqRPYIPnGAOWYpGApBuEEAJncAai8WqNuI-JwIE4Hh0cEDkjY4LGpseEzFMpVHkAArUZhkLClcqVQTaXR6OH7CDwZqxVoxdr+b6KKSpKQnPoSFgHWTIeQAVTg6W+5TehRKZQqWHkdEiVPSrFIMCkgiIaGY1CwcHkAF0IhxvnUAOZkynUwQANRC8BZIDZ8gAYswoDoAO6CACC1F+rGlMDZhtGlrg1KFYrEWNY3DStJUwS+4Vi6kiOxgADdGnzCAKFdSyvwRTEJD75H7A9RBHA9BVBGkAI6JCBpXn+tTSbAQNhtPzOvRKPWwKTmr0SDERADEDdm80WrGWpYkAGkYDA0IJzaxGn9eXVaYlRkXWCd89Kh7y9SEcIIwRDKtDmUmktRlmi63dMaXuEZBVhGIlhbXIgB6NL+lF6+TjOb3mAGknpTP50KrG+StWyESEjvPATKVFOz4bII-5RhExJsBw7DjK0sTAbMUG4OkLBkLAHDQaqSZZnhuJpn2p6CGAtRQIkrp7sB9axO0+7XqEpiMDgIx6E+V4SAccBgR6rDjAAwhx+jQUUZjRsBXSIWMkQoWhEgzBhHEFJJG6wthaDQEGi64EkVQwCQITBGaFG6XAdH7opgjtE63DSok+KEhE0o6JocByiAABUPnXj5FDCqykR+QFQVwIQDo+EemC-CQrmxG6oxDrasimuaAAUziuAAlIIAC8ggAMwRIZaAXgA-LInCJCQmXyBwhBqhqIDHMWID5UVjU9CWHTOsm0BQIlawBg+gFwSB-EwoJz5jW+mT7FhxhmlJk2yUEyF3KhwEAJLTmxVQsCaIxYKlcBsjBbIkeGNEhFY1kKdtEj2UeOjAleDESBy0Fqe9aggYGOhoHw7BGiCu10QxDkYIOl5AXeD6NBNO18QJEGRC+D4nB+mQreasE7VgzA6l5gjkiAcwYFIIXyAA4mkaDRWhG1IU9v5oVjC3sYo5q8rjJGM+RGCTmwGDaOkkCsFIMpWZNX12Y6R56oKehgPqI2kbAGDUijaFozNGPyGCfapOkQhpNr1Ic4t3RswrnNQXmUAFoJKTS4RJA1OUABe6SWzAOvLbzqLyweESvf13A4CTeia87rswOorHwHrwEBptkQ0EnxM6uoiTW9J8Fe7i3loKwIO0yA6wdOqkQp+xnHM4rMVRyQjBoMUjQJpr-0aLnw1pxIPyKHAApCuM3wy8wNvYTU0veUoBxVxQLEk8N17t2ghjd40FAkMczeR-45CJNKY5Xl+LuhEPU3o2w4wAIrOdfYQD4TaGDbqZMU4jb7NxIGOzA47eQTniDgydJJRnFDtLeXdqA928n3ZO69oERyVlHIgpByD-ARpwbkt8DbMiNiAH6Qhs6MCeJybkNs6gVXkvILo3xBCEEKoIHQ1MOS0EyrlG25ULzjCYVUAujQThFQ4VILhcAeG-nsiAbwooGBBGoFYfAWCcKHBoPQEAPcpz4EcPIoAA" target="_blank" rel="noopener noreferrer">
   <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
 </a>
 <!-- playground-link-end -->
+
+## Block Aliases
+
+`@commands` is an alias for `@shortcuts`. A file may declare a block name only
+once: a second block with the same name in one file is a PS048 error. Before
+syntax `1.5.0`, `@shortcuts` and `@commands` in one file are merged into a
+single block, so mixing them is accepted. From `1.5.0`, both resolve to the
+`shortcuts` block, and PS048 reports the later one as
+`@shortcuts (alias @commands)`.
 
 ## Shortcut Entry Shapes
 
@@ -30510,6 +30526,18 @@ Output paths are validated against project root - path traversal (`..`) is rejec
 | `entry`   | string        | `input.entry`    | Entry file to compile for this profile  |
 | `output`  | string        | `output.baseDir` | Base output directory for this profile  |
 | `targets` | TargetEntry[] | `targets`        | Target list to compile for this profile |
+| `enabled` | boolean       | `true`           | `false` drops the profile               |
+
+A config that extends another one can drop a build it does not want with `enabled: false`.
+The profile is removed after the whole `extends` chain is merged, so `--all-builds` skips it and
+`--build` does not know it. A later file in the chain can set `enabled: true` again.
+
+```yaml
+extends: ../tool/promptscript.yaml
+builds:
+  system-messages:
+    enabled: false
+```
 
 CLI flags still take precedence: `--target`/`--format` override the profile's
 target list, and `--output` overrides the profile's `output`.
@@ -31024,6 +31052,7 @@ How the merge works:
 
 - The `extends` path is relative to the file that declares it. A base file can extend another file. A circular chain is an error.
 - Objects merge deeply and the extending file wins. Arrays such as `targets` are replaced, not joined, so the example above compiles only `github`.
+- A build profile of the base can be dropped with `enabled: false`, see [builds](#builds).
 - A `__proto__`, `constructor` or `prototype` key in an object that both files set is a config error (`PS3002`) that names the key. The merge reads and writes own keys only, so no value goes through a prototype.
 - `policies` is joined: the base policies come first and the extending file's policies are appended. A base policy cannot be removed or redefined, so a policy with the same `name` as a base policy is a config error, and so is a `policies` value that is not a list, such as `policies: null` (a bare `policies:` key is accepted only when the base has no policies). Setting `validation.rules.policy-compliance` to `off` still turns PS030 off, including from an extending file.
 - `governance.admins` and each owner list under `governance.roles` are joined the same way: base owners come first, the extending file's new owners are appended and duplicates are dropped. The extending file can add roles and owners, but cannot remove one. `governance.codeowners.protect` is joined the same way, so a protected path set in a base file stays protected. A value of the wrong type for `governance`, `governance.admins`, `governance.roles`, one role, `governance.codeowners` or `governance.codeowners.protect` is a config error, and so is `null` when the base sets entries there (a bare key is accepted only when the base has none). A `__proto__` key under `governance`, `governance.roles` or `governance.codeowners` is refused. Other keys under `governance` merge like the rest of the file.

@@ -8,7 +8,7 @@
 
 > **setContext**(`context`): `void`
 
-Defined in: [cli/src/output/console.ts:52](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/output/console.ts#L52)
+Defined in: [cli/src/output/console.ts:52](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/output/console.ts#L52)
 
 Set the global CLI context.
 

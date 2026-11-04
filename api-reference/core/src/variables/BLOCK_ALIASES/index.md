@@ -8,6 +8,6 @@
 
 > `const` **BLOCK\_ALIASES**: `Readonly`\<`Record`\<`string`, [`BlockName`](https://getpromptscript.dev/api-reference/core/src/type-aliases/BlockName/index.md)\>\>
 
-Defined in: [core/src/block-aliases.ts:11](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/block-aliases.ts#L11)
+Defined in: [core/src/block-aliases.ts:11](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/block-aliases.ts#L11)
 
 Authoring aliases mapped to their canonical internal block names.

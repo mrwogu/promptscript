@@ -8,7 +8,7 @@
 
 > **diffCommand**(`options`): `Promise`\<`void`\>
 
-Defined in: [cli/src/commands/diff.ts:137](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/commands/diff.ts#L137)
+Defined in: [cli/src/commands/diff.ts:137](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/commands/diff.ts#L137)
 
 Show diff between current output files and what would be generated.
 

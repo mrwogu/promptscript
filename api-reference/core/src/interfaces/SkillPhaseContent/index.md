@@ -6,7 +6,7 @@
 
 # Interface: SkillPhaseContent
 
-Defined in: [core/src/skill-phase.ts:2](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/skill-phase.ts#L2)
+Defined in: [core/src/skill-phase.ts:2](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/skill-phase.ts#L2)
 
 The resolved content needed to render one composed skill phase.
 
@@ -16,7 +16,7 @@ The resolved content needed to render one composed skill phase.
 
 > **contextBlocks**: `object`[]
 
-Defined in: [core/src/skill-phase.ts:8](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/skill-phase.ts#L8)
+Defined in: [core/src/skill-phase.ts:8](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/skill-phase.ts#L8)
 
 Context blocks in their resolved display order.
 
@@ -34,7 +34,7 @@ Context blocks in their resolved display order.
 
 > **name**: `string`
 
-Defined in: [core/src/skill-phase.ts:6](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/skill-phase.ts#L6)
+Defined in: [core/src/skill-phase.ts:6](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/skill-phase.ts#L6)
 
 Phase display name, including any authored alias.
 
@@ -44,7 +44,7 @@ Phase display name, including any authored alias.
 
 > **phaseNumber**: `number`
 
-Defined in: [core/src/skill-phase.ts:4](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/skill-phase.ts#L4)
+Defined in: [core/src/skill-phase.ts:4](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/skill-phase.ts#L4)
 
 One-based phase position in the composed skill.
 
@@ -54,6 +54,6 @@ One-based phase position in the composed skill.
 
 > `optional` **skillContent?**: `string`
 
-Defined in: [core/src/skill-phase.ts:10](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/skill-phase.ts#L10)
+Defined in: [core/src/skill-phase.ts:10](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/skill-phase.ts#L10)
 
 Instructions appended after the context blocks, when present.

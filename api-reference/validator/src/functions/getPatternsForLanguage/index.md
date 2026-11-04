@@ -8,7 +8,7 @@
 
 > **getPatternsForLanguage**(`language`): `RegExp`[]
 
-Defined in: [validator/src/presets.ts:378](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/validator/src/presets.ts#L378)
+Defined in: [validator/src/presets.ts:378](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/validator/src/presets.ts#L378)
 
 Get patterns for a specific language.
 

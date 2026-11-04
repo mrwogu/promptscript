@@ -8,7 +8,7 @@
 
 > **effectiveGovernance**(`entry`, `defaults`): [`GovernanceMeta`](https://getpromptscript.dev/api-reference/core/src/interfaces/GovernanceMeta/index.md)
 
-Defined in: [core/src/prompt-definitions.ts:508](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/prompt-definitions.ts#L508)
+Defined in: [core/src/prompt-definitions.ts:508](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/prompt-definitions.ts#L508)
 
 Effective governance of a prompt: `risk`, `owner` and `domain` from the entry, else
 the `@meta` default; `dataClasses` joined; entry `reviewers` replace the default.

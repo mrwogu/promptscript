@@ -8,7 +8,7 @@
 
 > `const` **PROMPT\_TEXT\_VERSIONS**: `object`
 
-Defined in: [formatters/src/formatters/prompt-text.ts:9](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/formatters/prompt-text.ts#L9)
+Defined in: [formatters/src/formatters/prompt-text.ts:9](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/formatters/prompt-text.ts#L9)
 
 ## Type Declaration
 

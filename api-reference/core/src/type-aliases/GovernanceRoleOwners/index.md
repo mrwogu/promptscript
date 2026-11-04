@@ -8,7 +8,7 @@
 
 > **GovernanceRoleOwners** = [`GovernanceOwner`](https://getpromptscript.dev/api-reference/core/src/type-aliases/GovernanceOwner/index.md)[]
 
-Defined in: [core/src/types/config.ts:320](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/config.ts#L320)
+Defined in: [core/src/types/config.ts:326](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/config.ts#L326)
 
 Owners that review one approval role, at least one.
 

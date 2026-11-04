@@ -6,7 +6,7 @@
 
 # Interface: EvalRun
 
-Defined in: [eval/src/run.ts:928](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L928)
+Defined in: [eval/src/run.ts:928](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/run.ts#L928)
 
 What [runEvalDetailed](https://getpromptscript.dev/api-reference/eval/src/functions/runEvalDetailed/index.md) gives back.
 
@@ -16,7 +16,7 @@ What [runEvalDetailed](https://getpromptscript.dev/api-reference/eval/src/functi
 
 > **report**: [`EvalReportV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportV1/index.md)
 
-Defined in: [eval/src/run.ts:930](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L930)
+Defined in: [eval/src/run.ts:930](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/run.ts#L930)
 
 The report of the whole run
 
@@ -26,7 +26,7 @@ The report of the whole run
 
 > **suiteReports**: [`EvalReportV1`](https://getpromptscript.dev/api-reference/core/src/interfaces/EvalReportV1/index.md)[]
 
-Defined in: [eval/src/run.ts:936](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/eval/src/run.ts#L936)
+Defined in: [eval/src/run.ts:936](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/eval/src/run.ts#L936)
 
 One report per suite, built from that suite's cases alone, in suite name
 order: its own outcome, usage, cache summary and digest, no budget and no

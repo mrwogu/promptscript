@@ -8,7 +8,7 @@
 
 > **createOutputPlan**(`candidates`): [`OutputPlan`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputPlan/index.md)
 
-Defined in: [core/src/output-plan.ts:336](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/output-plan.ts#L336)
+Defined in: [core/src/output-plan.ts:336](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/output-plan.ts#L336)
 
 Build a deterministic output plan from formatter artifacts.
 

@@ -6,7 +6,7 @@
 
 # Interface: SkillContractField
 
-Defined in: [core/src/types/ast.ts:840](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L840)
+Defined in: [core/src/types/ast.ts:840](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L840)
 
 A field in a skill contract (input or output).
 
@@ -16,7 +16,7 @@ A field in a skill contract (input or output).
 
 > `optional` **default?**: [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)
 
-Defined in: [core/src/types/ast.ts:848](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L848)
+Defined in: [core/src/types/ast.ts:848](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L848)
 
 Default value
 
@@ -26,7 +26,7 @@ Default value
 
 > **description**: `string`
 
-Defined in: [core/src/types/ast.ts:842](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L842)
+Defined in: [core/src/types/ast.ts:842](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L842)
 
 Description of the field
 
@@ -36,7 +36,7 @@ Description of the field
 
 > `optional` **options?**: `string`[]
 
-Defined in: [core/src/types/ast.ts:846](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L846)
+Defined in: [core/src/types/ast.ts:846](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L846)
 
 Options for enum type
 
@@ -46,6 +46,6 @@ Options for enum type
 
 > **type**: `"string"` \| `"number"` \| `"boolean"` \| `"enum"`
 
-Defined in: [core/src/types/ast.ts:844](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L844)
+Defined in: [core/src/types/ast.ts:844](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L844)
 
 Value type

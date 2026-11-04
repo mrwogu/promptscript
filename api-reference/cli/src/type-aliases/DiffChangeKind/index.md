@@ -8,7 +8,7 @@
 
 > **DiffChangeKind** = `"added"` \| `"changed"` \| `"removed"` \| `"unsupported"` \| `"user-owned"`
 
-Defined in: [cli/src/utils/diff-report.ts:26](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/utils/diff-report.ts#L26)
+Defined in: [cli/src/utils/diff-report.ts:26](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/utils/diff-report.ts#L26)
 
 What happens to one output file.
 

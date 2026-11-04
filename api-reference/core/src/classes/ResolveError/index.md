@@ -6,7 +6,7 @@
 
 # Class: ResolveError
 
-Defined in: [core/src/errors/resolve.ts:9](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/resolve.ts#L9)
+Defined in: [core/src/errors/resolve.ts:9](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L9)
 
 Error during resolution phase.
 
@@ -36,7 +36,7 @@ Error during resolution phase.
 
 > **new ResolveError**(`message`, `location?`, `code?`, `cause?`): `ResolveError`
 
-Defined in: [core/src/errors/resolve.ts:10](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/resolve.ts#L10)
+Defined in: [core/src/errors/resolve.ts:10](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/resolve.ts#L10)
 
 #### Parameters
 
@@ -70,7 +70,7 @@ Defined in: [core/src/errors/resolve.ts:10](https://github.com/mrwogu/promptscri
 
 > `readonly` `optional` **cause?**: `Error`
 
-Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/base.ts#L56)
+Defined in: [core/src/errors/base.ts:56](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L56)
 
 Original error if wrapping another error
 
@@ -84,7 +84,7 @@ Original error if wrapping another error
 
 > `readonly` **code**: `string`
 
-Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/base.ts#L52)
+Defined in: [core/src/errors/base.ts:52](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L52)
 
 Error code
 
@@ -98,7 +98,7 @@ Error code
 
 > `readonly` `optional` **location?**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/base.ts#L54)
+Defined in: [core/src/errors/base.ts:54](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L54)
 
 Source location where error occurred
 
@@ -112,7 +112,7 @@ Source location where error occurred
 
 > **format**(): `string`
 
-Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/base.ts#L79)
+Defined in: [core/src/errors/base.ts:79](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L79)
 
 Format error for display.
 
@@ -130,7 +130,7 @@ Format error for display.
 
 > **toJSON**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/errors/base.ts#L92)
+Defined in: [core/src/errors/base.ts:92](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/errors/base.ts#L92)
 
 Convert to JSON-serializable object.
 

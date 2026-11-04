@@ -298,12 +298,6 @@ For incompatible block shapes, the existing target body wins. Under syntax
 # @restrictions contains both items (source first, then target)
 ```
 
-<!-- playground-link-start -->
-<a href="https://getpromptscript.dev/playground/?s=N4IgZglgNgpgziAXAbVABwIYBcAWSQwAeGAtmrAHRoBOCANCAMYD2AdljO-gMQAEAAiRhYMvDABNxMcbzjNeuCHF5hqGAOZD2vFmWjxebXhCzLmAd1bGruGL3IYAnuurMArq3EAdVoOGjgH15jcUReLwJiMlgIoNlHdgxCMIiARgoANgoABljWAF8fHz4AZXdqRhgw-hZqGAB6dTcManE4ergYRjdqE0cffjq4LF7GLAg2ZUCrXgBacJAAORgANxhqXiI0Zk7ZLrrTPMLWYt4AFRb1YTCKeppmACsurCpaAbddmuY6xubW9s63V6WH6J18QxGEDGE1YUzi8wiADFmFAoBZeAB5ADqAEESgAFXhNCBSKAQVjwI5FVh8ABK8DcUCwYjAHA2QmoV0Qp0G8Eh0MmOjYInJygARsxcMYOCRlAAKOQ9SoqCC0LB0BQ4TgKS7CACUIHydHQ2DwiBAXx+TRabQ6XR6fVe9CYws4WB4vBKbjQ5Ag0lk8lsmyi5Ds1A8yi1dQovEWkvsLWZzDAmrs4mY3S0InGbA1GE8vFY8dEdQwUATjAA1hoYBQBkIRLxpsESSkLbUGtb-nagX08sE4AkRMkFuksrkQHESBBCOSwiM3DAfMd+MN8+IbXCZiwpGFkBF8VAMJUcCipBs154bREALpxDjDcnqPcHo8ns-rWQiK+tW-LgYQqMOawk28ILIex4wKeUDnrwgFQsBRyGjeDButQjj4EQpChk6IAMGstAwvgqSGkAA" target="_blank" rel="noopener noreferrer">
-  <img src="https://img.shields.io/badge/Try_in-Playground-blue?style=flat-square" alt="Try in Playground" />
-</a>
-<!-- playground-link-end -->
-
 ### Alias for @extend Access
 
 When you provide an alias, imported blocks are also stored with a prefix for use with `@extend`:
@@ -1294,6 +1288,8 @@ The `@local` block generates `CLAUDE.local.md` when using the Claude formatter w
 ### @commands
 
 Alias for `@shortcuts`. The `@commands` block is functionally identical to `@shortcuts` — both define command aliases. Use `@shortcuts` in new files; `@commands` is supported for backward compatibility.
+
+A file may declare either block once. Before syntax `1.5.0`, `@shortcuts` and `@commands` in one file are merged into one block. From `1.5.0`, they are two blocks with the same name and PS048 reports the second one.
 
 ```promptscript
 @commands {

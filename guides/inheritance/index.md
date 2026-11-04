@@ -36,6 +36,8 @@ Use `@inherit` to extend another PromptScript file:
 
 The child inherits all blocks from the parent, which can then be extended.
 
+When the parent is the project file of another local project (`@inherit ../tool/.promptscript/project`), its native skills, commands and agents come from that project's `.promptscript/` directory too. See [Skills of an inherited project](https://getpromptscript.dev/guides/local-skills/index.md#skills-of-an-inherited-project).
+
 ## Registry Structure
 
 Organize your registry with namespaces:

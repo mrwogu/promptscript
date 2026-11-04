@@ -6,7 +6,7 @@
 
 # Class: Resolver
 
-Defined in: [resolver/src/resolver.ts:476](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L476)
+Defined in: [resolver/src/resolver.ts:478](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L478)
 
 Resolver for PromptScript files with inheritance and import support.
 
@@ -35,7 +35,7 @@ if (result.ast) {
 
 > **new Resolver**(`options`): `Resolver`
 
-Defined in: [resolver/src/resolver.ts:486](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L486)
+Defined in: [resolver/src/resolver.ts:488](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L488)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: [resolver/src/resolver.ts:486](https://github.com/mrwogu/promptscrip
 
 > **clearCache**(): `void`
 
-Defined in: [resolver/src/resolver.ts:2304](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L2304)
+Defined in: [resolver/src/resolver.ts:2359](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L2359)
 
 Clear the resolution cache.
 
@@ -67,7 +67,7 @@ Clear the resolution cache.
 
 > **getLoader**(): [`FileLoader`](https://getpromptscript.dev/api-reference/resolver/src/classes/FileLoader/index.md)
 
-Defined in: [resolver/src/resolver.ts:2444](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L2444)
+Defined in: [resolver/src/resolver.ts:2499](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L2499)
 
 Get the file loader.
 
@@ -81,7 +81,7 @@ Get the file loader.
 
 > **invalidate**(`changedPaths`): `void`
 
-Defined in: [resolver/src/resolver.ts:2313](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L2313)
+Defined in: [resolver/src/resolver.ts:2368](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L2368)
 
 Invalidate cached resolutions affected by changed files.
 
@@ -103,7 +103,7 @@ Files or directories that changed
 
 > **resolve**(`entryPath`, `compositionContext?`): `Promise`\<[`ResolvedAST`](https://getpromptscript.dev/api-reference/resolver/src/interfaces/ResolvedAST/index.md)\>
 
-Defined in: [resolver/src/resolver.ts:568](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L568)
+Defined in: [resolver/src/resolver.ts:570](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L570)
 
 Resolve a PromptScript file and all its dependencies.
 
@@ -135,7 +135,7 @@ CircularDependencyError if a circular dependency is detected
 
 > **verifyReferenceHashes**(`lockfile`): `Promise`\<[`ResolveError`](https://getpromptscript.dev/api-reference/core/src/classes/ResolveError/index.md)[]\>
 
-Defined in: [resolver/src/resolver.ts:2349](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/resolver/src/resolver.ts#L2349)
+Defined in: [resolver/src/resolver.ts:2404](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/resolver/src/resolver.ts#L2404)
 
 Verify integrity hashes for registry reference files.
 Reads each referenced file from the registry cache and compares its

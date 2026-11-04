@@ -6,7 +6,7 @@
 
 # Class: ConventionRenderer
 
-Defined in: [formatters/src/convention-renderer.ts:36](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L36)
+Defined in: [formatters/src/convention-renderer.ts:36](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L36)
 
 Convention renderer for applying output conventions to formatted content.
 
@@ -16,7 +16,7 @@ Convention renderer for applying output conventions to formatted content.
 
 > **new ConventionRenderer**(`conventionOrOptions?`): `ConventionRenderer`
 
-Defined in: [formatters/src/convention-renderer.ts:41](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L41)
+Defined in: [formatters/src/convention-renderer.ts:41](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L41)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [formatters/src/convention-renderer.ts:41](https://github.com/mrwogu
 
 > **getConvention**(): [`OutputConvention`](https://getpromptscript.dev/api-reference/core/src/interfaces/OutputConvention/index.md)
 
-Defined in: [formatters/src/convention-renderer.ts:91](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L91)
+Defined in: [formatters/src/convention-renderer.ts:91](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L91)
 
 Get the current convention.
 
@@ -48,7 +48,7 @@ Get the current convention.
 
 > **getPrettierOptions**(): `Required`\<[`PrettierMarkdownOptions`](https://getpromptscript.dev/api-reference/core/src/interfaces/PrettierMarkdownOptions/index.md)\>
 
-Defined in: [formatters/src/convention-renderer.ts:84](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L84)
+Defined in: [formatters/src/convention-renderer.ts:84](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L84)
 
 Get the current Prettier options.
 
@@ -62,7 +62,7 @@ Get the current Prettier options.
 
 > **getSectionSeparator**(): `string`
 
-Defined in: [formatters/src/convention-renderer.ts:168](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L168)
+Defined in: [formatters/src/convention-renderer.ts:168](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L168)
 
 Get the section separator based on convention.
 Returns '\n\n' (double newline) for all conventions.
@@ -77,7 +77,7 @@ Returns '\n\n' (double newline) for all conventions.
 
 > **renderCodeBlock**(`code`, `language?`): `string`
 
-Defined in: [formatters/src/convention-renderer.ts:149](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L149)
+Defined in: [formatters/src/convention-renderer.ts:149](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L149)
 
 Render a code block.
 
@@ -101,7 +101,7 @@ Render a code block.
 
 > **renderList**(`items`): `string`
 
-Defined in: [formatters/src/convention-renderer.ts:141](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L141)
+Defined in: [formatters/src/convention-renderer.ts:141](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L141)
 
 Render a list of items.
 
@@ -121,7 +121,7 @@ Render a list of items.
 
 > **renderSection**(`name`, `content`, `level?`): `string`
 
-Defined in: [formatters/src/convention-renderer.ts:102](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L102)
+Defined in: [formatters/src/convention-renderer.ts:102](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L102)
 
 Render a section with the convention.
 
@@ -155,7 +155,7 @@ Nesting level (1 = section, 2+ = subsection)
 
 > **wrapRoot**(`content`): `string`
 
-Defined in: [formatters/src/convention-renderer.ts:157](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/formatters/src/convention-renderer.ts#L157)
+Defined in: [formatters/src/convention-renderer.ts:157](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/formatters/src/convention-renderer.ts#L157)
 
 Wrap content with root wrapper if defined.
 

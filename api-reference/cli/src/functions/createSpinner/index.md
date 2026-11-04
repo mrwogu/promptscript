@@ -8,7 +8,7 @@
 
 > **createSpinner**(`text`): `Ora`
 
-Defined in: [cli/src/output/console.ts:90](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/cli/src/output/console.ts#L90)
+Defined in: [cli/src/output/console.ts:90](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/cli/src/output/console.ts#L90)
 
 Creates a spinner for async operations.
 Returns a no-op spinner in quiet mode.

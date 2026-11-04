@@ -8,7 +8,7 @@
 
 > **promptPolicyRisk**(`subject`, `policies`): [`RiskLevel`](https://getpromptscript.dev/api-reference/core/src/type-aliases/RiskLevel/index.md)
 
-Defined in: [validator/src/policy/prompt-evaluator.ts:204](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/validator/src/policy/prompt-evaluator.ts#L204)
+Defined in: [validator/src/policy/prompt-evaluator.ts:204](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/validator/src/policy/prompt-evaluator.ts#L204)
 
 The policy risk of a prompt: the higher of its effective risk (unset counts as low)
 and the floor of every risk-floor policy, whatever its severity.

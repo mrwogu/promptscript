@@ -6,7 +6,7 @@
 
 # Interface: TypeExpression
 
-Defined in: [core/src/types/ast.ts:476](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L476)
+Defined in: [core/src/types/ast.ts:476](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L476)
 
 Type expression for parameter definitions.
 
@@ -20,7 +20,7 @@ Type expression for parameter definitions.
 
 > `optional` **constraints?**: `object`
 
-Defined in: [core/src/types/ast.ts:483](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L483)
+Defined in: [core/src/types/ast.ts:483](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L483)
 
 Constraints
 
@@ -42,7 +42,7 @@ Constraints
 
 > **kind**: `"string"` \| `"number"` \| `"boolean"` \| `"list"` \| `"enum"` \| `"range"`
 
-Defined in: [core/src/types/ast.ts:479](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L479)
+Defined in: [core/src/types/ast.ts:479](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L479)
 
 Type kind
 
@@ -52,7 +52,7 @@ Type kind
 
 > **loc**: [`SourceLocation`](https://getpromptscript.dev/api-reference/core/src/interfaces/SourceLocation/index.md)
 
-Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L16)
+Defined in: [core/src/types/ast.ts:16](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L16)
 
 Source location
 
@@ -66,7 +66,7 @@ Source location
 
 > `optional` **params?**: [`Value`](https://getpromptscript.dev/api-reference/core/src/type-aliases/Value/index.md)[]
 
-Defined in: [core/src/types/ast.ts:481](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L481)
+Defined in: [core/src/types/ast.ts:481](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L481)
 
 Type parameters
 
@@ -76,7 +76,7 @@ Type parameters
 
 > `readonly` **type**: `"TypeExpression"`
 
-Defined in: [core/src/types/ast.ts:477](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/ast.ts#L477)
+Defined in: [core/src/types/ast.ts:477](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/ast.ts#L477)
 
 Node type discriminator
 

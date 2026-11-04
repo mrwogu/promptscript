@@ -6,7 +6,7 @@
 
 # Interface: EvalRegexAssertion
 
-Defined in: [core/src/types/eval.ts:143](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L143)
+Defined in: [core/src/types/eval.ts:143](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L143)
 
 Passes when the pattern matches the target.
 
@@ -20,7 +20,7 @@ Passes when the pattern matches the target.
 
 > `optional` **field?**: `string`
 
-Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L109)
+Defined in: [core/src/types/eval.ts:109](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L109)
 
 Output property the assertion reads; absent means the whole response text
 
@@ -34,7 +34,7 @@ Output property the assertion reads; absent means the whole response text
 
 > `optional` **flags?**: `string`
 
-Defined in: [core/src/types/eval.ts:156](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L156)
+Defined in: [core/src/types/eval.ts:156](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L156)
 
 Regular expression flags, any of `i`, `m`, `s` and `u`, each at most once.
 
@@ -48,7 +48,7 @@ Regular expression flags, any of `i`, `m`, `s` and `u`, each at most once.
 
 > **id**: `string`
 
-Defined in: [core/src/types/eval.ts:107](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L107)
+Defined in: [core/src/types/eval.ts:107](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L107)
 
 Assertion id, unique in the suite.
 
@@ -72,7 +72,7 @@ Assertion id, unique in the suite.
 
 > **kind**: `"regex"`
 
-Defined in: [core/src/types/eval.ts:144](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L144)
+Defined in: [core/src/types/eval.ts:144](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L144)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [core/src/types/eval.ts:144](https://github.com/mrwogu/promptscript/
 
 > `optional` **negate?**: `boolean`
 
-Defined in: [core/src/types/eval.ts:146](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L146)
+Defined in: [core/src/types/eval.ts:146](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L146)
 
 Inverts the result
 
@@ -90,7 +90,7 @@ Inverts the result
 
 > **pattern**: `string`
 
-Defined in: [core/src/types/eval.ts:151](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/types/eval.ts#L151)
+Defined in: [core/src/types/eval.ts:151](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/types/eval.ts#L151)
 
 Regular expression source.
 

@@ -8,7 +8,7 @@
 
 > **importFile**(`filepath`, `options?`): `Promise`\<[`ImportResult`](https://getpromptscript.dev/api-reference/importer/src/interfaces/ImportResult/index.md)\>
 
-Defined in: [importer/src/importer.ts:22](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/importer/src/importer.ts#L22)
+Defined in: [importer/src/importer.ts:22](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/importer/src/importer.ts#L22)
 
 ## Parameters
 

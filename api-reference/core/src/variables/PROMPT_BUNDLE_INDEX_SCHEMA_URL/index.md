@@ -8,6 +8,6 @@
 
 > `const` **PROMPT\_BUNDLE\_INDEX\_SCHEMA\_URL**: `"https://getpromptscript.dev/schema/prompt-bundle-index/v1.json"` = `'https://getpromptscript.dev/schema/prompt-bundle-index/v1.json'`
 
-Defined in: [core/src/prompt-bundle-hash.ts:8](https://github.com/mrwogu/promptscript/blob/b1ffa964bf8ec81f090aed0faac2af9f181c885e/packages/core/src/prompt-bundle-hash.ts#L8)
+Defined in: [core/src/prompt-bundle-hash.ts:8](https://github.com/mrwogu/promptscript/blob/e7987a2976ad00f00c32cde1ccabfcf2a8346792/packages/core/src/prompt-bundle-hash.ts#L8)
 
 Schema URL of a prompt bundle index.
