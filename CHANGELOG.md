@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.29.0](https://github.com/mrwogu/promptscript/compare/v1.28.1...v1.29.0) (2026-11-03)
+
+
+### Features
+
+* **validator:** report duplicate blocks in one file as PS048 ([315cc72](https://github.com/mrwogu/promptscript/commit/315cc726991782b2f2a85bc4ace76383280f3aae))
+
+
+### Bug Fixes
+
+* **browser-compiler:** apply param defaults to composed phases ([e99cfdb](https://github.com/mrwogu/promptscript/commit/e99cfdbb5fc60d138df094ef9abea575c2455f4f))
+* **playground:** merge output plans of all compile passes ([9bac970](https://github.com/mrwogu/promptscript/commit/9bac97033cec993bd101e7ef9eae34f72ce8e5c4))
+* **playground:** offer every catalog version in the config panel ([6f02e6c](https://github.com/mrwogu/promptscript/commit/6f02e6c3477a336a03461245349f783c7945817f))
+* **playground:** sort managed paths with a compare function ([3c0094a](https://github.com/mrwogu/promptscript/commit/3c0094ad6325b1927854407bd8694196f9d4d386))
+* **resolver:** interpolate params of composed skill phases ([d4a4550](https://github.com/mrwogu/promptscript/commit/d4a455065edae47a0494c3181fceb559d42d86db))
+* **resolver:** read native sources of an inherited project ([#772](https://github.com/mrwogu/promptscript/issues/772)) ([5020622](https://github.com/mrwogu/promptscript/commit/50206228b1597f0471e476a73ca0e1c87cf4aaee))
+* **resolver:** replace only the matched block in native discovery ([f0f0c2f](https://github.com/mrwogu/promptscript/commit/f0f0c2f8f0d88a35b934ca69c3aa3a5fb1f6f91c))
+* **resolver:** stamp __baseSource on auto-discovered skills ([59f0d1c](https://github.com/mrwogu/promptscript/commit/59f0d1c15f562c5f0e34483a882bef1ae80184d3))
+
 ## [1.28.1](https://github.com/mrwogu/promptscript/compare/v1.28.0...v1.28.1) (2026-11-03)
 
 
