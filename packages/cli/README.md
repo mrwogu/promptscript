@@ -160,7 +160,7 @@ CLAUDE.md
 ```promptscript
 @meta {
   id: "checkout-service"
-  syntax: "1.5.0"
+  syntax: "1.6.0"
 }
 
 @identity {
@@ -245,7 +245,7 @@ CLAUDE.md
 
 ```yaml
 id: checkout-service
-syntax: '1.5.0'
+syntax: '1.6.0'
 
 input:
   entry: .promptscript/project.prs
