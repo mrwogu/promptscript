@@ -1,6 +1,9 @@
 pnpm prs validate --strict
 pnpm prs fmt --check
 pnpm docs:validate:check
+pnpm playground:links --check
+pnpm docs:highlight:check
+pnpm grammar:check
 pnpm format:check
 pnpm nx affected -t lint --base=HEAD
 pnpm schema:check
