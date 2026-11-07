@@ -7,6 +7,7 @@ import {
 } from '@promptscript/core';
 import { resolveOutputPathTokens } from './path-tokens.js';
 import { appendResourceCapabilityWarnings } from './resource-capability-warnings.js';
+import { appendSkillContractWarnings } from './skill-contract-warnings.js';
 import type {
   CanonicalFormatter,
   Formatter,
@@ -28,7 +29,7 @@ export function isLegacyFormatter(formatter: Formatter): formatter is LegacyForm
 
 /**
  * Format a program, resolve `{{prs.*}}` path tokens for the target, and
- * report authored resource blocks the target drops.
+ * report authored resource blocks and skill contracts the target drops.
  */
 export function formatProgram(
   formatter: Formatter,
@@ -37,7 +38,18 @@ export function formatProgram(
 ): FormatterOutput {
   const output = resolveOutputPathTokens(runFormatter(formatter, ast, options), formatter, options);
   const program = isCanonicalProgram(ast) ? toLegacyProgram(ast) : ast;
-  return appendResourceCapabilityWarnings(output, program, formatter.name, options?.version);
+  const withResourceWarnings = appendResourceCapabilityWarnings(
+    output,
+    program,
+    formatter.name,
+    options?.version
+  );
+  return appendSkillContractWarnings(
+    withResourceWarnings,
+    program,
+    formatter.name,
+    options?.version
+  );
 }
 
 /**
