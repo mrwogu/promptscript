@@ -27,8 +27,19 @@ function isRecord(value: Value | undefined): value is Record<string, Value> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/**
+ * Keys the compiler attaches to a resolved object. They are not contract
+ * fields, unlike a user-written field that merely starts with `__`.
+ */
+const COMPILER_METADATA_KEYS: ReadonlySet<string> = new Set([
+  '__baseSource',
+  '__composedFrom',
+  '__layerTrace',
+  '__rawFrontmatter',
+]);
+
 function hasFields(value: Value | undefined): boolean {
-  return isRecord(value) && Object.keys(value).some((key) => !key.startsWith('__'));
+  return isRecord(value) && Object.keys(value).some((key) => !COMPILER_METADATA_KEYS.has(key));
 }
 
 function skillEntries(

@@ -169,6 +169,44 @@ describe('skill contract warnings', () => {
     expect(warnings).toEqual([]);
   });
 
+  it('counts a contract field whose name starts with two underscores', () => {
+    // Arrange
+    const ast = createProgram({
+      reporter: {
+        description: 'Reports',
+        content: 'body',
+        inputs: { __request: { description: 'The request', type: 'string' } },
+        __rawFrontmatter: 'name: reporter',
+      },
+    });
+
+    // Act
+    const warnings = getSkillContractWarnings(ast, 'factory', undefined);
+
+    // Assert
+    expect(warnings.map((warning) => warning.message)).toEqual([
+      'Target "factory" does not write inputs of skill "reporter" to its skill file and will omit the contract.',
+    ]);
+  });
+
+  it('ignores a contract that holds only compiler metadata', () => {
+    // Arrange
+    const ast = createProgram({
+      reporter: {
+        description: 'Reports',
+        content: 'body',
+        inputs: { __layerTrace: [] },
+        __rawFrontmatter: 'name: reporter',
+      },
+    });
+
+    // Act
+    const warnings = getSkillContractWarnings(ast, 'factory', undefined);
+
+    // Assert
+    expect(warnings).toEqual([]);
+  });
+
   it('leaves targets and versions without skill output to the resource warnings', () => {
     // Arrange
     const ast = createProgram({ 'from-file': FROM_FILE_SKILL, inline: INLINE_SKILL });
