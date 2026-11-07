@@ -70,7 +70,7 @@ export function getSkillContractWarnings(
   const capability = TARGET_CAPABILITIES[target];
   if (capability.unsupportedBlocks.includes('skills')) return [];
   const resource = capability.resources.find((candidate) => candidate.kind === 'skills');
-  if (!resource || !resource.versions.includes(resolveTargetVersion(capability, version))) {
+  if (!resource?.versions.includes(resolveTargetVersion(capability, version))) {
     return [];
   }
 
