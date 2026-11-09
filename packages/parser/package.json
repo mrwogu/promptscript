@@ -41,7 +41,7 @@
   "types": "./src/index.d.ts",
   "dependencies": {
     "@promptscript/core": "workspace:*",
-    "@swc/helpers": "~0.5.23",
+    "@swc/helpers": "~0.5.24",
     "chevrotain": "^13.2.0"
   },
   "publishConfig": {

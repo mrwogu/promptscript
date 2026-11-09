@@ -9,14 +9,14 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.3.5",
+    "@astrojs/markdown-remark": "^7.3.6",
     "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/starlight": "^0.42.8",
+    "@astrojs/starlight": "^0.42.10",
     "@promptscript/browser-compiler": "workspace:^",
-    "astro": "^7.4.4",
+    "astro": "^7.4.7",
     "astro-mermaid": "^2.2.0",
     "lz-string": "^1.5.0",
-    "mermaid": "^12.2.0",
+    "mermaid": "^12.3.0",
     "path-browserify": "^1.0.1",
     "sharp": "^0.35.5",
     "starlight-links-validator": "^0.27.0"
