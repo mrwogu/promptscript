@@ -10,7 +10,7 @@
     "@promptscript/core": "workspace:^",
     "@promptscript/runtime": "workspace:^",
     "@promptscript/validator": "workspace:^",
-    "@swc/helpers": "~0.5.23",
+    "@swc/helpers": "~0.5.24",
     "ajv": "^8.20.0",
     "yaml": "^2.9.1"
   }

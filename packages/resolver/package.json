@@ -42,7 +42,7 @@
   "dependencies": {
     "@promptscript/core": "workspace:*",
     "@promptscript/parser": "workspace:*",
-    "@swc/helpers": "~0.5.23",
+    "@swc/helpers": "~0.5.24",
     "simple-git": "4.0.2",
     "yaml": "^2.9.1"
   },

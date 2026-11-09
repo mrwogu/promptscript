@@ -40,7 +40,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "dependencies": {
-    "@swc/helpers": "~0.5.23"
+    "@swc/helpers": "~0.5.24"
   },
   "publishConfig": {
     "access": "public",
