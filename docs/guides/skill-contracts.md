@@ -88,6 +88,22 @@ The PS017 validation rule checks contract definitions:
 - Enum fields must include an `options` array
 - Name collisions between `params` and `inputs` are flagged
 
+## Target Support
+
+The contract is part of the skill's SKILL.md frontmatter. A target writes it only when it copies that frontmatter as it is, which is the case for a skill that comes from a SKILL.md file on most targets, for example Claude Code.
+
+| Case                                              | Contract in the output |
+| ------------------------------------------------- | ---------------------- |
+| Skill from a SKILL.md file, most targets          | Kept                   |
+| Skill from a SKILL.md file, Factory AI            | Dropped                |
+| Skill defined in a `.prs` file (no SKILL.md), any | Dropped                |
+
+**Factory AI does not carry the contract.** Factory fails to load a skill whose frontmatter has keys it does not know, so PromptScript keeps only `name`, `description`, `user-invocable` and `disable-model-invocation` there. `inputs` and `outputs` are removed from the generated `.factory/skills/<name>/SKILL.md`. If Factory agents need to know what a skill expects and returns, say so in the skill body.
+
+A skill defined in a `.prs` file has no frontmatter to copy, so its skill file holds only the fields the target generates.
+
+When a target drops a contract, compilation reports a `PS4005` warning that names the skill, the target and the dropped keys. The output is not changed. Targets that write no skill files at all are reported with `PS4002` instead.
+
 ## See Also
 
 - [Local Skills](local-skills.md) - Managing skills in your project
