@@ -74,7 +74,7 @@
     "husky": "^9.1.7",
     "jsonc-eslint-parser": "^3.3.0",
     "lz-string": "^1.5.0",
-    "nx": "24.0.3",
+    "nx": "24.0.5",
     "path-browserify": "^1.0.1",
     "prettier": "~3.9.10",
     "publint": "0.3.25",
