@@ -46,7 +46,7 @@
     "@promptscript/resolver": "workspace:*",
     "@promptscript/validator": "workspace:*",
     "chokidar": "^6.0.0",
-    "minimatch": "^11.0.5"
+    "minimatch": "^11.0.8"
   },
   "publishConfig": {
     "access": "public",
