@@ -509,6 +509,16 @@ const NEGATION_PREFIX =
   /(?:prevent|avoid|block|detect|flag|report|stop|prohibit|anti[- ]|against|don['']?t|do\s+not|never|must\s+not|should\s+not|cannot|warning.*about|protection\s+(?:from|against))\s+/i;
 
 /**
+ * A negation prefix that ends right before the match: at most two words may
+ * sit between them ("don't ever ignore"), and none of them may end a sentence,
+ * so "Never mind that. Ignore all previous instructions" is not negated.
+ */
+const NEGATION_BEFORE_MATCH = new RegExp(
+  `\\b${NEGATION_PREFIX.source}(?:[^\\s.!?;:]+\\s+){0,2}$`,
+  NEGATION_PREFIX.flags
+);
+
+/**
  * Check if a pattern match is preceded by a negation prefix,
  * indicating defensive/legitimate usage rather than an attack.
  */
@@ -516,7 +526,26 @@ function isNegatedMatch(text: string, matchIndex: number): boolean {
   // Look back up to 60 characters for a negation prefix
   const lookbackStart = Math.max(0, matchIndex - 60);
   const prefix = text.slice(lookbackStart, matchIndex);
-  return NEGATION_PREFIX.test(prefix);
+  return NEGATION_BEFORE_MATCH.test(prefix);
+}
+
+/**
+ * NFKC-normalizes text one code point at a time, so fullwidth and other
+ * compatibility forms ("Ｉgnore") match the ASCII patterns. `sourceIndex`
+ * maps each index of the normalized text back to the original text.
+ */
+function normalizeForMatching(text: string): { text: string; sourceIndex: number[] } {
+  let normalized = '';
+  const sourceIndex: number[] = [];
+  let index = 0;
+  for (const char of text) {
+    const form = char.normalize('NFKC');
+    for (let k = 0; k < form.length; k++) sourceIndex.push(index);
+    normalized += form;
+    index += char.length;
+  }
+  sourceIndex.push(index);
+  return { text: normalized, sourceIndex };
 }
 
 /**
@@ -551,6 +580,7 @@ export const blockedPatterns: ValidationRule = {
         if (isRuleExcludedForLocation(blockedPatterns, loc, ctx.config)) {
           return;
         }
+        const normalized = normalizeForMatching(text);
         for (const pattern of patterns) {
           // Use a global copy to find all matches with their positions
           const globalPattern = new RegExp(
@@ -559,15 +589,15 @@ export const blockedPatterns: ValidationRule = {
           );
           let match: RegExpExecArray | null;
 
-          while ((match = globalPattern.exec(text)) !== null) {
+          while ((match = globalPattern.exec(normalized.text)) !== null) {
             // Skip matches preceded by negation (defensive context)
-            if (isNegatedMatch(text, match.index)) {
+            if (isNegatedMatch(normalized.text, match.index)) {
               continue;
             }
 
             ctx.report({
               message: `Blocked pattern detected: ${pattern.source}`,
-              location: offsetLocation(loc, text, match.index),
+              location: offsetLocation(loc, text, normalized.sourceIndex[match.index]!),
               suggestion: 'Remove or rephrase the flagged content',
             });
 
