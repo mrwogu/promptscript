@@ -562,7 +562,13 @@ function firstUnnegatedMatch(pattern: RegExp, text: string): number {
   while ((match = globalPattern.exec(text)) !== null) {
     // Skip matches preceded by negation (defensive context)
     if (!isNegatedMatch(text, match.index)) return match.index;
-    if (match[0] === '') globalPattern.lastIndex++;
+    if (match[0] === '') {
+      // Step past an empty match; a u or v pattern steps a whole code point, as
+      // ECMAScript's AdvanceStringIndex does, or it would match again mid-pair.
+      const unicode = globalPattern.unicode || globalPattern.flags.includes('v');
+      const codePoint = unicode ? (text.codePointAt(match.index) ?? 0) : 0;
+      globalPattern.lastIndex = match.index + (codePoint > 0xffff ? 2 : 1);
+    }
   }
   return -1;
 }

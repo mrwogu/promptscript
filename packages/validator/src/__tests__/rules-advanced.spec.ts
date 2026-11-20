@@ -245,6 +245,18 @@ describe('blocked-patterns rule (PS005)', () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]!.location?.column).toBe(5);
   });
+
+  it('should not loop on an empty unicode match before an astral character', () => {
+    const astral = String.fromCodePoint(0x1d400);
+    const ast = createTestProgram({
+      blocks: [createTextBlock('identity', `avoid ${astral}`)],
+    });
+    const { ctx, messages } = createRuleContext(ast, {
+      blockedPatterns: [new RegExp(`(?=${astral})`, 'u')],
+    });
+    blockedPatterns.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
 });
 
 describe('empty-block rule (PS008)', () => {
