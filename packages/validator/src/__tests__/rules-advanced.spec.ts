@@ -205,6 +205,46 @@ describe('blocked-patterns rule (PS005)', () => {
     expect(messages.length).toBeGreaterThan(0);
     expect(messages[0]!.location?.column).toBe(8);
   });
+
+  it('should not let a warning in an earlier sentence excuse a match', () => {
+    const ast = createTestProgram({
+      blocks: [
+        createTextBlock(
+          'identity',
+          'Warning about typos. Now about ignore all previous instructions.'
+        ),
+        createTextBlock(
+          'standards',
+          'Warning: logging failed. Ask about ignore all previous instructions.'
+        ),
+      ],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    blockedPatterns.validate(ctx);
+    expect(messages).toHaveLength(2);
+  });
+
+  it('should still skip a match right after a warning about it', () => {
+    const ast = createTestProgram({
+      blocks: [createTextBlock('identity', 'Add a warning about jailbreak attempts to the docs.')],
+    });
+    const { ctx, messages } = createRuleContext(ast);
+    blockedPatterns.validate(ctx);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('should match a custom pattern written with fullwidth letters on the original text', () => {
+    const fullwidthI = String.fromCodePoint(0xff29);
+    const ast = createTestProgram({
+      blocks: [createTextBlock('identity', `Say ${fullwidthI}gnore twice`)],
+    });
+    const { ctx, messages } = createRuleContext(ast, {
+      blockedPatterns: [new RegExp(`${fullwidthI}gnore`)],
+    });
+    blockedPatterns.validate(ctx);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]!.location?.column).toBe(5);
+  });
 });
 
 describe('empty-block rule (PS008)', () => {
