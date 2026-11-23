@@ -184,14 +184,42 @@ function findHomographAttacks(
 }
 
 /**
- * Find all bidirectional control characters in text.
+ * Invisible directional marks. They change no text but can reorder what a
+ * terminal or editor shows next to them, like the controls above.
+ *
+ * - U+200E: Left-to-Right Mark (LRM)
+ * - U+200F: Right-to-Left Mark (RLM)
+ * - U+061C: Arabic Letter Mark (ALM)
+ */
+const DIRECTIONAL_MARKS: Map<string, string> = new Map([
+  ['\u{200E}', 'Left-to-Right Mark (U+200E)'],
+  ['\u{200F}', 'Right-to-Left Mark (U+200F)'],
+  ['\u{061C}', 'Arabic Letter Mark (U+061C)'],
+]);
+
+/**
+ * Unicode tag characters (U+E0000-U+E007F). They render as nothing, but each
+ * one mirrors an ASCII character, so a prompt can carry text a reviewer never
+ * sees.
+ */
+const TAG_CHAR_PATTERN = /[\u{E0000}-\u{E007F}]/gu;
+
+/**
+ * Find all Unicode tag characters in text.
+ */
+function findTagChars(text: string): Array<{ char: string; index: number }> {
+  return Array.from(text.matchAll(TAG_CHAR_PATTERN), (m) => ({ char: m[0], index: m.index! }));
+}
+
+/**
+ * Find all bidirectional control characters and directional marks in text.
  */
 function findBidiChars(text: string): Array<{ char: string; description: string; index: number }> {
   const results: Array<{ char: string; description: string; index: number }> = [];
 
   for (let i = 0; i < text.length; i++) {
     const char = text[i]!;
-    const description = BIDI_CONTROL_CHARS.get(char);
+    const description = BIDI_CONTROL_CHARS.get(char) ?? DIRECTIONAL_MARKS.get(char);
     if (description) {
       results.push({ char, description, index: i });
     }
@@ -225,10 +253,11 @@ function findZeroWidthChars(
  * This rule identifies potentially malicious use of Unicode features that
  * can hide or disguise content:
  *
- * 1. Bidirectional override characters (RTL/LTR overrides)
+ * 1. Bidirectional override characters (RTL/LTR overrides) and directional marks
  * 2. Zero-width characters that can break pattern matching
- * 3. Homograph attacks (Cyrillic/Greek characters mixed with Latin)
- * 4. Excessive combining characters (Zalgo text)
+ * 3. Invisible Unicode tag characters (U+E0000-U+E007F)
+ * 4. Homograph attacks (Cyrillic/Greek characters mixed with Latin)
+ * 5. Excessive combining characters (Zalgo text)
  *
  * Note: Legitimate multilingual content (pure Arabic, Hebrew, Russian, etc.)
  * is NOT flagged. Only suspicious patterns are reported.
@@ -270,6 +299,21 @@ export const unicodeSecurity: ValidationRule = {
             message: `Zero-width characters detected: ${descriptions}${suffix}`,
             location: offsetLocation(loc, text, zeroWidthChars[0]!.index),
             suggestion: 'Remove zero-width characters that may be used to evade pattern matching',
+          });
+        }
+
+        // Check for invisible tag characters
+        const tagChars = findTagChars(text);
+        if (tagChars.length > 0) {
+          const codes = tagChars
+            .slice(0, 3)
+            .map((t) => `U+${t.char.codePointAt(0)!.toString(16).toUpperCase()}`)
+            .join(', ');
+          const suffix = tagChars.length > 3 ? ` and ${tagChars.length - 3} more` : '';
+          ctx.report({
+            message: `Invisible Unicode tag characters detected: ${codes}${suffix}`,
+            location: offsetLocation(loc, text, tagChars[0]!.index),
+            suggestion: 'Remove Unicode tag characters that may hide text from reviewers',
           });
         }
 

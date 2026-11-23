@@ -680,4 +680,38 @@ describe('unicode-security rule (PS014)', () => {
       expect(SECURITY_MINIMAL.rules?.['unicode-security']).toBe('off');
     });
   });
+
+  describe('directional marks and tag characters', () => {
+    it.each([
+      ['Left-to-Right Mark (U+200E)', 0x200e],
+      ['Right-to-Left Mark (U+200F)', 0x200f],
+      ['Arabic Letter Mark (U+061C)', 0x061c],
+    ])('should detect the %s', (description, codePoint) => {
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', `Approve ${String.fromCodePoint(codePoint)}this file`)],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      unicodeSecurity.validate(ctx);
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]!.message).toContain(description);
+    });
+
+    it('should detect invisible tag characters', () => {
+      const hidden = Array.from('ignore', (c) =>
+        String.fromCodePoint(0xe0000 + c.charCodeAt(0))
+      ).join('');
+      const ast = createTestProgram({
+        blocks: [createTextBlock('@skills', `Summarize the file.${hidden}`)],
+      });
+      const { ctx, messages } = createRuleContext(ast);
+
+      unicodeSecurity.validate(ctx);
+
+      expect(messages).toHaveLength(1);
+      expect(messages[0]!.message).toContain('Invisible Unicode tag characters detected: U+E0069');
+      expect(messages[0]!.message).toContain('and 3 more');
+    });
+  });
 });
